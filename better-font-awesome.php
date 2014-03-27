@@ -28,6 +28,10 @@ License:
 /*--------------------------------------------*
  * Titan Framework
  *--------------------------------------------*/
+/*
+ * When using the embedded framework, use it only if the framework
+ * plugin isn't activated.
+ */
  
 // Don't do anything when we're activating a plugin to prevent errors
 // on redeclaring Titan classes
@@ -36,12 +40,27 @@ if ( ! empty( $_GET['action'] ) && ! empty( $_GET['plugin'] ) ) {
         return;
     }
 }
-
+// Check if the framework plugin is activated
+$useEmbeddedFramework = true;
+$activePlugins = get_option('active_plugins');
+if ( is_array( $activePlugins ) ) {
+    foreach ( $activePlugins as $plugin ) {
+        if ( is_string( $plugin ) ) {
+            if ( stripos( $plugin, '/titan-framework.php' ) !== false ) {
+                $useEmbeddedFramework = false;
+                break;
+            }
+        }
+    }
+}
 // Use the embedded Titan Framework
-if ( ! class_exists( 'TitanFramework' ) ) {
+if ( $useEmbeddedFramework && ! class_exists( 'TitanFramework' ) ) {
     require_once( plugin_dir_path( __FILE__ ) . 'titan-framework/titan-framework.php' );
 }
 
+/**
+ * Better Font Awesome plugin class
+ */
 class BetterFontAwesome {
 
 	/*--------------------------------------------*
@@ -50,20 +69,35 @@ class BetterFontAwesome {
 	const name = 'Better Font Awesome';
 	const slug = 'better-font-awesome';
 
+
 	/*--------------------------------------------*
-	 * Private variables
+	 * variables
 	 *--------------------------------------------*/
-	private $cdn_data;
-	
+	protected $cdn_data, $titan, $version, $minified, $stylsheet;
+
 	/**
 	 * Constructor
 	 */
 	function __construct() {
-		//register an activation hook for the plugin
-		register_activation_hook( __FILE__, array( &$this, 'install' ) );
+		// Register an activation hook for the plugin
+		register_activation_hook( __FILE__, array( $this, 'install' ) );
 
-		//Hook up to the init action
-		add_action( 'init', array( &$this, 'init' ) );
+		// Setup Titan instance
+		$this->titan = TitanFramework::getInstance( 'better-font-awesome' );
+
+		// Get CDN data
+		$this->setup_cdn_data();
+
+		// Do options page
+		$this->do_options_page();
+
+		// Hook up to the init action
+		add_action( 'after_setup_theme', array( $this, 'init' ) );
+
+		// Do scripts and styles
+		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_and_styles' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_and_styles' ) );
+
 	}
   
 	/**
@@ -72,128 +106,179 @@ class BetterFontAwesome {
 	function install() {
 		// do not generate any output here
 	}
-  
+
 	/**
 	 * Runs when the plugin is initialized
 	 */
 	function init() {
+
 		// Setup localization
 		load_plugin_textdomain( self::slug, false, dirname( plugin_basename( __FILE__ ) ) . '/lang' );
-		// Load JavaScript and stylesheets
-		$this->register_scripts_and_styles();
 
 		// Register the shortcode [icon]
-		add_shortcode( 'icon', array( &$this, 'render_shortcode' ) );
+		add_shortcode( 'icon', array( $this, 'render_shortcode' ) );
 
-		// Get CDN data
-		$this->setup_cdn_data();
-	
-		// Do options page
-		$this->do_options_page();
-	}
+		// Set Font Awesome stylesheet URL
+		$this->set_stylesheet_url();
 
-	function action_callback_method_name() {
-		// TODO define your action method here
-	}
+		// Add icon dropdown to TinyMCE 
+		if ( ( current_user_can('edit_posts') || current_user_can('edit_pages') ) &&
+                get_user_option('rich_editing') ) {
+            add_filter( 'mce_external_plugins', array( $this, 'register_tinymce_plugin') );
+            add_filter( 'mce_buttons', array( $this, 'add_tinymce_buttons') );
+        }
 
-	function filter_callback_method_name() {
-		// TODO define your filter method here
-	}
+        // Add PHP variables in head for use by TinyMCY JavaScript
+        foreach( array('post.php','post-new.php') as $hook )
+		     add_action( "admin_head-$hook", array( $this, 'admin_head_variables' ) );
 
-	function render_shortcode( $atts ) {
-		extract(shortcode_atts(array(
-			'name' => '',
-			'classes' => ''
-			), $atts)
-		);
-
-		return '<i class="fa fa-' . sanitize_html_class( $name ) . ' ' . sanitize_html_class( $classes ) . '"></i>';
 	}
 
 	/**
 	 * Registers and enqueues stylesheets for the administration panel and the
 	 * public facing site.
 	 */
-	private function setup_cdn_data() {
+	function setup_cdn_data() {
 		$this->cdn_data = json_decode( $this->get_data( 'http://api.jsdelivr.com/v1/bootstrap/libraries/font-awesome/' ) )[0];
-		
-	} // end setup_cdn_data
+	}
 
-	private function do_options_page() {
-		$titan = TitanFramework::getInstance( 'better-font-awesome' );
+	/*
+	 * Set the Font Awesome stylesheet url to use based on the settings
+	 */
+	function set_stylesheet_url() {
+		$this->version = $this->titan->getOption( 'version' );
+		$this->minified = $this->titan->getOption( 'minified' );
+
+		// Get latest version if need be
+		if ( 'latest' == $this->version )
+			$this->version = $this->cdn_data->lastversion;
+
+		$stylesheet = $this->minified ? '/css/font-awesome.min.css' : '/css/font-awesome.css';
+		$this->stylesheet_url = '//netdna.bootstrapcdn.com/font-awesome/' . $this->version . $stylesheet;
+	}
+
+	function do_options_page() {
+
+		// Setup available versions
+		$versions[ 'latest' ] = __( 'Latest', 'better-font-awesome' ) . ' (' . $this->cdn_data->lastversion . ')';
 
 		foreach( $this->cdn_data->versions as $version ) {
-			$verions[$version] = $version;
+			$versions[$version] = $version;
 		}
 
-		$optionsPage = $titan->createAdminPanel( array(
+		$optionsPage = $this->titan->createAdminPanel( array(
 		    'name' => __( 'Better Font Awesome', 'better-font-awesome'),
 		    'parent' => 'options-general.php',
 		) );
 
 		$optionsPage->createOption( array(
-		    'name' => __( 'Version', 'better-font-awesome' ),
+		    'name' => __( 'Font Awesome version', 'better-font-awesome' ),
 		    'id' => 'version',
 		    'type' => 'select',
-		    'desc' => __( 'Select the version of Font Awesome you would like to use. Please note that different versions use different icon names, and switching versions. . .', 'better-font-awesome') ,
-		    'options' => $this->cdn_data->versions,
+		    'desc' => __( 'Select the version of Font Awesome you would like to use. Visit the <a href="http://fontawesome.io/" target="_blank">Font Awesome website</a> for more information.', 'better-font-awesome') ,
+		    'options' => $versions,
+		    'default' => $this->cdn_data->lastversion,
 		) );
 
 		$optionsPage->createOption( array(
-		    'name' => __( 'Minified', 'better-font-awesome' ),
+		    'name' => __( 'Use minified CSS', 'better-font-awesome' ),
 		    'id' => 'minified',
 		    'type' => 'checkbox',
-		    'desc' => 'Whether to include the minified version of the CSS (checked), or the unminified version (unchecked).',
+		    'desc' => __( 'Whether to include the minified version of the CSS (checked), or the unminified version (unchecked).', 'better-font-awesome' ),
 		    'default' => false,
+		) );
+
+		$optionsPage->createOption( array(
+			'name' => __( 'Usage', 'better-font-awesome' ),
+		    'type' => 'note',
+		    'desc' => __( '
+		    		<b>Version 4</b>&nbsp;&nbsp;&nbsp;<small><a href="http://fontawesome.io/examples/">See all available classes &raquo;</a></small><br /><br />
+		    		<i class="icon-star fa fa-star"></i> <code>[icon name="star"]</code> or <code>&lt;i class="fa-star"&gt;&lt;/i&gt;</code><br /><br />
+		    		<i class="icon-star fa fa-star icon-2x fa-2x"></i> <code>[icon name="star" class="fa-2x"]</code> or <code>&lt;i class="fa-star fa-2x"&gt;&lt;/i&gt;</code><br /><br />
+		    		<i class="icon-star fa fa-star icon-2x fa-2x icon-border fa-border"></i> <code>[icon name="star" class="fa-2x fa-border"]</code> or <code>&lt;i class="fa-star fa-2x fa-border"&gt;&lt;/i&gt;</code><br /><br /><br />
+		    		<b>Version 3</b>&nbsp;&nbsp;&nbsp;<small><a href="http://fontawesome.io/3.2.1/examples/">See all available classes &raquo;</a></small><br /><br />
+		    		<i class="icon-star fa fa-star"></i> <code>[icon name="star"]</code> or <code>&lt;i class="icon-star"&gt;&lt;/i&gt;</code><br /><br />
+		    		<i class="icon-star fa fa-star icon-2x fa-2x"></i> <code>[icon name="star" class="icon-2x"]</code> or <code>&lt;i class="icon-star icon-2x"&gt;&lt;/i&gt;</code><br /><br />
+		    		<i class="icon-star fa fa-star icon-2x fa-2x icon-border fa-border"></i> <code>[icon name="star" class="icon-2x icon-border"]</code> or <code>&lt;i class="icon-star icon-2x icon-border"&gt;&lt;/i&gt;</code>
+
+		    		', 'better-font-awesome' ),
 		) );
 
 		$optionsPage->createOption( array(
 		    'type' => 'save',
 		) );
 	}
+
+	function render_shortcode( $atts ) {
+		extract(shortcode_atts(array(
+			'name' => '',
+			'class' => ''
+			), $atts)
+		);
+
+		$this->titan = TitanFramework::getInstance( 'better-font-awesome' );
+		$version = $this->titan->getOption( 'version' );
+
+		$icon_names = 'icon-' . $name . ' fa fa-' . $name;
+
+		return '<i class="' . $icon_names . ' ' . $class . '"></i>';
+	}
   
 	/**
 	 * Registers and enqueues stylesheets for the administration panel and the
 	 * public facing site.
 	 */
-	private function register_scripts_and_styles() {
-		$titan = TitanFramework::getInstance( 'better-font-awesome' );
-
-		$version = $titan->getOption( 'version' );
-		$minified = $titan->getOption( 'minified' );
-		$version='4.0.3';
-
-		$stylesheet = $minified ? '/css/font-awesome.min.css' : '/css/font-awesome.css';
+	function register_scripts_and_styles() {
+		// Deregister any existing Font Awesome CSS (including Titan Framework)
+		wp_dequeue_style( 'tf-font-awesome' );
+		wp_dequeue_style( 'font-awesome' );
 
 		// Enqueue Font Awesome CSS
-		wp_register_style( 'font-awesome', '//netdna.bootstrapcdn.com/font-awesome/' . $version . $stylesheet, '', $version );
+		wp_register_style( 'font-awesome', $this->stylesheet_url, '', $this->version );
 		wp_enqueue_style( 'font-awesome' );
-		
-	} // end register_scripts_and_styles
-	
-	/**
-	 * Helper function for registering and enqueueing scripts and styles.
-	 *
-	 * @name	The 	ID to register with WordPress
-	 * @file_path		The path to the actual file
-	 * @is_script		Optional argument for if the incoming file_path is a JavaScript source file.
+	}
+
+	function register_tinymce_plugin($plugin_array) {
+        $plugin_array['font_awesome_glyphs'] = plugins_url('inc/js/tinymce-icons.js', __FILE__);
+
+        return $plugin_array;
+    }
+
+    function add_tinymce_buttons($buttons) {
+        array_push($buttons, '|', 'fontAwesomeGlyphSelect');
+
+        return $buttons;
+    }
+
+    /**
+	 * Add PHP variables in head for use by TinyMCE JavaScript
 	 */
-	private function load_file( $name, $file_path, $is_script = false ) {
+	function admin_head_variables() {
+	    
+		// Get Font Awesome CSS
+	    if( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] == "on" )
+		    $prefix = 'http:';
+		else
+		    $prefix = 'http:';
 
-		$url = plugins_url($file_path, __FILE__);
-		$file = plugin_dir_path(__FILE__) . $file_path;
+	    $css = $this->get_data( $prefix . $this->stylesheet_url );
+	 
+	 	// Get only classes like .fa- or icon- that have a content: "something" rule
+	 	preg_match_all('/\.((fa-|icon-)[^,{]*)(:before)[^}]*content:/s', $css, $matches);
 
-		if( file_exists( $file ) ) {
-			if( $is_script ) {
-				wp_register_script( $name, $url, array('jquery') ); //depends on jquery
-				wp_enqueue_script( $name );
-			} else {
-				wp_register_style( $name, $url );
-				wp_enqueue_style( $name );
-			} // end if
-		} // end if
-
-	} // end load_file
+	    $classes = $matches[1];
+	    //sort( $classes );
+	    echo '<pre>' . print_r( $classes, true ) . '</pre>';
+	    ?>
+		<!-- TinyMCE Shortcode Plugin -->
+		<script type='text/javascript'>
+		var bfa_vars = {
+		    'stylesheet_url': '<?php echo $this->stylesheet_url; ?>',
+		};
+		</script>
+		<!-- TinyMCE Shortcode Plugin -->
+	    <?php
+	}
 
 	/**
 	 * Get contents of URL
@@ -201,7 +286,7 @@ class BetterFontAwesome {
 	 * @param   string $url URL to get content
 	 * @return  mixed Contents of URL
 	 */
-	private function get_data( $url ) {
+	function get_data( $url ) {
 		$ch = curl_init();
 		$timeout = 5;
 		curl_setopt($ch, CURLOPT_URL, $url);
@@ -212,5 +297,5 @@ class BetterFontAwesome {
 		return $data;
 	}
   
-} // end class
-new BetterFontAwesome();
+}
+$better_font_awesome = new BetterFontAwesome();
