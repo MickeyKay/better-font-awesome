@@ -1,0 +1,3 @@
+[submodule "titan-framework"]
+	path = titan-framework
+	url = https://github.com/gambitph/Titan-Framework.git
