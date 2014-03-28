@@ -1,29 +1,33 @@
 <?php
 /*
-Plugin Name: Better Font Awesome
-Plugin URI: http://wordpress.org/plugins/better-font-awesome
-Description: The better Font Awesome for WordPress. 
-Version: 0.9
-Author: Mickey Kay
-Author Email: mickey@mickeykaycreative.com
-License:
+ * Plugin Name: Better Font Awesome
+ * Plugin URI: http://wordpress.org/plugins/better-font-awesome
+ * Description: The better Font Awesome for WordPress. 
+ * Version: 0.9
+ * Author: Mickey Kay
+ * Author URI: mickey@mickeykaycreative.com
+ * License:     GPLv2+
+ * Text Domain: gp
+ * Domain Path: /languages
+ */
 
-  Copyright 2011 Mickey Kay (mickey@mickeykaycreative.com)
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License, version 2, as 
-  published by the Free Software Foundation.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  
-*/
+/**
+ * Copyright (c) 2014 Mickey Kay (email : mickey@mickeykaycreative.com)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License, version 2 or, at
+ * your discretion, any later version, as published by the Free
+ * Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 /*--------------------------------------------*
  * Titan Framework
@@ -95,8 +99,9 @@ class BetterFontAwesome {
 		add_action( 'after_setup_theme', array( $this, 'init' ) );
 
 		// Do scripts and styles
-		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_and_styles' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_and_styles' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_and_styles' ), 99 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_and_styles' ), 99 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'custom_admin_css' ), 99 );
 
 	}
   
@@ -113,7 +118,7 @@ class BetterFontAwesome {
 	function init() {
 
 		// Setup localization
-		load_plugin_textdomain( self::slug, false, dirname( plugin_basename( __FILE__ ) ) . '/lang' );
+		load_plugin_textdomain( self::slug, false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 
 		// Register the shortcode [icon]
 		add_shortcode( 'icon', array( $this, 'render_shortcode' ) );
@@ -126,11 +131,15 @@ class BetterFontAwesome {
                 get_user_option('rich_editing') ) {
             add_filter( 'mce_external_plugins', array( $this, 'register_tinymce_plugin') );
             add_filter( 'mce_buttons', array( $this, 'add_tinymce_buttons') );
+            add_filter('mce_css', array(&$this, 'add_tinymce_editor_sytle'));
         }
 
         // Add PHP variables in head for use by TinyMCY JavaScript
         foreach( array('post.php','post-new.php') as $hook )
 		     add_action( "admin_head-$hook", array( $this, 'admin_head_variables' ) );
+
+		// Add Font Awesome stylesheet to TinyMCE
+		add_editor_style( $this->stylesheet_url );
 
 	}
 
@@ -216,8 +225,16 @@ class BetterFontAwesome {
 			), $atts)
 		);
 
+		// Get selected Font Awesome version
 		$this->titan = TitanFramework::getInstance( 'better-font-awesome' );
 		$version = $this->titan->getOption( 'version' );
+
+		// Remove "icon-" and "fa-" from name
+		// This helps both:
+		// 	1. Incorrect shortcodes (when user includes full class name including prefix)
+		// 	2. Old shortcodes from other plugins that required prefixes
+		$name = str_replace( 'icon-', '', $name );
+		$name = str_replace( 'fa-', '', $name );
 
 		$icon_names = 'icon-' . $name . ' fa fa-' . $name;
 
@@ -238,13 +255,20 @@ class BetterFontAwesome {
 		wp_enqueue_style( 'font-awesome' );
 	}
 
-	function register_tinymce_plugin($plugin_array) {
-        $plugin_array['font_awesome_glyphs'] = plugins_url('inc/js/tinymce-icons.js', __FILE__);
+	/*
+	 * Load admin CSS
+	 */
+	function custom_admin_css() {
+		wp_enqueue_style( 'bfa-admin-styles', plugins_url( 'inc/css/admin-styles.css', __FILE__ ) );
+	}
+
+	function register_tinymce_plugin( $plugin_array ) {
+        $plugin_array['font_awesome_glyphs'] = plugins_url('inc/js/tinymce-icons.js', __FILE__ );
 
         return $plugin_array;
     }
 
-    function add_tinymce_buttons($buttons) {
+    function add_tinymce_buttons( $buttons ) {
         array_push($buttons, '|', 'fontAwesomeGlyphSelect');
 
         return $buttons;
@@ -257,23 +281,34 @@ class BetterFontAwesome {
 	    
 		// Get Font Awesome CSS
 	    if( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] == "on" )
-		    $prefix = 'http:';
+		    $prefix = 'https:';
 		else
 		    $prefix = 'http:';
 
 	    $css = $this->get_data( $prefix . $this->stylesheet_url );
 	 
-	 	// Get only classes like .fa- or icon- that have a content: "something" rule
-	 	preg_match_all('/\.((fa-|icon-)[^,{]*)(:before)[^}]*content:/s', $css, $matches);
+	 	// Get all CSS selectors that have a content: pseudo-element rule
+	 	preg_match_all('/(\.[^}]*)\s*{\s*(content:)/s', $css, $matches );
+	    $selectors = $matches[1];
 
-	    $classes = $matches[1];
-	    //sort( $classes );
-	    echo '<pre>' . print_r( $classes, true ) . '</pre>';
+	    // Select all icon- and fa- selectors from and split where there are commas
+	    foreach ( $selectors as $selector ) {
+	    	preg_match_all('/\.(icon-|fa-)([^,]*)\s*:before/s', $selector, $matches );
+	    	$clean_selectors = $matches[2];
+
+	    	// Create array of selectors
+	   		foreach( $clean_selectors as $clean_selector )
+	   			$classes[] = $clean_selector;
+	    }
+
+	    // Alphabetize & join with comma for use in JS array
+		sort( $classes );
+		$classes = implode( ",", $classes );
 	    ?>
-		<!-- TinyMCE Shortcode Plugin -->
+		<!-- Pass $classes variable so it is accessible to TinyMCE JavaScript -->
 		<script type='text/javascript'>
 		var bfa_vars = {
-		    'stylesheet_url': '<?php echo $this->stylesheet_url; ?>',
+		    'fa_icons': '<?php echo $classes; ?>',
 		};
 		</script>
 		<!-- TinyMCE Shortcode Plugin -->
