@@ -29,6 +29,15 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+
+	TODO:
+	- Make sure all icons are showing
+	- Fix conflict when another font awesome plugin is installed
+	- Make backwards compatible for all shortcodes including "FA Icons", "FA More", and "FA Shortcodes"
+
+**/
+
 /*--------------------------------------------*
  * Titan Framework
  *--------------------------------------------*/
