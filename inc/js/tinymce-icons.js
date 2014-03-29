@@ -11,8 +11,8 @@
 	}
 
 	var createControl = function(name, controlManager) {
-		if (name != 'fontAwesomeGlyphSelect') return null;
-		var listBox = controlManager.createListBox('fontAwesomeGlyphSelect', {
+		if (name != 'fontAwesomeIconSelect') return null;
+		var listBox = controlManager.createListBox('fontAwesomeIconSelect', {
 			title: 'Icons',
 			onselect: function(v) {
 				var editor = this.control_manager.editor;
@@ -31,11 +31,11 @@
 		return listBox;
 	};
 
-	tinymce.create('tinymce.plugins.FontAwesomeGlyphPlugin', {
+	tinymce.create('tinymce.plugins.FontAwesomeIconPlugin', {
 		createControl: createControl
 	});
 
-	tinymce.PluginManager.add('font_awesome_glyphs', tinymce.plugins.FontAwesomeGlyphPlugin);
+	tinymce.PluginManager.add('font_awesome_icons', tinymce.plugins.FontAwesomeIconPlugin);
 
 	var ICONS = bfa_vars.fa_icons.split(',');
 })();

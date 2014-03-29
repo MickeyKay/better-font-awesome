@@ -104,8 +104,8 @@ class BetterFontAwesome {
 		// Do options page
 		$this->do_options_page();
 
-		// Hook up to the init action
-		add_action( 'after_setup_theme', array( $this, 'init' ) );
+		// Hook up to the init action - on 11 to make sure it loads after other FA plugins
+		add_action( 'init', array( $this, 'init' ), 11 );
 
 		// Do scripts and styles
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_and_styles' ), 99 );
@@ -138,9 +138,8 @@ class BetterFontAwesome {
 		// Add icon dropdown to TinyMCE 
 		if ( ( current_user_can('edit_posts') || current_user_can('edit_pages') ) &&
                 get_user_option('rich_editing') ) {
-            add_filter( 'mce_external_plugins', array( $this, 'register_tinymce_plugin') );
-            add_filter( 'mce_buttons', array( $this, 'add_tinymce_buttons') );
-            add_filter('mce_css', array(&$this, 'add_tinymce_editor_sytle'));
+            add_filter( 'mce_external_plugins', array( $this, 'register_tinymce_plugin' ) );
+            add_filter( 'mce_buttons', array( $this, 'add_tinymce_buttons' ) );
         }
 
         // Add PHP variables in head for use by TinyMCY JavaScript
@@ -230,13 +229,21 @@ class BetterFontAwesome {
 	function render_shortcode( $atts ) {
 		extract(shortcode_atts(array(
 			'name' => '',
-			'class' => ''
+			'class' => '',
+			'title'     => '',
+            'size'      => '',
+            'space'     => ''
 			), $atts)
 		);
 
 		// Get selected Font Awesome version
 		$this->titan = TitanFramework::getInstance( 'better-font-awesome' );
 		$version = $this->titan->getOption( 'version' );
+
+		// Include for backwards compatibility with Font Awesome More Icons plugin
+		$title = $title ? 'title="' . $title . '" ' : '';
+		$space = 'false' == $space ? '' : '&nbsp;';
+        $size = 'icon-' . $size . ' fa-' . $size;
 
 		// Remove "icon-" and "fa-" from name
 		// This helps both:
@@ -247,7 +254,7 @@ class BetterFontAwesome {
 
 		$icon_names = 'icon-' . $name . ' fa fa-' . $name;
 
-		return '<i class="' . $icon_names . ' ' . $class . '"></i>';
+		return '<i class="' . $icon_names . ' ' . $class . ' ' . $size . '" ' . $title . '>' . $space . '</i>';
 	}
   
 	/**
@@ -272,13 +279,13 @@ class BetterFontAwesome {
 	}
 
 	function register_tinymce_plugin( $plugin_array ) {
-        $plugin_array['font_awesome_glyphs'] = plugins_url('inc/js/tinymce-icons.js', __FILE__ );
+        $plugin_array['font_awesome_icons'] = plugins_url('inc/js/tinymce-icons.js', __FILE__ );
 
         return $plugin_array;
     }
 
     function add_tinymce_buttons( $buttons ) {
-        array_push($buttons, '|', 'fontAwesomeGlyphSelect');
+        array_push($buttons, '|', 'fontAwesomeIconSelect');
 
         return $buttons;
     }
