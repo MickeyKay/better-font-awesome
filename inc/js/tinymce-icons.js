@@ -1,10 +1,11 @@
 (function() {
 
 	if( typeof bfa_vars != 'undefined' ) {
-		var ICONS;
+		var icons = bfa_vars.fa_icons.split(',');
+		var prefix = bfa_vars.fa_prefix;
 
 		var icon_i = function(id) {
-			return '<i class="fa icon-fw fa-fw icon-' + id + ' fa-' + id + '"></i>';
+			return '<i class="fa ' + prefix + 'fw ' + prefix + id + '"></i>';
 		}
 
 		var icon_shortcode = function(id) {
@@ -24,8 +25,8 @@
 				}
 			});
 
-			for (var i = 0; i < ICONS.length; i++) {
-				var _id = ICONS[i];
+			for (var i = 0; i < icons.length; i++) {
+				var _id = icons[i];
 				listBox.add(icon_i(_id) + ' ' + _id, _id);
 			}
 
@@ -38,6 +39,5 @@
 
 		tinymce.PluginManager.add('font_awesome_icons', tinymce.plugins.FontAwesomeIconPlugin);
 
-		var ICONS = bfa_vars.fa_icons.split(',');
 	}
 })();

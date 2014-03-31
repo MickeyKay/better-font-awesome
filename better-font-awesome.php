@@ -2,17 +2,17 @@
 /*
  * Plugin Name: Better Font Awesome
  * Plugin URI: http://wordpress.org/plugins/better-font-awesome
- * Description: The better Font Awesome for WordPress. 
- * Version: 0.9
+ * Description: The better Font Awesome icon plugin for Wordpress.
+ * Version: 0.9.0
  * Author: Mickey Kay
  * Author URI: mickey@mickeykaycreative.com
  * License:     GPLv2+
- * Text Domain: gp
+ * Text Domain: bfa
  * Domain Path: /languages
  */
 
 /**
- * Copyright (c) 2014 Mickey Kay (email : mickey@mickeykaycreative.com)
+ * Copyright (c) 2014 Mickey Kay & MIGHTYminnow (email : mickey@mickeykaycreative.com)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License, version 2 or, at
@@ -33,7 +33,6 @@
 
 	TODO:
 	- Make sure all icons are showing
-	- Fix conflict when another font awesome plugin is installed
 	- Make backwards compatible for all shortcodes including "FA Icons", "FA More", and "FA Shortcodes"
 
 **/
@@ -86,7 +85,7 @@ class BetterFontAwesome {
 	/*--------------------------------------------*
 	 * variables
 	 *--------------------------------------------*/
-	protected $cdn_data, $titan, $version, $minified, $stylsheet;
+	protected $cdn_data, $titan, $version, $prefix, $minified;
 
 	/**
 	 * Constructor
@@ -108,9 +107,9 @@ class BetterFontAwesome {
 		add_action( 'init', array( $this, 'init' ), 11 );
 
 		// Do scripts and styles
-		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_and_styles' ), 99 );
-		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_and_styles' ), 99 );
-		add_action( 'admin_enqueue_scripts', array( $this, 'custom_admin_css' ), 99 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_and_styles' ), 11 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_and_styles' ), 11 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'custom_admin_css' ), 11 );
 
 	}
   
@@ -132,8 +131,8 @@ class BetterFontAwesome {
 		// Register the shortcode [icon]
 		add_shortcode( 'icon', array( $this, 'render_shortcode' ) );
 
-		// Set Font Awesome stylesheet URL
-		$this->set_stylesheet_url();
+		// Set Font Awesome variables (stylesheet url, prefix, etc)
+		$this->setup_global_variables();
 
         // Add PHP variables in head for use by TinyMCY JavaScript
         foreach( array('post.php','post-new.php') as $hook ) {
@@ -152,8 +151,7 @@ class BetterFontAwesome {
 	}
 
 	/**
-	 * Registers and enqueues stylesheets for the administration panel and the
-	 * public facing site.
+	 * Get CDN data and prefix based on selected version
 	 */
 	function setup_cdn_data() {
 		$this->cdn_data = json_decode( $this->get_data( 'http://api.jsdelivr.com/v1/bootstrap/libraries/font-awesome/' ) )[0];
@@ -162,7 +160,7 @@ class BetterFontAwesome {
 	/*
 	 * Set the Font Awesome stylesheet url to use based on the settings
 	 */
-	function set_stylesheet_url() {
+	function setup_global_variables() {
 		$this->version = $this->titan->getOption( 'version' );
 		$this->minified = $this->titan->getOption( 'minified' );
 
@@ -172,6 +170,12 @@ class BetterFontAwesome {
 
 		$stylesheet = $this->minified ? '/css/font-awesome.min.css' : '/css/font-awesome.css';
 		$this->stylesheet_url = '//netdna.bootstrapcdn.com/font-awesome/' . $this->version . $stylesheet;
+
+		// Set proper prefix based on version
+		if ( 0 <= version_compare( $this->version, '4' ) )
+			$this->prefix = 'fa-';
+		elseif ( 0 <= version_compare( $this->version, '3' ) )
+			$this->prefix = 'icon-';
 	}
 
 	function do_options_page() {
@@ -180,7 +184,9 @@ class BetterFontAwesome {
 		$versions[ 'latest' ] = __( 'Latest', 'better-font-awesome' ) . ' (' . $this->cdn_data->lastversion . ')';
 
 		foreach( $this->cdn_data->versions as $version ) {
-			$versions[$version] = $version;
+			// Exclude v2.0
+			if ( '2' != substr( $version, 0, 1 ) )
+				$versions[$version] = $version;
 		}
 
 		$optionsPage = $this->titan->createAdminPanel( array(
@@ -202,7 +208,7 @@ class BetterFontAwesome {
 		    'id' => 'minified',
 		    'type' => 'checkbox',
 		    'desc' => __( 'Whether to include the minified version of the CSS (checked), or the unminified version (unchecked).', 'better-font-awesome' ),
-		    'default' => false,
+		    'default' => true,
 		) );
 
 		$optionsPage->createOption( array(
@@ -236,14 +242,10 @@ class BetterFontAwesome {
 			), $atts)
 		);
 
-		// Get selected Font Awesome version
-		$this->titan = TitanFramework::getInstance( 'better-font-awesome' );
-		$version = $this->titan->getOption( 'version' );
-
 		// Include for backwards compatibility with Font Awesome More Icons plugin
 		$title = $title ? 'title="' . $title . '" ' : '';
 		$space = 'false' == $space ? '' : '&nbsp;';
-        $size = 'icon-' . $size . ' fa-' . $size;
+        $size = $size ? ' '. $this->prefix . $size : '';
 
 		// Remove "icon-" and "fa-" from name
 		// This helps both:
@@ -251,10 +253,22 @@ class BetterFontAwesome {
 		// 	2. Old shortcodes from other plugins that required prefixes
 		$name = str_replace( 'icon-', '', $name );
 		$name = str_replace( 'fa-', '', $name );
+		
+		// Add prefix to name
+		$icon_name = $this->prefix . $name;
 
-		$icon_names = 'icon-' . $name . ' fa fa-' . $name;
+		// Remove "icon-" and "fa-" from classes
+		$class = str_replace( 'icon-', '', $class );
+		$class = str_replace( 'fa-', '', $class );
+		
+		// Remove extra spaces from class
+		$class = trim( $class );
+		$class = preg_replace('/\s{3,}/',' ', $class );
 
-		return '<i class="' . $icon_names . ' ' . $class . ' ' . $size . '" ' . $title . '>' . $space . '</i>';
+		// Add prefix to each class (separated by space)
+		$class = ' ' . $this->prefix . str_replace( ' ', ' ' . $this->prefix, $class );
+
+		return '<i class="fa ' . $icon_name . $class . $size . '" ' . $title . '>' . $space . '</i>';
 	}
   
 	/**
@@ -324,6 +338,7 @@ class BetterFontAwesome {
 		<!-- Pass $classes variable so it is accessible to TinyMCE JavaScript -->
 		<script type='text/javascript'>
 		var bfa_vars = {
+		    'fa_prefix': '<?php echo $this->prefix; ?>', 
 		    'fa_icons': '<?php echo $classes; ?>',
 		};
 		</script>

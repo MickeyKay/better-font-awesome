@@ -14,8 +14,9 @@
 /* TinyMCE */
 
 /* Override editor rules blocking these native Font Awesome styles */
-body .icon-fw,
-body .fa-fw {
+#menu_content_content_fontAwesomeIconSelect_menu .icon-fw,
+#menu_content_content_fontAwesomeIconSelect_menu .fa-fw {
+	display: inline-block;
 	width: 1.2857142857142858em;
 }
 
