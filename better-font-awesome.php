@@ -135,16 +135,16 @@ class BetterFontAwesome {
 		// Set Font Awesome stylesheet URL
 		$this->set_stylesheet_url();
 
-		// Add icon dropdown to TinyMCE 
-		if ( ( current_user_can('edit_posts') || current_user_can('edit_pages') ) &&
-                get_user_option('rich_editing') ) {
-            add_filter( 'mce_external_plugins', array( $this, 'register_tinymce_plugin' ) );
-            add_filter( 'mce_buttons', array( $this, 'add_tinymce_buttons' ) );
-        }
-
         // Add PHP variables in head for use by TinyMCY JavaScript
-        foreach( array('post.php','post-new.php') as $hook )
-		     add_action( "admin_head-$hook", array( $this, 'admin_head_variables' ) );
+        foreach( array('post.php','post-new.php') as $hook ) {
+        	add_action( "admin_head-$hook", array( $this, 'admin_head_variables' ) );
+        	
+        	if ( ( current_user_can('edit_posts') || current_user_can('edit_pages') ) &&
+                get_user_option('rich_editing') ) {
+	        	add_filter( 'mce_external_plugins', array( $this, 'register_tinymce_plugin' ) );
+	        	add_filter( 'mce_buttons', array( $this, 'add_tinymce_buttons' ) );
+	        }
+        }
 
 		// Add Font Awesome stylesheet to TinyMCE
 		add_editor_style( $this->stylesheet_url );
