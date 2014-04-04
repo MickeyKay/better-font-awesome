@@ -12,7 +12,7 @@ The better Font Awesome icon plugin for WordPress.
 
 == Description ==
 
-Better Font Awesome gives you easy access to the full [Font Awesome](http://fortawesome.github.io/Font-Awesome/ "Font Awesome icon website") icon library, and allows you to update your version of Font Awesome without having to change all your shortcodes.
+Better Font Awesome gives you easy access to the full [Font Awesome](http://fortawesome.github.io/Font-Awesome/ "Font Awesome icon website") icon library using shortcodes, HTML, and TinyMCE, and allows you to update your version of Font Awesome without having to change all your shortcodes.
 
 
 = Features =
@@ -54,6 +54,7 @@ Version 3:
 ** TinyMCE **
 Better Font Awesome also provides you with an easy-to-use drop down menu in the default WordPress TinyMCE, which you can use to automatically generate a shortcode for the icon you want. Check out our [Screenshots](https://wordpress.org/plugins/better-font-awesome/screenshots/ "Screenshots") to see what it looks like.
 
+
 == Installation ==
 
 This section describes how to install the plugin and get it working.
@@ -61,6 +62,7 @@ This section describes how to install the plugin and get it working.
 1. Upload Font Awesome Icons to the /wp-content/plugins/ directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
 1. That's it! Now you can use 3 different methods (shortcode, HTML, TinyMCE) to insert Font Awesome icons, all outlined in the [Description](https://wordpress.org/plugins/better-font-awesome "Description") section.
+
 
 == Frequently Asked Questions ==
 
@@ -76,19 +78,23 @@ Nope. Better Font Awesome automatically pulls in everything you need, and it doe
 
 Better Font Awesome does it's best to load after any existing Font Awesome CSS, which can minimize conflicts. If you are experiencing any unexpected behavior resulting from plugin/theme conflicts, you can try checking the box to "Remove existing Font Awesome version" in under Settings &rarr; Better Font Awesome.
 
+
 == Screenshots ==
 
 Coming soon.
+
 
 == Changelog ==
 
 = 0.9.0 =
 * First release!
 
+
 == Upgrade Notice ==
 
 = 0.9.0 =
 * First release!
+
 
 == Credits ==
 Many thanks to the following plugins and their authors:
