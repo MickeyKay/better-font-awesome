@@ -213,6 +213,14 @@ class BetterFontAwesome {
 		) );
 
 		$optionsPage->createOption( array(
+		    'name' => __( 'Remove existing Font Awesome styles', 'better-font-awesome' ),
+		    'id' => 'remove_existing_fa',
+		    'type' => 'checkbox',
+		    'desc' => __( 'Remove Font Awesome CSS included by other plugins and themes. This may help if icons are not rendering as expected.', 'better-font-awesome' ),
+		    'default' => false,
+		) );
+
+		$optionsPage->createOption( array(
 			'name' => __( 'Usage', 'better-font-awesome' ),
 		    'type' => 'note',
 		    'desc' => __( '
@@ -233,13 +241,22 @@ class BetterFontAwesome {
 		) );
 	}
 
+	/**
+	 * Output [icon] shortcode
+	 *
+	 * Example:
+	 * 	[icon name="flag" class="fw 2x spin"]
+	 *
+	 * @param   array $atts Shortcode attributes
+	 * @return  string <i> Font Awesome output
+	 */
 	function render_shortcode( $atts ) {
 		extract(shortcode_atts(array(
 			'name' => '',
 			'class' => '',
-			'title'     => '',
-            'size'      => '',
-            'space'     => ''
+			'title'     => '', /* For compatibility with other plugins */
+            'size'      => '', /* For compatibility with other plugins */
+            'space'     => '',
 			), $atts)
 		);
 
@@ -278,8 +295,10 @@ class BetterFontAwesome {
 	 */
 	function register_scripts_and_styles() {
 		// Deregister any existing Font Awesome CSS (including Titan Framework)
-		wp_dequeue_style( 'tf-font-awesome' );
-		wp_dequeue_style( 'font-awesome' );
+		if ( $this->titan->getOption( 'remove_existing_fa' ) ) {
+			wp_dequeue_style( 'tf-font-awesome' );
+			wp_dequeue_style( 'font-awesome' );
+		}
 
 		// Enqueue Font Awesome CSS
 		wp_register_style( 'font-awesome', $this->stylesheet_url, '', $this->version );
