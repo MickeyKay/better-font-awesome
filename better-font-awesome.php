@@ -154,7 +154,8 @@ class BetterFontAwesome {
 	 * Get CDN data and prefix based on selected version
 	 */
 	function setup_cdn_data() {
-		$this->cdn_data = json_decode( $this->get_data( 'http://api.jsdelivr.com/v1/bootstrap/libraries/font-awesome/' ) )[0];
+		$remote_data = wp_remote_get( 'http://api.jsdelivr.com/v1/bootstrap/libraries/font-awesome/' );
+		$this->cdn_data = json_decode( wp_remote_retrieve_body( $remote_data ) )[0];
 	}
 
 	/*
@@ -315,7 +316,8 @@ class BetterFontAwesome {
 		else
 		    $prefix = 'http:';
 
-	    $css = $this->get_data( $prefix . $this->stylesheet_url );
+		$remote_data = wp_remote_get( $prefix . $this->stylesheet_url );
+	    $css = wp_remote_retrieve_body( $remote_data );
 	 
 	 	// Get all CSS selectors that have a content: pseudo-element rule
 	 	preg_match_all('/(\.[^}]*)\s*{\s*(content:)/s', $css, $matches );
@@ -344,23 +346,6 @@ class BetterFontAwesome {
 		</script>
 		<!-- TinyMCE Shortcode Plugin -->
 	    <?php
-	}
-
-	/**
-	 * Get contents of URL
-	 *
-	 * @param   string $url URL to get content
-	 * @return  mixed Contents of URL
-	 */
-	function get_data( $url ) {
-		$ch = curl_init();
-		$timeout = 5;
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
-		$data = curl_exec($ch);
-		curl_close($ch);
-		return $data;
 	}
   
 }
