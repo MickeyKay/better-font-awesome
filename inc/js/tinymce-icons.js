@@ -1,43 +1,52 @@
-(function() {
+( function() {
+    "use strict";
 
-	if( typeof bfa_vars != 'undefined' ) {
-		var icons = bfa_vars.fa_icons.split(',');
-		var prefix = bfa_vars.fa_prefix;
+    var icons = bfa_vars.fa_icons.split(',');
+    var prefix = bfa_vars.fa_prefix;
 
-		var icon_i = function(id) {
-			return '<i class="fa ' + prefix + 'fw ' + prefix + id + '"></i>';
-		}
+    var icon_i = function(id) {
+        return '<i class="fa ' + prefix + 'fw ' + prefix + id + '"></i>';
+    }
 
-		var icon_shortcode = function(id) {
-			return '[icon name="' + id + '" class=""]';
-		}
+    var icon_shortcode = function(id) {
+        return '[icon name="' + id + '" class=""]';
+    }
 
-		var createControl = function(name, controlManager) {
-			if (name != 'fontAwesomeIconSelect') return null;
-			var listBox = controlManager.createListBox('fontAwesomeIconSelect', {
-				title: 'Icons',
-				onselect: function(v) {
-					var editor = this.control_manager.editor;
-					if (v) {
-						editor.selection.setContent(icon_shortcode(v));
-					}		
-					return false;
-				}
-			});
+    var bfaSelect = function( editor, url ) {
+        editor.addButton('bfaSelect', function() {
+            var values = [];
 
-			for (var i = 0; i < icons.length; i++) {
-				var _id = icons[i];
-				listBox.add(icon_i(_id) + ' ' + _id, _id);
-			}
+            for (var i = 0; i < icons.length; i++) {
+                var _id = icons[i];
+                values.push({text: _id, value: _id, icon: ' fa fa-fw icon-fw fa-' + _id + ' icon-' + _id });
+            }
 
-			return listBox;
-		};
+            return {
+                type: 'listbox',
+                name: 'bfaSelect',
+                tooltip: 'Better Font Awesome Icons',
+                icon: ' fa fa-flag icon-flag',
+                text: 'Icons',
+                label: 'Select :',
+                fixedWidth: true,
+                values: values,
+                onselect: function(e) {
+                    if (e) {
+                        editor.insertContent(icon_shortcode(e.control.settings.value));
+                    }
 
-		tinymce.create('tinymce.plugins.FontAwesomeIconPlugin', {
-			createControl: createControl
-		});
+	                // Reset back to inital "Icons" text
+         			this.value(null);
 
-		tinymce.PluginManager.add('font_awesome_icons', tinymce.plugins.FontAwesomeIconPlugin);
+	                return false;
+                },
+                onPostRender: function() {
+	                this.addClass('bfaSelect');
+	            }
+            
+            };
+        });
 
-	}
-})();
+    };
+    tinymce.PluginManager.add( 'bfa_plugin', bfaSelect );
+} )();

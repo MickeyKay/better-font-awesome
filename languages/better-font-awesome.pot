@@ -1,0 +1,211 @@
+# Copyright (C) 2014 Better Font Awesome
+# This file is distributed under the same license as the Better Font Awesome package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Better Font Awesome 0.9.3\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/better-font-awesome\n"
+"POT-Creation-Date: 2014-04-21 00:53:22+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2014-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+
+#: Titan-Framework/class-admin-panel.php:290
+msgid "Settings saved."
+msgstr ""
+
+#: Titan-Framework/class-admin-panel.php:292
+msgid "Settings reset to default."
+msgstr ""
+
+#: Titan-Framework/class-meta-box.php:35
+#: Titan-Framework/class-theme-customizer-section.php:30
+msgid "More Options"
+msgstr ""
+
+#: Titan-Framework/class-option-save.php:20
+msgid "Save Changes"
+msgstr ""
+
+#: Titan-Framework/class-option-save.php:23
+msgid "Reset to Default"
+msgstr ""
+
+#: Titan-Framework/class-option-select-categories.php:37
+#: Titan-Framework/class-option-select-categories.php:104
+#: Titan-Framework/class-option-select-pages.php:30
+#: Titan-Framework/class-option-select-posts.php:38
+#: Titan-Framework/class-option-select-posts.php:106
+msgid "Select"
+msgstr ""
+
+#: Titan-Framework/class-option-select-googlefont.php:29
+msgid ""
+"%s has been deprecated and will be removed in version %s! Please use %s "
+"instead to avoid errors in the future."
+msgstr ""
+
+#: Titan-Framework/class-option-select-googlefont.php:108
+msgid "Ultra-light"
+msgstr ""
+
+#: Titan-Framework/class-option-select-googlefont.php:111
+msgid "Light"
+msgstr ""
+
+#: Titan-Framework/class-option-select-googlefont.php:114
+msgid "Book"
+msgstr ""
+
+#: Titan-Framework/class-option-select-googlefont.php:117
+msgid "Medium"
+msgstr ""
+
+#: Titan-Framework/class-option-select-googlefont.php:120
+msgid "Semi-Bold"
+msgstr ""
+
+#: Titan-Framework/class-option-select-googlefont.php:123
+msgid "Bold"
+msgstr ""
+
+#: Titan-Framework/class-option-select-googlefont.php:126
+msgid "Extra-Bold"
+msgstr ""
+
+#: Titan-Framework/class-option-select-googlefont.php:129
+msgid "Ultra-Bold"
+msgstr ""
+
+#: Titan-Framework/class-option-select-googlefont.php:132
+msgid "Regular"
+msgstr ""
+
+#: Titan-Framework/class-option-upload.php:196
+msgid "Select Image"
+msgstr ""
+
+#: Titan-Framework/class-option-upload.php:199
+msgid "Use image"
+msgstr ""
+
+#: Titan-Framework/class-option.php:40
+msgid "Option type or extended class %s does not exist."
+msgstr ""
+
+#: Titan-Framework/class-titan-framework.php:85
+msgid "All option IDs must be unique. The id %s has been used multiple times."
+msgstr ""
+
+#: Titan-Framework/class-titan-framework.php:346
+#: Titan-Framework/class-titan-framework.php:393
+msgid ""
+"Wrong usage of %s, this should be called inside a hook or from within a "
+"theme file."
+msgstr ""
+
+#: Titan-Framework/titan-framework.php:126
+msgid "Documentation"
+msgstr ""
+
+#: Titan-Framework/titan-framework.php:130
+msgid "GitHub Repo"
+msgstr ""
+
+#: Titan-Framework/titan-framework.php:134
+msgid "Issue Tracker"
+msgstr ""
+
+#: better-font-awesome.php:189
+msgid "Latest"
+msgstr ""
+
+#. #-#-#-#-#  plugin.pot (Better Font Awesome 0.9.3)  #-#-#-#-#
+#. Plugin Name of the plugin/theme
+#: better-font-awesome.php:198
+msgid "Better Font Awesome"
+msgstr ""
+
+#: better-font-awesome.php:203
+msgid "Font Awesome version"
+msgstr ""
+
+#: better-font-awesome.php:206
+msgid ""
+"Select the version of Font Awesome you would like to use. Visit the <a href="
+"\"http://fontawesome.io/\" target=\"_blank\">Font Awesome website</a> for "
+"more information."
+msgstr ""
+
+#: better-font-awesome.php:212
+msgid "Use minified CSS"
+msgstr ""
+
+#: better-font-awesome.php:215
+msgid ""
+"Whether to include the minified version of the CSS (checked), or the "
+"unminified version (unchecked)."
+msgstr ""
+
+#: better-font-awesome.php:220
+msgid "Remove existing Font Awesome styles and shortcodes"
+msgstr ""
+
+#: better-font-awesome.php:223
+msgid ""
+"Attempt to remove Font Awesome CSS and shortcodes included by other plugins "
+"and themes. This may help if icons are not rendering properly."
+msgstr ""
+
+#: better-font-awesome.php:228
+msgid "Usage"
+msgstr ""
+
+#: better-font-awesome.php:230
+msgid ""
+"\n"
+"\t\t    \t\t<b>Version 4</b>&nbsp;&nbsp;&nbsp;<small><a href=\"http://"
+"fontawesome.io/examples/\">See all available classes &raquo;</a></small><br /"
+"><br />\n"
+"\t\t    \t\t<i class=\"icon-star fa fa-star\"></i> <code>[icon name=\"star\"]"
+"</code> or <code>&lt;i class=\"fa-star\"&gt;&lt;/i&gt;</code><br /><br />\n"
+"\t\t    \t\t<i class=\"icon-star fa fa-star icon-2x fa-2x\"></i> <code>[icon "
+"name=\"star\" class=\"fa-2x\"]</code> or <code>&lt;i class=\"fa-star fa-2x"
+"\"&gt;&lt;/i&gt;</code><br /><br />\n"
+"\t\t    \t\t<i class=\"icon-star fa fa-star icon-2x fa-2x icon-border fa-"
+"border\"></i> <code>[icon name=\"star\" class=\"fa-2x fa-border\"]</code> or "
+"<code>&lt;i class=\"fa-star fa-2x fa-border\"&gt;&lt;/i&gt;</code><br /><br /"
+"><br />\n"
+"\t\t    \t\t<b>Version 3</b>&nbsp;&nbsp;&nbsp;<small><a href=\"http://"
+"fontawesome.io/3.2.1/examples/\">See all available classes &raquo;</a></"
+"small><br /><br />\n"
+"\t\t    \t\t<i class=\"icon-star fa fa-star\"></i> <code>[icon name=\"star\"]"
+"</code> or <code>&lt;i class=\"icon-star\"&gt;&lt;/i&gt;</code><br /><br />\n"
+"\t\t    \t\t<i class=\"icon-star fa fa-star icon-2x fa-2x\"></i> <code>[icon "
+"name=\"star\" class=\"icon-2x\"]</code> or <code>&lt;i class=\"icon-star "
+"icon-2x\"&gt;&lt;/i&gt;</code><br /><br />\n"
+"\t\t    \t\t<i class=\"icon-star fa fa-star icon-2x fa-2x icon-border fa-"
+"border\"></i> <code>[icon name=\"star\" class=\"icon-2x icon-border\"]</"
+"code> or <code>&lt;i class=\"icon-star icon-2x icon-border\"&gt;&lt;/i&gt;</"
+"code>\n"
+"\n"
+"\t\t    \t\t"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "http://wordpress.org/plugins/better-font-awesome"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid "The better Font Awesome icon plugin for Wordpress."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "Mickey Kay"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "mickey@mickeykaycreative.com"
+msgstr ""
