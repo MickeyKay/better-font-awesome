@@ -4,3 +4,4 @@
 * Add hard copy CSS file as final fallback.
 * Integrate transients for better load time.
 * Integrate BFA library!
+* Add MIGHTYminnow to credit
