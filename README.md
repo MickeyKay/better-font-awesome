@@ -6,3 +6,7 @@
 * Integrate transients for better load time.
 * Integrate BFA library!
 * Add MIGHTYminnow to credit
+* Add filter
+* Make sure users have access to all important class props (version, icons, prefix, etc)
+* Add debugging functions per Dmitriy's request
+* Add credits for Dmitriy, etc
