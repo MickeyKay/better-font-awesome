@@ -95,17 +95,6 @@ class Better_Font_Awesome_Plugin {
 	}
 
 	/**
-	 * Runs when the plugin is initialized
-	 */
-	function init() {
-		// Setup localization
-		load_plugin_textdomain( self::slug, false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-
-		// Initialize Better Font Awesome Library with BFA options
-		$this->do_better_font_awesome_library();
-	}
-
-	/**
 	 * Set the Font Awesome stylesheet url to use based on the settings.
 	 */
 	function setup_global_variables() {
@@ -180,6 +169,17 @@ class Better_Font_Awesome_Plugin {
 		$optionsPage->createOption( array(
 				'type' => 'save',
 			) );
+	}
+
+	/**
+	 * Runs when the plugin is initialized
+	 */
+	function init() {
+		// Setup localization
+		load_plugin_textdomain( self::slug, false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+
+		// Initialize Better Font Awesome Library with BFA options
+		$this->do_better_font_awesome_library();
 	}
 
 	function do_better_font_awesome_library() {
