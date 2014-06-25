@@ -44,7 +44,7 @@ if ( $useEmbeddedFramework && ! class_exists( 'TitanFramework' ) ) {
 }
 
 
-add_action( 'plugins_loaded', 'bfa_start', 1 );
+add_action( 'plugins_loaded', 'bfa_start', 5 );
 /**
  * Initialize Better Font Awesome plugin.
  *
@@ -92,7 +92,7 @@ class Better_Font_Awesome_Plugin {
 		$this->do_options_page();
 
 		// Hook up to the init action
-		add_action( 'init', array( $this, 'init' ) );
+		add_action( 'init', array( $this, 'init' ), 5 );
 	}
 
 	/**
