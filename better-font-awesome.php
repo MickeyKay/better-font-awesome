@@ -74,24 +74,45 @@ class Better_Font_Awesome_Plugin {
 	/*--------------------------------------------*
 	 * Variables
 	 *--------------------------------------------*/
+	
+	// Main libraries
 	protected $bfa_lib, $titan;
+	
+	// jsDelivr CDN data
 	protected $jsdelivr_data = array();
+	
+	// Plugin variables
+	protected $plugin_display_name;
+	protected $option_name;
+
+	/**
+     * Holds the values to be used in the fields callbacks
+     */
+    protected $options;
 
 	/**
 	 * Constructor
 	 */
 	function __construct() {
+
+		// Setup plugin details
+		$this->plugin_display_name = __( 'Better Font Awesome 2', 'bfa' );
+		$this->option_name = self::slug . '_options2';
+
 		// Setup Titan instance
 		$this->titan = TitanFramework::getInstance( 'better-font-awesome' );
 
 		// Set Font Awesome variables (stylesheet url, prefix, etc)
 		$this->setup_global_variables();
 
-		// Do options page
-		$this->do_options_page();
-
-		// Hook up to the init action
+		// Hook up to the init action - priority 5 to execute before other hooked actions
 		add_action( 'init', array( $this, 'init' ), 5 );
+
+		// Do options page
+		$this->do_options_page(); // this is the TF method
+		add_action( 'admin_menu', array( $this, 'add_setting_page' ) );
+		add_action( 'admin_init', array( $this, 'add_settings' ) );
+
 	}
 
 	/**
@@ -105,12 +126,207 @@ class Better_Font_Awesome_Plugin {
 		// jsDelivr CDN data
 		$this->jsdelivr_data['versions'] = $jsdelivr_fetcher->get_value( 'versions' );
 		$this->jsdelivr_data['last_version'] = $jsdelivr_fetcher->get_value( 'lastversion' );
+
 	}
+
+	/**
+	 * Runs when the plugin is initialized
+	 */
+	function init() {
+
+		// Setup localization
+		load_plugin_textdomain( self::slug, false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+
+		// Initialize Better Font Awesome Library with BFA options
+		$this->do_better_font_awesome_library();
+
+	}
+
+	/**
+	 * Create the plugin settings page.
+	 */
+	function add_setting_page() {
+
+        add_options_page(
+            $this->plugin_display_name, 
+            $this->plugin_display_name, 
+            'manage_options', 
+            self::slug, 
+            array( $this, 'create_admin_page' )
+        );
+
+	}
+
+	/**
+     * Options page callback
+     */
+    public function create_admin_page() {
+       
+        /**
+         * Get plugin options.
+         *
+         * Run maybe_unserialize() in case updating from old serialized 
+         * Titan Framwork option to new array-based options.
+         */
+        $this->options = maybe_unserialize( get_option( $this->option_name ) );
+
+        ?>
+        <div class="wrap">
+            <?php screen_icon(); ?>
+            <h2><?php echo $this->plugin_display_name; ?></h2>           
+            <form method="post" action="options.php">
+            <?php
+                // This prints out all hidden setting fields
+                settings_fields( 'option_group' );   
+                do_settings_sections( self::slug );
+                submit_button(); 
+            ?>
+            </form>
+        </div>
+        <?php
+
+    }
+
+	/**
+	 * Populate the plugin settings page.
+	 */
+	function add_settings() {
+
+		register_setting(
+            'option_group', // Option group
+            $this->option_name, // Option name
+            array( $this, 'sanitize' ) // Sanitize
+        );
+
+        add_settings_section(
+            'settings_section_primary', // ID
+            null, // Title
+            null, // Callback
+            self::slug // Page
+        );
+
+        add_settings_field(
+            'version', // ID
+            __( 'Version', 'bfa' ), // Title 
+            array( $this, 'version_callback' ), // Callback
+            self::slug, // Page
+            'settings_section_primary', // Section
+            $this->get_available_bfa_versions() // Args
+        );      
+
+        add_settings_field(
+            'minified', 
+            __( 'Use minified CSS', 'bfa' ), 
+            array( $this, 'checkbox_callback' ), 
+            self::slug, 
+            'settings_section_primary'
+        );
+
+        add_settings_field(
+            'remove_existing_fa', 
+            __( 'Remove existing Font Awesome', 'bfa' ), 
+            array( $this, 'checkbox_callback' ), 
+            self::slug, 
+            'settings_section_primary'
+        );
+
+	}
+
+	/**
+	 * Get all Font Awesome versions available from the jsDelivr API.
+	 *
+	 * @return array All available versions and the latest version
+	 */
+	function get_available_bfa_versions() {
+
+		$versions['latest'] = __( 'Always Latest', 'better-font-awesome' ) . ' (' . $this->jsdelivr_data['last_version'] . ')';
+
+		foreach ( $this->jsdelivr_data['versions'] as $version ) {
+			
+			// Exclude v2.0 since it is obsolete and uses a different file structure
+			if ( '2' != substr( $version, 0, 1 ) ) {
+				$versions[ $version ] = $version;
+			}
+
+		}
+
+		return $versions;
+
+	}
+
+	/**
+     * Sanitize each setting field as needed
+     *
+     * @param array $input Contains all settings fields as array keys
+     */
+    public function sanitize( $input ) {
+        
+        $new_input = array();
+
+        if ( isset( $input['version'] ) )
+            $new_input['version'] = sanitize_text_field( $input['version'] );
+
+		if ( isset( $input['minified'] ) )
+            $new_input['minified'] = absint( $input['minified'] );
+
+        if ( isset( $input['remove_existing_fa'] ) )
+            $new_input['remove_existing_fa'] = absint( $input['remove_existing_fa'] );
+
+        return $new_input;
+
+    }
+
+    /** 
+     * Print the Section text
+     */
+    public function print_section_info() {
+        print 'Enter your settings below:';
+    }
+
+    /** 
+     * Get the settings option array and print one of its values
+     *
+     * @param array $versions All available Font Awesome versions
+     */
+    public function version_callback( $versions ) {
+    	
+    	if ( $versions ) {
+
+    		printf( '<select id="version" name="%s[version]">', esc_attr( $this->option_name ) );
+    				
+    		foreach ( $versions as $version => $text ) {
+    			
+    			printf( 
+    				'<option value="%s" %s>%s</option>',
+    				esc_attr( $version ),
+    				selected( $version, get_option( $this->option_name )['version'], false ),
+    				esc_attr( $text )
+    			);
+    
+    		}
+
+    		echo '</select>';
+
+    	}
+
+    }
+
+    /** 
+     * Get the settings option array and print one of its values
+     */
+    public function title_callback()
+    {
+        printf(
+            '<input type="text" id="title" name="my_option_name[title]" value="%s" />',
+            isset( $this->options['title'] ) ? esc_attr( $this->options['title']) : ''
+        );
+    }
 
 	/**
 	 * Set up admin options page
 	 */
 	function do_options_page() {
+		
 		// Setup available versions
 		$versions[ 'latest' ] = __( 'Always Latest', 'better-font-awesome' ) . ' (' . $this->jsdelivr_data['last_version'] . ')';
 
@@ -169,17 +385,6 @@ class Better_Font_Awesome_Plugin {
 		$optionsPage->createOption( array(
 				'type' => 'save',
 			) );
-	}
-
-	/**
-	 * Runs when the plugin is initialized
-	 */
-	function init() {
-		// Setup localization
-		load_plugin_textdomain( self::slug, false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-
-		// Initialize Better Font Awesome Library with BFA options
-		$this->do_better_font_awesome_library();
 	}
 
 	function do_better_font_awesome_library() {
