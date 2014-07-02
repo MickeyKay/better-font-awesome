@@ -1,6 +1,8 @@
-[submodule "titan-framework"]
-	path = Titan-Framework
-	url = https://github.com/gambitph/Titan-Framework.git
+
 [submodule "lib/better-font-awesome-library"]
 	path = lib/better-font-awesome-library
 	url = https://github.com/MickeyKay/better-font-awesome-library.git
+	branch = fetcher-class
+[submodule "lib/Titan-Framework"]
+	path = lib/Titan-Framework
+	url = https://github.com/gambitph/Titan-Framework.git
