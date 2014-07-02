@@ -4,7 +4,7 @@
  * Plugin URI: http://wordpress.org/plugins/better-font-awesome
  * Description: The ultimate Font Awesome icon plugin for Wordpress.
  * Version: 0.9.6
- * Author: Mickey Kay
+ * Author: MIGHTYminnow
  * Author URI: mickey@mickeykaycreative.com
  * License:     GPLv2+
  * Text Domain: bfa
