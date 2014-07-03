@@ -97,7 +97,7 @@ class Better_Font_Awesome_Plugin {
 
 		// Setup plugin details
 		$this->plugin_display_name = __( 'Better Font Awesome 2', 'bfa' );
-		$this->option_name = self::slug . '_options2';
+		$this->option_name = self::slug . '_options';
 
 		// Setup Titan instance
 		$this->titan = TitanFramework::getInstance( 'better-font-awesome' );
@@ -119,6 +119,14 @@ class Better_Font_Awesome_Plugin {
 	 * Set the Font Awesome stylesheet url to use based on the settings.
 	 */
 	function setup_global_variables() {
+
+		/**
+         * Get plugin options.
+         *
+         * Run maybe_unserialize() in case updating from old serialized 
+         * Titan Framwork option to new array-based options.
+         */
+        $this->options = maybe_unserialize( get_option( $this->option_name ) );
 
 		// Initialize jsDelivr Fercher class_alias()
 		$jsdelivr_fetcher = new jsDeliver_Fetcher();
@@ -161,14 +169,6 @@ class Better_Font_Awesome_Plugin {
      * Options page callback
      */
     public function create_admin_page() {
-       
-        /**
-         * Get plugin options.
-         *
-         * Run maybe_unserialize() in case updating from old serialized 
-         * Titan Framwork option to new array-based options.
-         */
-        $this->options = maybe_unserialize( get_option( $this->option_name ) );
 
         ?>
         <div class="wrap">
@@ -219,7 +219,11 @@ class Better_Font_Awesome_Plugin {
             __( 'Use minified CSS', 'bfa' ), 
             array( $this, 'checkbox_callback' ), 
             self::slug, 
-            'settings_section_primary'
+            'settings_section_primary',
+            array(
+            	'id' => 'minified',
+            	'description' => __( 'Whether to include the minified version of the CSS (checked), or the unminified version (unchecked).', 'bfa' ),
+            )
         );
 
         add_settings_field(
@@ -227,7 +231,11 @@ class Better_Font_Awesome_Plugin {
             __( 'Remove existing Font Awesome', 'bfa' ), 
             array( $this, 'checkbox_callback' ), 
             self::slug, 
-            'settings_section_primary'
+            'settings_section_primary',
+            array(
+            	'id' => 'remove_existing_fa',
+            	'description' => __( 'Remove Font Awesome CSS and shortcodes added by other plugins and themes. This may help if icons are not rendering properly.', 'bfa' ),
+            )
         );
 
 	}
@@ -299,7 +307,7 @@ class Better_Font_Awesome_Plugin {
     			printf( 
     				'<option value="%s" %s>%s</option>',
     				esc_attr( $version ),
-    				selected( $version, get_option( $this->option_name )['version'], false ),
+    				selected( $version, $this->options['version'], false ),
     				esc_attr( $text )
     			);
     
@@ -314,11 +322,15 @@ class Better_Font_Awesome_Plugin {
     /** 
      * Get the settings option array and print one of its values
      */
-    public function title_callback()
-    {
+    public function checkbox_callback( $args ) {
+      	$option_name = esc_attr( $this->option_name ) . '[' . $args['id'] . ']';
         printf(
-            '<input type="text" id="title" name="my_option_name[title]" value="%s" />',
-            isset( $this->options['title'] ) ? esc_attr( $this->options['title']) : ''
+            '<label for="%s"><input type="checkbox" value="1" id="%s" name="%s" %s/> %s</label>',
+            $option_name,
+            $args['id'],
+            $option_name,
+            checked( 1, $this->options[ $args['id'] ], false ),
+            $args['description']
         );
     }
 
