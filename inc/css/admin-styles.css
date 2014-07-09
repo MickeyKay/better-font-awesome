@@ -8,6 +8,10 @@
  * @copyright 2014 MIGHTYminnow & Mickey Kay
  */
 
+/**	
+ * TinyMCE
+ */
+
 /* Override TinyMCE rules blocking these native Font Awesome styles */
 #menu_content_content_bfaSelect_menu .icon-fw,
 #menu_content_content_bfaSelect_menu .fa-fw,
@@ -29,3 +33,14 @@
 	margin-right: .5em;
 	font-family: FontAwesome;
 }
+
+/**
+ * Settings page
+ */
+
+.bfa-usage-text {
+	padding: 20px;
+	background-color: #fff;
+}
+
+/* Force equal width of demo icons */
