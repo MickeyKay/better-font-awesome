@@ -1,15 +1,12 @@
-/* Options page */
-.settings_page_options-general-better-font-awesome .titan-framework-panel-wrap [class*="icon-"],
-.settings_page_options-general-better-font-awesome .titan-framework-panel-wrap [class*="fa-"] {
-	display: inline-block;
-	width: 44px;
-	margin-right: 10px;
-	text-align: center;
-	vertical-align: middle;
-	-webkit-box-sizing: border-box;
-	   -moz-box-sizing: border-box;
-	        box-sizing: border-box;
-}
+/**
+ * Better Font Awesome admin styles
+ *
+ * @package   Better Font Awesome
+ * @author    Mickey Kay <mickey@mickeykaycreative.com>
+ * @license   GPL-2.0+
+ * @link      http://wordpress.org/plugins/folio
+ * @copyright 2014 Mickey Kay
+ */
 
 /* TinyMCE */
 
