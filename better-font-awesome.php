@@ -48,7 +48,7 @@ add_action( 'plugins_loaded', 'bfa_start', 5 );
  */
 function bfa_start() {
     global $better_font_awesome;
-    $better_font_awesome = new Better_Font_Awesome_Plugin();
+    $better_font_awesome = Better_Font_Awesome_Plugin::get_instance();
 }
 
 /**
@@ -87,6 +87,15 @@ class Better_Font_Awesome_Plugin {
     protected $options;
 
     /**
+     * Instance of this class.
+     *
+     * @since    1.0.0
+     *
+     * @var      object
+     */
+    protected static $instance = null;
+
+    /**
      * Constructor
      */
     function __construct() {
@@ -108,6 +117,21 @@ class Better_Font_Awesome_Plugin {
         add_action( 'admin_menu', array( $this, 'add_setting_page' ) );
         add_action( 'admin_init', array( $this, 'add_settings' ) );
 
+    }
+
+    /**
+     * Returns the instance of this class, and initializes
+     * the instance if it doesn't already exist
+     *
+     * @return Better_Font_Awesome The BFA object
+     */
+    public static function get_instance( $args = '' ) {
+        static $instance = null;
+        if ( null === $instance ) {
+            $instance = new static( $args );
+        }
+
+        return $instance;
     }
 
     function do_defaults() {
@@ -133,7 +157,7 @@ class Better_Font_Awesome_Plugin {
         $this->options = maybe_unserialize( get_option( $this->option_name ) );
 
         // Initialize jsDelivr Fercher class_alias()
-        $jsdelivr_fetcher = new jsDeliver_Fetcher();
+        $jsdelivr_fetcher = jsDeliver_Fetcher::get_instance();
 
         // jsDelivr CDN data
         $this->jsdelivr_data['versions'] = $jsdelivr_fetcher->get_value( 'versions' );
