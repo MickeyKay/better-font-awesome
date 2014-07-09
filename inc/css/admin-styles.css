@@ -2,15 +2,13 @@
  * Better Font Awesome admin styles
  *
  * @package   Better Font Awesome
- * @author    Mickey Kay <mickey@mickeykaycreative.com>
+ * @author    MIGHTYminnow & Mickey Kay <mickey@mickeykaycreative.com>
  * @license   GPL-2.0+
- * @link      http://wordpress.org/plugins/folio
- * @copyright 2014 Mickey Kay
+ * @link      http://wordpress.org/plugins/better-font-awesome
+ * @copyright 2014 MIGHTYminnow & Mickey Kay
  */
 
-/* TinyMCE */
-
-/* Override editor rules blocking these native Font Awesome styles */
+/* Override TinyMCE rules blocking these native Font Awesome styles */
 #menu_content_content_bfaSelect_menu .icon-fw,
 #menu_content_content_bfaSelect_menu .fa-fw,
 .mce-stack-layout-item .icon-fw,
@@ -20,7 +18,7 @@
 	text-align: center;
 }
 
-/* Override editor icon font family */
+/* Override TinyMCE icon font family */
 .fa {
 	font-family: FontAwesome !important;
 }

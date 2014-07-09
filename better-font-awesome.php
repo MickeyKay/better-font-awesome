@@ -25,6 +25,8 @@
  * @todo add a reset defaults button
  * @todo test to ensure that BFA trumps any BFA Library inclusions in plugins/themes
  * @todo add filters in all necessary locations
+ * @todo check all comments for formatting and thoroughness
+ * @todo test in both pre and post TinyMCE V4 (make sure icons all appear in editor and front end)
  */
 
 // Includes
