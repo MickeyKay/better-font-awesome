@@ -149,7 +149,7 @@ class Better_Font_Awesome_Plugin {
 
     function initialize_better_font_awesome_library() {
         $args = array(
-            'version' => 'latest' == $this->options['version'] ? $this->jsdelivr_data['last_version'] : $this->options['version'],
+            'version' => $this->options['version'],
             'minified' => isset( $this->options['minified'] ) ? $this->options['minified'] : '',
             'remove_existing_fa' => isset( $this->options['remove_existing_fa'] ) ? $this->options['remove_existing_fa'] :'',
             'load_styles' => true,
