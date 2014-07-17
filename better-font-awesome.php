@@ -21,8 +21,6 @@
  */
 
 /**
- *
- *
  * @todo ensure defaults are working for new manual options
  * @todo add a reset defaults button
  * @todo test to ensure that BFA trumps any BFA Library inclusions in plugins/themes
