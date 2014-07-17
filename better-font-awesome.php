@@ -31,6 +31,13 @@
  * @todo add timeout functionality, and possibly other wp_remote_get args
  * @todo add trailingslashit and make sure all paths are consistent on requires
  * @todo make sure fallback url/file work okay if a user filters them, not just if the string combining happens before or after filter
+ * @todo fix error on bfal CDN notice
+ *
+ * @todo  possible failures
+ *        - api unreachable
+ *        - css (CDN) unreachable
+ *        - css transient not set
+ *        - 
  */
 
 // Includes
