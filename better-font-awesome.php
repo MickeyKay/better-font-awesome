@@ -30,6 +30,8 @@
  * @todo check all comments for formatting and thoroughness
  * @todo test in both pre and post TinyMCE V4 (make sure icons all appear in editor and front end)
  * @todo check visibility of all class methods (private, protected, public)
+ * @todo add timeout functionality, and possibly other wp_remote_get args
+ * @todo add trailingslashit and make sure all paths are consistent on requires
  */
 
 // Includes
@@ -105,7 +107,10 @@ class Better_Font_Awesome_Plugin {
         $this->option_name = self::slug . '_options';
 
         // Do default options
-        $this->do_defaults();
+        $this->setup_defaults();
+
+        // Initialize Better Font Awesome Library with BFA options
+        $this->initialize_better_font_awesome_library();
 
         // Set Font Awesome variables (stylesheet url, prefix, etc)
         $this->setup_global_variables();
@@ -134,13 +139,27 @@ class Better_Font_Awesome_Plugin {
         return $instance;
     }
 
-    function do_defaults() {
+    function setup_defaults() {
 
         $this->options = maybe_unserialize( get_option( $this->option_name ) );
         
         if ( empty( $this->options ) ) {
             update_option( $this->option_name, $this->option_defaults );
         }
+    }
+
+    function initialize_better_font_awesome_library() {
+        $args = array(
+            'version' => 'latest' == $this->options['version'] ? $this->jsdelivr_data['last_version'] : $this->options['version'],
+            'minified' => isset( $this->options['minified'] ) ? $this->options['minified'] : '',
+            'remove_existing_fa' => isset( $this->options['remove_existing_fa'] ) ? $this->options['remove_existing_fa'] :'',
+            'load_styles' => true,
+            'load_admin_styles' => true,
+            'load_shortcode' => true,
+            'load_tinymce_plugin' => true,
+        );
+
+        $this->bfa_lib = Better_Font_Awesome_Library::get_instance( $args );
     }
 
     /**
@@ -156,12 +175,9 @@ class Better_Font_Awesome_Plugin {
          */
         $this->options = maybe_unserialize( get_option( $this->option_name ) );
 
-        // Initialize jsDelivr Fercher class_alias()
-        $jsdelivr_fetcher = jsDeliver_Fetcher::get_instance();
-
         // jsDelivr CDN data
-        $this->jsdelivr_data['versions'] = $jsdelivr_fetcher->get_value( 'versions' );
-        $this->jsdelivr_data['last_version'] = $jsdelivr_fetcher->get_value( 'lastversion' );
+        $this->jsdelivr_data['versions'] = $this->bfa_lib->get_api_value( 'versions' );
+        $this->jsdelivr_data['last_version'] = $this->bfa_lib->get_api_value( 'lastversion' );
 
     }
 
@@ -172,9 +188,6 @@ class Better_Font_Awesome_Plugin {
 
         // Setup localization
         load_plugin_textdomain( self::slug, false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-
-        // Initialize Better Font Awesome Library with BFA options
-        $this->do_better_font_awesome_library();
 
     }
 
@@ -285,19 +298,24 @@ class Better_Font_Awesome_Plugin {
     /**
      * Get all Font Awesome versions available from the jsDelivr API.
      *
-     * @return array All available versions and the latest version
+     * @return array All available versions and the latest version, or an empty array if the API fetch fails.
      */
     function get_available_bfa_versions() {
 
-        $versions['latest'] = __( 'Always Latest', 'bfa' ) . ' (' . $this->jsdelivr_data['last_version'] . ')';
+        // Create $version array of jsDelivr API fetch succeeded
+        if ( $this->bfa_lib->api_fetch_succeeded() ) {
+            $versions['latest'] = __( 'Always Latest', 'bfa' ) . ' (' . $this->jsdelivr_data['last_version'] . ')';
 
-        foreach ( $this->jsdelivr_data['versions'] as $version ) {
+            foreach ( $this->jsdelivr_data['versions'] as $version ) {
 
-            // Exclude v2.0 since it is obsolete and uses a different file structure
-            if ( '2' != substr( $version, 0, 1 ) ) {
-                $versions[ $version ] = $version;
+                // Exclude v2.0 since it is obsolete and uses a different file structure
+                if ( '2' != substr( $version, 0, 1 ) ) {
+                    $versions[ $version ] = $version;
+                }
+
             }
-
+        } else {
+            $versions = array();
         }
 
         return $versions;
@@ -307,7 +325,7 @@ class Better_Font_Awesome_Plugin {
     /**
      * Sanitize each setting field as needed
      *
-     * @param array   $input Contains all settings fields as array keys
+     * @param array $input Contains all settings fields as array keys
      */
     public function sanitize( $input ) {
 
@@ -344,7 +362,8 @@ class Better_Font_Awesome_Plugin {
      */
     public function version_callback( $versions ) {
 
-        if ( $versions ) {
+        // If the jsDelivr API fetch succeeded, output all available versions
+        if ( $this->bfa_lib->api_fetch_succeeded() && $versions ) {
 
             printf( '<select id="version" name="%s[version]">', esc_attr( $this->option_name ) );
 
@@ -361,6 +380,10 @@ class Better_Font_Awesome_Plugin {
 
             echo '</select>';
 
+        } else { // Otherwise output a fallback message
+            printf( __( 'Version selection is currently unavailable because the attempt to reach the jsDelivr API server failed with the following message: %s', 'bfa' ), 
+                    '<br /><br /><code>' . $this->bfa_lib->get_api_data() . '</code>'
+                     );
         }
 
     }
@@ -388,17 +411,4 @@ class Better_Font_Awesome_Plugin {
         echo '<div class="bfa-text">' . $args['text'] . '</div>';
     }
 
-    function do_better_font_awesome_library() {
-        $args = array(
-            'version' => 'latest' == $this->options['version'] ? $this->jsdelivr_data['last_version'] : $this->options['version'],
-            'minified' => isset( $this->options['minified'] ) ? $this->options['minified'] : '',
-            'remove_existing_fa' => isset( $this->options['remove_existing_fa'] ) ? $this->options['remove_existing_fa'] :'',
-            'load_styles' => true,
-            'load_admin_styles' => true,
-            'load_shortcode' => true,
-            'load_tinymce_plugin' => true,
-        );
-
-        $this->bfa_lib = Better_Font_Awesome_Library::get_instance( $args );
-    }
 }
