@@ -20,29 +20,8 @@
  * Domain Path: /languages
  */
 
-/**
- * @todo ensure defaults are working for new manual options
- * @todo add a reset defaults button
- * @todo test to ensure that BFA trumps any BFA Library inclusions in plugins/themes
- * @todo add filters in all necessary locations
- * @todo check all comments for formatting and thoroughness
- * @todo test in both pre and post TinyMCE V4 (make sure icons all appear in editor and front end)
- * @todo check visibility of all class methods (private, protected, public)
- * @todo add timeout functionality, and possibly other wp_remote_get args
- * @todo add trailingslashit and make sure all paths are consistent on requires
- * @todo make sure fallback url/file work okay if a user filters them, not just if the string combining happens before or after filter
- * @todo fix error on bfal CDN notice
- *
- * @todo  possible failures
- *        - api unreachable
- *        - css (CDN) unreachable
- *        - css transient not set
- *        - 
- */
-
 // Includes
 require_once plugin_dir_path( __FILE__ ) . 'lib/better-font-awesome-library/better-font-awesome-library.php';
-
 
 add_action( 'plugins_loaded', 'bfa_start', 5 );
 /**
