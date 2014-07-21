@@ -43,25 +43,60 @@ function bfa_start() {
  */
 class Better_Font_Awesome_Plugin {
 
-    /*--------------------------------------------*
-     * Constants
-     *--------------------------------------------*/
-    const name = 'Better Font Awesome';
-    const slug = 'better-font-awesome';
+    /**
+     * Plugin slug.
+     *
+     * @since 0.9.0
+     *
+     * @var   string
+     */
+    const SLUG = 'better-font-awesome';
 
-    /*--------------------------------------------*
-     * Variables
-     *--------------------------------------------*/
+    /**
+     * Better Font Awesome Library object.
+     *
+     * @since  1.0.0
+     *
+     * @var    Better_Font_Awesome_Library
+     */
+    private $bfa_lib;
 
-    // Main libraries
-    protected $bfa_lib;
+    /**
+     * Plugin display name.
+     *
+     * @since 0.9.0
+     *
+     * @var   string
+     */
+    private $plugin_display_name;
 
-    // jsDelivr CDN data
-    protected $jsdelivr_data = array();
-
-    // Plugin variables
-    protected $plugin_display_name;
+    /**
+     * Plugin option nav_menu_description.
+     *
+     * @since 0.9.0
+     *
+     * @var   string
+     */
     protected $option_name;
+
+    /**
+     * Plugin options.
+     *
+     * @since 0.9.0
+     *
+     * @var   string
+     */
+    protected $options;
+
+    /**
+     * Default options.
+     *
+     * Used for setting uninitialized plugin options.
+     *
+     * @since 0.9.0
+     *
+     * @var   array
+     */
     protected $option_defaults = array(
         'version'            => 'latest',
         'minified'           => 1,
@@ -69,45 +104,14 @@ class Better_Font_Awesome_Plugin {
     );
 
     /**
-     * Holds the values to be used in the fields callbacks
-     */
-    protected $options;
-
-    /**
      * Instance of this class.
      *
      * @since    1.0.0
      *
-     * @var      object
+     * @var      Better_Font_Awesome_Plugin
      */
     protected static $instance = null;
 
-    /**
-     * Constructor
-     */
-    function __construct() {
-
-        // Setup plugin details
-        $this->plugin_display_name = __( 'Better Font Awesome', 'bfa' );
-        $this->option_name = self::slug . '_options';
-
-        // Do default options
-        $this->setup_defaults();
-
-        // Initialize Better Font Awesome Library with BFA options
-        $this->initialize_better_font_awesome_library();
-
-        // Set Font Awesome variables (stylesheet url, prefix, etc)
-        $this->setup_global_variables();
-
-        // Hook up to the init action - priority 5 to execute before other hooked actions
-        add_action( 'init', array( $this, 'init' ), 5 );
-
-        // Do options page
-        add_action( 'admin_menu', array( $this, 'add_setting_page' ) );
-        add_action( 'admin_init', array( $this, 'add_settings' ) );
-
-    }
 
     /**
      * Returns the instance of this class, and initializes
@@ -124,33 +128,54 @@ class Better_Font_Awesome_Plugin {
         return $instance;
     }
 
-    function setup_defaults() {
+    /**
+     * Better Font Awesome Plugin constructor.
+     *
+     * @param  array  $args  Initialization arguments.
+     */
+    function __construct() {
 
-        $this->options = maybe_unserialize( get_option( $this->option_name ) );
-        
-        if ( empty( $this->options ) ) {
-            update_option( $this->option_name, $this->option_defaults );
-        }
-    }
+        // Initialization actions (set up properties).
+        $this->initialize();
 
-    function initialize_better_font_awesome_library() {
-        $args = array(
-            'version' => $this->options['version'],
-            'minified' => isset( $this->options['minified'] ) ? $this->options['minified'] : '',
-            'remove_existing_fa' => isset( $this->options['remove_existing_fa'] ) ? $this->options['remove_existing_fa'] :'',
-            'load_styles' => true,
-            'load_admin_styles' => true,
-            'load_shortcode' => true,
-            'load_tinymce_plugin' => true,
-        );
+        // Initialize Better Font Awesome Library with plugin options as args.
+        $this->initialize_better_font_awesome_library( $this->options );
 
-        $this->bfa_lib = Better_Font_Awesome_Library::get_instance( $args );
+        // Load plugin text domain.
+        add_action( 'init', array( $this, 'load_text_domain' ) );
+
+        // Do options page
+        add_action( 'admin_menu', array( $this, 'add_settings_page' ) );
+        add_action( 'admin_init', array( $this, 'add_settings' ) );
+
     }
 
     /**
-     * Set the Font Awesome stylesheet url to use based on the settings.
+     * Do necessary initialization actions.
+     *
+     * @since  0.10.0
      */
-    function setup_global_variables() {
+    private function initialize() {
+        
+        // Set display name.
+        $this->plugin_display_name = __( 'Better Font Awesome', 'bfa' );
+
+        // Set options name.
+        $this->option_name = self::SLUG . '_options';
+
+        // Get plugin options, and populate defaults as needed.
+        $this->initialize_options( $this->option_name );
+
+    }
+
+    /**
+     * Get plugin options or initialize with default values.
+     *
+     * @since   0.10.0
+     *
+     * @return  array  Plugin options.
+     */
+    private function initialize_options( $option_name ) {
 
         /**
          * Get plugin options.
@@ -158,41 +183,65 @@ class Better_Font_Awesome_Plugin {
          * Run maybe_unserialize() in case updating from old serialized
          * Titan Framwork option to new array-based options.
          */
-        $this->options = maybe_unserialize( get_option( $this->option_name ) );
-
-        // jsDelivr CDN data
-        $this->jsdelivr_data['versions'] = $this->bfa_lib->get_api_value( 'versions' );
-        $this->jsdelivr_data['last_version'] = $this->bfa_lib->get_api_value( 'lastversion' );
+        $this->options = maybe_unserialize( get_option( $option_name ) );
+        
+        if ( empty( $this->options ) ) {
+            update_option( $option_name, $this->option_defaults );
+        }
 
     }
 
     /**
-     * Runs when the plugin is initialized
+     * Initialize the Better Font Awesome Library object.
+     *
+     * @since  0.9.0
+     *
+     * @param  array  $options  Plugin options.
      */
-    function init() {
+    private function initialize_better_font_awesome_library( $options ) {
+        
+        $args = array(
+            'version'             => $options['version'],
+            'minified'            => isset( $options['minified'] ) ? $options['minified'] : '',
+            'remove_existing_fa'  => isset( $options['remove_existing_fa'] ) ? $options['remove_existing_fa'] :'',
+            'load_styles'         => true,
+            'load_admin_styles'   => true,
+            'load_shortcode'      => true,
+            'load_tinymce_plugin' => true,
+        );
 
-        // Setup localization
-        load_plugin_textdomain( self::slug, false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+        $this->bfa_lib = Better_Font_Awesome_Library::get_instance( $args );
 
+    }
+
+    /**
+     * Load plugin text domain.
+     *
+     * @since  0.10.0
+     */
+    function load_text_domain() {
+        load_plugin_textdomain( self::SLUG, false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
     }
 
     /**
      * Create the plugin settings page.
      */
-    function add_setting_page() {
+    function add_settings_page() {
 
         add_options_page(
             $this->plugin_display_name,
             $this->plugin_display_name,
             'manage_options',
-            self::slug,
+            self::SLUG,
             array( $this, 'create_admin_page' )
         );
 
     }
 
     /**
-     * Options page callback
+     * Create the plugin settings page.
+     *
+     * @since  0.10.0
      */
     public function create_admin_page() {
     ?>
@@ -203,7 +252,7 @@ class Better_Font_Awesome_Plugin {
             <?php
                 // This prints out all hidden setting fields
                 settings_fields( 'option_group' );
-                do_settings_sections( self::slug );
+                do_settings_sections( self::SLUG );
                 submit_button();
                 echo $this->get_usage_text();
             ?>
@@ -213,7 +262,9 @@ class Better_Font_Awesome_Plugin {
     }
 
     /**
-     * Populate the plugin settings page.
+     * Populate the settings page with specific settings.
+     *
+     * @since  0.10.0
      */
     function add_settings() {
 
@@ -227,23 +278,23 @@ class Better_Font_Awesome_Plugin {
             'settings_section_primary', // ID
             null, // Title
             null, // Callback
-            self::slug // Page
+            self::SLUG // Page
         );
 
         add_settings_field(
             'version', // ID
             __( 'Version', 'bfa' ), // Title
             array( $this, 'version_callback' ), // Callback
-            self::slug, // Page
+            self::SLUG, // Page
             'settings_section_primary', // Section
-            $this->get_available_bfa_versions() // Args
+            $this->get_versions_list() // Args
         );
 
         add_settings_field(
             'minified',
             __( 'Use minified CSS', 'bfa' ),
             array( $this, 'checkbox_callback' ),
-            self::slug,
+            self::SLUG,
             'settings_section_primary',
             array(
                 'id' => 'minified',
@@ -255,56 +306,148 @@ class Better_Font_Awesome_Plugin {
             'remove_existing_fa',
             __( 'Remove existing Font Awesome', 'bfa' ),
             array( $this, 'checkbox_callback' ),
-            self::slug,
+            self::SLUG,
             'settings_section_primary',
             array(
                 'id' => 'remove_existing_fa',
-                'description' => __( 'Remove Font Awesome CSS and shortcodes added by other plugins and themes. This may help if icons are not rendering properly.', 'bfa' ),
+                'description' => __( 'Attempt to remove Font Awesome CSS and shortcodes added by other plugins and themes.', 'bfa' ),
             )
         );
 
     }
 
-    function get_usage_text() {
-        return '<div class="bfa-usage-text">' . 
-                __( '<h3>Usage</h3>
-                     <b>Font Awesome version 4.x +</b>&nbsp;&nbsp;&nbsp;<small><a href="http://fontawesome.io/examples/">See all available classes &raquo;</a></small><br /><br />
-                     <i class="icon-coffee fa fa-coffee"></i> <code>[icon name="coffee"]</code> or <code>&lt;i class="fa-coffee"&gt;&lt;/i&gt;</code><br /><br />
-                     <i class="icon-coffee fa fa-coffee icon-2x fa-2x"></i> <code>[icon name="coffee" class="fa-2x"]</code> or <code>&lt;i class="fa-coffee fa-2x"&gt;&lt;/i&gt;</code><br /><br />
-                     <i class="icon-coffee fa fa-coffee icon-2x fa-2x icon-rotate-90 fa-rotate-90"></i> <code>[icon name="coffee" class="fa-2x fa-rotate-90"]</code> or <code>&lt;i class="fa-coffee fa-2x fa-rotate-90"&gt;&lt;/i&gt;</code><br /><br /><br />
-                     <b>Font Awesome version 3.x</b>&nbsp;&nbsp;&nbsp;<small><a href="http://fontawesome.io/3.2.1/examples/">See all available classes &raquo;</a></small><br /><br />
-                     <i class="icon-coffee fa fa-coffee"></i> <code>[icon name="coffee"]</code> or <code>&lt;i class="icon-coffee"&gt;&lt;/i&gt;</code><br /><br />
-                     <i class="icon-coffee fa fa-coffee icon-2x fa-2x"></i> <code>[icon name="coffee" class="icon-2x"]</code> or <code>&lt;i class="icon-coffee icon-2x"&gt;&lt;/i&gt;</code><br /><br />
-                     <i class="icon-coffee fa fa-coffee icon-2x fa-2x icon-rotate-90 fa-rotate-90"></i> <code>[icon name="coffee" class="icon-2x icon-rotate-90"]</code> or <code>&lt;i class="icon-coffee icon-2x icon-rotate-90"&gt;&lt;/i&gt;</code>',
-                'bfa' ) .
-                '</div>';
-    }
-
     /**
      * Get all Font Awesome versions available from the jsDelivr API.
      *
-     * @return array All available versions and the latest version, or an empty array if the API fetch fails.
+     * @return  array  All available versions and the latest version, or an
+     *                 empty array if the API fetch fails.
      */
-    function get_available_bfa_versions() {
+    function get_versions_list() {
 
-        // Create $version array of jsDelivr API fetch succeeded
-        if ( $this->bfa_lib->api_fetch_succeeded() ) {
-            $versions['latest'] = __( 'Always Latest', 'bfa' ) . ' (' . $this->jsdelivr_data['last_version'] . ')';
+        if ( $this->bfa_lib->get_api_value('versions') ) {
+            $versions['latest'] = __( 'Always Latest', 'bfa' );
 
-            foreach ( $this->jsdelivr_data['versions'] as $version ) {
-
-                // Exclude v2.0 since it is obsolete and uses a different file structure
-                if ( '2' != substr( $version, 0, 1 ) ) {
-                    $versions[ $version ] = $version;
-                }
-
+            foreach ( $this->bfa_lib->get_api_value('versions') as $version ) {
+                $versions[ $version ] = $version;
             }
+
         } else {
             $versions = array();
         }
 
         return $versions;
 
+    }
+
+    /**
+     * Get the settings option array and print one of its values
+     *
+     * @param array  $versions  All available Font Awesome versions
+     */
+    public function version_callback( $versions ) {
+
+        if ( $versions ) {
+
+            // Add 'Latest' option.
+            $versions[ 'latest' ] = __( 'Always Latest', 'bfa' );
+
+            // Remove version 2.0 as its CSS doesn't work with the regex algorith.
+            foreach ( $versions as $index => $version ) {
+                
+                if ( '2.0' == $version ) {
+                    unset( $versions[ $index ] );
+                }
+
+            }
+
+            // Output select element
+            printf( '<select id="version" name="%s[version]">', esc_attr( $this->option_name ) );
+
+            foreach ( $versions as $version => $text ) {
+
+                printf(
+                    '<option value="%s" %s>%s</option>',
+                    esc_attr( $version ),
+                    selected( $version, $this->options['version'], false ),
+                    esc_attr( $text )
+                );
+
+            }
+
+            echo '</select>';
+
+        } else {
+            ?>
+            <p>
+                <?php 
+                printf( __( 'Version selection is currently unavailable. The attempt to reach the jsDelivr API server failed with the following error: %s', 'bfa' ), 
+                    '<code>' . $this->bfa_lib->get_error('api')->get_error_code() . ': ' . $this->bfa_lib->get_error('api')->get_error_message() . '</code>'
+                );
+                ?>
+            </p>
+            <p>
+                <?php 
+                printf( __( 'Font Awesome will still render using version: %s', 'bfa' ),
+                    '<code>' . $this->bfa_lib->get_active_version() . '</code>'
+                );
+                ?>
+            </p>
+            <p>
+                <?php
+                printf( __( 'This may be the result of a temporary server or connectivity issue which will resolve shortly. However if the problem persists please file a support ticket on the %splugin forum%s, citing the errors listed above. ', 'bfa' ),
+                        '<a href="http://wordpress.org/support/plugin/better-font-awesome" target="_blank" title="Better Font Awesome support forum">',
+                        '</a>'
+                );
+                ?>
+            </small></p>
+            <?php
+        }
+
+    }
+
+    /**
+     * Get the settings option array and print one of its values
+     */
+    public function checkbox_callback( $args ) {
+        $option_name = esc_attr( $this->option_name ) . '[' . $args['id'] . ']';
+        $option_value = isset( $this->options[ $args['id'] ] ) ? $this->options[ $args['id'] ] : '';
+        printf(
+            '<label for="%s"><input type="checkbox" value="1" id="%s" name="%s" %s/> %s</label>',
+            $args['id'],
+            $args['id'],
+            $option_name,
+            checked( 1, $option_value, false ),
+            $args['description']
+        );
+    }
+
+    /**
+     * Get the settings option array and print one of its values
+     */
+    public function text_callback( $args ) {
+        echo '<div class="bfa-text">' . $args['text'] . '</div>';
+    }
+
+    /**
+     * Generate the admin instructions/usage text.
+     *
+     * @since   0.10.0
+     *
+     * @return  string  Usage text.
+     */
+    public function get_usage_text() {
+        return '<div class="bfa-usage-text">' . 
+                __( '<h3>Usage</h3>
+                     <b>Font Awesome version 4.x +</b>&nbsp;&nbsp;&nbsp;<small><a href="http://fontawesome.io/examples/">See all available options &raquo;</a></small><br /><br />
+                     <i class="icon-coffee fa fa-coffee"></i> <code>[icon name="coffee"]</code> or <code>&lt;i class="fa-coffee"&gt;&lt;/i&gt;</code><br /><br />
+                     <i class="icon-coffee fa fa-coffee icon-2x fa-2x"></i> <code>[icon name="coffee" class="fa-2x"]</code> or <code>&lt;i class="fa-coffee fa-2x"&gt;&lt;/i&gt;</code><br /><br />
+                     <i class="icon-coffee fa fa-coffee icon-2x fa-2x icon-rotate-90 fa-rotate-90"></i> <code>[icon name="coffee" class="fa-2x fa-rotate-90"]</code> or <code>&lt;i class="fa-coffee fa-2x fa-rotate-90"&gt;&lt;/i&gt;</code><br /><br /><br />
+                     <b>Font Awesome version 3.x</b>&nbsp;&nbsp;&nbsp;<small><a href="http://fontawesome.io/3.2.1/examples/">See all available options &raquo;</a></small><br /><br />
+                     <i class="icon-coffee fa fa-coffee"></i> <code>[icon name="coffee"]</code> or <code>&lt;i class="icon-coffee"&gt;&lt;/i&gt;</code><br /><br />
+                     <i class="icon-coffee fa fa-coffee icon-2x fa-2x"></i> <code>[icon name="coffee" class="icon-2x"]</code> or <code>&lt;i class="icon-coffee icon-2x"&gt;&lt;/i&gt;</code><br /><br />
+                     <i class="icon-coffee fa fa-coffee icon-2x fa-2x icon-rotate-90 fa-rotate-90"></i> <code>[icon name="coffee" class="icon-2x icon-rotate-90"]</code> or <code>&lt;i class="icon-coffee icon-2x icon-rotate-90"&gt;&lt;/i&gt;</code>',
+                'bfa' ) .
+                '</div>';
     }
 
     /**
@@ -331,69 +474,6 @@ class Better_Font_Awesome_Plugin {
 
         return $new_input;
 
-    }
-
-    /**
-     * Print the Section text
-     */
-    public function print_section_info() {
-        print 'Enter your settings below:';
-    }
-
-    /**
-     * Get the settings option array and print one of its values
-     *
-     * @param array   $versions All available Font Awesome versions
-     */
-    public function version_callback( $versions ) {
-
-        // If the jsDelivr API fetch succeeded, output all available versions
-        if ( $this->bfa_lib->api_fetch_succeeded() && $versions ) {
-
-            printf( '<select id="version" name="%s[version]">', esc_attr( $this->option_name ) );
-
-            foreach ( $versions as $version => $text ) {
-
-                printf(
-                    '<option value="%s" %s>%s</option>',
-                    esc_attr( $version ),
-                    selected( $version, $this->options['version'], false ),
-                    esc_attr( $text )
-                );
-
-            }
-
-            echo '</select>';
-
-        } else { // Otherwise output a fallback message
-            printf( __( 'Version selection is currently unavailable because the attempt to reach the jsDelivr API server failed with the following message: %s', 'bfa' ), 
-                    '<br /><br /><code>' . $this->bfa_lib->get_api_data() . '</code>'
-                     );
-        }
-
-    }
-
-    /**
-     * Get the settings option array and print one of its values
-     */
-    public function checkbox_callback( $args ) {
-        $option_name = esc_attr( $this->option_name ) . '[' . $args['id'] . ']';
-        $option_value = isset( $this->options[ $args['id'] ] ) ? $this->options[ $args['id'] ] : '';
-        printf(
-            '<label for="%s"><input type="checkbox" value="1" id="%s" name="%s" %s/> %s</label>',
-            $option_name,
-            $args['id'],
-            $option_name,
-            checked( 1, $option_value, false ),
-            $args['description']
-        );
-    }
-
-    /**
-     * Get the settings option array and print one of its values
-     */
-    public function text_callback( $args ) {
-        echo '<div class="bfa-text">' . $args['text'] . '</div>';
     }
 
 }
