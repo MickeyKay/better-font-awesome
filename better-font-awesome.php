@@ -10,14 +10,19 @@
  *
  * @wordpress-plugin
  * Plugin Name: Better Font Awesome
- * Plugin URI: http://wordpress.org/plugins/better-font-awesome
- * Description: The ultimate Font Awesome icon plugin for Wordpress.
- * Version: 0.9.6
- * Author: MIGHTYminnow
- * Author URI: mickey@mickeykaycreative.com
+ * Plugin URI:  http://wordpress.org/plugins/better-font-awesome
+ * Description: The ultimate Font Awesome icon plugin for WordPress.
+ * Version:     0.10.0
+ * Author:      MIGHTYminnow & Mickey Kay
+ * Author URI:  mickey@mickeykaycreative.com
  * License:     GPLv2+
  * Text Domain: bfa
  * Domain Path: /languages
+ */
+
+/**
+ * @todo  Consider moving entire startup process out of bfa_start hook to ensure
+ *        it runs before other plugins.
  */
 
 // Includes
