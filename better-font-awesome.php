@@ -28,7 +28,7 @@ add_action( 'plugins_loaded', 'bfa_start', 5 );
  * Initialize Better Font Awesome plugin.
  *
  * Start up Better Font Awesome early on the plugins_loaded
- * hook in order to load it before any other plugins that
+ * hook, priority 5, in order to load it before any other plugins that
  * might also use the Better Font Awesome Library.
  *
  * @since 0.9.5
