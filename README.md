@@ -13,4 +13,5 @@ Better Font Awesome allows you to automatically integrate the latest available v
 Better Font Awesome utilizies the Better Font Awesome Library, which is available for standalone use in plugins and themes: [https://github.com/MickeyKay/better-font-awesome-library](https://github.com/MickeyKay/better-font-awesome-library)
 
 ## TO DO ##
+* Update readme!
 * Check to make sure plugin isn't deactivating on update (seemed to happen once before).
