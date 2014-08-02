@@ -1,6 +1,6 @@
 # Better Font Awesome #
 
-The better Font Awesome plugin for WordPress
+The better Font Awesome plugin for WordPress.
 
 __Plug Page:__ [http://wordpress.org/plugins/better-font-awesome/](http://wordpress.org/plugins/better-font-awesome/)  
 __Contributors:__ [Mickey Kay](http://profiles.wordpress.org/mcguive7/), [MIGHTYminnow](http://profiles.wordpress.org/mightyminnow/)  
