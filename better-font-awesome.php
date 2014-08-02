@@ -20,23 +20,18 @@
  * Domain Path: /languages
  */
 
-/**
- * @todo  Consider moving entire startup process out of bfa_start hook to ensure
- *        it runs before other plugins.
- */
-
-// Includes
+// Include required files.
 require_once plugin_dir_path( __FILE__ ) . 'lib/better-font-awesome-library/better-font-awesome-library.php';
 
 add_action( 'plugins_loaded', 'bfa_start', 5 );
 /**
- * Initialize Better Font Awesome plugin.
+ * Initialize the Better Font Awesome plugin.
  *
- * Start up Better Font Awesome early on the plugins_loaded
- * hook, priority 5, in order to load it before any other plugins that
- * might also use the Better Font Awesome Library.
+ * Start up Better Font Awesome early on the plugins_loaded hook, priority 5, in
+ * order to load it before any other plugins that might also use the Better Font
+ * Awesome Library.
  *
- * @since 0.9.5
+ * @since  0.9.5
  */
 function bfa_start() {
     global $better_font_awesome;
@@ -45,20 +40,22 @@ function bfa_start() {
 
 /**
  * Better Font Awesome plugin class
+ *
+ * @since  0.9.0
  */
 class Better_Font_Awesome_Plugin {
 
     /**
      * Plugin slug.
      *
-     * @since 0.9.0
+     * @since  0.9.0
      *
-     * @var   string
+     * @var    string
      */
     const SLUG = 'better-font-awesome';
 
     /**
-     * Better Font Awesome Library object.
+     * The Better Font Awesome Library object.
      *
      * @since  1.0.0
      *
@@ -69,27 +66,27 @@ class Better_Font_Awesome_Plugin {
     /**
      * Plugin display name.
      *
-     * @since 0.9.0
+     * @since  0.9.0
      *
-     * @var   string
+     * @var    string
      */
     private $plugin_display_name;
 
     /**
-     * Plugin option nav_menu_description.
+     * Plugin option name.
      *
-     * @since 0.9.0
+     * @since  0.9.0
      *
-     * @var   string
+     * @var    string
      */
     protected $option_name;
 
     /**
      * Plugin options.
      *
-     * @since 0.9.0
+     * @since  0.9.0
      *
-     * @var   string
+     * @var    string
      */
     protected $options;
 
@@ -98,9 +95,9 @@ class Better_Font_Awesome_Plugin {
      *
      * Used for setting uninitialized plugin options.
      *
-     * @since 0.9.0
+     * @since  0.9.0
      *
-     * @var   array
+     * @var    array
      */
     protected $option_defaults = array(
         'version'            => 'latest',
@@ -111,18 +108,18 @@ class Better_Font_Awesome_Plugin {
     /**
      * Instance of this class.
      *
-     * @since    1.0.0
+     * @since  0.9.0
      *
-     * @var      Better_Font_Awesome_Plugin
+     * @var    Better_Font_Awesome_Plugin
      */
     protected static $instance = null;
 
 
     /**
-     * Returns the instance of this class, and initializes
-     * the instance if it doesn't already exist
+     * Returns the instance of this class, and initializes the instance if it
+     * doesn't already exist.
      *
-     * @return Better_Font_Awesome The BFA object
+     * @return  Better_Font_Awesome  The BFA object.
      */
     public static function get_instance( $args = '' ) {
         static $instance = null;
@@ -136,20 +133,20 @@ class Better_Font_Awesome_Plugin {
     /**
      * Better Font Awesome Plugin constructor.
      *
-     * @param  array  $args  Initialization arguments.
+     * @since  0.9.0
      */
     function __construct() {
 
-        // Initialization actions (set up properties).
+        // Perform plugin initialization actions.
         $this->initialize();
 
-        // Initialize Better Font Awesome Library with plugin options as args.
+        // Initialize the Better Font Awesome Library.
         $this->initialize_better_font_awesome_library( $this->options );
 
-        // Load plugin text domain.
+        // Load the plugin text domain.
         add_action( 'init', array( $this, 'load_text_domain' ) );
 
-        // Do options page
+        // Set up the admin settings page.
         add_action( 'admin_menu', array( $this, 'add_settings_page' ) );
         add_action( 'admin_init', array( $this, 'add_settings' ) );
 
@@ -174,7 +171,7 @@ class Better_Font_Awesome_Plugin {
     }
 
     /**
-     * Get plugin options or initialize with default values.
+     * Get plugin options, or initialize with default values.
      *
      * @since   0.10.0
      *
@@ -185,11 +182,12 @@ class Better_Font_Awesome_Plugin {
         /**
          * Get plugin options.
          *
-         * Run maybe_unserialize() in case updating from old serialized
-         * Titan Framwork option to new array-based options.
+         * Run maybe_unserialize() in case we're updating from the old
+         * serialized Titan Framwork option to a new, array-based options.
          */
         $this->options = maybe_unserialize( get_option( $option_name ) );
         
+        // Initialize the plugin options with defaults if they're not set.
         if ( empty( $this->options ) ) {
             update_option( $option_name, $this->option_defaults );
         }
@@ -244,7 +242,7 @@ class Better_Font_Awesome_Plugin {
     }
 
     /**
-     * Create the plugin settings page.
+     * Output the plugin settings page contents.
      *
      * @since  0.10.0
      */
@@ -324,6 +322,8 @@ class Better_Font_Awesome_Plugin {
     /**
      * Get all Font Awesome versions available from the jsDelivr API.
      *
+     * @since 0.10.0
+     *
      * @return  array  All available versions and the latest version, or an
      *                 empty array if the API fetch fails.
      */
@@ -345,7 +345,9 @@ class Better_Font_Awesome_Plugin {
     }
 
     /**
-     * Get the settings option array and print one of its values
+     * Output a <select> version selector.
+     *
+     * @since  0.10.0
      *
      * @param array  $versions  All available Font Awesome versions
      */
@@ -353,10 +355,13 @@ class Better_Font_Awesome_Plugin {
 
         if ( $versions ) {
 
-            // Add 'Latest' option.
-            $versions[ 'latest' ] = __( 'Always Latest', 'bfa' );
+            // Add 'Always Latest' option.
+            $versions['latest'] = __( 'Always Latest', 'bfa' );
 
-            // Remove version 2.0 as its CSS doesn't work with the regex algorith.
+            /**
+             * Remove version 2.0, since its CSS doesn't work with the regex
+             * algorith and no one needs 2.0 anyways.
+             */
             foreach ( $versions as $index => $version ) {
                 
                 if ( '2.0' == $version ) {
@@ -365,7 +370,7 @@ class Better_Font_Awesome_Plugin {
 
             }
 
-            // Output select element
+            // Output the <select> element.
             printf( '<select id="version" name="%s[version]">', esc_attr( $this->option_name ) );
 
             foreach ( $versions as $version => $text ) {
@@ -411,7 +416,9 @@ class Better_Font_Awesome_Plugin {
     }
 
     /**
-     * Get the settings option array and print one of its values
+     * Output a checkbox setting.
+     *
+     * @since  0.10.0
      */
     public function checkbox_callback( $args ) {
         $option_name = esc_attr( $this->option_name ) . '[' . $args['id'] . ']';
@@ -427,7 +434,9 @@ class Better_Font_Awesome_Plugin {
     }
 
     /**
-     * Get the settings option array and print one of its values
+     * Output a text setting.
+     *
+     * @since 0.10.0
      */
     public function text_callback( $args ) {
         echo '<div class="bfa-text">' . $args['text'] . '</div>';
@@ -456,9 +465,9 @@ class Better_Font_Awesome_Plugin {
     }
 
     /**
-     * Sanitize each setting field as needed
+     * Sanitize each settings field as needed.
      *
-     * @param array $input Contains all settings fields as array keys
+     * @param  array  $input  Contains all settings fields as array keys.
      */
     public function sanitize( $input ) {
 
