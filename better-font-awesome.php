@@ -204,7 +204,7 @@ class Better_Font_Awesome_Plugin {
     private function initialize_better_font_awesome_library( $options ) {
         
         $args = array(
-            'version'             => $options['version'],
+            'version'             => $options['version'] ? $options['version'] : $this->option_defaults['version'],
             'minified'            => isset( $options['minified'] ) ? $options['minified'] : '',
             'remove_existing_fa'  => isset( $options['remove_existing_fa'] ) ? $options['remove_existing_fa'] :'',
             'load_styles'         => true,
