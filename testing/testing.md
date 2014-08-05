@@ -6,10 +6,10 @@ First of all, if you've made it here, thanks for your help! It makes a HUGE diff
 ## How to Report ##
 If you *do* enounter issues or questions, please [file an issue](https://github.com/MickeyKay/better-font-awesome/blob/master/testing/better-font-awesome-beta.zip?raw=true) on this repo.
 
-If you *don't* encounter any issues, I'd still love to know that things went smoothly. Please file [file an issue](https://github.com/MickeyKay/better-font-awesome/blob/master/testing/better-font-awesome-beta.zip?raw=true) and indicate what tests you've run and if there is anything else worth reporting.
+If you *don't* encounter any issues, I'd still love to know that things went smoothly. Please [file an issue](https://github.com/MickeyKay/better-font-awesome/blob/master/testing/better-font-awesome-beta.zip?raw=true) and indicate what tests you've run and if there is anything else worth reporting.
 
 ## What to Watch For ##
-Below are various [testing steps] you can take to put this plugin through the ringer. In addition to the specific steps and tests suggested, please feel free to make note of anything that seems out of place, incorrect, or otherwise wonky. The goal is to get this plugin as perfect as possible, so nothing is off limits.
+Below are various [testing steps](https://github.com/MickeyKay/better-font-awesome/blob/master/testing/testing.md#testing-steps) you can take to put this plugin through the ringer. In addition to the specific steps and tests suggested, please feel free to make note of anything that seems out of place, incorrect, or otherwise wonky. The goal is to get this plugin as perfect as possible, so nothing is off limits.
 
 ## Testing Steps ##
 To get started with testing, download the following beta version of Better Font Awesome and install it on your local/dev install of WordPress:
