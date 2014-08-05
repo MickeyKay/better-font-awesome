@@ -8,6 +8,18 @@ If you *do* enounter issues or questions, please [file an issue](https://github.
 
 If you *don't* encounter any issues, I'd still love to know that things went smoothly. Please [file an issue](https://github.com/MickeyKay/better-font-awesome/blob/master/testing/better-font-awesome-beta.zip?raw=true) and indicate what tests you've run and if there is anything else worth reporting.
 
+When reporting (whether success or failures) it can be *extremely* helpful if you provide as much information as possible. This information includes, but isn't limited to:
+
+* What the error is
+* Steps to reproduce the error
+* Consistency of error (every time vs intermittently)
+* WordPress version
+* Server setup
+* PHP version
+* Active theme
+* Active plugins
+* Anything else you think would be helpful
+
 ## What to Watch For ##
 Below are various [steps](https://github.com/MickeyKay/better-font-awesome/blob/master/testing/testing.md#testing-steps) that will help you test this plugin. In addition to the suggested steps and tests, please feel free to make note of anything that seems out of place, incorrect, or otherwise wonky. The goal is to get this plugin as perfect as possible, so nothing is off limits. More points if you can break it!
 
@@ -24,7 +36,7 @@ Now you're ready to test. In fact, you've already started the testing process! T
 * Add a new post/page (does the icon dropdown appear as expected in Visual view?).
 * Insert an icon using the dropdown, and check that it appears on the front end.
 * Try various settings under `Settings > Better Font Awesome` in the admin and check that everything is still working as expected.
-* Do anything and everything you can to try and break BFA!
+* Do anything and everything you can to try and break things! This is the fun part.
 
 ### Bonus Testing ###
 Bonus points to anyone who tests the following:
@@ -36,7 +48,7 @@ Bonus points to anyone who tests the following:
 * Test on various servers. Try various PHP configurations. Force timeouts. Try running with no internet connection (it should still fall back to the locally included version of Font Awesome 4.1.0).
 
 ### Double Bonus Testing ###
-Test the [Better Font Awesome Library](https://github.com/MickeyKay/better-font-awesome-library/), the core stand-alone library upon which the plugin is based. A few things to note about this library:
+If you're feeling super dedicated and want to learn about a cool new library I've been working on, then test the [Better Font Awesome Library](https://github.com/MickeyKay/better-font-awesome-library/), the core stand-alone library upon which the plugin is based. A few things to note about this library:
 
 * It contains a [Git Submodule](http://git-scm.com/book/en/Git-Tools-Submodules) that will require you to run the following two commands to get all necessary files after cloning the library:
 ```
