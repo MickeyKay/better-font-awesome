@@ -50,9 +50,18 @@ Bonus points to anyone who tests the following:
 ### Double Bonus Testing ###
 If you're feeling super dedicated and want to learn about a cool new library I've been working on, then test the [Better Font Awesome Library](https://github.com/MickeyKay/better-font-awesome-library/), the core stand-alone library upon which the plugin is based. A few things to note about this library:
 
-* It contains a [Git Submodule](http://git-scm.com/book/en/Git-Tools-Submodules) that will require you to run the following two commands to get all necessary files after cloning the library:
+* It contains a [Git Submodule](http://git-scm.com/book/en/Git-Tools-Submodules) that will require you to run a few special commands to get all necessary files after cloning the library. So the whole process of cloning and updating the library looks like this (performed from the command line):
 ```
+// Clone the repo
+git clone https://github.com/MickeyKay/better-font-awesome-library.git
+
+// Enter the newly downloaded repo
+cd better-font-awesome-library
+
+// Initialize all submodules
 git submodule init
+
+// Pull in updated copies of all submodules
 git submodule update
 ```
 * This library is designed to work as a standalone way for you to incorporate the latest version of Font Awesome in your plugin, theme, or other WordPress project. Feel free to test it out in any way you like - I'd love to see what you build.
