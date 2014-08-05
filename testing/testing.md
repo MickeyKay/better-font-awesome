@@ -13,7 +13,7 @@ Below are various [testing steps] you can take to put this plugin through the ri
 
 ## Testing Steps ##
 To get started with testing, download the following beta version of Better Font Awesome and install it on your local/dev install of WordPress:
-#### [Download Better Font Awesome Beta](https://github.com/MickeyKay/better-font-awesome/blob/master/testing/better-font-awesome-beta.zip?raw=true) ####
+* [Better Font Awesome v0.10.0.beta](https://github.com/MickeyKay/better-font-awesome/blob/master/testing/better-font-awesome-0.10.0.beta.zip?raw=true)
 
 Now you're ready to test. In fact, you've already started the testing process! Basic testing consists of the following:
 
