@@ -11,8 +11,10 @@ If you *don't* encounter any issues, I'd still love to know that things went smo
 ## What to Watch For ##
 Below are various [steps](https://github.com/MickeyKay/better-font-awesome/blob/master/testing/testing.md#testing-steps) that will help you test this plugin. In addition to the suggested steps and tests, please feel free to make note of anything that seems out of place, incorrect, or otherwise wonky. The goal is to get this plugin as perfect as possible, so nothing is off limits. More points if you can break it!
 
+** Note: ** While Better Font Awesome has already undergone extensive testing to make it to this point, there is no guarantee that it doesn't contain errors. With your help, we can make that guarantee as 100% as possible, but in the meantime please use this testing version accordingly.
+
 ## Testing Steps ##
-To get started with testing, download the following beta version of Better Font Awesome and install it on your local/dev install of WordPress:
+To get started with testing, first download the most recent version of Better Font Awesome and install it on your local/dev install of WordPress:
 * [Better Font Awesome v0.10.0.beta](https://github.com/MickeyKay/better-font-awesome/blob/master/testing/better-font-awesome-0.10.0.beta.zip?raw=true)
 
 ### Basic Testing ###
