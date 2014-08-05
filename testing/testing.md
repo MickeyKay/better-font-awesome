@@ -21,9 +21,9 @@ To get started with testing, first download the most recent version of Better Fo
 Now you're ready to test. In fact, you've already started the testing process! To complete basic testing, please do the following:
 
 * Install and activate the plugin (anything to report in this process?).
-* Add a new post/page (does the icon dropdown appear as expected in visual view?).
-* Insert an icon using the dropdown and check that it appears on the front end.
-* Try various settings under Settings > Better Font Awesome in the admin and check that everything is still working as expected.
+* Add a new post/page (does the icon dropdown appear as expected in Visual view?).
+* Insert an icon using the dropdown, and check that it appears on the front end.
+* Try various settings under `Settings > Better Font Awesome` in the admin and check that everything is still working as expected.
 * Do anything and everything you can to try and break BFA!
 
 ### Bonus Testing ###
