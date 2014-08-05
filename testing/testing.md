@@ -1,6 +1,6 @@
 # Testing Better Font Awesome #
 
-**Downloads
+**Downloads**
 * [Better Font Awesome v0.10.0.beta](https://github.com/MickeyKay/better-font-awesome/blob/master/testing/better-font-awesome-0.10.0.beta.zip?raw=true)
 
 ## Intro ##
