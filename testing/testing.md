@@ -9,12 +9,13 @@ If you *do* enounter issues or questions, please [file an issue](https://github.
 If you *don't* encounter any issues, I'd still love to know that things went smoothly. Please [file an issue](https://github.com/MickeyKay/better-font-awesome/blob/master/testing/better-font-awesome-beta.zip?raw=true) and indicate what tests you've run and if there is anything else worth reporting.
 
 ## What to Watch For ##
-Below are various [steps](https://github.com/MickeyKay/better-font-awesome/blob/master/testing/testing.md#testing-steps) that will help you test this plugin. In addition to the specific steps and tests suggested, please feel free to make note of anything that seems out of place, incorrect, or otherwise wonky. The goal is to get this plugin as perfect as possible, so nothing is off limits. More points if you can break it!
+Below are various [steps](https://github.com/MickeyKay/better-font-awesome/blob/master/testing/testing.md#testing-steps) that will help you test this plugin. In addition to the suggested steps and tests, please feel free to make note of anything that seems out of place, incorrect, or otherwise wonky. The goal is to get this plugin as perfect as possible, so nothing is off limits. More points if you can break it!
 
 ## Testing Steps ##
 To get started with testing, download the following beta version of Better Font Awesome and install it on your local/dev install of WordPress:
 * [Better Font Awesome v0.10.0.beta](https://github.com/MickeyKay/better-font-awesome/blob/master/testing/better-font-awesome-0.10.0.beta.zip?raw=true)
 
+### Basic Testing ###
 Now you're ready to test. In fact, you've already started the testing process! Basic testing consists of the following:
 
 * Install and activate the plugin.
@@ -23,7 +24,7 @@ Now you're ready to test. In fact, you've already started the testing process! B
 * Try various settings under Settings > Better Font Awesome in the admin and check that everything is still working as expected.
 * Do anything and everything you can to try and break BFA!
 
-### Bonus Testing Steps ###
+### Bonus Testing ###
 Bonus points to anyone who tests the following:
 
 * Test on WordPress 3.8 or below (this uses a different version of TinyMCE).
@@ -32,7 +33,7 @@ Bonus points to anyone who tests the following:
 * Test all the filters listed here: https://github.com/MickeyKay/better-font-awesome-library#filters
 * Test on various servers. Try various PHP configurations. Force timeouts. Try running with no internet connection (it should still fall back to the locally included version of Font Awesome 4.1.0).
 
-### Double Bonus Testing Steps ###
+### Double Bonus Testing ###
 Test the [Better Font Awesome Library](https://github.com/MickeyKay/better-font-awesome-library/), the core stand-alone library upon which the plugin is based. A few things to note about this library:
 
 * It contains a [Git Submodule](http://git-scm.com/book/en/Git-Tools-Submodules) that will require you to run the following two commands to get all necessary files after cloning the library:
