@@ -1,10 +1,10 @@
 # Testing Better Font Awesome #
 
-## Downloads ##
-* [Better Font Awesome v0.10.0.beta](https://github.com/MickeyKay/better-font-awesome/blob/master/testing/better-font-awesome-0.10.0.beta.zip?raw=true)
-
 ## Intro ##
 First of all, if you've made it here, thanks for your help! It makes a HUGE difference to have real-life users like yourself put software through the ringer. So thanks!
+
+## Downloads ##
+* [Better Font Awesome v0.10.0.beta](https://github.com/MickeyKay/better-font-awesome/blob/master/testing/better-font-awesome-0.10.0.beta.zip?raw=true)
 
 ## How to Report ##
 If you *do* enounter issues or questions, please [file an issue](https://github.com/MickeyKay/better-font-awesome/blob/master/testing/better-font-awesome-beta.zip?raw=true) on this repo.
