@@ -6,9 +6,9 @@
 First of all, if you've made it here, thanks for your help! It makes a HUGE difference to have real-life users like yourself put software through the ringer. So thanks!
 
 ## How to Report ##
-If you *do* enounter issues or questions, please [file an issue](https://github.com/MickeyKay/better-font-awesome/blob/master/testing/better-font-awesome-beta.zip?raw=true) on this repo.
+If you *do* enounter issues or questions, please [file an issue](https://github.com/MickeyKay/better-font-awesome/issues) on this repo.
 
-If you *don't* encounter any issues, I'd still love to know that things went smoothly. Please [file an issue](https://github.com/MickeyKay/better-font-awesome/blob/master/testing/better-font-awesome-beta.zip?raw=true) and indicate what tests you've run and if there is anything else worth reporting.
+If you *don't* encounter any issues, I'd still love to know that things went smoothly. Please [file an issue](https://github.com/MickeyKay/better-font-awesome/issues) and indicate what tests you've run and if there is anything else worth reporting.
 
 When reporting (whether success or failures) it can be *extremely* helpful if you provide as much information as possible. This information includes, but isn't limited to:
 
