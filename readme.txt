@@ -80,6 +80,12 @@ Many thanks to the following plugins and their authors:
 * [Font Awesome Shortcodes](https://wordpress.org/plugins/font-awesome-shortcodes/) by [FoolsRun](https://profiles.wordpress.org/foolsrun/ "FoolsRun")
 * Dmitriy Akulov and the awesome folks at [jsDelivr](http://www.jsdelivr.com/)
 
+And many thanks to the following folks who helped with testing and QA:
+* [Jeffrey Dubinksy](#)
+* [Neil Gee](https://twitter.com/_neilgee)
+* [Michael Beil](https://twitter.com/MichaelBeil)
+* [Jan Hoek](https://twitter.com/JanHoekdotCom)
+
 
 == Installation ==
 
