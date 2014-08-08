@@ -9,6 +9,13 @@ __License:__ [GPL-2.0+](http://www.gnu.org/licenses/gpl-2.0.html)
 ## Introduction ##
 Better Font Awesome allows you to automatically integrate the latest available version of [Font Awesome](http://fontawesome.io/) into your WordPress project, along with accompanying CSS, shortcode, and TinyMCE icon shortcode generator. Furthermore, it generates all the data you need to create new functionality of your own.
 
+## Installations ##
+```
+git clone --recursive https://github.com/MickeyKay/better-font-awesome.git
+```
+
+The Better Font Awesome plugin includes some [Git submodules](http://git-scm.com/book/en/Git-Tools-Submodules) that need to be pulled in. The above command will accomplish this.
+
 ## The Better Font Awesome Library ##
 Better Font Awesome utilizies the Better Font Awesome Library, which is available for standalone use in plugins and themes: [https://github.com/MickeyKay/better-font-awesome-library](https://github.com/MickeyKay/better-font-awesome-library)
 
