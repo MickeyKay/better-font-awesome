@@ -25,7 +25,7 @@ git submodule update
 ```
 
 ## The Better Font Awesome Library ##
-Better Font Awesome utilizies the Better Font Awesome Library, which is available for standalone use in plugins and themes: [https://github.com/MickeyKay/better-font-awesome-library](https://github.com/MickeyKay/better-font-awesome-library)
+Better Font Awesome is built around the Better Font Awesome Library, which is available for standalone use in plugins and themes: [https://github.com/MickeyKay/better-font-awesome-library](https://github.com/MickeyKay/better-font-awesome-library)
 
 ## TO DO ##
 * Update readme!
