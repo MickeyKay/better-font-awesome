@@ -27,6 +27,25 @@ git submodule update
 ## The Better Font Awesome Library ##
 Better Font Awesome is built around the Better Font Awesome Library, which is available for standalone use in plugins and themes: [https://github.com/MickeyKay/better-font-awesome-library](https://github.com/MickeyKay/better-font-awesome-library)
 
+## Updates ##
+
+This plugin supports the [GitHub Updater](https://github.com/afragen/github-updater) plugin, so if you install that, this plugin becomes automatically updateable direct from GitHub.
+
+## Credits ##
+Special thanks to the following folks and their plugins for inspiration and support:
+* [Font Awesome Icons](http://wordpress.org/plugins/font-awesome/ "Font Awesome Icons") by [Rachel Baker](http://rachelbaker.me/ "Rachel Baker")
+* [Font Awesome More Icons](https://wordpress.org/plugins/font-awesome-more-icons/ "Font Awesome More Icons") by [Web Guys](http://webguysaz.com/ "Web Guys")
+* [Font Awesome Shortcodes](https://wordpress.org/plugins/font-awesome-shortcodes/) by [FoolsRun](https://profiles.wordpress.org/foolsrun/ "FoolsRun")
+* Dmitriy Akulov and the awesome folks at [jsDelivr](http://www.jsdelivr.com/)
+
+And many thanks to the following folks who helped with testing and QA:
+* [Jeffrey Dubinksy](http://vanishingforests.org/)
+* [Neil Gee](https://twitter.com/_neilgee)
+* [Michael Beil](https://twitter.com/MichaelBeil)
+* [Rob Neue](https://twitter.com/rob_neu)
+* [Gary Jones](https://twitter.com/GaryJ)
+* [Jan Hoek](https://twitter.com/JanHoekdotCom)
+
 ## TO DO ##
 * Update readme!
 * Check to make sure plugin isn't deactivating on update (seemed to happen once before).
