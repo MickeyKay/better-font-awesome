@@ -12,7 +12,7 @@
  * Plugin Name:       Better Font Awesome
  * Plugin URI:        http://wordpress.org/plugins/better-font-awesome
  * Description:       The ultimate Font Awesome icon plugin for WordPress.
- * Version:           0.0.1
+ * Version:           1.0.0
  * Author:            MIGHTYminnow & Mickey Kay
  * Author URI:        mickey@mickeykaycreative.com
  * License:           GPLv2+
@@ -20,8 +20,6 @@
  * Domain Path:       /languages
  * GitHub Plugin URI: https://github.com/MickeyKay/better-font-awesome
  */
-
-//register_activation_hook( __FILE__, array( 'Better_Font_Awesome_Plugin', 'activation_check' ) );
 
 add_action( 'plugins_loaded', 'bfa_start', 5 );
 /**
@@ -184,7 +182,7 @@ class Better_Font_Awesome_Plugin {
         $this->option_name = self::SLUG . '_options';
 
         // Set up main Better Font Awesome Library file path.
-        $this->bfa_lib_file_path = plugin_dir_path( __FILE__ ) . 'lsib/better-font-awesome-library/better-font-awesome-library.php';
+        $this->bfa_lib_file_path = plugin_dir_path( __FILE__ ) . 'lib/better-font-awesome-library/better-font-awesome-library.php';
 
         // Get plugin options, and populate defaults as needed.
         $this->initialize_options( $this->option_name );
