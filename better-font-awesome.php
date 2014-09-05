@@ -12,7 +12,7 @@
  * Plugin Name:       Better Font Awesome
  * Plugin URI:        http://wordpress.org/plugins/better-font-awesome
  * Description:       The ultimate Font Awesome icon plugin for WordPress.
- * Version:           1.0.0
+ * Version:           1.0.3
  * Author:            MIGHTYminnow & Mickey Kay
  * Author URI:        mickey@mickeykaycreative.com
  * License:           GPLv2+
@@ -176,7 +176,7 @@ class Better_Font_Awesome_Plugin {
     private function initialize() {
         
         // Set display name.
-        $this->plugin_display_name = __( 'Better Font Awesome', 'bfa' );
+        $this->plugin_display_name = __( 'Better Font Awesome', 'better-font-awesome' );
 
         // Set options name.
         $this->option_name = self::SLUG . '_options';
@@ -213,9 +213,9 @@ class Better_Font_Awesome_Plugin {
         
         deactivate_plugins( plugin_basename( __FILE__ ) );
 
-        $message = '<h2>' . __( 'Better Font Awesome', 'bfa' ) . '</h2>';
-            $message .= '<p>' . __( 'It appears that Better Font Awesome is missing it\'s <a href="https://github.com/MickeyKay/better-font-awesome-library" target="_blank">core library</a>, which typically occurs when cloning the Git repository and not updating all submodules. Please refer to the plugin\'s <a href="https://github.com/MickeyKay/better-font-awesome" target="_blank">installation instructions</a> for details on how to properly install Better Font Awesome via Git. If you installed from within WordPress, or via the wordpress.org repo, then chances are the install failed and you can try again. If the issue persists, please create a new topic on the plugin\'s <a href="http://wordpress.org/support/plugin/better-font-awesome" target="_blank">support forum</a> or file an issue on the <a href="https://github.com/MickeyKay/better-font-awesome/issues" target="_blank">Github repo</a>.' , 'bfa' ) . '</p>';
-            $message .= '<p><a href="' . get_admin_url( null, 'plugins.php' ) . '">' . __( 'Back to the plugins page &rarr;', 'bfa' ) . '</a></p>';
+        $message = '<h2>' . __( 'Better Font Awesome', 'better-font-awesome' ) . '</h2>';
+            $message .= '<p>' . __( 'It appears that Better Font Awesome is missing it\'s <a href="https://github.com/MickeyKay/better-font-awesome-library" target="_blank">core library</a>, which typically occurs when cloning the Git repository and not updating all submodules. Please refer to the plugin\'s <a href="https://github.com/MickeyKay/better-font-awesome" target="_blank">installation instructions</a> for details on how to properly install Better Font Awesome via Git. If you installed from within WordPress, or via the wordpress.org repo, then chances are the install failed and you can try again. If the issue persists, please create a new topic on the plugin\'s <a href="http://wordpress.org/support/plugin/better-font-awesome" target="_blank">support forum</a> or file an issue on the <a href="https://github.com/MickeyKay/better-font-awesome/issues" target="_blank">Github repo</a>.' , 'better-font-awesome' ) . '</p>';
+            $message .= '<p><a href="' . get_admin_url( null, 'plugins.php' ) . '">' . __( 'Back to the plugins page &rarr;', 'better-font-awesome' ) . '</a></p>';
 
             wp_die( $message );
             
@@ -349,7 +349,7 @@ class Better_Font_Awesome_Plugin {
 
         add_settings_field(
             'version', // ID
-            __( 'Version', 'bfa' ), // Title
+            __( 'Version', 'better-font-awesome' ), // Title
             array( $this, 'version_callback' ), // Callback
             self::SLUG, // Page
             'settings_section_primary', // Section
@@ -358,25 +358,25 @@ class Better_Font_Awesome_Plugin {
 
         add_settings_field(
             'minified',
-            __( 'Use minified CSS', 'bfa' ),
+            __( 'Use minified CSS', 'better-font-awesome' ),
             array( $this, 'checkbox_callback' ),
             self::SLUG,
             'settings_section_primary',
             array(
                 'id' => 'minified',
-                'description' => __( 'Whether to include the minified version of the CSS (checked), or the unminified version (unchecked).', 'bfa' ),
+                'description' => __( 'Whether to include the minified version of the CSS (checked), or the unminified version (unchecked).', 'better-font-awesome' ),
             )
         );
 
         add_settings_field(
             'remove_existing_fa',
-            __( 'Remove existing Font Awesome', 'bfa' ),
+            __( 'Remove existing Font Awesome', 'better-font-awesome' ),
             array( $this, 'checkbox_callback' ),
             self::SLUG,
             'settings_section_primary',
             array(
                 'id' => 'remove_existing_fa',
-                'description' => __( 'Attempt to remove Font Awesome CSS and shortcodes added by other plugins and themes.', 'bfa' ),
+                'description' => __( 'Attempt to remove Font Awesome CSS and shortcodes added by other plugins and themes.', 'better-font-awesome' ),
             )
         );
 
@@ -393,7 +393,7 @@ class Better_Font_Awesome_Plugin {
     function get_versions_list() {
 
         if ( $this->bfa_lib->get_api_value('versions') ) {
-            $versions['latest'] = __( 'Always Latest', 'bfa' );
+            $versions['latest'] = __( 'Always Latest', 'better-font-awesome' );
 
             foreach ( $this->bfa_lib->get_api_value('versions') as $version ) {
                 $versions[ $version ] = $version;
@@ -419,7 +419,7 @@ class Better_Font_Awesome_Plugin {
         if ( $versions ) {
 
             // Add 'Always Latest' option.
-            $versions['latest'] = __( 'Always Latest', 'bfa' );
+            $versions['latest'] = __( 'Always Latest', 'better-font-awesome' );
 
             /**
              * Remove version 2.0, since its CSS doesn't work with the regex
@@ -453,21 +453,21 @@ class Better_Font_Awesome_Plugin {
             ?>
             <p>
                 <?php 
-                printf( __( 'Version selection is currently unavailable. The attempt to reach the jsDelivr API server failed with the following error: %s', 'bfa' ), 
+                printf( __( 'Version selection is currently unavailable. The attempt to reach the jsDelivr API server failed with the following error: %s', 'better-font-awesome' ), 
                     '<code>' . $this->bfa_lib->get_error('api')->get_error_code() . ': ' . $this->bfa_lib->get_error('api')->get_error_message() . '</code>'
                 );
                 ?>
             </p>
             <p>
                 <?php 
-                printf( __( 'Font Awesome will still render using version: %s', 'bfa' ),
-                    '<code>' . $this->bfa_lib->get_version() . '</code>'
+                printf( __( 'Font Awesome will still render using version: %s', 'better-font-awesome' ),
+                    '<code>' . $this->bfa_lib->get_fallback_version() . '</code>'
                 );
                 ?>
             </p>
             <p>
                 <?php
-                printf( __( 'This may be the result of a temporary server or connectivity issue which will resolve shortly. However if the problem persists please file a support ticket on the %splugin forum%s, citing the errors listed above. ', 'bfa' ),
+                printf( __( 'This may be the result of a temporary server or connectivity issue which will resolve shortly. However if the problem persists please file a support ticket on the %splugin forum%s, citing the errors listed above. ', 'better-font-awesome' ),
                         '<a href="http://wordpress.org/support/plugin/better-font-awesome" target="_blank" title="Better Font Awesome support forum">',
                         '</a>'
                 );
@@ -523,7 +523,7 @@ class Better_Font_Awesome_Plugin {
                      <i class="icon-coffee fa fa-coffee"></i> <code>[icon name="coffee"]</code> or <code>&lt;i class="icon-coffee"&gt;&lt;/i&gt;</code><br /><br />
                      <i class="icon-coffee fa fa-coffee icon-2x fa-2x"></i> <code>[icon name="coffee" class="icon-2x"]</code> or <code>&lt;i class="icon-coffee icon-2x"&gt;&lt;/i&gt;</code><br /><br />
                      <i class="icon-coffee fa fa-coffee icon-2x fa-2x icon-rotate-90 fa-rotate-90"></i> <code>[icon name="coffee" class="icon-2x icon-rotate-90"]</code> or <code>&lt;i class="icon-coffee icon-2x icon-rotate-90"&gt;&lt;/i&gt;</code>',
-                'bfa' ) .
+                'better-font-awesome' ) .
                 '</div>';
     }
 
