@@ -3,8 +3,8 @@ Contributors: McGuive7, MIGHTYminnow
 Tags: better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode
 Donate link: http://mightyminnow.com
 Requires at least: 3.0
-Tested up to: 3.9
-Stable tag: 1.0.0
+Tested up to: 4.1
+Stable tag: 1.0.5
 License: GPLv2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -54,6 +54,9 @@ Note that prefixes are required for HTML usage, and are version-specific. For th
 = Advanced / Integration =
 Better Font Awesome is built around the [Better Font Awesome Library](https://github.com/MickeyKay/better-font-awesome-library). This library allows you to integrate Better Font Awesome into any custom project you want to create (perhaps a theme or plugin with a constantly up-to-date icon list), and includes all the [filters](https://github.com/MickeyKay/better-font-awesome-library#filters) you might need.
 
+= Languages / Translations =
+* English
+* French (thanks to [David Tisserand](http://www.pixemotion.fr))
 
 = Credits =
 Many thanks to the following plugins and their authors:
@@ -64,6 +67,7 @@ Many thanks to the following plugins and their authors:
 * Dmitriy Akulov and the awesome folks at [jsDelivr](http://www.jsdelivr.com/)
 
 And many thanks to the following folks who helped with testing and QA:
+
 * [Jeffrey Dubinksy](http://vanishingforests.org/)
 * [Neil Gee](https://twitter.com/_neilgee)
 * [Michael Beil](https://twitter.com/MichaelBeil)
@@ -104,6 +108,24 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 == Changelog ==
 
+= 1.0.5 =
+* Add fa_force_fallback and bfa_show_errors filters.
+* Add hex icon values as $icon array indexes.
+
+= 1.0.4 =
+* Add missing isset() check that was causing intermittent warning.
+
+= 1.0.3 =
+* Add French translation.
+* Correct text domain slug.
+
+= 1.0.2 =
+* Add updated .pot file.
+* Further improve error handling and fallback.
+
+= 1.0.1 =
+* Fix error handling for 404 API requests.
+
 = 1.0.0 =
 * Fully refactor the back-end.
 * Switch to just using the jsDelivr CDN.
@@ -139,6 +161,24 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 == Upgrade Notice ==
+
+= 1.0.5 =
+* Add fa_force_fallback and bfa_show_errors filters.
+* Add hex icon values as $icon array indexes.
+
+= 1.0.4 =
+* Add missing isset() check that was causing intermittent warning.
+
+= 1.0.3 =
+* Add French translation.
+* Correct text domain slug.
+
+= 1.0.2 =
+* Add updated .pot file.
+* Further improve error handling and fallback.
+
+= 1.0.1 =
+* Fix error handling for 404 API requests.
 
 = 1.0.0 =
 * Fully refactor the back-end.
