@@ -54,7 +54,3 @@ And many thanks to the following folks who helped with testing and QA:
 * [Rob Neue](https://twitter.com/rob_neu)
 * [Gary Jones](https://twitter.com/GaryJ)
 * [Jan Hoek](https://twitter.com/JanHoekdotCom)
-
-## TO DO ##
-* Update readme!
-* Check to make sure plugin isn't deactivating on update (seemed to happen once before).
