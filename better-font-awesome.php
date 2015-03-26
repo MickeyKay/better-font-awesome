@@ -559,7 +559,8 @@ class Better_Font_Awesome_Plugin {
 	    ?>
 
 	    <div class="bfa-usage-text">
-			<h3><?php esc_html_e( 'Usage', 'better-font-awesome' ); ?></h3>
+
+		    <h3><?php esc_html_e( 'Usage', 'better-font-awesome' ); ?></h3>
 
 		    <b><?php printf( esc_html_x( 'Font Awesome version %s', 'For version 4.x +', 'better-font-awesome' ), '4.x +' ); ?></b>
 		    <small>
