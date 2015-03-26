@@ -221,14 +221,7 @@ class Better_Font_Awesome_Plugin {
 		    <?php
 		    printf(
 			    esc_html__(
-				    'It appears that Better Font Awesome is missing it\'s %1$score library%5$s, '.
-				    'which typically occurs when cloning the Git repository and not updating all ' .
-				    'submodules. Please refer to the plugin\'s %2$sinstallation instructions%5$s ' .
-				    'for details on how to properly install Better Font Awesome via Git. If you ' .
-				    'installed from within WordPress, or via the wordpress.org repo, then chances ' .
-				    'are the install failed and you can try again. If the issue persists, please ' .
-				    'create a new topic on the plugin\'s %3$ssupport forum%5$s or file an issue ' .
-				    'on the %4$sGithub repo%5$s.',
+				    'It appears that Better Font Awesome is missing it\'s %1$score library%5$s, which typically occurs when cloning the Git repository and not updating all submodules. Please refer to the plugin\'s %2$sinstallation instructions%5$s for details on how to properly install Better Font Awesome via Git. If you installed from within WordPress, or via the wordpress.org repo, then chances are the install failed and you can try again. If the issue persists, please create a new topic on the plugin\'s %3$ssupport forum%5$s or file an issue on the %4$sGithub repo%5$s.',
 				    'better-font-awesome'
 			    ),
 			    '<a href="https://github.com/MickeyKay/better-font-awesome-library" target="_blank">',
