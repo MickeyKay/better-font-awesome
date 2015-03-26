@@ -421,18 +421,17 @@ class Better_Font_Awesome_Plugin {
      */
     function get_versions_list() {
 
-        if ( $this->bfa_lib->get_api_value( 'versions' ) ) {
-	        $versions['latest'] = __( 'Always Latest', 'better-font-awesome' );
+	    if ( $this->bfa_lib->get_api_value( 'versions' ) ) {
+		    $versions['latest'] = __( 'Always Latest', 'better-font-awesome' );
 
-            foreach ( $this->bfa_lib->get_api_value( 'versions' ) as $version ) {
-                $versions[ $version ] = $version;
-            }
+		    foreach ( $this->bfa_lib->get_api_value( 'versions' ) as $version ) {
+			    $versions[ $version ] = $version;
+		    }
+	    } else {
+		    $versions = array();
+	    }
 
-        } else {
-            $versions = array();
-        }
-
-        return $versions;
+	    return $versions;
 
     }
 
