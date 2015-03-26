@@ -387,7 +387,10 @@ class Better_Font_Awesome_Plugin {
             'settings_section_primary',
             array(
                 'id'          => 'minified',
-                'description' => __( 'Whether to include the minified version of the CSS (checked), or the unminified version (unchecked).', 'better-font-awesome' ),
+                'description' => __(
+	                'Whether to include the minified version of the CSS (checked), or the unminified version (unchecked).',
+	                'better-font-awesome'
+                ),
             )
         );
 
@@ -399,7 +402,10 @@ class Better_Font_Awesome_Plugin {
             'settings_section_primary',
             array(
                 'id'          => 'remove_existing_fa',
-                'description' => __( 'Attempt to remove Font Awesome CSS and shortcodes added by other plugins and themes.', 'better-font-awesome' ),
+                'description' => __(
+	                'Attempt to remove Font Awesome CSS and shortcodes added by other plugins and themes.',
+	                'better-font-awesome'
+                ),
             )
         );
 
@@ -476,21 +482,33 @@ class Better_Font_Awesome_Plugin {
             ?>
             <p>
                 <?php 
-                printf( esc_html__( 'Version selection is currently unavailable. The attempt to reach the jsDelivr API server failed with the following error: %s', 'better-font-awesome' ),
-                    '<code>' . $this->bfa_lib->get_error('api')->get_error_code() . ': ' . $this->bfa_lib->get_error('api')->get_error_message() . '</code>'
+                printf(
+	                esc_html__(
+		                'Version selection is currently unavailable. The attempt to reach the jsDelivr API server failed with the following error: %s',
+		                'better-font-awesome'
+	                ),
+	                '<code>' . $this->bfa_lib->get_error('api')->get_error_code() . ': ' . $this->bfa_lib->get_error('api')->get_error_message() . '</code>'
                 );
                 ?>
             </p>
             <p>
                 <?php 
-                printf( esc_html__( 'Font Awesome will still render using version: %s', 'better-font-awesome' ),
+                printf(
+	                esc_html__(
+		                'Font Awesome will still render using version: %s',
+		                'better-font-awesome'
+	                ),
 	                '<code>' . $this->bfa_lib->get_fallback_version() . '</code>'
                 );
                 ?>
             </p>
             <p>
                 <?php
-                printf( esc_html__( 'This may be the result of a temporary server or connectivity issue which will resolve shortly. However if the problem persists please file a support ticket on the %splugin forum%s, citing the errors listed above. ', 'better-font-awesome' ),
+                printf(
+	                esc_html__(
+		                'This may be the result of a temporary server or connectivity issue which will resolve shortly. However if the problem persists please file a support ticket on the %splugin forum%s, citing the errors listed above. ',
+		                'better-font-awesome'
+	                ),
 	                '<a href="http://wordpress.org/support/plugin/better-font-awesome" target="_blank" title="Better Font Awesome support forum">',
 	                '</a>'
                 );
