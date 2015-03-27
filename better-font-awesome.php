@@ -587,7 +587,7 @@ class Better_Font_Awesome_Plugin {
 	 * @return string          Content of the template file if it exists
 	 *                         Empty string otherwise
 	 */
-	function get_template( $template, $args = array() ) {
+	protected function get_template( $template, $args = array() ) {
 
 		// Allow to filter template path
 		$path = apply_filters( 'bfa_get_template', __DIR__ . '/templates/' . $template, $template, $args );
