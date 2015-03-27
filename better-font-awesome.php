@@ -481,7 +481,9 @@ class Better_Font_Awesome_Plugin {
 		                'Version selection is currently unavailable. The attempt to reach the jsDelivr API server failed with the following error: %s',
 		                'better-font-awesome'
 	                ),
-	                '<code>' . $this->bfa_lib->get_error('api')->get_error_code() . ': ' . $this->bfa_lib->get_error('api')->get_error_message() . '</code>'
+	                '<code>' .
+	                    esc_html( $this->bfa_lib->get_error('api')->get_error_code() . ': ' . $this->bfa_lib->get_error('api')->get_error_message() ) .
+	                '</code>'
                 );
                 ?>
             </p>
@@ -492,7 +494,9 @@ class Better_Font_Awesome_Plugin {
 		                'Font Awesome will still render using version: %s',
 		                'better-font-awesome'
 	                ),
-	                '<code>' . $this->bfa_lib->get_fallback_version() . '</code>'
+	                '<code>' .
+	                    esc_html( $this->bfa_lib->get_fallback_version() ) .
+	                '</code>'
                 );
                 ?>
             </p>
