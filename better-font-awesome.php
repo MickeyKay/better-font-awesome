@@ -594,7 +594,7 @@ class Better_Font_Awesome_Plugin {
 	protected function get_template( $template, $args = array() ) {
 
 		// Allow to filter template path
-		$path = apply_filters( 'bfa_get_template', __DIR__ . '/templates/' . $template, $template, $args );
+		$path = apply_filters( 'bfa_get_template', plugin_dir_path( __FILE__ ) . 'templates/' . $template, $template, $args );
 
 		if ( file_exists( $path ) ) {
 
