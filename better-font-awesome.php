@@ -212,13 +212,36 @@ class Better_Font_Awesome_Plugin {
     public function deactivate() {
         
         deactivate_plugins( plugin_basename( __FILE__ ) );
+	    ob_start();
+	    ?>
 
-        $message = '<h2>' . __( 'Better Font Awesome', 'better-font-awesome' ) . '</h2>';
-            $message .= '<p>' . __( 'It appears that Better Font Awesome is missing it\'s <a href="https://github.com/MickeyKay/better-font-awesome-library" target="_blank">core library</a>, which typically occurs when cloning the Git repository and not updating all submodules. Please refer to the plugin\'s <a href="https://github.com/MickeyKay/better-font-awesome" target="_blank">installation instructions</a> for details on how to properly install Better Font Awesome via Git. If you installed from within WordPress, or via the wordpress.org repo, then chances are the install failed and you can try again. If the issue persists, please create a new topic on the plugin\'s <a href="http://wordpress.org/support/plugin/better-font-awesome" target="_blank">support forum</a> or file an issue on the <a href="https://github.com/MickeyKay/better-font-awesome/issues" target="_blank">Github repo</a>.' , 'better-font-awesome' ) . '</p>';
-            $message .= '<p><a href="' . get_admin_url( null, 'plugins.php' ) . '">' . __( 'Back to the plugins page &rarr;', 'better-font-awesome' ) . '</a></p>';
+	    <h2><?php esc_html_e( 'Better Font Awesome', 'better-font-awesome' ); ?></h2>
 
-            wp_die( $message );
-            
+	    <p>
+		    <?php
+		    printf(
+			    esc_html__(
+				    'It appears that Better Font Awesome is missing it\'s %1$score library%5$s, which typically occurs when cloning the Git repository and not updating all submodules. Please refer to the plugin\'s %2$sinstallation instructions%5$s for details on how to properly install Better Font Awesome via Git. If you installed from within WordPress, or via the wordpress.org repo, then chances are the install failed and you can try again. If the issue persists, please create a new topic on the plugin\'s %3$ssupport forum%5$s or file an issue on the %4$sGithub repo%5$s.',
+				    'better-font-awesome'
+			    ),
+			    '<a href="https://github.com/MickeyKay/better-font-awesome-library" target="_blank">',
+			    '<a href="https://github.com/MickeyKay/better-font-awesome" target="_blank">',
+			    '<a href="http://wordpress.org/support/plugin/better-font-awesome" target="_blank">',
+			    '<a href="https://github.com/MickeyKay/better-font-awesome/issues" target="_blank">',
+			    '</a>'
+		    );
+		    ?>
+	    </p>
+
+	    <p>
+		    <a href="<?php echo esc_url( get_admin_url( null, 'plugins.php' ) ); ?>">
+			    <?php esc_html_e( 'Back to the plugins page &rarr;', 'better-font-awesome' ); ?>
+		    </a>
+	    </p>
+
+	    <?php
+	    wp_die( ob_get_clean() );
+
     }
 
     /**
@@ -313,7 +336,7 @@ class Better_Font_Awesome_Plugin {
     ?>
         <div class="wrap">
             <?php screen_icon(); ?>
-            <h2><?php echo $this->plugin_display_name; ?></h2>
+            <h2><?php echo esc_html( $this->plugin_display_name ); ?></h2>
             <form method="post" action="options.php">
             <?php
                 // This prints out all hidden setting fields
@@ -442,7 +465,7 @@ class Better_Font_Awesome_Plugin {
                     '<option value="%s" %s>%s</option>',
                     esc_attr( $version ),
                     selected( $version, $this->options['version'], false ),
-                    esc_attr( $text )
+                    esc_html( $text )
                 );
 
             }
@@ -453,26 +476,42 @@ class Better_Font_Awesome_Plugin {
             ?>
             <p>
                 <?php 
-                printf( __( 'Version selection is currently unavailable. The attempt to reach the jsDelivr API server failed with the following error: %s', 'better-font-awesome' ), 
-                    '<code>' . $this->bfa_lib->get_error('api')->get_error_code() . ': ' . $this->bfa_lib->get_error('api')->get_error_message() . '</code>'
+                printf(
+	                esc_html__(
+		                'Version selection is currently unavailable. The attempt to reach the jsDelivr API server failed with the following error: %s',
+		                'better-font-awesome'
+	                ),
+	                '<code>' .
+	                    esc_html( $this->bfa_lib->get_error('api')->get_error_code() . ': ' . $this->bfa_lib->get_error('api')->get_error_message() ) .
+	                '</code>'
                 );
                 ?>
             </p>
             <p>
                 <?php 
-                printf( __( 'Font Awesome will still render using version: %s', 'better-font-awesome' ),
-                    '<code>' . $this->bfa_lib->get_fallback_version() . '</code>'
+                printf(
+	                esc_html__(
+		                'Font Awesome will still render using version: %s',
+		                'better-font-awesome'
+	                ),
+	                '<code>' .
+	                    esc_html( $this->bfa_lib->get_fallback_version() ) .
+	                '</code>'
                 );
                 ?>
             </p>
             <p>
                 <?php
-                printf( __( 'This may be the result of a temporary server or connectivity issue which will resolve shortly. However if the problem persists please file a support ticket on the %splugin forum%s, citing the errors listed above. ', 'better-font-awesome' ),
-                        '<a href="http://wordpress.org/support/plugin/better-font-awesome" target="_blank" title="Better Font Awesome support forum">',
-                        '</a>'
+                printf(
+	                esc_html__(
+		                'This may be the result of a temporary server or connectivity issue which will resolve shortly. However if the problem persists please file a support ticket on the %splugin forum%s, citing the errors listed above. ',
+		                'better-font-awesome'
+	                ),
+	                '<a href="http://wordpress.org/support/plugin/better-font-awesome" target="_blank" title="Better Font Awesome support forum">',
+	                '</a>'
                 );
                 ?>
-            </small></p>
+            </p>
             <?php
         }
 
@@ -484,15 +523,15 @@ class Better_Font_Awesome_Plugin {
      * @since  0.10.0
      */
     public function checkbox_callback( $args ) {
-        $option_name = esc_attr( $this->option_name ) . '[' . $args['id'] . ']';
+        $option_name = esc_attr( $this->option_name ) . '[' . esc_attr( $args['id'] ) . ']';
         $option_value = isset( $this->options[ $args['id'] ] ) ? $this->options[ $args['id'] ] : '';
         printf(
             '<label for="%s"><input type="checkbox" value="1" id="%s" name="%s" %s/> %s</label>',
-            $args['id'],
-            $args['id'],
+            esc_attr( $args['id'] ),
+            esc_attr( $args['id'] ),
             $option_name,
             checked( 1, $option_value, false ),
-            $args['description']
+            esc_html( $args['description'] )
         );
     }
 
@@ -502,7 +541,7 @@ class Better_Font_Awesome_Plugin {
      * @since 0.10.0
      */
     public function text_callback( $args ) {
-        echo '<div class="bfa-text">' . $args['text'] . '</div>';
+        echo '<div class="bfa-text">' . esc_html( $args['text'] ) . '</div>';
     }
 
     /**
@@ -513,18 +552,8 @@ class Better_Font_Awesome_Plugin {
      * @return  string  Usage text.
      */
     public function get_usage_text() {
-        return '<div class="bfa-usage-text">' . 
-                __( '<h3>Usage</h3>
-                     <b>Font Awesome version 4.x +</b>&nbsp;&nbsp;&nbsp;<small><a href="http://fontawesome.io/examples/">See all available options &raquo;</a></small><br /><br />
-                     <i class="icon-coffee fa fa-coffee"></i> <code>[icon name="coffee"]</code> or <code>&lt;i class="fa-coffee"&gt;&lt;/i&gt;</code><br /><br />
-                     <i class="icon-coffee fa fa-coffee icon-2x fa-2x"></i> <code>[icon name="coffee" class="fa-2x"]</code> or <code>&lt;i class="fa-coffee fa-2x"&gt;&lt;/i&gt;</code><br /><br />
-                     <i class="icon-coffee fa fa-coffee icon-2x fa-2x icon-rotate-90 fa-rotate-90"></i> <code>[icon name="coffee" class="fa-2x fa-rotate-90"]</code> or <code>&lt;i class="fa-coffee fa-2x fa-rotate-90"&gt;&lt;/i&gt;</code><br /><br /><br />
-                     <b>Font Awesome version 3.x</b>&nbsp;&nbsp;&nbsp;<small><a href="http://fontawesome.io/3.2.1/examples/">See all available options &raquo;</a></small><br /><br />
-                     <i class="icon-coffee fa fa-coffee"></i> <code>[icon name="coffee"]</code> or <code>&lt;i class="icon-coffee"&gt;&lt;/i&gt;</code><br /><br />
-                     <i class="icon-coffee fa fa-coffee icon-2x fa-2x"></i> <code>[icon name="coffee" class="icon-2x"]</code> or <code>&lt;i class="icon-coffee icon-2x"&gt;&lt;/i&gt;</code><br /><br />
-                     <i class="icon-coffee fa fa-coffee icon-2x fa-2x icon-rotate-90 fa-rotate-90"></i> <code>[icon name="coffee" class="icon-2x icon-rotate-90"]</code> or <code>&lt;i class="icon-coffee icon-2x icon-rotate-90"&gt;&lt;/i&gt;</code>',
-                'better-font-awesome' ) .
-                '</div>';
+
+	    return $this->get_template( 'example-usage-html.php' );
     }
 
     /**
@@ -552,5 +581,29 @@ class Better_Font_Awesome_Plugin {
         return $new_input;
 
     }
+
+	/**
+	 * Outputs template's content
+	 *
+	 * @param string $template String name of a template file
+	 * @param array $args      Associative array that's accessible in the template via $args['key']
+	 *
+	 * @return string          Content of the template file if it exists
+	 *                         Empty string otherwise
+	 */
+	protected function get_template( $template, $args = array() ) {
+
+		// Allow to filter template path
+		$path = apply_filters( 'bfa_get_template', plugin_dir_path( __FILE__ ) . 'templates/' . $template, $template, $args );
+
+		if ( file_exists( $path ) ) {
+
+			ob_start();
+			include $path;
+			return ob_get_clean();
+		}
+
+		return '';
+	}
 
 }
