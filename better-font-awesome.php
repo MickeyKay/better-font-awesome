@@ -358,25 +358,25 @@ class Better_Font_Awesome_Plugin {
     function add_settings() {
 
         register_setting(
-            'option_group',            // Option group
-            $this->option_name,        // Option name
+            'option_group', // Option group
+            $this->option_name, // Option name
             array( $this, 'sanitize' ) // Sanitize
         );
 
         add_settings_section(
             'settings_section_primary', // ID
-            null,                       // Title
-            null,                       // Callback
-            self::SLUG                  // Page
+            null, // Title
+            null, // Callback
+            self::SLUG // Page
         );
 
         add_settings_field(
-            'version',                              // ID
+            'version', // ID
             __( 'Version', 'better-font-awesome' ), // Title
-            array( $this, 'version_callback' ),     // Callback
-            self::SLUG,                             // Page
-            'settings_section_primary',             // Section
-            $this->get_versions_list()              // Args
+            array( $this, 'version_callback' ), // Callback
+            self::SLUG, // Page
+            'settings_section_primary', // Section
+            $this->get_versions_list() // Args
         );
 
         add_settings_field(
@@ -386,11 +386,8 @@ class Better_Font_Awesome_Plugin {
             self::SLUG,
             'settings_section_primary',
             array(
-                'id'          => 'minified',
-                'description' => __(
-	                'Whether to include the minified version of the CSS (checked), or the unminified version (unchecked).',
-	                'better-font-awesome'
-                ),
+                'id' => 'minified',
+                'description' => __( 'Whether to include the minified version of the CSS (checked), or the unminified version (unchecked).', 'better-font-awesome' ),
             )
         );
 
@@ -401,39 +398,37 @@ class Better_Font_Awesome_Plugin {
             self::SLUG,
             'settings_section_primary',
             array(
-                'id'          => 'remove_existing_fa',
-                'description' => __(
-	                'Attempt to remove Font Awesome CSS and shortcodes added by other plugins and themes.',
-	                'better-font-awesome'
-                ),
+                'id' => 'remove_existing_fa',
+                'description' => __( 'Attempt to remove Font Awesome CSS and shortcodes added by other plugins and themes.', 'better-font-awesome' ),
             )
         );
 
     }
 
-    /**
-     * Get all Font Awesome versions available from the jsDelivr API.
-     *
-     * @since 0.10.0
-     *
-     * @return  array  All available versions and the latest version, or an
-     *                 empty array if the API fetch fails.
-     */
-    function get_versions_list() {
+	/**
+	 * Get all Font Awesome versions available from the jsDelivr API.
+	 *
+	 * @since 0.10.0
+	 *
+	 * @return  array  All available versions and the latest version, or an
+	 *                 empty array if the API fetch fails.
+	 */
+	function get_versions_list() {
 
-	    if ( $this->bfa_lib->get_api_value( 'versions' ) ) {
-		    $versions['latest'] = __( 'Always Latest', 'better-font-awesome' );
+		if ( $this->bfa_lib->get_api_value('versions') ) {
+			$versions['latest'] = __( 'Always Latest', 'better-font-awesome' );
 
-		    foreach ( $this->bfa_lib->get_api_value( 'versions' ) as $version ) {
-			    $versions[ $version ] = $version;
-		    }
-	    } else {
-		    $versions = array();
-	    }
+			foreach ( $this->bfa_lib->get_api_value('versions') as $version ) {
+				$versions[ $version ] = $version;
+			}
 
-	    return $versions;
+		} else {
+			$versions = array();
+		}
 
-    }
+		return $versions;
+
+	}
 
     /**
      * Output a <select> version selector.
