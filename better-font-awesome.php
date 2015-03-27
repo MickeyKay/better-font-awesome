@@ -405,30 +405,30 @@ class Better_Font_Awesome_Plugin {
 
     }
 
-	/**
-	 * Get all Font Awesome versions available from the jsDelivr API.
-	 *
-	 * @since 0.10.0
-	 *
-	 * @return  array  All available versions and the latest version, or an
-	 *                 empty array if the API fetch fails.
-	 */
-	function get_versions_list() {
+    /**
+     * Get all Font Awesome versions available from the jsDelivr API.
+     *
+     * @since 0.10.0
+     *
+     * @return  array  All available versions and the latest version, or an
+     *                 empty array if the API fetch fails.
+     */
+    function get_versions_list() {
 
-		if ( $this->bfa_lib->get_api_value('versions') ) {
-			$versions['latest'] = __( 'Always Latest', 'better-font-awesome' );
+        if ( $this->bfa_lib->get_api_value('versions') ) {
+            $versions['latest'] = __( 'Always Latest', 'better-font-awesome' );
 
-			foreach ( $this->bfa_lib->get_api_value('versions') as $version ) {
-				$versions[ $version ] = $version;
-			}
+            foreach ( $this->bfa_lib->get_api_value('versions') as $version ) {
+                $versions[ $version ] = $version;
+            }
 
-		} else {
-			$versions = array();
-		}
+        } else {
+            $versions = array();
+        }
 
-		return $versions;
+        return $versions;
 
-	}
+    }
 
     /**
      * Output a <select> version selector.
