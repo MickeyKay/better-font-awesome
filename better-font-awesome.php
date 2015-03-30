@@ -12,11 +12,11 @@
  * Plugin Name:       Better Font Awesome
  * Plugin URI:        http://wordpress.org/plugins/better-font-awesome
  * Description:       The ultimate Font Awesome icon plugin for WordPress.
- * Version:           1.0.5
+ * Version:           1.0.10
  * Author:            MIGHTYminnow & Mickey Kay
  * Author URI:        mickey@mickeykaycreative.com
  * License:           GPLv2+
- * Text Domain:       bfa
+ * Text Domain:       better-font-awesome
  * Domain Path:       /languages
  * GitHub Plugin URI: https://github.com/MickeyKay/better-font-awesome
  */
@@ -110,6 +110,7 @@ class Better_Font_Awesome_Plugin {
         'version'            => 'latest',
         'minified'           => 1,
         'remove_existing_fa' => '',
+        'hide_admin_notices' => '',
     );
 
     /**
@@ -174,7 +175,7 @@ class Better_Font_Awesome_Plugin {
      * @since  0.10.0
      */
     private function initialize() {
-        
+
         // Set display name.
         $this->plugin_display_name = __( 'Better Font Awesome', 'better-font-awesome' );
 
@@ -195,7 +196,7 @@ class Better_Font_Awesome_Plugin {
      * @since  0.10.0
      */
     private function bfal_exists() {
-    
+
         if ( ! is_readable( $this->bfa_lib_file_path ) ) {
             return false;
         } else {
@@ -210,7 +211,7 @@ class Better_Font_Awesome_Plugin {
      * @since  0.10.0
      */
     public function deactivate() {
-        
+
         deactivate_plugins( plugin_basename( __FILE__ ) );
 
         $message = '<h2>' . __( 'Better Font Awesome', 'better-font-awesome' ) . '</h2>';
@@ -218,7 +219,7 @@ class Better_Font_Awesome_Plugin {
             $message .= '<p><a href="' . get_admin_url( null, 'plugins.php' ) . '">' . __( 'Back to the plugins page &rarr;', 'better-font-awesome' ) . '</a></p>';
 
             wp_die( $message );
-            
+
     }
 
     /**
@@ -249,7 +250,7 @@ class Better_Font_Awesome_Plugin {
          * serialized Titan Framwork option to a new, array-based options.
          */
         $this->options = maybe_unserialize( get_option( $option_name ) );
-        
+
         // Initialize the plugin options with defaults if they're not set.
         if ( empty( $this->options ) ) {
             update_option( $option_name, $this->option_defaults );
@@ -265,7 +266,13 @@ class Better_Font_Awesome_Plugin {
      * @param  array  $options  Plugin options.
      */
     private function initialize_better_font_awesome_library( $options ) {
-        
+
+        // Hide admin notices if setting is checked.
+        if ( isset( $options['hide_admin_notices'] ) ) {
+            add_filter( 'bfa_show_errors', '__return_false' );
+        }
+
+        // Initialize BFA library.
         $args = array(
             'version'             => isset( $options['version'] ) ? $options['version'] : $this->option_defaults['version'],
             'minified'            => isset( $options['minified'] ) ? $options['minified'] : '',
@@ -380,6 +387,18 @@ class Better_Font_Awesome_Plugin {
             )
         );
 
+        add_settings_field(
+            'hide_admin_notices',
+            __( 'Hide admin notices', 'better-font-awesome' ),
+            array( $this, 'checkbox_callback' ),
+            self::SLUG,
+            'settings_section_primary',
+            array(
+                'id' => 'hide_admin_notices',
+                'description' => __( 'Hide the default admin warnings that are shown when API and CDN errors occur.', 'better-font-awesome' ),
+            )
+        );
+
     }
 
     /**
@@ -426,7 +445,7 @@ class Better_Font_Awesome_Plugin {
              * algorith and no one needs 2.0 anyways.
              */
             foreach ( $versions as $index => $version ) {
-                
+
                 if ( '2.0' == $version ) {
                     unset( $versions[ $index ] );
                 }
@@ -452,14 +471,14 @@ class Better_Font_Awesome_Plugin {
         } else {
             ?>
             <p>
-                <?php 
-                printf( __( 'Version selection is currently unavailable. The attempt to reach the jsDelivr API server failed with the following error: %s', 'better-font-awesome' ), 
+                <?php
+                printf( __( 'Version selection is currently unavailable. The attempt to reach the jsDelivr API server failed with the following error: %s', 'better-font-awesome' ),
                     '<code>' . $this->bfa_lib->get_error('api')->get_error_code() . ': ' . $this->bfa_lib->get_error('api')->get_error_message() . '</code>'
                 );
                 ?>
             </p>
             <p>
-                <?php 
+                <?php
                 printf( __( 'Font Awesome will still render using version: %s', 'better-font-awesome' ),
                     '<code>' . $this->bfa_lib->get_fallback_version() . '</code>'
                 );
@@ -513,7 +532,7 @@ class Better_Font_Awesome_Plugin {
      * @return  string  Usage text.
      */
     public function get_usage_text() {
-        return '<div class="bfa-usage-text">' . 
+        return '<div class="bfa-usage-text">' .
                 __( '<h3>Usage</h3>
                      <b>Font Awesome version 4.x +</b>&nbsp;&nbsp;&nbsp;<small><a href="http://fontawesome.io/examples/">See all available options &raquo;</a></small><br /><br />
                      <i class="icon-coffee fa fa-coffee"></i> <code>[icon name="coffee"]</code> or <code>&lt;i class="fa-coffee"&gt;&lt;/i&gt;</code><br /><br />
@@ -547,6 +566,10 @@ class Better_Font_Awesome_Plugin {
 
         if ( isset( $input['remove_existing_fa'] ) ) {
             $new_input['remove_existing_fa'] = absint( $input['remove_existing_fa'] );
+        }
+
+        if ( isset( $input['hide_admin_notices'] ) ) {
+            $new_input['hide_admin_notices'] = absint( $input['hide_admin_notices'] );
         }
 
         return $new_input;
