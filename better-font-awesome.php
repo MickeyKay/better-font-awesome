@@ -444,7 +444,7 @@ class Better_Font_Awesome_Plugin {
      */
     public function save_options() {
 
-        $version = (string) $_POST['version'];
+        $version = sanitize_text_field( $_POST['version'] );
         $minified = (int) $_POST['minified'];
         $remove_existing_fa = (int) $_POST['remove_existing_fa'];
         $hide_admin_notices = (int) $_POST['hide_admin_notices'];
