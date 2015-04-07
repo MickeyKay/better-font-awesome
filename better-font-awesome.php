@@ -435,6 +435,7 @@ class Better_Font_Awesome_Plugin {
             );
 
         }
+        
     }
 
     /**
@@ -444,23 +445,23 @@ class Better_Font_Awesome_Plugin {
      */
     public function save_options() {
 
-        $version = sanitize_text_field( $_POST['version'] );
-        $minified = (int) $_POST['minified'];
-        $remove_existing_fa = (int) $_POST['remove_existing_fa'];
-        $hide_admin_notices = (int) $_POST['hide_admin_notices'];
-
         $options = array(
-            'version'            => $version,
-            'minified'           => $minified,
-            'remove_existing_fa' => $remove_existing_fa,
-            'hide_admin_notices' => $hide_admin_notices,
+            'version'            => $_POST['version'],
+            'minified'           => $_POST['minified'],
+            'remove_existing_fa' => $_POST['remove_existing_fa'],
+            'hide_admin_notices' => $_POST['hide_admin_notices'],
         );
 
-        update_option( $this->option_name, $options );
+        // Sanitize the options before saving.
+        $clean_options = $this->sanitize( $options );
 
+        update_option( $this->option_name, $clean_options );
+
+        // Return a message.
         echo '<div class="updated"><p>' . __( 'Settings have been saved.', 'better-font-awesome' ) . '</p></div>';
 
         wp_die();
+        
     }
 
     /**
