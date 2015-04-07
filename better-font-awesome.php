@@ -332,7 +332,7 @@ class Better_Font_Awesome_Plugin {
                 do_settings_sections( self::SLUG );
             ?>
                 <p>
-                    <span id="bfa-save-settings-button" class="button-primary">Save Settings</span>
+                    <span id="bfa-save-settings-button" class="button-primary"><?php _e( 'Save Settings', 'better-font-awesome' ); ?></span>
                 </p>
                 <div id="bfa-loading-gif" style="display: none;">
                     <img src="<?php echo includes_url() . 'images/spinner.gif' ?>" />
