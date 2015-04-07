@@ -421,13 +421,13 @@ class Better_Font_Awesome_Plugin {
         if ( 'settings_page_better-font-awesome' === $hook ) {
 
             wp_enqueue_script(
-                'bfa-admin-js',
+                self::SLUG,
                 plugin_dir_url( __FILE__ ) . 'js/admin.js',
                 array( 'jquery' )
             );      
 
             wp_localize_script(
-                'bfa-admin-js',
+                self::SLUG,
                 'ajax_object',
                 array(
                     'ajax_url' => admin_url( 'admin-ajax.php' )
