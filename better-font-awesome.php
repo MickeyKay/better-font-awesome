@@ -335,7 +335,7 @@ class Better_Font_Awesome_Plugin {
                     <span id="bfa-save-settings-button" class="button-primary"><?php _e( 'Save Settings', 'better-font-awesome' ); ?></span>
                 </p>
                 <div id="bfa-loading-gif" style="display: none;">
-                    <img src="<?php echo includes_url() . 'images/spinner.gif' ?>" />
+                    <img src="<?php echo includes_url() . 'images/spinner.gif'; ?>" />
                 </div>
                 <div id="bfa-ajax-response-holder" style="margin-bottom: 20px;"></div>
                 <?php echo $this->get_usage_text(); ?>
