@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the Better Font Awesome package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Better Font Awesome 0.9.3\n"
+"Project-Id-Version: Better Font Awesome 1.0.2\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/better-font-awesome\n"
-"POT-Creation-Date: 2014-04-21 00:53:22+00:00\n"
+"POT-Creation-Date: 2014-09-03 16:31:22+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -12,186 +12,143 @@ msgstr ""
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 
-#: Titan-Framework/class-admin-panel.php:290
-msgid "Settings saved."
-msgstr ""
-
-#: Titan-Framework/class-admin-panel.php:292
-msgid "Settings reset to default."
-msgstr ""
-
-#: Titan-Framework/class-meta-box.php:35
-#: Titan-Framework/class-theme-customizer-section.php:30
-msgid "More Options"
-msgstr ""
-
-#: Titan-Framework/class-option-save.php:20
-msgid "Save Changes"
-msgstr ""
-
-#: Titan-Framework/class-option-save.php:23
-msgid "Reset to Default"
-msgstr ""
-
-#: Titan-Framework/class-option-select-categories.php:37
-#: Titan-Framework/class-option-select-categories.php:104
-#: Titan-Framework/class-option-select-pages.php:30
-#: Titan-Framework/class-option-select-posts.php:38
-#: Titan-Framework/class-option-select-posts.php:106
-msgid "Select"
-msgstr ""
-
-#: Titan-Framework/class-option-select-googlefont.php:29
-msgid ""
-"%s has been deprecated and will be removed in version %s! Please use %s "
-"instead to avoid errors in the future."
-msgstr ""
-
-#: Titan-Framework/class-option-select-googlefont.php:108
-msgid "Ultra-light"
-msgstr ""
-
-#: Titan-Framework/class-option-select-googlefont.php:111
-msgid "Light"
-msgstr ""
-
-#: Titan-Framework/class-option-select-googlefont.php:114
-msgid "Book"
-msgstr ""
-
-#: Titan-Framework/class-option-select-googlefont.php:117
-msgid "Medium"
-msgstr ""
-
-#: Titan-Framework/class-option-select-googlefont.php:120
-msgid "Semi-Bold"
-msgstr ""
-
-#: Titan-Framework/class-option-select-googlefont.php:123
-msgid "Bold"
-msgstr ""
-
-#: Titan-Framework/class-option-select-googlefont.php:126
-msgid "Extra-Bold"
-msgstr ""
-
-#: Titan-Framework/class-option-select-googlefont.php:129
-msgid "Ultra-Bold"
-msgstr ""
-
-#: Titan-Framework/class-option-select-googlefont.php:132
-msgid "Regular"
-msgstr ""
-
-#: Titan-Framework/class-option-upload.php:196
-msgid "Select Image"
-msgstr ""
-
-#: Titan-Framework/class-option-upload.php:199
-msgid "Use image"
-msgstr ""
-
-#: Titan-Framework/class-option.php:40
-msgid "Option type or extended class %s does not exist."
-msgstr ""
-
-#: Titan-Framework/class-titan-framework.php:85
-msgid "All option IDs must be unique. The id %s has been used multiple times."
-msgstr ""
-
-#: Titan-Framework/class-titan-framework.php:346
-#: Titan-Framework/class-titan-framework.php:393
-msgid ""
-"Wrong usage of %s, this should be called inside a hook or from within a "
-"theme file."
-msgstr ""
-
-#: Titan-Framework/titan-framework.php:126
-msgid "Documentation"
-msgstr ""
-
-#: Titan-Framework/titan-framework.php:130
-msgid "GitHub Repo"
-msgstr ""
-
-#: Titan-Framework/titan-framework.php:134
-msgid "Issue Tracker"
-msgstr ""
-
-#: better-font-awesome.php:189
-msgid "Latest"
-msgstr ""
-
-#. #-#-#-#-#  plugin.pot (Better Font Awesome 0.9.3)  #-#-#-#-#
+#. #-#-#-#-#  plugin.pot (Better Font Awesome 1.0.2)  #-#-#-#-#
 #. Plugin Name of the plugin/theme
-#: better-font-awesome.php:198
+#: better-font-awesome.php:179 better-font-awesome.php:216
+#: lib/better-font-awesome-library/better-font-awesome-library.php:1016
 msgid "Better Font Awesome"
 msgstr ""
 
-#: better-font-awesome.php:203
-msgid "Font Awesome version"
-msgstr ""
-
-#: better-font-awesome.php:206
+#: better-font-awesome.php:217
 msgid ""
-"Select the version of Font Awesome you would like to use. Visit the <a href="
-"\"http://fontawesome.io/\" target=\"_blank\">Font Awesome website</a> for "
-"more information."
+"It appears that Better Font Awesome is missing it's <a href=\"https://github."
+"com/MickeyKay/better-font-awesome-library\" target=\"_blank\">core library</"
+"a>, which typically occurs when cloning the Git repository and not updating "
+"all submodules. Please refer to the plugin's <a href=\"https://github.com/"
+"MickeyKay/better-font-awesome\" target=\"_blank\">installation instructions</"
+"a> for details on how to properly install Better Font Awesome via Git. If "
+"you installed from within WordPress, or via the wordpress.org repo, then "
+"chances are the install failed and you can try again. If the issue persists, "
+"please create a new topic on the plugin's <a href=\"http://wordpress.org/"
+"support/plugin/better-font-awesome\" target=\"_blank\">support forum</a> or "
+"file an issue on the <a href=\"https://github.com/MickeyKay/better-font-"
+"awesome/issues\" target=\"_blank\">Github repo</a>."
 msgstr ""
 
-#: better-font-awesome.php:212
+#: better-font-awesome.php:218
+msgid "Back to the plugins page &rarr;"
+msgstr ""
+
+#: better-font-awesome.php:352
+msgid "Version"
+msgstr ""
+
+#: better-font-awesome.php:361
 msgid "Use minified CSS"
 msgstr ""
 
-#: better-font-awesome.php:215
+#: better-font-awesome.php:367
 msgid ""
 "Whether to include the minified version of the CSS (checked), or the "
 "unminified version (unchecked)."
 msgstr ""
 
-#: better-font-awesome.php:220
-msgid "Remove existing Font Awesome styles and shortcodes"
+#: better-font-awesome.php:373
+msgid "Remove existing Font Awesome"
 msgstr ""
 
-#: better-font-awesome.php:223
+#: better-font-awesome.php:379
 msgid ""
-"Attempt to remove Font Awesome CSS and shortcodes included by other plugins "
-"and themes. This may help if icons are not rendering properly."
+"Attempt to remove Font Awesome CSS and shortcodes added by other plugins and "
+"themes."
 msgstr ""
 
-#: better-font-awesome.php:228
-msgid "Usage"
+#: better-font-awesome.php:396 better-font-awesome.php:422
+msgid "Always Latest"
 msgstr ""
 
-#: better-font-awesome.php:230
+#: better-font-awesome.php:456
 msgid ""
-"\n"
-"\t\t    \t\t<b>Version 4</b>&nbsp;&nbsp;&nbsp;<small><a href=\"http://"
-"fontawesome.io/examples/\">See all available classes &raquo;</a></small><br /"
-"><br />\n"
-"\t\t    \t\t<i class=\"icon-star fa fa-star\"></i> <code>[icon name=\"star\"]"
-"</code> or <code>&lt;i class=\"fa-star\"&gt;&lt;/i&gt;</code><br /><br />\n"
-"\t\t    \t\t<i class=\"icon-star fa fa-star icon-2x fa-2x\"></i> <code>[icon "
-"name=\"star\" class=\"fa-2x\"]</code> or <code>&lt;i class=\"fa-star fa-2x"
-"\"&gt;&lt;/i&gt;</code><br /><br />\n"
-"\t\t    \t\t<i class=\"icon-star fa fa-star icon-2x fa-2x icon-border fa-"
-"border\"></i> <code>[icon name=\"star\" class=\"fa-2x fa-border\"]</code> or "
-"<code>&lt;i class=\"fa-star fa-2x fa-border\"&gt;&lt;/i&gt;</code><br /><br /"
-"><br />\n"
-"\t\t    \t\t<b>Version 3</b>&nbsp;&nbsp;&nbsp;<small><a href=\"http://"
-"fontawesome.io/3.2.1/examples/\">See all available classes &raquo;</a></"
-"small><br /><br />\n"
-"\t\t    \t\t<i class=\"icon-star fa fa-star\"></i> <code>[icon name=\"star\"]"
-"</code> or <code>&lt;i class=\"icon-star\"&gt;&lt;/i&gt;</code><br /><br />\n"
-"\t\t    \t\t<i class=\"icon-star fa fa-star icon-2x fa-2x\"></i> <code>[icon "
-"name=\"star\" class=\"icon-2x\"]</code> or <code>&lt;i class=\"icon-star "
-"icon-2x\"&gt;&lt;/i&gt;</code><br /><br />\n"
-"\t\t    \t\t<i class=\"icon-star fa fa-star icon-2x fa-2x icon-border fa-"
-"border\"></i> <code>[icon name=\"star\" class=\"icon-2x icon-border\"]</"
-"code> or <code>&lt;i class=\"icon-star icon-2x icon-border\"&gt;&lt;/i&gt;</"
-"code>\n"
-"\n"
-"\t\t    \t\t"
+"Version selection is currently unavailable. The attempt to reach the "
+"jsDelivr API server failed with the following error: %s"
+msgstr ""
+
+#: better-font-awesome.php:463
+msgid "Font Awesome will still render using version: %s"
+msgstr ""
+
+#: better-font-awesome.php:470
+#: lib/better-font-awesome-library/better-font-awesome-library.php:1052
+msgid ""
+"This may be the result of a temporary server or connectivity issue which "
+"will resolve shortly. However if the problem persists please file a support "
+"ticket on the %splugin forum%s, citing the errors listed above. "
+msgstr ""
+
+#: better-font-awesome.php:517
+msgid ""
+"<h3>Usage</h3>\n"
+"                     <b>Font Awesome version 4.x +</b>&nbsp;&nbsp;&nbsp;"
+"<small><a href=\"http://fontawesome.io/examples/\">See all available options "
+"&raquo;</a></small><br /><br />\n"
+"                     <i class=\"icon-coffee fa fa-coffee\"></i> <code>[icon "
+"name=\"coffee\"]</code> or <code>&lt;i class=\"fa-coffee\"&gt;&lt;/i&gt;</"
+"code><br /><br />\n"
+"                     <i class=\"icon-coffee fa fa-coffee icon-2x fa-2x\"></"
+"i> <code>[icon name=\"coffee\" class=\"fa-2x\"]</code> or <code>&lt;i class="
+"\"fa-coffee fa-2x\"&gt;&lt;/i&gt;</code><br /><br />\n"
+"                     <i class=\"icon-coffee fa fa-coffee icon-2x fa-2x icon-"
+"rotate-90 fa-rotate-90\"></i> <code>[icon name=\"coffee\" class=\"fa-2x fa-"
+"rotate-90\"]</code> or <code>&lt;i class=\"fa-coffee fa-2x fa-rotate-90\"&gt;"
+"&lt;/i&gt;</code><br /><br /><br />\n"
+"                     <b>Font Awesome version 3.x</b>&nbsp;&nbsp;&nbsp;"
+"<small><a href=\"http://fontawesome.io/3.2.1/examples/\">See all available "
+"options &raquo;</a></small><br /><br />\n"
+"                     <i class=\"icon-coffee fa fa-coffee\"></i> <code>[icon "
+"name=\"coffee\"]</code> or <code>&lt;i class=\"icon-coffee\"&gt;&lt;/i&gt;</"
+"code><br /><br />\n"
+"                     <i class=\"icon-coffee fa fa-coffee icon-2x fa-2x\"></"
+"i> <code>[icon name=\"coffee\" class=\"icon-2x\"]</code> or <code>&lt;i "
+"class=\"icon-coffee icon-2x\"&gt;&lt;/i&gt;</code><br /><br />\n"
+"                     <i class=\"icon-coffee fa fa-coffee icon-2x fa-2x icon-"
+"rotate-90 fa-rotate-90\"></i> <code>[icon name=\"coffee\" class=\"icon-2x "
+"icon-rotate-90\"]</code> or <code>&lt;i class=\"icon-coffee icon-2x icon-"
+"rotate-90\"&gt;&lt;/i&gt;</code>"
+msgstr ""
+
+#: lib/better-font-awesome-library/better-font-awesome-library.php:430
+msgid "The jsDelivr API servers appear to be temporarily unavailable."
+msgstr ""
+
+#: lib/better-font-awesome-library/better-font-awesome-library.php:1022
+msgid "API Error"
+msgstr ""
+
+#: lib/better-font-awesome-library/better-font-awesome-library.php:1024
+msgid ""
+"The attempt to reach the jsDelivr API server failed with the following "
+"error: %s"
+msgstr ""
+
+#: lib/better-font-awesome-library/better-font-awesome-library.php:1034
+msgid "Remote CSS Error"
+msgstr ""
+
+#: lib/better-font-awesome-library/better-font-awesome-library.php:1036
+msgid ""
+"The attempt to fetch the remote Font Awesome stylesheet failed with the "
+"following error: %s %s The embedded fallback Font Awesome will be used "
+"instead (version: %s)."
+msgstr ""
+
+#: lib/better-font-awesome-library/better-font-awesome-library.php:1046
+msgid ""
+"<b>Don't worry! Better Font Awesome will still render using the included "
+"fallback version:</b> "
+msgstr ""
+
+#: lib/better-font-awesome-library/better-font-awesome-library.php:1050
+msgid "Solution"
 msgstr ""
 
 #. Plugin URI of the plugin/theme
@@ -199,11 +156,11 @@ msgid "http://wordpress.org/plugins/better-font-awesome"
 msgstr ""
 
 #. Description of the plugin/theme
-msgid "The better Font Awesome icon plugin for Wordpress."
+msgid "The ultimate Font Awesome icon plugin for WordPress."
 msgstr ""
 
 #. Author of the plugin/theme
-msgid "Mickey Kay"
+msgid "MIGHTYminnow & Mickey Kay"
 msgstr ""
 
 #. Author URI of the plugin/theme
