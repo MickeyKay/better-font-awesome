@@ -452,10 +452,8 @@ class Better_Font_Awesome_Plugin {
             'hide_admin_notices' => $_POST['hide_admin_notices'],
         );
 
-        // Sanitize the options before saving.
-        $clean_options = $this->sanitize( $options );
-
-        update_option( $this->option_name, $clean_options );
+        // Sanitize and update the options.
+        update_option( $this->option_name, $options );
 
         // Return a message.
         echo '<div class="updated"><p>' . __( 'Settings have been saved.', 'better-font-awesome' ) . '</p></div>';
