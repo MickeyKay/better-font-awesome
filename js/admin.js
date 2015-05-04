@@ -9,10 +9,10 @@
 
 	$( document ).ready( function() {
 
-		$( '#bfa-save-settings-button' ).on( 'click', function() {
+		$( '.bfa-save-settings-button' ).on( 'click', function() {
 
-			$( '#bfa-ajax-response-holder' ).empty();
-			$( '#bfa-loading-gif' ).show();
+			$( '.bfa-ajax-response-holder' ).empty();
+			$( '.bfa-loading-gif' ).fadeIn();
 
 			var $bfaSettingsForm, data, version, minified, remove_existing_fa, hide_admin_notices;
 
@@ -32,11 +32,12 @@
 			};
 
 			$.post(
-				ajax_object.ajax_url,
+				bfa_ajax_object.ajax_url, // Array passed via wp_localize_script()
 				data,
 				function( response ) {
-					$( '#bfa-loading-gif' ).hide();
-					$( '#bfa-ajax-response-holder' ).html( response );			
+					$( '.bfa-loading-gif' ).fadeOut( function() {
+						$( '.bfa-ajax-response-holder' ).slideUp().html( response ).slideDown().delay(1500).slideUp();
+					});
 				}
 			);
 		

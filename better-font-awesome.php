@@ -322,7 +322,7 @@ class Better_Font_Awesome_Plugin {
      */
     public function create_admin_page() {
     ?>
-        <div class="wrap">
+        <div class="wrap bfa-settings">
             <?php screen_icon(); ?>
             <h2><?php echo $this->plugin_display_name; ?></h2>
             <form method="post" action="options.php" id="bfa-settings-form">
@@ -332,12 +332,9 @@ class Better_Font_Awesome_Plugin {
                 do_settings_sections( self::SLUG );
             ?>
                 <p>
-                    <span id="bfa-save-settings-button" class="button-primary"><?php _e( 'Save Settings', 'better-font-awesome' ); ?></span>
+                    <span class="button-primary bfa-save-settings-button"><?php _e( 'Save Settings', 'better-font-awesome' ); ?></span> <img class="bfa-loading-gif" src="<?php echo includes_url() . 'images/spinner.gif'; ?>" />
                 </p>
-                <div id="bfa-loading-gif" style="display: none;">
-                    <img src="<?php echo includes_url() . 'images/spinner.gif'; ?>" />
-                </div>
-                <div id="bfa-ajax-response-holder" style="margin-bottom: 20px;"></div>
+                <div class="bfa-ajax-response-holder"></div>
                 <?php echo $this->get_usage_text(); ?>
             </form>
         </div>
@@ -412,7 +409,7 @@ class Better_Font_Awesome_Plugin {
     }
 
     /**
-     * Enqueue admin scripts.
+     * Enqueue admin scripts and styles.
      *
      * @since 1.0.10
      */
@@ -420,15 +417,20 @@ class Better_Font_Awesome_Plugin {
 
         if ( 'settings_page_better-font-awesome' === $hook ) {
 
+            wp_enqueue_style(
+                self::SLUG . '-admin',
+                plugin_dir_url( __FILE__ ) . 'css/admin.css'
+            );
+
             wp_enqueue_script(
-                self::SLUG,
+                self::SLUG . '-admin',
                 plugin_dir_url( __FILE__ ) . 'js/admin.js',
                 array( 'jquery' )
             );      
 
             wp_localize_script(
-                self::SLUG,
-                'ajax_object',
+                self::SLUG . '-admin',
+                'bfa_ajax_object',
                 array(
                     'ajax_url' => admin_url( 'admin-ajax.php' )
                 )
@@ -456,7 +458,7 @@ class Better_Font_Awesome_Plugin {
         update_option( $this->option_name, $options );
 
         // Return a message.
-        echo '<div class="updated"><p>' . __( 'Settings have been saved.', 'better-font-awesome' ) . '</p></div>';
+        echo '<div class="updated"><p>' . esc_html( 'Settings saved.', 'better-font-awesome' ) . '</p></div>';
 
         wp_die();
         
