@@ -166,6 +166,10 @@ class Better_Font_Awesome_Plugin {
         // Set up the admin settings page.
         add_action( 'admin_menu', array( $this, 'add_settings_page' ) );
         add_action( 'admin_init', array( $this, 'add_settings' ) );
+        add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
+
+        // Handle saving options via AJAX
+        add_action( 'wp_ajax_bfa_save_options', array( $this, 'save_options' ) );
 
     }
 
@@ -318,17 +322,20 @@ class Better_Font_Awesome_Plugin {
      */
     public function create_admin_page() {
     ?>
-        <div class="wrap">
+        <div class="wrap bfa-settings">
             <?php screen_icon(); ?>
             <h2><?php echo $this->plugin_display_name; ?></h2>
-            <form method="post" action="options.php">
+            <form method="post" action="options.php" id="bfa-settings-form">
             <?php
                 // This prints out all hidden setting fields
                 settings_fields( 'option_group' );
                 do_settings_sections( self::SLUG );
-                submit_button();
-                echo $this->get_usage_text();
             ?>
+                <p>
+                    <span class="button-primary bfa-save-settings-button"><?php _e( 'Save Settings', 'better-font-awesome' ); ?></span> <img class="bfa-loading-gif" src="<?php echo includes_url() . 'images/spinner.gif'; ?>" />
+                </p>
+                <div class="bfa-ajax-response-holder"></div>
+                <?php echo $this->get_usage_text(); ?>
             </form>
         </div>
     <?php
@@ -399,6 +406,62 @@ class Better_Font_Awesome_Plugin {
             )
         );
 
+    }
+
+    /**
+     * Enqueue admin scripts and styles.
+     *
+     * @since 1.0.10
+     */
+    public function admin_enqueue_scripts( $hook ) {
+
+        if ( 'settings_page_better-font-awesome' === $hook ) {
+
+            wp_enqueue_style(
+                self::SLUG . '-admin',
+                plugin_dir_url( __FILE__ ) . 'css/admin.css'
+            );
+
+            wp_enqueue_script(
+                self::SLUG . '-admin',
+                plugin_dir_url( __FILE__ ) . 'js/admin.js',
+                array( 'jquery' )
+            );      
+
+            wp_localize_script(
+                self::SLUG . '-admin',
+                'bfa_ajax_object',
+                array(
+                    'ajax_url' => admin_url( 'admin-ajax.php' )
+                )
+            );
+
+        }
+        
+    }
+
+    /**
+     * Save options via AJAX.
+     *
+     * @since  1.0.10
+     */
+    public function save_options() {
+
+        $options = array(
+            'version'            => $_POST['version'],
+            'minified'           => $_POST['minified'],
+            'remove_existing_fa' => $_POST['remove_existing_fa'],
+            'hide_admin_notices' => $_POST['hide_admin_notices'],
+        );
+
+        // Sanitize and update the options.
+        update_option( $this->option_name, $options );
+
+        // Return a message.
+        echo '<div class="updated"><p>' . esc_html( 'Settings saved.', 'better-font-awesome' ) . '</p></div>';
+
+        wp_die();
+        
     }
 
     /**

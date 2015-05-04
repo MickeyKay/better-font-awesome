@@ -1,0 +1,20 @@
+/**
+ * Better Font Awesome Admin CSS
+ *
+ * @since 1.1.0
+ */
+
+.bfa-loading-gif {
+	display: none;
+	vertical-align: middle;
+}
+
+.bfa-ajax-response-holder {
+	display: none;
+	padding-bottom: 20px;
+}
+
+.bfa-ajax-response-holder div.updated {
+	margin: 0;
+}
+
