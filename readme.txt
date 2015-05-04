@@ -109,7 +109,7 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 == Changelog ==
 
 = 1.1.0 =
-* Implement Ajax to save plugin settings
+* Implement Ajax to save plugin settings (thanks [Braad](https://profiles.wordpress.org/braad))
 
 = 1.0.10 =
 * Fix SSL bug breaking wp_remote_get() from https.
@@ -182,7 +182,7 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 == Upgrade Notice ==
 
 = 1.1.0 =
-* Implement Ajax to save plugin settings
+* Implement Ajax to save plugin settings (thanks [Braad](https://profiles.wordpress.org/braad))
 
 = 1.0.10 =
 * Fix SSL bug breaking wp_remote_get() from https
