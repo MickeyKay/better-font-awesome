@@ -36,7 +36,7 @@
 				data,
 				function( response ) {
 					$( '.bfa-loading-gif' ).fadeOut( function() {
-						$( '.bfa-ajax-response-holder' ).slideUp().html( response ).slideDown().delay(1500).slideUp();
+						$( '.bfa-ajax-response-holder' ).slideUp().html( response ).slideDown().delay(2000).fadeTo(600, 0).delay(300).slideUp();
 					});
 				}
 			);
