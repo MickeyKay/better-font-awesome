@@ -19,9 +19,9 @@ _The Better Font Awesome settings page_
 _The icon shortcode dropdown selector_
 
 ## Installation ##
-The Better Font Awesome Library contains some [Git submodules](http://git-scm.com/book/en/Git-Tools-Submodules) that will require you to recursively clone this repo:
+The Better Font Awesome plugin contains some [Git submodules](http://git-scm.com/book/en/Git-Tools-Submodules) that will require you to recursively clone this repo:
 ```
-git clone --recursive https://github.com/MickeyKay/better-font-awesome-library.git
+git clone --recursive https://github.com/MickeyKay/better-font-awesome.git
 ```
 
 Alternately, if you've already cloned the repo and need to add the submodules, you can run the following commands:
