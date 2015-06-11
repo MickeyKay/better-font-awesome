@@ -11,12 +11,12 @@ Better Font Awesome allows you to automatically integrate the latest available v
 
 ## Screenshots ##
 ![The Better Font Awesome settings page](https://raw.githubusercontent.com/MickeyKay/better-font-awesome/master/assets/screenshot-1.gif?raw=true)  
-_The Better Font Awesome settings page_
+_The icon shortcode dropdown selector_
 
 ---
 
 ![The icon shortcode dropdown selector](https://raw.githubusercontent.com/MickeyKay/better-font-awesome/master/assets/screenshot-2.png?raw=true)  
-_The icon shortcode dropdown selector_
+_The Better Font Awesome settings page_
 
 ## Installation ##
 The Better Font Awesome plugin contains some [Git submodules](http://git-scm.com/book/en/Git-Tools-Submodules) that will require you to recursively clone this repo:
