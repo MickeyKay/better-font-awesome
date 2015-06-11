@@ -4,7 +4,7 @@ Tags: better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode
 Donate link: http://mightyminnow.com
 Requires at least: 3.0
 Tested up to: 4.3
-Stable tag: 1.2.1
+Stable tag: 1.3.0
 License: GPLv2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -101,11 +101,15 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 == Screenshots ==
-1. Inserting icon shortcakes into the editor
+1. The icon shortcode dropdown selector
 2. Better Font Awesome settings, accessed via Settings &rarr; Better Font Awesome
 
 
 == Changelog ==
+
+= 1.3.0 =
+* Replace outdated TinyMCE shortcode selector brand new jQuery dropdown selector that works in both the visual and text editor
+* Clean up CSS and JS
 
 = 1.2.1 =
 * Update get_instance() call to work for older versions of PHP (< 5.3)
@@ -186,6 +190,10 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 == Upgrade Notice ==
+
+= 1.3.0 =
+* Replace outdated TinyMCE shortcode selector brand new jQuery dropdown selector that works in both the visual and text editor
+* Clean up CSS and JS
 
 = 1.2.1 =
 * Update get_instance() call to work for older versions of PHP (< 5.3)
