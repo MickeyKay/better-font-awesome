@@ -24,13 +24,10 @@ The Better Font Awesome plugin contains some [Git submodules](http://git-scm.com
 git clone --recursive https://github.com/MickeyKay/better-font-awesome.git
 ```
 
-Alternately, if you've already cloned the repo and need to add the submodules, you can run the following commands:
+Alternately, if you've already cloned the repo and need to add the submodules, you can run the following command:
 ```
 // Initialize all submodules.
-git submodule init
-
-// Pull in updated copies of all submodules.
-git submodule update
+git submodule update --init --recursive
 ```
 
 ## The Better Font Awesome Library ##
