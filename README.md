@@ -10,13 +10,13 @@ __License:__ [GPL-2.0+](http://www.gnu.org/licenses/gpl-2.0.html)
 Better Font Awesome allows you to automatically integrate the latest available version of [Font Awesome](http://fontawesome.io/) into your WordPress project, along with accompanying CSS, shortcode, and TinyMCE icon shortcode generator. Furthermore, it generates all the data you need to create new functionality of your own.
 
 ## Screenshots ##
-![The Better Font Awesome settings page](/../testing/assets/screenshot-1.png?raw=true)  
-_The Better Font Awesome settings page_
+![The Better Font Awesome settings page](https://raw.githubusercontent.com/MickeyKay/better-font-awesome/master/assets/screenshot-1.gif?raw=true)  
+_The icon shortcode dropdown selector_
 
 ---
 
-![The icon shortcode dropdown selector](/../testing/assets/screenshot-2.png?raw=true)  
-_The icon shortcode dropdown selector_
+![The icon shortcode dropdown selector](https://raw.githubusercontent.com/MickeyKay/better-font-awesome/master/assets/screenshot-2.png?raw=true)  
+_The Better Font Awesome settings page_
 
 ## Installation ##
 The Better Font Awesome plugin contains some [Git submodules](http://git-scm.com/book/en/Git-Tools-Submodules) that will require you to recursively clone this repo:
@@ -24,13 +24,10 @@ The Better Font Awesome plugin contains some [Git submodules](http://git-scm.com
 git clone --recursive https://github.com/MickeyKay/better-font-awesome.git
 ```
 
-Alternately, if you've already cloned the repo and need to add the submodules, you can run the following commands:
+Alternately, if you've already cloned the repo and need to add the submodules, you can run the following command:
 ```
 // Initialize all submodules.
-git submodule init
-
-// Pull in updated copies of all submodules.
-git submodule update
+git submodule update --init --recursive
 ```
 
 ## The Better Font Awesome Library ##
