@@ -101,9 +101,8 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 == Screenshots ==
-
-1. Better Font Awesome settings, accessed via Settings &rarr; Better Font Awesome
-2. Using Better Font Awesome via TinyMCE
+1. Inserting icon shortcakes into the editor
+2. Better Font Awesome settings, accessed via Settings &rarr; Better Font Awesome
 
 
 == Changelog ==
