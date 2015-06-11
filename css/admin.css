@@ -18,3 +18,19 @@
 	margin: 0;
 }
 
+.bfa-usage-text {
+	padding: 20px;
+	background-color: #fff;
+	border: 1px solid #efefef;
+}
+
+.bfa-usage-text h3 {
+	margin-top: 0;
+}
+
+.bfa-usage-text .fa,
+.bfa-usage-text .icon {
+	width: 40px;
+	text-align: center;
+	box-sizing: border-box;
+}

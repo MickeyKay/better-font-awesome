@@ -4,7 +4,7 @@ Tags: better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode
 Donate link: http://mightyminnow.com
 Requires at least: 3.0
 Tested up to: 4.3
-Stable tag: 1.1.0
+Stable tag: 1.2.1
 License: GPLv2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -108,6 +108,13 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 == Changelog ==
 
+= 1.2.1 =
+* Update get_instance() call to work for older versions of PHP (< 5.3)
+
+= 1.2.0 =
+* Attach load functionality to after_theme_setup hook to allow themes to filter options
+* Update fallback Font Awesome to version 4.3.0
+
 = 1.1.0 =
 * Implement Ajax to save plugin settings (thanks [Braad](https://profiles.wordpress.org/braad))
 
@@ -180,6 +187,13 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 == Upgrade Notice ==
+
+= 1.2.1 =
+* Update get_instance() call to work for older versions of PHP (< 5.3)
+
+= 1.2.0 =
+* Attach load functionality to after_theme_setup hook to allow themes to filter options
+* Update fallback Font Awesome to version 4.3.0
 
 = 1.1.0 =
 * Implement Ajax to save plugin settings (thanks [Braad](https://profiles.wordpress.org/braad))
