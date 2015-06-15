@@ -4,7 +4,7 @@ Tags: better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode
 Donate link: http://mightyminnow.com
 Requires at least: 3.0
 Tested up to: 4.3
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 License: GPLv2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -107,6 +107,9 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 == Changelog ==
 
+= 1.3.2 =
+* Update Better Font Awesome Library with better prefix removal method for filtered icons.
+
 = 1.3.1 =
 * Update admin JS to trigger icon picker on ALL TinyMCE initializations (e.g. Visual Composer and AJAX)
 
@@ -193,6 +196,9 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 == Upgrade Notice ==
+
+= 1.3.2 =
+* Update Better Font Awesome Library with better prefix removal method.
 
 = 1.3.1 =
 * Update admin JS to trigger icon picker on ALL TinyMCE initializations (e.g. Visual Composer and AJAX)
