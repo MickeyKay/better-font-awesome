@@ -107,6 +107,11 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 == Changelog ==
 
+= Unreleased [1.3.3]=
+* Update plugin and BFAL to all fire on `init` hook instead of mix of `plugins_loaded` and `after_theme_setup`. This should fix issues in which icons don't show up when BFAL is used in other plugins.
+* Update iconpicker JS to avoid conflict that arose from preventing subsequent `mouseup` event listeners from firing.
+* Change appearance of iconpicker button to match default buttons.
+
 = 1.3.2 =
 * Update Better Font Awesome Library with better prefix removal method for filtered icons.
 
