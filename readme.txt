@@ -12,6 +12,8 @@ The Better Font Awesome plugin for WordPress. Shortcodes, HTML, TinyMCE, various
 
 == Description ==
 
+**Do you find this plugin helpful? Please consider [leaving a 5-star review](https://wordpress.org/support/view/plugin-reviews/better-font-awesome).**
+
 Better Font Awesome allows you to automatically integrate the latest available version of [Font Awesome](http://fontawesome.io/) into your WordPress project, along with accompanying CSS, shortcodes, and TinyMCE icon shortcode generator.
 
 
