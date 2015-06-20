@@ -1,0 +1,22 @@
+{
+  "title": "Better Font Awesome",
+  "description": "The best WordPress extension ever made!",
+  "version": "1.3.3",
+  "homepage": "http://wordpress.org/plugins/better-font-awesome",
+  "author": {
+    "name": "MIGHTYminnow Web Studio & School",
+    "email": "info@mightyminnow.com",
+    "url": "http://mightyminnow.com/plugin-landing-page?utm_source=better-font-awesome&utm_medium=plugin-repo&utm_campaign=WordPress%20Plugins"
+  },
+  "devDependencies": {
+    "grunt": "latest",
+    "load-grunt-tasks": "latest",
+    "grunt-dev-update": "latest",
+    "grunt-prompt": "latest",
+    "grunt-text-replace": "latest",
+    "grunt-wp-readme-to-markdown": "latest",
+    "grunt-wp-i18n": "latest",
+    "grunt-contrib-copy": "^0.7.0"
+  },
+  "keywords": []
+}
