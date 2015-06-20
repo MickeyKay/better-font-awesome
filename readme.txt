@@ -4,13 +4,15 @@ Tags: better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode
 Donate link: http://mightyminnow.com
 Requires at least: 3.0
 Tested up to: 4.3
-Stable tag: 1.3.2
+Stable tag: 1.3.3
 License: GPLv2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 The Better Font Awesome plugin for WordPress. Shortcodes, HTML, TinyMCE, various Font Awesome versions, backwards compatibility, CDN speeds, and more.
 
 == Description ==
+
+**Do you find this plugin helpful? Please consider [leaving a 5-star review](https://wordpress.org/support/view/plugin-reviews/better-font-awesome).**
 
 Better Font Awesome allows you to automatically integrate the latest available version of [Font Awesome](http://fontawesome.io/) into your WordPress project, along with accompanying CSS, shortcodes, and TinyMCE icon shortcode generator.
 
@@ -107,6 +109,11 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 == Changelog ==
 
+= 1.3.3 =
+* Update plugin and BFAL to all fire on `init` hook instead of mix of `plugins_loaded` and `after_theme_setup`. This should fix issues in which icons don't show up when BFAL is used in other plugins.
+* Update iconpicker JS to avoid conflict that arose from preventing subsequent `mouseup` event listeners from firing.
+* Change appearance of iconpicker button to match default buttons.
+
 = 1.3.2 =
 * Update Better Font Awesome Library with better prefix removal method for filtered icons.
 
@@ -196,6 +203,11 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 == Upgrade Notice ==
+
+= 1.3.3 =
+* Update plugin and BFAL to all fire on `init` hook instead of mix of `plugins_loaded` and `after_theme_setup`. This should fix issues in which icons don't show up when BFAL is used in other plugins.
+* Update iconpicker JS to avoid conflict that arose from preventing subsequent `mouseup` event listeners from firing.
+* Change appearance of iconpicker button to match default buttons.
 
 = 1.3.2 =
 * Update Better Font Awesome Library with better prefix removal method.
