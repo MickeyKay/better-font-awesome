@@ -4,7 +4,7 @@
  * @since 1.0.10
  */
 ( function( $ ) {
-	
+
 	'use strict';
 
 	$( document ).ready( function() {
@@ -40,7 +40,7 @@
 					});
 				}
 			);
-		
+
 		});
 	});
 })( jQuery );
