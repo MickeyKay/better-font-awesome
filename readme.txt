@@ -109,6 +109,9 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 == Changelog ==
 
+= 1.4.2 =
+* Fix: icon picker not working for ACF Pro repeater field.
+
 = 1.4.1 =
 * Fix: icon picker not working for ACF repeater field.
 
@@ -215,6 +218,9 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 == Upgrade Notice ==
+
+= 1.4.2 =
+* Fix: icon picker not working for ACF Pro repeater field.
 
 = 1.4.1 =
 * Fix: icon picker not working for ACF repeater field.
