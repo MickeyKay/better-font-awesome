@@ -109,8 +109,11 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 == Changelog ==
 
+= 1.4.1 =
+* Fix: icon picker not working for ACF repeater field.
+
 = 1.4.0 =
-* Fix: icon picker not working for ACF repeater field. (props @EJOweb and @marcochiesi)
+* Fix: icon picker not working for Black Studio TinyMCE Widget. (props @EJOweb and @marcochiesi)
 * Update fallback Font Awesome to version 4.4.0.
 
 = 1.3.4 =
@@ -213,8 +216,11 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 == Upgrade Notice ==
 
+= 1.4.1 =
+* Fix: icon picker not working for ACF repeater field.
+
 = 1.4.0 =
-* Fix: icon picker not working for ACF repeater field. (props @EJOweb and @marcochiesi)
+* Fix: icon picker not working for Black Studio TinyMCE Widget. (props @EJOweb and @marcochiesi)
 * Update fallback Font Awesome to version 4.4.0.
 
 = 1.3.4 =
