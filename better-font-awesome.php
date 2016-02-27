@@ -3,7 +3,7 @@
  * Better Font Awesome
  *
  * @package   Better Font Awesome
- * @author    MIGHTYminnow & Mickey Kay <mickey@mickeykaycreative.com>
+ * @author    Mickey Kay & MIGHTYminnow <mickey@mickeykaycreative.com>
  * @license   GPL-2.0+
  * @link      http://wordpress.org/plugins/better-font-awesome
  * @copyright 2014 MIGHTYminnow & Mickey Kay
@@ -130,7 +130,7 @@ class Better_Font_Awesome_Plugin {
      * @return  Better_Font_Awesome  The BFA object.
      */
     public static function get_instance( $args = array() ) {
-        
+
         // If the single instance hasn't been set, set it now.
         if ( null == self::$instance ) {
             self::$instance = new self( $args );
@@ -288,7 +288,7 @@ class Better_Font_Awesome_Plugin {
             'load_shortcode'      => true,
             'load_tinymce_plugin' => true,
         );
-        
+
         $this->bfa_lib = Better_Font_Awesome_Library::get_instance( $args );
 
     }
@@ -428,7 +428,7 @@ class Better_Font_Awesome_Plugin {
                 self::SLUG . '-admin',
                 plugin_dir_url( __FILE__ ) . 'js/admin.js',
                 array( 'jquery' )
-            );      
+            );
 
             wp_localize_script(
                 self::SLUG . '-admin',
@@ -439,7 +439,7 @@ class Better_Font_Awesome_Plugin {
             );
 
         }
-        
+
     }
 
     /**
@@ -463,7 +463,7 @@ class Better_Font_Awesome_Plugin {
         echo '<div class="updated"><p>' . esc_html( 'Settings saved.', 'better-font-awesome' ) . '</p></div>';
 
         wp_die();
-        
+
     }
 
     /**
