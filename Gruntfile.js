@@ -30,7 +30,7 @@ module.exports = function( grunt ) {
 							config:  'newVersion',
 							type:    'input',
 							message: 'What specific version would you like',
-							default: '<%= pkg.version %>' 
+							default: '<%= pkg.version %>'
 						}
 					]
 				}
@@ -78,6 +78,13 @@ module.exports = function( grunt ) {
 	            }
 	        }
 	    },
+	    wp_readme_to_markdown: {
+	    	readme: {
+	    		files: {
+	    			'readme.md': 'readme.txt'
+	    		},
+	    	},
+	    },
 		copy: {
 			svnAssets: {
 				cwd: 'assets/',
@@ -120,6 +127,7 @@ module.exports = function( grunt ) {
 		'prompt',
 		'replace',
 		'makepot',
+		'wp_readme_to_markdown',
 		'copy'
 	] );
 
