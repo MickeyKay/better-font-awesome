@@ -1,5 +1,4 @@
 === Better Font Awesome ===
-https://travis-ci.org/MickeyKay/better-font-awesome.svg?branch=master
 Contributors: McGuive7, MIGHTYminnow
 Tags: better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode
 Donate link: http://mightyminnow.com
@@ -8,6 +7,8 @@ Tested up to: 4.4
 Stable tag: 1.5.0
 License: GPLv2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
+
+https://travis-ci.org/MickeyKay/better-font-awesome.svg?branch=master
 
 The Better Font Awesome plugin for WordPress. Shortcodes, HTML, TinyMCE, various Font Awesome versions, backwards compatibility, CDN speeds, and more.
 
