@@ -8,7 +8,7 @@ Stable tag: 1.5.0
 License: GPLv2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-The Better Font Awesome plugin for WordPress. Shortcodes, HTML, TinyMCE, various Font Awesome versions, backwards compatibility, CDN speeds, and more. https://travis-ci.org/MickeyKay/better-font-awesome.svg?branch=master
+The Better Font Awesome plugin for WordPress es. Shortcodes, HTML, TinyMCE, various Font Awesome versions, backwards compatibility, CDN speeds, and more. https://travis-ci.org/MickeyKay/better-font-awesome.svg?branch=master
 
 == Description ==
 
