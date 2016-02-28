@@ -1,4 +1,5 @@
 === Better Font Awesome ===
+https://travis-ci.org/MickeyKay/better-font-awesome.svg?branch=master
 Contributors: McGuive7, MIGHTYminnow
 Tags: better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode
 Donate link: http://mightyminnow.com
