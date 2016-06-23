@@ -1,10 +1,10 @@
 # Better Font Awesome #
-**Contributors:** McGuive7, MIGHTYminnow  
+**Contributors:** [McGuive7](https://profiles.wordpress.org/McGuive7), [MIGHTYminnow](https://profiles.wordpress.org/MIGHTYminnow)  
 **Tags:** better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode  
 **Donate link:** http://mightyminnow.com  
 **Requires at least:** 3.0  
 **Tested up to:** 4.4  
-**Stable tag:** 1.5.0  
+**Stable tag:** 1.6.0  
 **License:** GPLv2+  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -105,15 +105,14 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 ## Screenshots ##
-### 1. The icon shortcode dropdown selector ###
-![The icon shortcode dropdown selector](http://ps.w.org/better-font-awesome/assets/screenshot-1.png)
-
-### 2. Better Font Awesome settings, accessed via Settings &rarr; Better Font Awesome ###
-![Better Font Awesome settings, accessed via Settings &rarr; Better Font Awesome](http://ps.w.org/better-font-awesome/assets/screenshot-2.png)
-
+1. The icon shortcode dropdown selector
+2. Better Font Awesome settings, accessed via Settings &rarr; Better Font Awesome
 
 
 ## Changelog ##
+
+### 1.6.0 ###
+* Update fallback Font Awesome to v4.6.3.
 
 ### 1.5.0 ###
 * Update fallback Font Awesome to v4.5.0.
@@ -231,6 +230,9 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 ## Upgrade Notice ##
+
+### 1.6.0 ###
+* Update fallback Font Awesome to v4.6.3.
 
 ### 1.5.0 ###
 * Update fallback Font Awesome to v4.5.0.
