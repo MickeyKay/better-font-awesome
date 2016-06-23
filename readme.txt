@@ -111,6 +111,9 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 == Changelog ==
 
+= 1.6.0 =
+* Update fallback Font Awesome to v4.6.3.
+
 = 1.5.0 =
 * Update fallback Font Awesome to v4.5.0.
 * Add new `bfa_icon_tag` to allow for filtering default `<i>` tag.
@@ -227,6 +230,9 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 == Upgrade Notice ==
+
+= 1.6.0 =
+* Update fallback Font Awesome to v4.6.3.
 
 = 1.5.0 =
 * Update fallback Font Awesome to v4.5.0.
