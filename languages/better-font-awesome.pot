@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: Better Font Awesome 1.6.0\n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/better-font-awesome\n"
-"POT-Creation-Date: 2016-06-23 06:30:11+00:00\n"
+"POT-Creation-Date: 2016-06-23 06:44:24+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -43,6 +43,7 @@ msgstr ""
 #: svn/tags/1.4.2/better-font-awesome.php:224
 #: svn/tags/1.4.3/better-font-awesome.php:224
 #: svn/tags/1.5.0/better-font-awesome.php:224
+#: svn/tags/1.6.0/better-font-awesome.php:224
 #: svn/trunk/better-font-awesome.php:224
 msgid ""
 "It appears that Better Font Awesome is missing it's <a "
@@ -86,6 +87,7 @@ msgstr ""
 #: svn/tags/1.4.2/better-font-awesome.php:225
 #: svn/tags/1.4.3/better-font-awesome.php:225
 #: svn/tags/1.5.0/better-font-awesome.php:225
+#: svn/tags/1.6.0/better-font-awesome.php:225
 #: svn/trunk/better-font-awesome.php:225
 msgid "Back to the plugins page &rarr;"
 msgstr ""
@@ -104,6 +106,7 @@ msgstr ""
 #: svn/tags/1.4.2/better-font-awesome.php:337
 #: svn/tags/1.4.3/better-font-awesome.php:337
 #: svn/tags/1.5.0/better-font-awesome.php:337
+#: svn/tags/1.6.0/better-font-awesome.php:337
 #: svn/trunk/better-font-awesome.php:337
 msgid "Save Settings"
 msgstr ""
@@ -133,6 +136,7 @@ msgstr ""
 #: svn/tags/1.4.2/better-font-awesome.php:368
 #: svn/tags/1.4.3/better-font-awesome.php:368
 #: svn/tags/1.5.0/better-font-awesome.php:368
+#: svn/tags/1.6.0/better-font-awesome.php:368
 #: svn/trunk/better-font-awesome.php:368
 msgid "Version"
 msgstr ""
@@ -171,6 +175,7 @@ msgstr ""
 #: svn/tags/1.4.2/better-font-awesome.php:377
 #: svn/tags/1.4.3/better-font-awesome.php:377
 #: svn/tags/1.5.0/better-font-awesome.php:377
+#: svn/tags/1.6.0/better-font-awesome.php:377
 #: svn/trunk/better-font-awesome.php:377
 msgid "Use minified CSS"
 msgstr ""
@@ -209,6 +214,7 @@ msgstr ""
 #: svn/tags/1.4.2/better-font-awesome.php:383
 #: svn/tags/1.4.3/better-font-awesome.php:383
 #: svn/tags/1.5.0/better-font-awesome.php:383
+#: svn/tags/1.6.0/better-font-awesome.php:383
 #: svn/trunk/better-font-awesome.php:383
 msgid ""
 "Whether to include the minified version of the CSS (checked), or the "
@@ -240,6 +246,7 @@ msgstr ""
 #: svn/tags/1.4.2/better-font-awesome.php:389
 #: svn/tags/1.4.3/better-font-awesome.php:389
 #: svn/tags/1.5.0/better-font-awesome.php:389
+#: svn/tags/1.6.0/better-font-awesome.php:389
 #: svn/trunk/better-font-awesome.php:389
 msgid "Remove existing Font Awesome"
 msgstr ""
@@ -269,6 +276,7 @@ msgstr ""
 #: svn/tags/1.4.2/better-font-awesome.php:395
 #: svn/tags/1.4.3/better-font-awesome.php:395
 #: svn/tags/1.5.0/better-font-awesome.php:395
+#: svn/tags/1.6.0/better-font-awesome.php:395
 #: svn/trunk/better-font-awesome.php:395
 msgid ""
 "Attempt to remove Font Awesome CSS and shortcodes added by other plugins "
@@ -292,6 +300,7 @@ msgstr ""
 #: svn/tags/1.4.2/better-font-awesome.php:401
 #: svn/tags/1.4.3/better-font-awesome.php:401
 #: svn/tags/1.5.0/better-font-awesome.php:401
+#: svn/tags/1.6.0/better-font-awesome.php:401
 #: svn/trunk/better-font-awesome.php:401
 msgid "Hide admin notices"
 msgstr ""
@@ -313,6 +322,7 @@ msgstr ""
 #: svn/tags/1.4.2/better-font-awesome.php:407
 #: svn/tags/1.4.3/better-font-awesome.php:407
 #: svn/tags/1.5.0/better-font-awesome.php:407
+#: svn/tags/1.6.0/better-font-awesome.php:407
 #: svn/trunk/better-font-awesome.php:407
 msgid ""
 "Hide the default admin warnings that are shown when API and CDN errors "
@@ -377,6 +387,8 @@ msgstr ""
 #: svn/tags/1.4.3/better-font-awesome.php:506
 #: svn/tags/1.5.0/better-font-awesome.php:480
 #: svn/tags/1.5.0/better-font-awesome.php:506
+#: svn/tags/1.6.0/better-font-awesome.php:480
+#: svn/tags/1.6.0/better-font-awesome.php:506
 #: svn/trunk/better-font-awesome.php:480 svn/trunk/better-font-awesome.php:506
 msgid "Always Latest"
 msgstr ""
@@ -406,6 +418,7 @@ msgstr ""
 #: svn/tags/1.4.2/better-font-awesome.php:540
 #: svn/tags/1.4.3/better-font-awesome.php:540
 #: svn/tags/1.5.0/better-font-awesome.php:540
+#: svn/tags/1.6.0/better-font-awesome.php:540
 #: svn/trunk/better-font-awesome.php:540
 msgid ""
 "Version selection is currently unavailable. The attempt to reach the "
@@ -437,6 +450,7 @@ msgstr ""
 #: svn/tags/1.4.2/better-font-awesome.php:547
 #: svn/tags/1.4.3/better-font-awesome.php:547
 #: svn/tags/1.5.0/better-font-awesome.php:547
+#: svn/tags/1.6.0/better-font-awesome.php:547
 #: svn/trunk/better-font-awesome.php:547
 msgid "Font Awesome will still render using version: %s"
 msgstr ""
@@ -493,6 +507,8 @@ msgstr ""
 #: svn/tags/1.4.3/lib/better-font-awesome-library/better-font-awesome-library.php:1098
 #: svn/tags/1.5.0/better-font-awesome.php:554
 #: svn/tags/1.5.0/lib/better-font-awesome-library/better-font-awesome-library.php:1109
+#: svn/tags/1.6.0/better-font-awesome.php:554
+#: svn/tags/1.6.0/lib/better-font-awesome-library/better-font-awesome-library.php:1109
 #: svn/trunk/better-font-awesome.php:554
 #: svn/trunk/lib/better-font-awesome-library/better-font-awesome-library.php:1109
 msgid ""
@@ -512,6 +528,7 @@ msgstr ""
 #: svn/tags/1.4.2/better-font-awesome.php:601
 #: svn/tags/1.4.3/better-font-awesome.php:601
 #: svn/tags/1.5.0/better-font-awesome.php:601
+#: svn/tags/1.6.0/better-font-awesome.php:601
 #: svn/trunk/better-font-awesome.php:601
 msgid ""
 "<h3>Usage</h3>\n"
@@ -571,6 +588,7 @@ msgstr ""
 #: svn/tags/1.4.2/lib/better-font-awesome-library/better-font-awesome-library.php:493
 #: svn/tags/1.4.3/lib/better-font-awesome-library/better-font-awesome-library.php:493
 #: svn/tags/1.5.0/lib/better-font-awesome-library/better-font-awesome-library.php:493
+#: svn/tags/1.6.0/lib/better-font-awesome-library/better-font-awesome-library.php:493
 #: svn/trunk/lib/better-font-awesome-library/better-font-awesome-library.php:493
 msgid "The jsDelivr API servers appear to be temporarily unavailable."
 msgstr ""
@@ -587,6 +605,7 @@ msgstr ""
 #: svn/tags/1.4.2/lib/better-font-awesome-library/better-font-awesome-library.php:1042
 #: svn/tags/1.4.3/lib/better-font-awesome-library/better-font-awesome-library.php:1042
 #: svn/tags/1.5.0/lib/better-font-awesome-library/better-font-awesome-library.php:1053
+#: svn/tags/1.6.0/lib/better-font-awesome-library/better-font-awesome-library.php:1053
 #: svn/trunk/lib/better-font-awesome-library/better-font-awesome-library.php:1053
 msgid "Insert Icon"
 msgstr ""
@@ -617,6 +636,7 @@ msgstr ""
 #: svn/tags/1.4.2/lib/better-font-awesome-library/better-font-awesome-library.php:1068
 #: svn/tags/1.4.3/lib/better-font-awesome-library/better-font-awesome-library.php:1068
 #: svn/tags/1.5.0/lib/better-font-awesome-library/better-font-awesome-library.php:1079
+#: svn/tags/1.6.0/lib/better-font-awesome-library/better-font-awesome-library.php:1079
 #: svn/trunk/lib/better-font-awesome-library/better-font-awesome-library.php:1079
 msgid "API Error"
 msgstr ""
@@ -647,6 +667,7 @@ msgstr ""
 #: svn/tags/1.4.2/lib/better-font-awesome-library/better-font-awesome-library.php:1070
 #: svn/tags/1.4.3/lib/better-font-awesome-library/better-font-awesome-library.php:1070
 #: svn/tags/1.5.0/lib/better-font-awesome-library/better-font-awesome-library.php:1081
+#: svn/tags/1.6.0/lib/better-font-awesome-library/better-font-awesome-library.php:1081
 #: svn/trunk/lib/better-font-awesome-library/better-font-awesome-library.php:1081
 msgid ""
 "The attempt to reach the jsDelivr API server failed with the following "
@@ -679,6 +700,7 @@ msgstr ""
 #: svn/tags/1.4.2/lib/better-font-awesome-library/better-font-awesome-library.php:1080
 #: svn/tags/1.4.3/lib/better-font-awesome-library/better-font-awesome-library.php:1080
 #: svn/tags/1.5.0/lib/better-font-awesome-library/better-font-awesome-library.php:1091
+#: svn/tags/1.6.0/lib/better-font-awesome-library/better-font-awesome-library.php:1091
 #: svn/trunk/lib/better-font-awesome-library/better-font-awesome-library.php:1091
 msgid "Remote CSS Error"
 msgstr ""
@@ -709,6 +731,7 @@ msgstr ""
 #: svn/tags/1.4.2/lib/better-font-awesome-library/better-font-awesome-library.php:1082
 #: svn/tags/1.4.3/lib/better-font-awesome-library/better-font-awesome-library.php:1082
 #: svn/tags/1.5.0/lib/better-font-awesome-library/better-font-awesome-library.php:1093
+#: svn/tags/1.6.0/lib/better-font-awesome-library/better-font-awesome-library.php:1093
 #: svn/trunk/lib/better-font-awesome-library/better-font-awesome-library.php:1093
 msgid ""
 "The attempt to fetch the remote Font Awesome stylesheet failed with the "
@@ -741,6 +764,7 @@ msgstr ""
 #: svn/tags/1.4.2/lib/better-font-awesome-library/better-font-awesome-library.php:1092
 #: svn/tags/1.4.3/lib/better-font-awesome-library/better-font-awesome-library.php:1092
 #: svn/tags/1.5.0/lib/better-font-awesome-library/better-font-awesome-library.php:1103
+#: svn/tags/1.6.0/lib/better-font-awesome-library/better-font-awesome-library.php:1103
 #: svn/trunk/lib/better-font-awesome-library/better-font-awesome-library.php:1103
 msgid ""
 "<b>Don't worry! Better Font Awesome will still render using the included "
@@ -773,6 +797,7 @@ msgstr ""
 #: svn/tags/1.4.2/lib/better-font-awesome-library/better-font-awesome-library.php:1096
 #: svn/tags/1.4.3/lib/better-font-awesome-library/better-font-awesome-library.php:1096
 #: svn/tags/1.5.0/lib/better-font-awesome-library/better-font-awesome-library.php:1107
+#: svn/tags/1.6.0/lib/better-font-awesome-library/better-font-awesome-library.php:1107
 #: svn/trunk/lib/better-font-awesome-library/better-font-awesome-library.php:1107
 msgid "Solution"
 msgstr ""

@@ -8,11 +8,11 @@ Stable tag: 1.6.0
 License: GPLv2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-[![Build Status](https://travis-ci.org/MickeyKay/better-font-awesome.svg?branch=master)](https://travis-ci.org/MickeyKay/better-font-awesome)
-
 The Better Font Awesome plugin for WordPress. Shortcodes, HTML, TinyMCE, various Font Awesome versions, backwards compatibility, CDN speeds, and more.
 
 == Description ==
+
+[![Build Status](https://travis-ci.org/MickeyKay/better-font-awesome.svg?branch=master)](https://travis-ci.org/MickeyKay/better-font-awesome)
 
 **Do you find this plugin helpful? Please consider [leaving a 5-star review](https://wordpress.org/support/view/plugin-reviews/better-font-awesome).**
 
