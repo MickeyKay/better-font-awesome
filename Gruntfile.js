@@ -86,6 +86,12 @@ module.exports = function( grunt ) {
 	    	},
 	    },
 		copy: {
+			deps: {
+				cwd: 'vendor/mickey-kay/better-font-awesome-library/',
+				src: ['**'],
+				dest: 'lib/',
+				expand: true,
+			}
 			svnAssets: {
 				cwd: 'assets/',
 				src: ['**'],
