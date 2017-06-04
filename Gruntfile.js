@@ -87,11 +87,15 @@ module.exports = function( grunt ) {
 	    },
 		copy: {
 			deps: {
-				cwd: 'vendor/mickey-kay/better-font-awesome-library/',
-				src: ['**'],
+				cwd: 'vendor/',
+				src: [
+					'**',
+					'!composer/**',
+					'!autoload.php'
+				],
 				dest: 'lib/',
 				expand: true,
-			}
+			},
 			svnAssets: {
 				cwd: 'assets/',
 				src: ['**'],
@@ -136,6 +140,8 @@ module.exports = function( grunt ) {
 		'wp_readme_to_markdown',
 		'copy'
 	] );
+
+	grunt.registerTask( 'default', 'build' );
 
 	grunt.util.linefeed = '\n';
 };
