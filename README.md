@@ -4,7 +4,7 @@
 **Donate link:** http://mightyminnow.com  
 **Requires at least:** 3.0  
 **Tested up to:** 4.6  
-**Stable tag:** 1.6.0  
+**Stable tag:** 1.7.0  
 **License:** GPLv2+  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 

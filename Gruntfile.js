@@ -87,12 +87,8 @@ module.exports = function( grunt ) {
 	    },
 		copy: {
 			deps: {
-				cwd: 'vendor/',
-				src: [
-					'**',
-					'!composer/**',
-					'!autoload.php'
-				],
+				cwd: 'vendor/mickey-kay',
+				src: ['**'],
 				dest: 'lib/',
 				expand: true,
 			},
@@ -106,6 +102,7 @@ module.exports = function( grunt ) {
 				src:  [
 					'**',
 					'!node_modules/**',
+					'!vendor/**',
 					'!svn/**',
 					'!.git/**',
 					'!.sass-cache/**',
@@ -119,8 +116,6 @@ module.exports = function( grunt ) {
 					'!.gitignore',
 					'!.gitmodules',
 					'!composer*',
-					'!vendor/autoload.php',
-					'!vendor/composer/**'
 				],
 				dest: 'svn/trunk/',
 			},
