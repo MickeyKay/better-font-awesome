@@ -287,7 +287,7 @@ class Better_Font_Awesome_Plugin {
     private function initialize_better_font_awesome_library( $options ) {
 
         // Hide admin notices if setting is checked.
-        if ( isset( $options['hide_admin_notices'] ) ) {
+        if ( true == $options['hide_admin_notices'] ) {
             add_filter( 'bfa_show_errors', '__return_false' );
         }
 
