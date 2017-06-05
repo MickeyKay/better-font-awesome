@@ -111,7 +111,10 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 == Changelog ==
 
-### 1.7.0 ###
+= 1.7.1 =
+* Fix functionality to hide/show admin notices.
+
+= 1.7.0 =
 * Update fallback Font Awesome to v4.7.0.
 * Switch from using git submodules to composer dependency management for core library inclusion.
 
@@ -235,7 +238,10 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 == Upgrade Notice ==
 
-### 1.7.0 ###
+= 1.7.1 =
+* Fix functionality to hide/show admin notices.
+
+= 1.7.0 =
 * Update fallback Font Awesome to v4.7.0.
 * Switch from using git submodules to composer dependency management for core library inclusion.
 
