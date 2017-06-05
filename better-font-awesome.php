@@ -197,11 +197,24 @@ class Better_Font_Awesome_Plugin {
     }
 
     /**
+     * Get class prop.
+     *
+     * @since 1.7.0
+     *
+     * @param   string  $prop  Prop to fetch.
+     *
+     * @return  mixed          Value of the prop.
+     */
+    public function get( $prop ) {
+    	return $this->$prop;
+    }
+
+    /**
      * Check if the Better Font Awesome Library is included.
      *
      * @since  0.10.0
      */
-    private function bfal_exists() {
+    public function bfal_exists() {
 
         if ( ! is_readable( $this->bfa_lib_file_path ) ) {
             return false;

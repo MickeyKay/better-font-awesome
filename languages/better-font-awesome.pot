@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: Better Font Awesome 1.7.0\n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/better-font-awesome\n"
-"POT-Creation-Date: 2017-06-05 04:30:35+00:00\n"
+"POT-Creation-Date: 2017-06-05 04:48:04+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -500,8 +500,6 @@ msgstr ""
 #: svn/tags/1.7.0/lib/better-font-awesome-library/better-font-awesome-library.php:1109
 #: svn/tags/1.7.0/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1107
 #: svn/trunk/better-font-awesome.php:554
-#: svn/trunk/lib/better-font-awesome-library/better-font-awesome-library.php:1109
-#: svn/trunk/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1107
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1107
 msgid ""
 "This may be the result of a temporary server or connectivity issue which "
@@ -1152,8 +1150,6 @@ msgstr ""
 #: svn/tags/1.6.0/lib/better-font-awesome-library/better-font-awesome-library.php:1079
 #: svn/tags/1.7.0/lib/better-font-awesome-library/better-font-awesome-library.php:1079
 #: svn/tags/1.7.0/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1077
-#: svn/trunk/lib/better-font-awesome-library/better-font-awesome-library.php:1079
-#: svn/trunk/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1077
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1077
 msgid "API Error"
 msgstr ""
@@ -1186,8 +1182,6 @@ msgstr ""
 #: svn/tags/1.6.0/lib/better-font-awesome-library/better-font-awesome-library.php:1081
 #: svn/tags/1.7.0/lib/better-font-awesome-library/better-font-awesome-library.php:1081
 #: svn/tags/1.7.0/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1079
-#: svn/trunk/lib/better-font-awesome-library/better-font-awesome-library.php:1081
-#: svn/trunk/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1079
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1079
 msgid ""
 "The attempt to reach the jsDelivr API server failed with the following "
@@ -1222,8 +1216,6 @@ msgstr ""
 #: svn/tags/1.6.0/lib/better-font-awesome-library/better-font-awesome-library.php:1091
 #: svn/tags/1.7.0/lib/better-font-awesome-library/better-font-awesome-library.php:1091
 #: svn/tags/1.7.0/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1089
-#: svn/trunk/lib/better-font-awesome-library/better-font-awesome-library.php:1091
-#: svn/trunk/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1089
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1089
 msgid "Remote CSS Error"
 msgstr ""
@@ -1256,8 +1248,6 @@ msgstr ""
 #: svn/tags/1.6.0/lib/better-font-awesome-library/better-font-awesome-library.php:1093
 #: svn/tags/1.7.0/lib/better-font-awesome-library/better-font-awesome-library.php:1093
 #: svn/tags/1.7.0/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1091
-#: svn/trunk/lib/better-font-awesome-library/better-font-awesome-library.php:1093
-#: svn/trunk/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1091
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1091
 msgid ""
 "The attempt to fetch the remote Font Awesome stylesheet failed with the "
@@ -1293,8 +1283,6 @@ msgstr ""
 #: svn/tags/1.6.0/lib/better-font-awesome-library/better-font-awesome-library.php:1107
 #: svn/tags/1.7.0/lib/better-font-awesome-library/better-font-awesome-library.php:1107
 #: svn/tags/1.7.0/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1105
-#: svn/trunk/lib/better-font-awesome-library/better-font-awesome-library.php:1107
-#: svn/trunk/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1105
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1105
 msgid "Solution"
 msgstr ""
@@ -1326,8 +1314,6 @@ msgstr ""
 #: svn/tags/1.6.0/lib/better-font-awesome-library/better-font-awesome-library.php:493
 #: svn/tags/1.7.0/lib/better-font-awesome-library/better-font-awesome-library.php:493
 #: svn/tags/1.7.0/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:491
-#: svn/trunk/lib/better-font-awesome-library/better-font-awesome-library.php:493
-#: svn/trunk/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:491
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:491
 msgid "The jsDelivr API servers appear to be temporarily unavailable."
 msgstr ""
@@ -1359,8 +1345,6 @@ msgstr ""
 #: svn/tags/1.6.0/lib/better-font-awesome-library/better-font-awesome-library.php:1103
 #: svn/tags/1.7.0/lib/better-font-awesome-library/better-font-awesome-library.php:1103
 #: svn/tags/1.7.0/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1101
-#: svn/trunk/lib/better-font-awesome-library/better-font-awesome-library.php:1103
-#: svn/trunk/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1101
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1101
 msgid ""
 "<b>Don't worry! Better Font Awesome will still render using the included "
@@ -1381,8 +1365,6 @@ msgstr ""
 #: svn/tags/1.6.0/lib/better-font-awesome-library/better-font-awesome-library.php:1053
 #: svn/tags/1.7.0/lib/better-font-awesome-library/better-font-awesome-library.php:1053
 #: svn/tags/1.7.0/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1051
-#: svn/trunk/lib/better-font-awesome-library/better-font-awesome-library.php:1053
-#: svn/trunk/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1051
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1051
 msgid "Insert Icon"
 msgstr ""
