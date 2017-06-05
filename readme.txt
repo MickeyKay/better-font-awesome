@@ -1,9 +1,9 @@
 === Better Font Awesome ===
-Contributors: McGuive7, MIGHTYminnow
+Contributors: McGuive7
 Tags: better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode
-Donate link: http://mightyminnow.com
+Donate link: http://mickeykay.me
 Requires at least: 3.0
-Tested up to: 4.6
+Tested up to: 4.9
 Stable tag: 1.7.0
 License: GPLv2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -110,6 +110,10 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 == Changelog ==
+
+### 1.7.0 ###
+* Update fallback Font Awesome to v4.7.0.
+* Switch from using git submodules to composer dependency management for core library inclusion.
 
 = 1.6.0 =
 * Update fallback Font Awesome to v4.6.3.
@@ -230,6 +234,10 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 == Upgrade Notice ==
+
+### 1.7.0 ###
+* Update fallback Font Awesome to v4.7.0.
+* Switch from using git submodules to composer dependency management for core library inclusion.
 
 = 1.6.0 =
 * Update fallback Font Awesome to v4.6.3.

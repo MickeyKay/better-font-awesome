@@ -3,18 +3,18 @@
  * Better Font Awesome
  *
  * @package   Better Font Awesome
- * @author    Mickey Kay & MIGHTYminnow <mickey@mickeykaycreative.com>
+ * @author    Mickey Kay <mickeykay.me>
  * @license   GPL-2.0+
  * @link      http://wordpress.org/plugins/better-font-awesome
- * @copyright 2014 MIGHTYminnow & Mickey Kay
+ * @copyright 2017 Mickey Kay
  *
  * @wordpress-plugin
  * Plugin Name:       Better Font Awesome
  * Plugin URI:        http://wordpress.org/plugins/better-font-awesome
  * Description:       The ultimate Font Awesome icon plugin for WordPress.
  * Version:           1.7.0
- * Author:            MIGHTYminnow & Mickey Kay
- * Author URI:        mickey@mickeykaycreative.com
+ * Author:            Mickey Kay
+ * Author URI:        mickeyskay@gmail.com
  * License:           GPLv2+
  * Text Domain:       better-font-awesome
  * Domain Path:       /languages
