@@ -12,7 +12,7 @@
  * Plugin Name:       Better Font Awesome
  * Plugin URI:        http://wordpress.org/plugins/better-font-awesome
  * Description:       The ultimate Font Awesome icon plugin for WordPress.
- * Version:           1.7.0
+ * Version:           1.7.1
  * Author:            Mickey Kay
  * Author URI:        mickeyskay@gmail.com
  * License:           GPLv2+
@@ -287,7 +287,7 @@ class Better_Font_Awesome_Plugin {
     private function initialize_better_font_awesome_library( $options ) {
 
         // Hide admin notices if setting is checked.
-        if ( isset( $options['hide_admin_notices'] ) ) {
+        if ( true == $options['hide_admin_notices'] ) {
             add_filter( 'bfa_show_errors', '__return_false' );
         }
 
