@@ -86,6 +86,12 @@ module.exports = function( grunt ) {
 	    	},
 	    },
 		copy: {
+			composerDeps: {
+				src: [
+					'vendor/mickey-kay/**'
+				],
+				dest: 'svn/trunk/'
+			},
 			svnAssets: {
 				cwd: 'assets/',
 				src: ['**'],
@@ -96,9 +102,14 @@ module.exports = function( grunt ) {
 				src:  [
 					'**',
 					'!node_modules/**',
+					'!vendor/**',
 					'!svn/**',
 					'!.git/**',
+					'!.gitignore',
+					'!.gitmodules',
 					'!.sass-cache/**',
+					'!bin/**',
+					'!tests/**',
 					'!css/src/**',
 					'!js/src/**',
 					'!img/src/**',
@@ -106,11 +117,7 @@ module.exports = function( grunt ) {
 					'!design/**',
 					'!Gruntfile.js',
 					'!package.json',
-					'!.gitignore',
-					'!.gitmodules',
 					'!composer*',
-					'!vendor/autoload.php',
-					'!vendor/composer/**'
 				],
 				dest: 'svn/trunk/',
 			},
@@ -130,6 +137,8 @@ module.exports = function( grunt ) {
 		'wp_readme_to_markdown',
 		'copy'
 	] );
+
+	grunt.registerTask( 'default', 'build' );
 
 	grunt.util.linefeed = '\n';
 };

@@ -1,4 +1,0 @@
-[submodule "lib/better-font-awesome-library"]
-	path = lib/better-font-awesome-library
-	url = https://github.com/MickeyKay/better-font-awesome-library.git
-	branch = master

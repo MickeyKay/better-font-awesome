@@ -1,0 +1,40 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "715604b93e0c8733d0347eb1cae4dcd6",
+    "packages": [
+        {
+            "name": "mickey-kay/better-font-awesome-library",
+            "version": "v1.4.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/MickeyKay/better-font-awesome-library.git",
+                "reference": "8200b5c5f3c86628b83dd436b0d33a6d6d99b54f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/8200b5c5f3c86628b83dd436b0d33a6d6d99b54f",
+                "reference": "8200b5c5f3c86628b83dd436b0d33a6d6d99b54f",
+                "shasum": ""
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0"
+            ],
+            "description": "Better Font Awesome Library for PHP",
+            "time": "2017-06-04T18:42:24+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": []
+}

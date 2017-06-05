@@ -3,18 +3,18 @@
  * Better Font Awesome
  *
  * @package   Better Font Awesome
- * @author    Mickey Kay & MIGHTYminnow <mickey@mickeykaycreative.com>
+ * @author    Mickey Kay <mickeykay.me>
  * @license   GPL-2.0+
  * @link      http://wordpress.org/plugins/better-font-awesome
- * @copyright 2014 MIGHTYminnow & Mickey Kay
+ * @copyright 2017 Mickey Kay
  *
  * @wordpress-plugin
  * Plugin Name:       Better Font Awesome
  * Plugin URI:        http://wordpress.org/plugins/better-font-awesome
  * Description:       The ultimate Font Awesome icon plugin for WordPress.
- * Version:           1.6.0
- * Author:            MIGHTYminnow & Mickey Kay
- * Author URI:        mickey@mickeykaycreative.com
+ * Version:           1.7.0
+ * Author:            Mickey Kay
+ * Author URI:        mickeyskay@gmail.com
  * License:           GPLv2+
  * Text Domain:       better-font-awesome
  * Domain Path:       /languages
@@ -189,7 +189,7 @@ class Better_Font_Awesome_Plugin {
         $this->option_name = self::SLUG . '_options';
 
         // Set up main Better Font Awesome Library file path.
-        $this->bfa_lib_file_path = plugin_dir_path( __FILE__ ) . 'lib/better-font-awesome-library/better-font-awesome-library.php';
+        $this->bfa_lib_file_path = plugin_dir_path( __FILE__ ) . 'vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php';
 
         // Get plugin options, and populate defaults as needed.
         $this->initialize_options( $this->option_name );
@@ -197,11 +197,24 @@ class Better_Font_Awesome_Plugin {
     }
 
     /**
+     * Get class prop.
+     *
+     * @since 1.7.0
+     *
+     * @param   string  $prop  Prop to fetch.
+     *
+     * @return  mixed          Value of the prop.
+     */
+    public function get( $prop ) {
+    	return $this->$prop;
+    }
+
+    /**
      * Check if the Better Font Awesome Library is included.
      *
      * @since  0.10.0
      */
-    private function bfal_exists() {
+    public function bfal_exists() {
 
         if ( ! is_readable( $this->bfa_lib_file_path ) ) {
             return false;
@@ -221,7 +234,7 @@ class Better_Font_Awesome_Plugin {
         deactivate_plugins( plugin_basename( __FILE__ ) );
 
         $message = '<h2>' . __( 'Better Font Awesome', 'better-font-awesome' ) . '</h2>';
-            $message .= '<p>' . __( 'It appears that Better Font Awesome is missing it\'s <a href="https://github.com/MickeyKay/better-font-awesome-library" target="_blank">core library</a>, which typically occurs when cloning the Git repository and not updating all submodules. Please refer to the plugin\'s <a href="https://github.com/MickeyKay/better-font-awesome" target="_blank">installation instructions</a> for details on how to properly install Better Font Awesome via Git. If you installed from within WordPress, or via the wordpress.org repo, then chances are the install failed and you can try again. If the issue persists, please create a new topic on the plugin\'s <a href="http://wordpress.org/support/plugin/better-font-awesome" target="_blank">support forum</a> or file an issue on the <a href="https://github.com/MickeyKay/better-font-awesome/issues" target="_blank">Github repo</a>.' , 'better-font-awesome' ) . '</p>';
+            $message .= '<p>' . __( 'It appears that Better Font Awesome is missing it\'s <a href="https://github.com/MickeyKay/better-font-awesome-library" target="_blank">core library</a>, which typically occurs when cloning the Git repository and failing to run <code>composer install</code>. Please refer to the plugin\'s <a href="https://github.com/MickeyKay/better-font-awesome" target="_blank">installation instructions</a> for details on how to properly install Better Font Awesome via Git. If you installed from within WordPress, or via the wordpress.org repo, then chances are the install failed and you can try again. If the issue persists, please create a new topic on the plugin\'s <a href="http://wordpress.org/support/plugin/better-font-awesome" target="_blank">support forum</a> or file an issue on the <a href="https://github.com/MickeyKay/better-font-awesome/issues" target="_blank">Github repo</a>.' , 'better-font-awesome' ) . '</p>';
             $message .= '<p><a href="' . get_admin_url( null, 'plugins.php' ) . '">' . __( 'Back to the plugins page &rarr;', 'better-font-awesome' ) . '</a></p>';
 
             wp_die( $message );
