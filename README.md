@@ -1,12 +1,12 @@
 # Better Font Awesome #
-**Contributors:** [McGuive7](https://profiles.wordpress.org/McGuive7), [MIGHTYminnow](https://profiles.wordpress.org/MIGHTYminnow)  
-**Tags:** better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode  
-**Donate link:** http://mightyminnow.com  
-**Requires at least:** 3.0  
-**Tested up to:** 4.6  
-**Stable tag:** 1.7.0  
-**License:** GPLv2+  
-**License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
+**Contributors:** [McGuive7](https://profiles.wordpress.org/McGuive7), [MIGHTYminnow](https://profiles.wordpress.org/MIGHTYminnow)
+**Tags:** better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode
+**Donate link:** http://mightyminnow.com
+**Requires at least:** 3.0
+**Tested up to:** 4.6
+**Stable tag:** 1.7.0
+**License:** GPLv2+
+**License URI:** http://www.gnu.org/licenses/gpl-2.0.html
 
 The Better Font Awesome plugin for WordPress. Shortcodes, HTML, TinyMCE, various Font Awesome versions, backwards compatibility, CDN speeds, and more.
 
@@ -110,6 +110,10 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 ## Changelog ##
+
+### 1.7.0 ###
+* Update fallback Font Awesome to v4.7.0.
+* Switch from using git submodules to composer dependency management for core library inclusion.
 
 ### 1.6.0 ###
 * Update fallback Font Awesome to v4.6.3.
@@ -230,6 +234,10 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 ## Upgrade Notice ##
+
+### 1.7.0 ###
+* Update fallback Font Awesome to v4.7.0.
+* Switch from using git submodules to composer dependency management for core library inclusion.
 
 ### 1.6.0 ###
 * Update fallback Font Awesome to v4.6.3.
