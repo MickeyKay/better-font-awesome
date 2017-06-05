@@ -189,7 +189,7 @@ class Better_Font_Awesome_Plugin {
         $this->option_name = self::SLUG . '_options';
 
         // Set up main Better Font Awesome Library file path.
-        $this->bfa_lib_file_path = plugin_dir_path( __FILE__ ) . 'lib/better-font-awesome-library/better-font-awesome-library.php';
+        $this->bfa_lib_file_path = plugin_dir_path( __FILE__ ) . 'vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php';
 
         // Get plugin options, and populate defaults as needed.
         $this->initialize_options( $this->option_name );

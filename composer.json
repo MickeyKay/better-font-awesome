@@ -1,8 +1,8 @@
 {
 	"name": "mickey-kay/better-font-awesome",
 	"description": "Better Font Awesome",
-	"license": "GPL-2.0"
-    "require": {
-        "mickey-kay/better-font-awesome-library": "1.4.6"
-    }
+	"license": "GPL-2.0",
+	"require": {
+		"mickey-kay/better-font-awesome-library": "1.4.6"
+	}
 }
