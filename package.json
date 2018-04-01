@@ -1,8 +1,14 @@
 {
   "title": "Better Font Awesome",
   "description": "The best WordPress extension ever made!",
-  "version": "1.7.1",
+  "version": "0.0.0-beta-test",
   "homepage": "http://wordpress.org/plugins/better-font-awesome",
+  "scripts": {
+    "composer": "composer install",
+    "grunt": "grunt build",
+    "clean": "rm -rf svn && rm -rf vendor",
+    "build": "npm run clean && npm run composer && npm run grunt"
+  },
   "author": {
     "name": "MIGHTYminnow Web Studio & School",
     "email": "info@mightyminnow.com",

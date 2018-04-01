@@ -4,7 +4,7 @@
 **Donate link:** http://mickeykay.me  
 **Requires at least:** 3.0  
 **Tested up to:** 4.9  
-**Stable tag:** 1.7.1  
+**Stable tag:** 0.0.0-beta-test  
 **License:** GPLv2+  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -110,6 +110,9 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 ## Changelog ##
+
+### 1.7.1 ###
+* Fix functionality to hide/show admin notices.
 
 ### 1.7.0 ###
 * Update fallback Font Awesome to v4.7.0.
@@ -234,6 +237,9 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 ## Upgrade Notice ##
+
+### 1.7.1 ###
+* Fix functionality to hide/show admin notices.
 
 ### 1.7.0 ###
 * Update fallback Font Awesome to v4.7.0.
