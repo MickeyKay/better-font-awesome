@@ -4,7 +4,7 @@ Tags: better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode
 Donate link: http://mickeykay.me
 Requires at least: 3.0
 Tested up to: 4.9
-Stable tag: 2.0.0-beta1
+Stable tag: 1.7.1
 License: GPLv2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
