@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "240ac77cf59f6239b462e5f2cc466502",
+    "content-hash": "12e4dd27497ddba78ada5e7664d72d6e",
     "packages": [
         {
             "name": "mickey-kay/better-font-awesome-library",
