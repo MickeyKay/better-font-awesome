@@ -4,33 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "240ac77cf59f6239b462e5f2cc466502",
+    "content-hash": "2af966f91fba481aec1dcf6e1531d0f0",
     "packages": [
-        {
-            "name": "mickey-kay/better-font-awesome-library",
-            "version": "v2.0.0-beta1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/MickeyKay/better-font-awesome-library.git",
-                "reference": "e1a05e6a6cece2f2f02a26a0b41d312393b17740"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/e1a05e6a6cece2f2f02a26a0b41d312393b17740",
-                "reference": "e1a05e6a6cece2f2f02a26a0b41d312393b17740",
-                "shasum": ""
-            },
-            "require": {
-                "mustangostang/spyc": "^0.6.2"
-            },
-            "type": "library",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-2.0"
-            ],
-            "description": "Better Font Awesome Library for PHP",
-            "time": "2018-04-09T04:27:27+00:00"
-        },
         {
             "name": "mustangostang/spyc",
             "version": "0.6.2",
@@ -85,9 +60,7 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "mickey-kay/better-font-awesome-library": 10
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
