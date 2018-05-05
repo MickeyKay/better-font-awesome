@@ -31,6 +31,12 @@ module.exports = function( grunt ) {
 							type:    'input',
 							message: 'What specific version would you like',
 							default: '<%= pkg.version %>'
+						},
+						{
+							config:  'updateStable',
+							type:    'confirm',
+							message: 'Bump stable version?',
+							default: false
 						}
 					]
 				}
@@ -42,7 +48,7 @@ module.exports = function( grunt ) {
    				overwrite: true,
     			replacements: [
 	    			{
-	    				  "version": "1.0.0",
+	    				"version": "1.0.0",
 	    				from: /("version":\s*).*,\n/g,
 	    				to: '$1"<%= newVersion %>",\n'
 	    			}
@@ -53,8 +59,10 @@ module.exports = function( grunt ) {
    				overwrite: true,
     			replacements: [
 	    			{
-	    				from: /(Stable tag:\s*).*\n/g,
-	    				to: '$1<%= newVersion %>\n'
+	    				from: /(Stable tag:\s*)(.*)(\n)/g,
+	    				to: function(matchedText, index, fullText, regexMatches) {
+	    					return grunt.config('updateStable') ? regexMatches[0] + grunt.config('newVersion') + regexMatches[2]: matchedText;
+	    				}
 	    			}
     			]
 			},
@@ -83,6 +91,17 @@ module.exports = function( grunt ) {
 	    		files: {
 	    			'readme.md': 'readme.txt'
 	    		},
+	    		options: {
+		    		post_convert: function(text) {
+		    			var prefix = [
+		    				'[![Build Status](https://travis-ci.org/MickeyKay/better-font-awesome.svg?branch=master)](https://travis-ci.org/MickeyKay/better-font-awesome)',
+		    				'[![Downloads](https://img.shields.io/wordpress/plugin/dt/better-font-awesome.svg)](https://wordpress.org/plugins/better-font-awesome/)',
+		    				'[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)'
+		    			].join(' ');
+
+						return [prefix,text].join('\n\n');
+		    		}
+		    	}
 	    	},
 	    },
 		copy: {
