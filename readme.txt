@@ -1,7 +1,7 @@
 === Better Font Awesome ===
 Contributors: McGuive7
 Tags: better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode
-Donate link: http://mickeykay.me
+Donate link: https://mickeykay.me
 Requires at least: 3.0
 Tested up to: 4.9
 Stable tag: 1.7.1
