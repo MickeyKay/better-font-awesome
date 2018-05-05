@@ -111,6 +111,7 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 = 2.0.0 =
 * Add support for Font Awesome 5
+* Add upgrade logic to map legacy icons to current versions
 
 = 1.7.1 =
 * Fix functionality to hide/show admin notices.
@@ -241,6 +242,7 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 = 2.0.0 =
 * Add support for Font Awesome 5
+* Add upgrade logic to map legacy icons to current versions
 
 = 1.7.1 =
 * Fix functionality to hide/show admin notices.
