@@ -1,5 +1,7 @@
 === Better Font Awesome ===
+
 [![Build Status](https://travis-ci.org/MickeyKay/better-font-awesome.svg?branch=master)](https://travis-ci.org/MickeyKay/better-font-awesome)
+
 **Contributors:** [McGuive7](https://profiles.wordpress.org/McGuive7)
 **Tags:** better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode
 **Donate link:** http://mickeykay.me
