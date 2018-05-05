@@ -53,23 +53,23 @@
     },
     {
         "name": "mickey-kay/better-font-awesome-library",
-        "version": "v2.0.0-beta1",
-        "version_normalized": "2.0.0.0-beta1",
+        "version": "v2.0.0-beta2",
+        "version_normalized": "2.0.0.0-beta2",
         "source": {
             "type": "git",
             "url": "https://github.com/MickeyKay/better-font-awesome-library.git",
-            "reference": "e1a05e6a6cece2f2f02a26a0b41d312393b17740"
+            "reference": "680c949f51f8f957dfc6f75dce56a6ff3b039447"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/e1a05e6a6cece2f2f02a26a0b41d312393b17740",
-            "reference": "e1a05e6a6cece2f2f02a26a0b41d312393b17740",
+            "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/680c949f51f8f957dfc6f75dce56a6ff3b039447",
+            "reference": "680c949f51f8f957dfc6f75dce56a6ff3b039447",
             "shasum": ""
         },
         "require": {
             "mustangostang/spyc": "^0.6.2"
         },
-        "time": "2018-04-09T04:27:27+00:00",
+        "time": "2018-05-05T18:55:56+00:00",
         "type": "library",
         "installation-source": "dist",
         "notification-url": "https://packagist.org/downloads/",

@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "12e4dd27497ddba78ada5e7664d72d6e",
+    "content-hash": "f5c37a89c39135be431e6ded88ae2ad1",
     "packages": [
         {
             "name": "mickey-kay/better-font-awesome-library",
-            "version": "v2.0.0-beta1",
+            "version": "v2.0.0-beta2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MickeyKay/better-font-awesome-library.git",
-                "reference": "e1a05e6a6cece2f2f02a26a0b41d312393b17740"
+                "reference": "680c949f51f8f957dfc6f75dce56a6ff3b039447"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/e1a05e6a6cece2f2f02a26a0b41d312393b17740",
-                "reference": "e1a05e6a6cece2f2f02a26a0b41d312393b17740",
+                "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/680c949f51f8f957dfc6f75dce56a6ff3b039447",
+                "reference": "680c949f51f8f957dfc6f75dce56a6ff3b039447",
                 "shasum": ""
             },
             "require": {
@@ -29,7 +29,7 @@
                 "GPL-2.0"
             ],
             "description": "Better Font Awesome Library for PHP",
-            "time": "2018-04-09T04:27:27+00:00"
+            "time": "2018-05-05T18:55:56+00:00"
         },
         {
             "name": "mustangostang/spyc",
