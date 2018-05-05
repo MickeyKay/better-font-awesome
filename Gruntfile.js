@@ -31,6 +31,12 @@ module.exports = function( grunt ) {
 							type:    'input',
 							message: 'What specific version would you like',
 							default: '<%= pkg.version %>'
+						},
+						{
+							config:  'updateStable',
+							type:    'confirm',
+							message: 'Bump stable version?',
+							default: false
 						}
 					]
 				}
@@ -42,7 +48,7 @@ module.exports = function( grunt ) {
    				overwrite: true,
     			replacements: [
 	    			{
-	    				  "version": "1.0.0",
+	    				"version": "1.0.0",
 	    				from: /("version":\s*).*,\n/g,
 	    				to: '$1"<%= newVersion %>",\n'
 	    			}
@@ -54,7 +60,9 @@ module.exports = function( grunt ) {
     			replacements: [
 	    			{
 	    				from: /(Stable tag:\s*).*\n/g,
-	    				to: '$1<%= newVersion %>\n'
+	    				to: function(origVersion) {
+	    					return updateStable ? '$1<%= newVersion %>\n' : origVersion;
+	    				}
 	    			}
     			]
 			},
