@@ -59,9 +59,9 @@ module.exports = function( grunt ) {
    				overwrite: true,
     			replacements: [
 	    			{
-	    				from: /(Stable tag:\s*).*\n/g,
-	    				to: function(origVersion) {
-	    					return updateStable ? '$1<%= newVersion %>\n' : origVersion;
+	    				from: /(Stable tag:\s*)(.*)(\n)/g,
+	    				to: function(matchedText, index, fullText, regexMatches) {
+	    					return grunt.config('updateStable') ? regexMatches[0] + grunt.config('newVersion') + regexMatches[2]: matchedText;
 	    				}
 	    			}
     			]
