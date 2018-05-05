@@ -13,7 +13,7 @@
   "author": {
     "name": "Mickey Kay",
     "email": "mickeyskay@gmail.com",
-    "url": "mickeykay.me"
+    "url": "https://mickeykay.me/"
   },
   "devDependencies": {
     "grunt": "latest",
