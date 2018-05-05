@@ -91,6 +91,16 @@ module.exports = function( grunt ) {
 	    		files: {
 	    			'readme.md': 'readme.txt'
 	    		},
+	    		options: {
+		    		post_convert: function(text) {
+		    			var prefix = [
+		    				'[![Build Status](https://travis-ci.org/MickeyKay/better-font-awesome.svg?branch=master)](https://travis-ci.org/MickeyKay/better-font-awesome)',
+		    				'[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)'
+		    			].join(' ');
+
+						return [prefix,text].join('\n\n');
+		    		}
+		    	}
 	    	},
 	    },
 		copy: {
