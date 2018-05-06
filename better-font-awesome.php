@@ -147,6 +147,8 @@ class Better_Font_Awesome_Plugin {
      */
     function __construct() {
 
+        error_log( print_r('CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC', true) );
+
         // Perform plugin initialization actions.
         $this->initialize();
 
@@ -182,6 +184,8 @@ class Better_Font_Awesome_Plugin {
      */
     private function initialize() {
 
+
+
         // Set display name.
         $this->plugin_display_name = __( 'Better Font Awesome', 'better-font-awesome' );
 
@@ -192,7 +196,7 @@ class Better_Font_Awesome_Plugin {
         $this->bfa_lib_file_path = plugin_dir_path( __FILE__ ) . 'vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php';
 
         // Get plugin options, and populate defaults as needed.
-        $this->initialize_options( $this->option_name );
+        $this->initialize_options();
 
     }
 
@@ -260,7 +264,7 @@ class Better_Font_Awesome_Plugin {
      *
      * @return  array  Plugin options.
      */
-    private function initialize_options( $option_name ) {
+    private function initialize_options() {
 
         /**
          * Get plugin options.
@@ -268,11 +272,13 @@ class Better_Font_Awesome_Plugin {
          * Run maybe_unserialize() in case we're updating from the old
          * serialized Titan Framwork option to a new, array-based options.
          */
-        $this->options = maybe_unserialize( get_option( $option_name ) );
+        $this->options = maybe_unserialize( get_option( $this->option_name ) );
+
+        error_log( print_r($this->options, true) );
 
         // Initialize the plugin options with defaults if they're not set.
         if ( empty( $this->options ) ) {
-            update_option( $option_name, $this->option_defaults );
+            update_option( $this->option_name, $this->option_defaults );
         }
 
     }
@@ -376,51 +382,62 @@ class Better_Font_Awesome_Plugin {
             self::SLUG // Page
         );
 
-        add_settings_field(
-            'version', // ID
-            __( 'Version', 'better-font-awesome' ), // Title
-            array( $this, 'version_callback' ), // Callback
-            self::SLUG, // Page
-            'settings_section_primary', // Section
-            $this->get_versions_list() // Args
-        );
-
-        add_settings_field(
-            'minified',
-            __( 'Use minified CSS', 'better-font-awesome' ),
-            array( $this, 'checkbox_callback' ),
-            self::SLUG,
-            'settings_section_primary',
+        $settings_fields = array(
             array(
-                'id' => 'minified',
-                'description' => __( 'Whether to include the minified version of the CSS (checked), or the unminified version (unchecked).', 'better-font-awesome' ),
-            )
-        );
-
-        add_settings_field(
-            'remove_existing_fa',
-            __( 'Remove existing Font Awesome', 'better-font-awesome' ),
-            array( $this, 'checkbox_callback' ),
-            self::SLUG,
-            'settings_section_primary',
+                'version', // ID
+                __( 'Version', 'better-font-awesome' ), // Title
+                array( $this, 'version_callback' ), // Callback
+                self::SLUG, // Page
+                'settings_section_primary', // Section
+                $this->get_versions_list() // Args
+            ),
             array(
-                'id' => 'remove_existing_fa',
-                'description' => __( 'Attempt to remove Font Awesome CSS and shortcodes added by other plugins and themes.', 'better-font-awesome' ),
-            )
-        );
-
-        add_settings_field(
-            'hide_admin_notices',
-            __( 'Hide admin notices', 'better-font-awesome' ),
-            array( $this, 'checkbox_callback' ),
-            self::SLUG,
-            'settings_section_primary',
+                'minified',
+                __( 'Use minified CSS', 'better-font-awesome' ),
+                array( $this, 'checkbox_callback' ),
+                self::SLUG,
+                'settings_section_primary',
+                array(
+                    'id' => 'minified',
+                    'description' => __( 'Whether to include the minified version of the CSS (checked), or the unminified version (unchecked).', 'better-font-awesome' ),
+                )
+            ),
             array(
-                'id' => 'hide_admin_notices',
-                'description' => __( 'Hide the default admin warnings that are shown when API and CDN errors occur.', 'better-font-awesome' ),
-            )
+                'remove_existing_fa',
+                __( 'Remove existing Font Awesome', 'better-font-awesome' ),
+                array( $this, 'checkbox_callback' ),
+                self::SLUG,
+                'settings_section_primary',
+                array(
+                    'id' => 'remove_existing_fa',
+                    'description' => __( 'Attempt to remove Font Awesome CSS and shortcodes added by other plugins and themes.', 'better-font-awesome' ),
+                )
+            ),
+            array(
+                'hide_admin_notices',
+                __( 'Hide admin notices', 'better-font-awesome' ),
+                array( $this, 'checkbox_callback' ),
+                self::SLUG,
+                'settings_section_primary',
+                array(
+                    'id' => 'hide_admin_notices',
+                    'description' => __( 'Hide the default admin warnings that are shown when API and CDN errors occur.', 'better-font-awesome' ),
+                )
+            ),
         );
 
+        /**
+         * Filter settings fields array.
+         *
+         * @var array
+         */
+        $settings_fields = apply_filters( 'bfa_settings_fields', $settings_fields, $this->options );
+
+
+
+        foreach ( $settings_fields as $settings_field ) {
+            call_user_func_array( 'add_settings_field', $settings_field  );
+        }
     }
 
     /**
@@ -468,9 +485,17 @@ class Better_Font_Awesome_Plugin {
             'remove_existing_fa' => $_POST['remove_existing_fa'],
             'hide_admin_notices' => $_POST['hide_admin_notices'],
         );
+update_option( $this->option_name, 'aasdgads');
+        $options = apply_filters( 'bfa_save_options', $options );
 
-        // Sanitize and update the options.
-        update_option( $this->option_name, $options );
+        // error_log( print_r('Options', true) );
+        // error_log( print_r($options, true) );
+
+        // // Sanitize and update the options.
+        // update_option( $this->option_name, $options );
+
+        // error_log( print_r('Get option', true) );
+        // error_log( print_r(get_option($this->option_name), true) );
 
         // Return a message.
         echo '<div class="updated"><p>' . esc_html( 'Settings saved.', 'better-font-awesome' ) . '</p></div>';
@@ -627,30 +652,30 @@ class Better_Font_Awesome_Plugin {
     /**
      * Sanitize each settings field as needed.
      *
-     * @param  array  $input  Contains all settings fields as array keys.
+     * @param  array  $inputs  Contains all settings fields as array keys.
      */
-    public function sanitize( $input ) {
+    public function sanitize( $inputs ) {
 
-        $new_input = array();
+        $sanitized_inputs = array();
 
         // Sanitize options to match their type
-        if ( isset( $input['version'] ) ) {
-            $new_input['version'] = sanitize_text_field( $input['version'] );
+        if ( isset( $inputs['version'] ) ) {
+            $sanitized_inputs['version'] = sanitize_text_field( $inputs['version'] );
         }
 
-        if ( isset( $input['minified'] ) ) {
-            $new_input['minified'] = absint( $input['minified'] );
+        if ( isset( $inputs['minified'] ) ) {
+            $sanitized_inputs['minified'] = absint( $inputs['minified'] );
         }
 
-        if ( isset( $input['remove_existing_fa'] ) ) {
-            $new_input['remove_existing_fa'] = absint( $input['remove_existing_fa'] );
+        if ( isset( $inputs['remove_existing_fa'] ) ) {
+            $sanitized_inputs['remove_existing_fa'] = absint( $inputs['remove_existing_fa'] );
         }
 
-        if ( isset( $input['hide_admin_notices'] ) ) {
-            $new_input['hide_admin_notices'] = absint( $input['hide_admin_notices'] );
+        if ( isset( $inputs['hide_admin_notices'] ) ) {
+            $sanitized_inputs['hide_admin_notices'] = absint( $inputs['hide_admin_notices'] );
         }
 
-        return $new_input;
+        return do_action( 'bfa_sanitize_option_inputs', $inputs, $sanitized_inputs );
 
     }
 
