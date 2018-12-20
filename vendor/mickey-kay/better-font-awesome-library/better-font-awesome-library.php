@@ -550,6 +550,10 @@ class Better_Font_Awesome_Library {
 
 		$url = self::JSDELIVR_ICON_METADATA_BASE_URL . $version . self::JSDELIVR_ICON_METADATA_FILE_PATH;
 
+		if ( version_compare( $version, '5.5.0', '>' ) ) {
+		    $url = str_replace( 'advanced-options/', '', $url );
+        }
+
 		if ( false === ( $response = get_transient( $transient_slug ) ) ) {
 
 			$response = wp_remote_get( $url, $this->wp_remote_get_args );
@@ -689,7 +693,9 @@ class Better_Font_Awesome_Library {
 	 * @param  string  $version  Version of Font Awesome to use.
 	 */
 	private function set_stylesheet_url( $version ) {
-		if ( version_compare( $version, '5.0.0', '>=' ) ) {
+	    if ( version_compare( $version, '5.5.0', '>' ) ) {
+	        $this->stylesheet_url = '//cdn.jsdelivr.net/gh/FortAwesome/Font-Awesome@'. $version . '/css/all' . $this->get_min_suffix() . '.css';
+        } else if ( version_compare( $version, '5.0.0', '>=' ) ) {
 			$this->stylesheet_url = '//cdn.jsdelivr.net/gh/FortAwesome/Font-Awesome@' . $version . '/web-fonts-with-css/css/fontawesome-all' . $this->get_min_suffix() . '.css';
 		} else {
 			$this->stylesheet_url = '//cdn.jsdelivr.net/fontawesome/' . $version . '/css/font-awesome' . $this->get_min_suffix() . '.css';
