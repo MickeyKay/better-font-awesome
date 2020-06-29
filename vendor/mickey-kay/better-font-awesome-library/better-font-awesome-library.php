@@ -56,7 +56,7 @@ class Better_Font_Awesome_Library {
 	 *
 	 * @var    string
 	 */
-	const JSDELIVR_ICON_METADATA_BASE_URL = 'https://cdn.jsdelivr.net/gh/FortAwesome/Font-Awesome@';
+	const JSDELIVR_ICON_METADATA_BASE_URL = 'https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@';
 
 	/**
 	 * jsDelivr API file path for Font Awesome icon metadata.
@@ -67,7 +67,7 @@ class Better_Font_Awesome_Library {
 	 *
 	 * @var    string
 	 */
-	const JSDELIVR_ICON_METADATA_FILE_PATH = '/advanced-options/metadata/icons.yml';
+	const JSDELIVR_ICON_METADATA_FILE_PATH = '/metadata/icons.yml';
 
 	/**
 	 * Initialization args.
@@ -690,7 +690,7 @@ class Better_Font_Awesome_Library {
 	 */
 	private function set_stylesheet_url( $version ) {
 		if ( version_compare( $version, '5.0.0', '>=' ) ) {
-			$this->stylesheet_url = '//cdn.jsdelivr.net/gh/FortAwesome/Font-Awesome@' . $version . '/web-fonts-with-css/css/fontawesome-all' . $this->get_min_suffix() . '.css';
+			$this->stylesheet_url = '//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@' . $version . '/css/all' . $this->get_min_suffix() . '.css';
 		} else {
 			$this->stylesheet_url = '//cdn.jsdelivr.net/fontawesome/' . $version . '/css/font-awesome' . $this->get_min_suffix() . '.css';
 		}
