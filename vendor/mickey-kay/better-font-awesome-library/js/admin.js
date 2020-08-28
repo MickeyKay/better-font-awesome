@@ -21,7 +21,7 @@
 		return '[icon name="' + icon.slug + '"' + icon_style_string + ' class="" unprefixed_class=""]';
 	}
 
-	$( document ).on( 'ready ', function() {
+	$( document ).ready( function() {
 
 		$( 'body' ).on( 'mousedown', '.bfa-iconpicker', function(e) { // Use mousedown even to allow for triggering click later without infinite looping.
 
