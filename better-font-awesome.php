@@ -230,6 +230,17 @@ class Better_Font_Awesome_Plugin {
     }
 
     /**
+     * Get BFAL instance.
+     *
+     * @since   2.0.0
+     *
+     * @return  Object  BFAL instance.
+     */
+    public function get_bfal_instance() {
+    	return $this->$bfa_lib;
+    }
+
+    /**
      * Deactivate and display an error if the BFAL isn't included.
      *
      * @since  0.10.0
