@@ -317,7 +317,9 @@ class Better_Font_Awesome_Plugin {
             'load_tinymce_plugin' => true,
         );
 
+error_log( print_r('+++ RAn initialize', true) );
         $this->bfa_lib = Better_Font_Awesome_Library::get_instance( $args );
+        error_log( print_r($this->bfa_lib, true) );
 
     }
 
