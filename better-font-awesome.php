@@ -236,8 +236,8 @@ class Better_Font_Awesome_Plugin {
      *
      * @return  Object  BFAL instance.
      */
-    public function get_bfal_instance() {
-    	return $this->$bfa_lib;
+    public function get_bfa_lib_instance() {
+    	return $this->$bfa_lib->get_instance();
     }
 
     /**
@@ -319,7 +319,7 @@ class Better_Font_Awesome_Plugin {
 
 error_log( print_r('+++ RAn initialize', true) );
         $this->bfa_lib = Better_Font_Awesome_Library::get_instance( $args );
-        error_log( print_r($this->bfa_lib, true) );
+        error_log( print_r($this->bfa_lib->get_version, true) );
 
     }
 

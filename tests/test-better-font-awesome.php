@@ -7,9 +7,7 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 
 	public function setUp() {
         $this->bfa = Better_Font_Awesome_Plugin::get_instance();
-        error_log( print_r('+++++', true) );
-        error_log( print_r($this->bfa->bfal_exists(), true) );
-        $this->bfa_lib = $this->bfa->get_bfal_instance();
+        $this->bfa_lib = $this->bfa->get_bfa_lib_instance();
     }
 
     public function test_props_that_should_never_change() {
