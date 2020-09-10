@@ -65,7 +65,7 @@ class Better_Font_Awesome_Plugin {
      *
      * @var    Better_Font_Awesome_Library
      */
-    private $bfa_lib;
+    public $bfa_lib;
 
     /**
      * Path to the Better Font Awesome Library main file.
