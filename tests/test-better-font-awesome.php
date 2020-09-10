@@ -8,9 +8,11 @@ class_alias('\PHPUnit_Framework_TestCase', 'PHPUnit\Framework\TestCase');
 class Better_Font_Awesome_Test extends WP_UnitTestCase {
 
 	protected $bfa;
+	protected $bfa_lib;
 
 	public function setUp() {
         $this->bfa = Better_Font_Awesome_Plugin::get_instance();
+        $this->bfa_lib->get_bfal_instance();
     }
 
     public function test_props_that_should_never_change() {
@@ -39,7 +41,7 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
   	 * Including here for now until we get BFAL up and running with local tests.
   	 */
 
-  	protected $bfa_lib = $bfa->get_bfal_instance();
+
 
   	public function test_bfal_version() {
 		$this->assertEquals( '5.14.0', $bfa_lib->get_version() );
