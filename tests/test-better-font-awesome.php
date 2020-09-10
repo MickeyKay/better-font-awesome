@@ -1,10 +1,5 @@
 <?php
 
-// Support PHP 7+.
-// @see  https://stackoverflow.com/questions/42811164/class-phpunit-framework-testcase-not-found
-class_alias('\PHPUnit_Framework_TestCase', 'PHPUnit\Framework\TestCase');
-
-
 class Better_Font_Awesome_Test extends WP_UnitTestCase {
 
 	protected $bfa;
@@ -12,6 +7,8 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 
 	public function setUp() {
         $this->bfa = Better_Font_Awesome_Plugin::get_instance();
+        error_log( print_r('+++++++++++', true) );
+        error_log( print_r($this->bfa, true) );
         $this->bfa_lib = $this->bfa->get_bfal_instance();
     }
 
