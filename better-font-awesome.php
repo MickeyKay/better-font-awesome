@@ -319,7 +319,7 @@ class Better_Font_Awesome_Plugin {
 
 error_log( print_r('+++ RAn initialize', true) );
         $this->bfa_lib = Better_Font_Awesome_Library::get_instance( $args );
-        error_log( print_r($this->bfa_lib->get_version, true) );
+        error_log( print_r($this->bfa_lib->get_version(), true) );
 
     }
 
