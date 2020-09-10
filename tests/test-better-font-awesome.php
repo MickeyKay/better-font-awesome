@@ -57,7 +57,7 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
   			'searchTerms',
   		];
 
-  		$icons = $this->bfa_lib->get_icons()
+  		$icons = $this->bfa_lib->get_icons();
 
   		foreach ( $icons as $icon ) {
   			foreach ( $expected_icon_keys as $expected_icon_key ) {
