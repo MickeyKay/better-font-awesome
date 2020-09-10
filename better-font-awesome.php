@@ -113,8 +113,7 @@ class Better_Font_Awesome_Plugin {
      * @var    array
      */
     protected $option_defaults = array(
-        'version'            => 'latest',
-        'minified'           => 1,
+        'include_v4_shim'    => '',
         'remove_existing_fa' => '',
         'hide_admin_notices' => '',
     );
@@ -299,9 +298,8 @@ class Better_Font_Awesome_Plugin {
 
         // Initialize BFA library.
         $args = array(
-            'version'             => isset( $options['version'] ) ? $options['version'] : $this->option_defaults['version'],
-            'minified'            => isset( $options['minified'] ) ? $options['minified'] : '',
-            'remove_existing_fa'  => isset( $options['remove_existing_fa'] ) ? $options['remove_existing_fa'] :'',
+            'include_v4_shim'     => isset( $options['include_v4_shim'] ) ? $options['include_v4_shim'] : '',
+            'remove_existing_fa'  => isset( $options['remove_existing_fa'] ) ? $options['remove_existing_fa'] : '',
             'load_styles'         => true,
             'load_admin_styles'   => true,
             'load_shortcode'      => true,
@@ -356,7 +354,6 @@ class Better_Font_Awesome_Plugin {
                     <span class="button-primary bfa-save-settings-button"><?php _e( 'Save Settings', 'better-font-awesome' ); ?></span> <img class="bfa-loading-gif" src="<?php echo includes_url() . 'images/spinner.gif'; ?>" />
                 </p>
                 <div class="bfa-ajax-response-holder"></div>
-                <?php echo $this->get_usage_text(); ?>
             </form>
         </div>
     <?php
@@ -388,6 +385,18 @@ class Better_Font_Awesome_Plugin {
             array( $this, 'version_callback' ), // Callback
             self::SLUG, // Page
             'settings_section_primary' // Section
+        );
+
+        add_settings_field(
+            'include_v4_shim',
+            __( 'Include v4 CSS shim', 'better-font-awesome' ),
+            array( $this, 'checkbox_callback' ),
+            self::SLUG,
+            'settings_section_primary',
+            array(
+                'id' => 'include_v4_shim',
+                'description' => __( 'Include the Font Awesome v4 CSS shim to support legacy icons (<a href="https://fontawesome.com/how-to-use/on-the-web/setup/upgrading-from-version-4" target="_blank">more details</a>).', 'better-font-awesome' ),
+            )
         );
 
         add_settings_field(
@@ -456,8 +465,7 @@ class Better_Font_Awesome_Plugin {
     public function save_options() {
 
         $options = array(
-            'version'            => $_POST['version'],
-            'minified'           => $_POST['minified'],
+            'include_v4_shim'    => $_POST['include_v4_shim'],
             'remove_existing_fa' => $_POST['remove_existing_fa'],
             'hide_admin_notices' => $_POST['hide_admin_notices'],
         );
@@ -511,28 +519,6 @@ class Better_Font_Awesome_Plugin {
     }
 
     /**
-     * Generate the admin instructions/usage text.
-     *
-     * @since   0.10.0
-     *
-     * @return  string  Usage text.
-     */
-    public function get_usage_text() {
-        return '<div class="bfa-usage-text">' .
-                __( '<h3>Usage</h3>
-                     <b>Font Awesome version 4.x +</b>&nbsp;&nbsp;&nbsp;<small><a href="http://fontawesome.io/examples/">See all available options &raquo;</a></small><br /><br />
-                     <i class="icon-coffee fa fa-coffee"></i> <code>[icon name="coffee"]</code> or <code>&lt;i class="fa fa-coffee"&gt;&lt;/i&gt;</code><br /><br />
-                     <i class="icon-coffee fa fa-coffee icon-2x fa-2x"></i> <code>[icon name="coffee" class="fa-2x"]</code> or <code>&lt;i class="fa fa-coffee fa-2x"&gt;&lt;/i&gt;</code><br /><br />
-                     <i class="icon-coffee fa fa-coffee icon-2x fa-2x icon-rotate-90 fa-rotate-90"></i> <code>[icon name="coffee" class="fa-2x fa-rotate-90"]</code> or <code>&lt;i class="fa fa-coffee fa-2x fa-rotate-90"&gt;&lt;/i&gt;</code><br /><br /><br />
-                     <b>Font Awesome version 3.x</b>&nbsp;&nbsp;&nbsp;<small><a href="http://fontawesome.io/3.2.1/examples/">See all available options &raquo;</a></small><br /><br />
-                     <i class="icon-coffee fa fa-coffee"></i> <code>[icon name="coffee"]</code> or <code>&lt;i class="icon icon-coffee"&gt;&lt;/i&gt;</code><br /><br />
-                     <i class="icon-coffee fa fa-coffee icon-2x fa-2x"></i> <code>[icon name="coffee" class="icon-2x"]</code> or <code>&lt;i class="icon icon-coffee icon-2x"&gt;&lt;/i&gt;</code><br /><br />
-                     <i class="icon-coffee fa fa-coffee icon-2x fa-2x icon-rotate-90 fa-rotate-90"></i> <code>[icon name="coffee" class="icon-2x icon-rotate-90"]</code> or <code>&lt;i class="icon icon-coffee icon-2x icon-rotate-90"&gt;&lt;/i&gt;</code>',
-                'better-font-awesome' ) .
-                '</div>';
-    }
-
-    /**
      * Sanitize each settings field as needed.
      *
      * @param  array  $input  Contains all settings fields as array keys.
@@ -541,13 +527,8 @@ class Better_Font_Awesome_Plugin {
 
         $new_input = array();
 
-        // Sanitize options to match their type
-        if ( isset( $input['version'] ) ) {
-            $new_input['version'] = sanitize_text_field( $input['version'] );
-        }
-
-        if ( isset( $input['minified'] ) ) {
-            $new_input['minified'] = absint( $input['minified'] );
+        if ( isset( $input['include_v4_shim'] ) ) {
+            $new_input['include_v4_shim'] = absint( $input['include_v4_shim'] );
         }
 
         if ( isset( $input['remove_existing_fa'] ) ) {
