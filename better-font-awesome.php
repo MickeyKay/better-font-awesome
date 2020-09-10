@@ -65,7 +65,7 @@ class Better_Font_Awesome_Plugin {
      *
      * @var    Better_Font_Awesome_Library
      */
-    public $bfa_lib;
+    private $bfa_lib;
 
     /**
      * Path to the Better Font Awesome Library main file.
@@ -317,10 +317,7 @@ class Better_Font_Awesome_Plugin {
             'load_tinymce_plugin' => true,
         );
 
-error_log( print_r('+++ RAn initialize', true) );
         $this->bfa_lib = Better_Font_Awesome_Library::get_instance( $args );
-        error_log( print_r($this->bfa_lib->get_version(), true) );
-
     }
 
     /**
