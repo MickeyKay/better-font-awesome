@@ -237,6 +237,8 @@ class Better_Font_Awesome_Plugin {
      * @return  Object  BFAL instance.
      */
     public function get_bfal_instance() {
+    	error_log( print_r('=====', true) );
+    	error_log( print_r($this, true) );
     	return $this->$bfa_lib;
     }
 
