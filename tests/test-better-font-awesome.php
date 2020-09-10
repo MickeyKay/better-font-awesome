@@ -7,7 +7,7 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 
 	public function setUp() {
         $this->bfa = Better_Font_Awesome_Plugin::get_instance();
-        $this->bfa_lib = $this->bfa->get_bfa_lib_instance()::get_instance();
+        $this->bfa_lib = $this->bfa->bfa_lib;
     }
 
     public function test_props_that_should_never_change() {
@@ -28,5 +28,17 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 
   	public function test_bfal_exists() {
 		$this->assertTrue( $this->bfa->bfal_exists() );
+  	}
+
+  	/**
+  	 * BFA Library Tests
+  	 *
+  	 * Including here for now until we get BFAL up and running with local tests.
+  	 */
+
+
+
+  	public function test_bfal_version() {
+		$this->assertEquals( '5.14.0', $this->bfa_lib->get_version() );
   	}
 }
