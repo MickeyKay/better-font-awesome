@@ -21,6 +21,12 @@
  * GitHub Plugin URI: https://github.com/MickeyKay/better-font-awesome
  */
 
+/**
+ * @todo
+ *
+ * - [ ] Handle errors in version_callback()
+ */
+
 add_action( 'init', 'bfa_start', 5 );
 /**
  * Initialize the Better Font Awesome plugin.
@@ -378,23 +384,10 @@ class Better_Font_Awesome_Plugin {
 
         add_settings_field(
             'version', // ID
-            __( 'Version', 'better-font-awesome' ), // Title
+            __( 'Font Awesome Version', 'better-font-awesome' ), // Title
             array( $this, 'version_callback' ), // Callback
             self::SLUG, // Page
-            'settings_section_primary', // Section
-            $this->get_versions_list() // Args
-        );
-
-        add_settings_field(
-            'minified',
-            __( 'Use minified CSS', 'better-font-awesome' ),
-            array( $this, 'checkbox_callback' ),
-            self::SLUG,
-            'settings_section_primary',
-            array(
-                'id' => 'minified',
-                'description' => __( 'Whether to include the minified version of the CSS (checked), or the unminified version (unchecked).', 'better-font-awesome' ),
-            )
+            'settings_section_primary' // Section
         );
 
         add_settings_field(
@@ -480,99 +473,14 @@ class Better_Font_Awesome_Plugin {
     }
 
     /**
-     * Get all Font Awesome versions available from the jsDelivr API.
-     *
-     * @since 0.10.0
-     *
-     * @return  array  All available versions and the latest version, or an
-     *                 empty array if the API fetch fails.
-     */
-    function get_versions_list() {
-
-        if ( $this->bfa_lib->get_api_value('versions') ) {
-            $versions['latest'] = __( 'Always Latest', 'better-font-awesome' );
-
-            foreach ( $this->bfa_lib->get_api_value('versions') as $version ) {
-                $versions[ $version ] = $version;
-            }
-
-        } else {
-            $versions = array();
-        }
-
-        return $versions;
-
-    }
-
-    /**
      * Output a <select> version selector.
      *
      * @since  0.10.0
      *
      * @param array  $versions  All available Font Awesome versions
      */
-    public function version_callback( $versions ) {
-
-        if ( $versions ) {
-
-            // Add 'Always Latest' option.
-            $versions['latest'] = __( 'Always Latest', 'better-font-awesome' );
-
-            /**
-             * Remove version 2.0, since its CSS doesn't work with the regex
-             * algorith and no one needs 2.0 anyways.
-             */
-            foreach ( $versions as $index => $version ) {
-
-                if ( '2.0' == $version ) {
-                    unset( $versions[ $index ] );
-                }
-
-            }
-
-            // Output the <select> element.
-            printf( '<select id="version" name="%s[version]">', esc_attr( $this->option_name ) );
-
-            foreach ( $versions as $version => $text ) {
-
-                printf(
-                    '<option value="%s" %s>%s</option>',
-                    esc_attr( $version ),
-                    selected( $version, $this->options['version'], false ),
-                    esc_attr( $text )
-                );
-
-            }
-
-            echo '</select>';
-
-        } else {
-            ?>
-            <p>
-                <?php
-                printf( __( 'Version selection is currently unavailable. The attempt to reach the jsDelivr API server failed with the following error: %s', 'better-font-awesome' ),
-                    '<code>' . $this->bfa_lib->get_error('api')->get_error_code() . ': ' . $this->bfa_lib->get_error('api')->get_error_message() . '</code>'
-                );
-                ?>
-            </p>
-            <p>
-                <?php
-                printf( __( 'Font Awesome will still render using version: %s', 'better-font-awesome' ),
-                    '<code>' . $this->bfa_lib->get_fallback_version() . '</code>'
-                );
-                ?>
-            </p>
-            <p>
-                <?php
-                printf( __( 'This may be the result of a temporary server or connectivity issue which will resolve shortly. However if the problem persists please file a support ticket on the %splugin forum%s, citing the errors listed above. ', 'better-font-awesome' ),
-                        '<a href="http://wordpress.org/support/plugin/better-font-awesome" target="_blank" title="Better Font Awesome support forum">',
-                        '</a>'
-                );
-                ?>
-            </small></p>
-            <?php
-        }
-
+    public function version_callback() {
+    	echo "<code>{$this->bfa_lib->get_version()}</code>";
     }
 
     /**
@@ -613,9 +521,9 @@ class Better_Font_Awesome_Plugin {
         return '<div class="bfa-usage-text">' .
                 __( '<h3>Usage</h3>
                      <b>Font Awesome version 4.x +</b>&nbsp;&nbsp;&nbsp;<small><a href="http://fontawesome.io/examples/">See all available options &raquo;</a></small><br /><br />
-                     <i class="icon-coffee fa fa-coffee"></i> <code>[icon name="coffee"]</code> or <code>&lt;i class="fa-coffee"&gt;&lt;/i&gt;</code><br /><br />
-                     <i class="icon-coffee fa fa-coffee icon-2x fa-2x"></i> <code>[icon name="coffee" class="fa-2x"]</code> or <code>&lt;i class="fa-coffee fa-2x"&gt;&lt;/i&gt;</code><br /><br />
-                     <i class="icon-coffee fa fa-coffee icon-2x fa-2x icon-rotate-90 fa-rotate-90"></i> <code>[icon name="coffee" class="fa-2x fa-rotate-90"]</code> or <code>&lt;i class="fa-coffee fa-2x fa-rotate-90"&gt;&lt;/i&gt;</code><br /><br /><br />
+                     <i class="icon-coffee fa fa-coffee"></i> <code>[icon name="coffee"]</code> or <code>&lt;i class="fa fa-coffee"&gt;&lt;/i&gt;</code><br /><br />
+                     <i class="icon-coffee fa fa-coffee icon-2x fa-2x"></i> <code>[icon name="coffee" class="fa-2x"]</code> or <code>&lt;i class="fa fa-coffee fa-2x"&gt;&lt;/i&gt;</code><br /><br />
+                     <i class="icon-coffee fa fa-coffee icon-2x fa-2x icon-rotate-90 fa-rotate-90"></i> <code>[icon name="coffee" class="fa-2x fa-rotate-90"]</code> or <code>&lt;i class="fa fa-coffee fa-2x fa-rotate-90"&gt;&lt;/i&gt;</code><br /><br /><br />
                      <b>Font Awesome version 3.x</b>&nbsp;&nbsp;&nbsp;<small><a href="http://fontawesome.io/3.2.1/examples/">See all available options &raquo;</a></small><br /><br />
                      <i class="icon-coffee fa fa-coffee"></i> <code>[icon name="coffee"]</code> or <code>&lt;i class="icon icon-coffee"&gt;&lt;/i&gt;</code><br /><br />
                      <i class="icon-coffee fa fa-coffee icon-2x fa-2x"></i> <code>[icon name="coffee" class="icon-2x"]</code> or <code>&lt;i class="icon icon-coffee icon-2x"&gt;&lt;/i&gt;</code><br /><br />
