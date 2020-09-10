@@ -39,4 +39,67 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
   	public function test_bfal_version() {
 		$this->assertEquals( '5.14.0', $this->bfa_lib->get_version() );
   	}
+
+  	public function test_get_stylesheet_url() {
+  		$this->assertEquals( 'https://use.fontawesome.com/releases/v5.14.0/css/all.css', $this->bfa_lib->get_stylesheet_url() );
+  	}
+
+  	public function test_get_stylesheet_url_v4_shim() {
+  		$this->assertEquals( 'https://use.fontawesome.com/releases/v5.14.0/css/v4-shims.css', $this->bfa_lib->get_stylesheet_url() );
+  	}
+
+  	public function test_get_icons() {
+  		$expected_icon_keys = [
+  			'title',
+  			'slug',
+  			'style',
+  			'base_class',
+  			'searchTerms',
+  		];
+
+  		$icons = $this->bfa_lib->get_icons()
+
+  		foreach ( $icons as $icon ) {
+  			foreach ( $expected_icon_keys as $expected_icon_key ) {
+  				$this->assertArrayHasKey( $expected_icon_key, $icon);
+  			}
+  		}
+  	}
+
+  	public function test_get_release_icons() {
+  		$expected_icon_keys = [
+  			'id',
+  			'label',
+  			'membership',
+  			'styles',
+  		];
+
+  		$release_icons = $this->bfa_lib->get_release_icons();
+
+  		foreach ( $release_icons as $release_icon ) {
+  			foreach ( $expected_icon_keys as $expected_icon_key ) {
+  				$this->assertArrayHasKey( $expected_icon_key, $release_icon);
+  			}
+  		}
+  	}
+
+  	public function test_get_release_assets() {
+  		$assets = $this->bfa_lib->get_release_assets();
+
+  		$release_icons = $this->bfa_lib->get_release_icons();
+
+  		foreach ( $assets as $asset ) {
+  			$this->assertIsString( $asset['path'] );
+  			$this->assertNotEmpty( $asset['path'] );
+  		}
+  	}
+
+  	public function test_get_prefix() {
+  		$this->assertEquals( 'fa', $this->bfa_lib->get_prefix() );
+  	}
+
+  	public function test_get_errors() {
+
+  	}
+
 }
