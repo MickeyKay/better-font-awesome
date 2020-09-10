@@ -33,4 +33,8 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
   	public function test_bfal_exists() {
 		$this->assertTrue( $this->bfa->bfal_exists() );
   	}
+
+  	public function test_bfal_version() {
+		$this->assertEquals( '5.14.0', $this->bfa->get_version() );
+  	}
 }
