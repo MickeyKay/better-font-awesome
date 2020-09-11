@@ -89,7 +89,7 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
   		$release_icons = $this->bfa_lib->get_release_icons();
 
   		foreach ( $assets as $asset ) {
-  			$this->assertIsString( $asset['path'] );
+  			$this->assertInternalType( 'string', $asset['path'] );
   			$this->assertNotEmpty( $asset['path'] );
   		}
   	}
