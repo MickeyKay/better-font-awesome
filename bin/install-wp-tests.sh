@@ -132,6 +132,10 @@ recreate_db() {
 		mysqladmin drop $DB_NAME -f --user="$DB_USER" --password="$DB_PASS"$EXTRA
 		create_db
 		echo "Recreated the database ($DB_NAME)."
+    echo "dddddd"
+    echo $DB_NAME
+    echo $DB_USER
+    echo $DB_PASS
 	else
 		echo "Leaving the existing database ($DB_NAME) in place."
 	fi

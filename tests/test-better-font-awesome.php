@@ -6,8 +6,8 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 	protected $bfa_lib;
 
 	public function setUp() {
-        $this->bfa = Better_Font_Awesome_Plugin::get_instance();
-        $this->bfa_lib = $this->bfa->get_bfa_lib_instance();
+        $this->bfa = Better_Font_Awesome_Plugin::get_instance( [] );
+        $this->bfa_lib = $this->bfa->get_bfa_lib_instance( [] );
     }
 
     public function test_props_that_should_never_change() {
@@ -98,8 +98,46 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
   		$this->assertEquals( 'fa', $this->bfa_lib->get_prefix() );
   	}
 
-  	public function test_get_errors() {
+  	public function test_render_shortcode() {
+  		$shortcodes = [
+  			// Minimal props populated.
+  			[
+  				'atts' => [
+  					'name' => 'bicycle',
+  				],
+  				'output' => '<i class="fa fa-bicycle " ></i>',
+  			],
+  			// All props populated.
+  			[
+  				'atts' => [
+  					'name'             => 'ethereum',
+  					'style'            => 'brands',
+  					'class'            => '2x',
+  					'unprefixed_class' => 'my-custom-class',
+  				],
+  				'output' => '<i class="fab fa-ethereum fa-2x my-custom-class " ></i>',
+  			],
+  			// Minimal props populated.
+  			[
+  				'atts' => [
+  					'name' => 'bicycle',
+  				],
+  				'output' => '<i class="fa fa-bicycle " ></i>',
+  			],
+  			// Properly strip/replace prefixes
+  			[
+  				'atts' => [
+  					'name'  => 'icon-bicycle',
+  					'class' => 'icon-rotate fa-2x',
+  				],
+  				'output' => '<i class="fa fa-bicycle fa-rotate fa-2x " ></i>',
+  			],
 
+  		];
+
+  		foreach ( $shortcodes as $shortcode ) {
+  			$this->assertEquals( $this->bfa_lib->render_shortcode( $shortcode['atts'] ), $shortcode['output'] );
+  		}
   	}
 
 }

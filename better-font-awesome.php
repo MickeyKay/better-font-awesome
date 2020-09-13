@@ -303,7 +303,7 @@ class Better_Font_Awesome_Plugin {
     private function initialize_better_font_awesome_library( $options ) {
 
         // Hide admin notices if setting is checked.
-        if ( true == $options['hide_admin_notices'] ) {
+        if ( $options && true == $options['hide_admin_notices'] ) {
             add_filter( 'bfa_show_errors', '__return_false' );
         }
 
@@ -391,8 +391,16 @@ class Better_Font_Awesome_Plugin {
 
         add_settings_field(
             'version', // ID
-            __( 'Font Awesome Version', 'better-font-awesome' ), // Title
+            __( 'Font Awesome version', 'better-font-awesome' ), // Title
             array( $this, 'version_callback' ), // Callback
+            self::SLUG, // Page
+            'settings_section_primary' // Section
+        );
+
+        add_settings_field(
+            'version_update_frequency', // ID
+            __( 'Version update frequency', 'better-font-awesome' ), // Title
+            array( $this, 'version_update_frequency_callback' ), // Callback
             self::SLUG, // Page
             'settings_section_primary' // Section
         );
@@ -491,14 +499,25 @@ class Better_Font_Awesome_Plugin {
     }
 
     /**
-     * Output a <select> version selector.
+     * Output version information.
      *
      * @since  0.10.0
-     *
-     * @param array  $versions  All available Font Awesome versions
      */
     public function version_callback() {
     	echo "<code>{$this->bfa_lib->get_version()}</code>";
+    }
+
+    /**
+     * Version update interval callback.
+     *
+     * @since  2.0.0
+     */
+    public function version_update_frequency_callback() {
+    	$current_time = time();
+    	$expiration_time = time() + $this->bfa_lib->get_transient_expiration() - 1; // -1 to improve readability (e.g. "24 hours" instead of "1 days")
+    	$human_readable_expiration = human_time_diff( $current_time, $expiration_time );
+
+    	echo "<code>{$human_readable_expiration}</code> (The plugin will automatically check for new available versions of Font Awesome at this frequency)";
     }
 
     /**

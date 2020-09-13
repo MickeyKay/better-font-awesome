@@ -4,5 +4,7 @@
 	"license": "GPL-2.0",
 	"require": {
 		"mickey-kay/better-font-awesome-library": "v2.0.0-beta3"
+	},
+	"require-dev": {
 	}
 }
