@@ -398,9 +398,9 @@ class Better_Font_Awesome_Plugin {
         );
 
         add_settings_field(
-            'version_update_frequency', // ID
-            __( 'Version update frequency', 'better-font-awesome' ), // Title
-            array( $this, 'version_update_frequency_callback' ), // Callback
+            'version_check_frequency', // ID
+            __( 'Version check frequency', 'better-font-awesome' ), // Title
+            array( $this, 'version_check_frequency_callback' ), // Callback
             self::SLUG, // Page
             'settings_section_primary' // Section
         );
@@ -413,7 +413,7 @@ class Better_Font_Awesome_Plugin {
             'settings_section_primary',
             array(
                 'id' => 'include_v4_shim',
-                'description' => __( 'Include the Font Awesome v4 CSS shim to support legacy icons (<a href="https://fontawesome.com/how-to-use/on-the-web/setup/upgrading-from-version-4" target="_blank">more details</a>).', 'better-font-awesome' ),
+                'description' => __( 'Include the Font Awesome v4 CSS shim to support legacy icons (<a href="https://fontawesome.com/how-to-use/on-the-web/setup/upgrading-from-version-4#name-changes" target="_blank">more details</a>).', 'better-font-awesome' ),
             )
         );
 
@@ -512,12 +512,12 @@ class Better_Font_Awesome_Plugin {
      *
      * @since  2.0.0
      */
-    public function version_update_frequency_callback() {
+    public function version_check_frequency_callback() {
     	$current_time = time();
     	$expiration_time = time() + $this->bfa_lib->get_transient_expiration() - 1; // -1 to improve readability (e.g. "24 hours" instead of "1 days")
     	$human_readable_expiration = human_time_diff( $current_time, $expiration_time );
 
-    	echo "<code>{$human_readable_expiration}</code> (The plugin will automatically check for new available versions of Font Awesome at this frequency)";
+    	echo "<code>{$human_readable_expiration}</code> (The plugin automatically uses the latest version of Font Awesome, and checks for updates at this frequency)";
     }
 
     /**

@@ -105,7 +105,7 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
   				'atts' => [
   					'name' => 'bicycle',
   				],
-  				'output' => '<i class="fa fa-bicycle " ></i>',
+  				'output' => '<i class="fas fa-bicycle " ></i>',
   			],
   			// All props populated.
   			[
@@ -122,7 +122,7 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
   				'atts' => [
   					'name' => 'bicycle',
   				],
-  				'output' => '<i class="fa fa-bicycle " ></i>',
+  				'output' => '<i class="fas fa-bicycle " ></i>',
   			],
   			// Properly strip/replace prefixes
   			[
@@ -130,14 +130,25 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
   					'name'  => 'icon-bicycle',
   					'class' => 'icon-rotate fa-2x',
   				],
-  				'output' => '<i class="fa fa-bicycle fa-rotate fa-2x " ></i>',
+  				'output' => '<i class="fas fa-bicycle fa-rotate fa-2x " ></i>',
   			],
+  			// V5 (not v4 prefix, "fa" -> "fas")
+  			[
+  				'atts' => [
+  					'name'  => 'camera-retro',
+  				],
+  				'output' => '<i class="fas fa-camera-retro " ></i>',
+  			]
 
   		];
 
   		foreach ( $shortcodes as $shortcode ) {
   			$this->assertEquals( $this->bfa_lib->render_shortcode( $shortcode['atts'] ), $shortcode['output'] );
   		}
+  	}
+
+  	public function test_get_transient_expiration() {
+  		$this->assertEquals( $this->bfa_lib->get_transient_expiration(), DAY_IN_SECONDS );
   	}
 
 }
