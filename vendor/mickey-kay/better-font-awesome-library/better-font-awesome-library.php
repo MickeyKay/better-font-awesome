@@ -23,21 +23,6 @@
  *       is still an issue?
  */
 
-/**
- * 2.0.0 changes
- *
- * - [x] Switch to only using 1. FA@latest, or 2. 4@latest vs 5@latest (need to pin at 4 for any reason?)
- * - [x] Switch to using FA GraphQL API for #allthethings
- * 		- [x] Version data
- * 		- [x] Icons list
- * - [x] Include v4 shim css if needed, add admin option
- * - [x] Display current version in the admin.
- * - [x] Remove inc/icon-updater logic if possible
- * - [x] Corroborate what shim actually does
- * - [x] Add note on transient expiration
- * 		- [ ] Check what happens if transient expires but fetch fails
- */
-
 // Exit if accessed directly
 if ( ! defined( 'ABSPATH' ) ) exit;
 
@@ -391,7 +376,6 @@ class Better_Font_Awesome_Library {
 		/**
 		 * Filter the fallback release data path.
 		 *
-		 * @todo  add to docs
 		 * @since  2.0.0
 		 *
 		 * @param  string  $fallback_release_data_path  The path to the fallback Font Awesome directory.
@@ -421,7 +405,6 @@ class Better_Font_Awesome_Library {
 		$release_data = array();
 
 		// 2. Short-circuit return the transient value if set.
-		// @todo this probably shouldn't be a false check :thinking:
 		if ( false !== $transient_value ) {
 			$release_data = $transient_value ;
 		}
@@ -487,7 +470,6 @@ class Better_Font_Awesome_Library {
 				/**
 				 * Filter release data transient expiration.
 				 *
-				 * @todo  Renamed old filter, which was incorrectly named. Call out in readme.
 				 * @since  2.0.0
 				 *
 				 * @param  int  Expiration for release data.
@@ -548,7 +530,6 @@ class Better_Font_Awesome_Library {
 					'slug'        => $icon_metadata['id'],
 					'style'       => $icon_style,
 					'base_class'  => $this->get_icon_base_class( $icon_metadata['id'], $icon_style ),
-					// @todo this is not included in the GraphQL API :(
 					'searchTerms' => $icon_metadata['id'],
 				];
 			}
@@ -680,19 +661,6 @@ class Better_Font_Awesome_Library {
 			'space'            => '',
 			'style'            => '', /* Style category */
 		), $atts ));
-
-		// @todo remove and verify this logic isn't needed with v4 shim CSS included
-		// $icon = $this->get_icon_by_slug( $name );
-
-		// // Maybe this is an old icon that needs an updated alias.
-		// if ( ! $icon ) {
-		// 	require __DIR__ . '/inc/icon-updater.php';
-		// 	$name = bfa_get_updated_icon_slug( $name );
-
-		// 	if ( ! $name ) {
-		// 		return '';
-		// 	}
-		// }
 
 		$prefix = $this->get_prefix();
 		$classes = [];
@@ -978,8 +946,6 @@ class Better_Font_Awesome_Library {
 	public function get_version() {
 		return $this->get_font_awesome_release_data()['version'];
 	}
-
-	// @todo Remove the functions below that aren't used.
 
 	/**
 	 * Get the main font awesome stylesheet URL.
