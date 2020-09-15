@@ -78,12 +78,12 @@
         "source": {
             "type": "git",
             "url": "https://github.com/MickeyKay/better-font-awesome-library.git",
-            "reference": "518931b9d784635db3327b67b9b31cb78a01d908"
+            "reference": "9c64bae3795e8bdce3e2a9bcdeb4cf3becb92037"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/518931b9d784635db3327b67b9b31cb78a01d908",
-            "reference": "518931b9d784635db3327b67b9b31cb78a01d908",
+            "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/9c64bae3795e8bdce3e2a9bcdeb4cf3becb92037",
+            "reference": "9c64bae3795e8bdce3e2a9bcdeb4cf3becb92037",
             "shasum": ""
         },
         "time": "2020-09-14T16:26:16+00:00",
