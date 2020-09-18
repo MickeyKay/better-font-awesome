@@ -12,7 +12,7 @@
  * Plugin Name:       Better Font Awesome
  * Plugin URI:        http://wordpress.org/plugins/better-font-awesome
  * Description:       The ultimate Font Awesome icon plugin for WordPress.
- * Version:           2.0.0-beta3
+ * Version:           1.7.2
  * Author:            Mickey Kay
  * Author URI:        mickeyskay@gmail.com
  * License:           GPLv2+
@@ -165,6 +165,9 @@ class Better_Font_Awesome_Plugin {
         // Load the plugin text domain.
         $this->load_text_domain();
 
+       	// Output admin notices.
+		add_action( 'admin_notices', array( $this, 'do_admin_notices' ) );
+
         // Set up the admin settings page.
         add_action( 'admin_menu', array( $this, 'add_settings_page' ) );
         add_action( 'admin_init', array( $this, 'add_settings' ) );
@@ -172,6 +175,7 @@ class Better_Font_Awesome_Plugin {
 
         // Handle saving options via AJAX
         add_action( 'wp_ajax_bfa_save_options', array( $this, 'save_options' ) );
+        add_action( 'wp_ajax_bfa_dismiss_testing_admin_notice', array( $this, 'dismiss_testing_admin_notice' ) );
 
     }
 
@@ -316,6 +320,58 @@ class Better_Font_Awesome_Plugin {
     }
 
     /**
+	 * Generate admin notices.
+	 *
+	 * @since  1.7.3
+	 */
+	public function do_admin_notices() {
+
+		$user_dismissed_option_data = $this->get_dismissed_admin_notice_testing_data();
+
+		if (
+				!isset( $user_dismissed_option_data->{get_current_user_id()} ) ||
+				true !== $user_dismissed_option_data->{get_current_user_id()}
+			) :
+			?>
+			<div class="notice notice-info is-dismissible" id="<?php esc_attr_e( self::SLUG . '-testing-notice' ); ?>">
+				<p><strong>Better Font Awesome <span class="dashicons dashicons-flag"></span></strong></p>
+				<p><a href="https://mickeykay.me/2020/09/better-font-awesome-v2-ready-for-testing/" target="_blank">Better Font Awesome 2.0</a> is <i>almost</i> ready for you to use! This update adds a few major improvements, most notably support for Font Awesome 5 icons. Before publishing the update, it's important that we get plenty of real user testing to verify everything is working as expected.</p>
+				<p>If you are interested in testing, please read the official <a href="https://mickeykay.me/2020/09/better-font-awesome-v2-ready-for-testing/" target="_blank">blog post</a>, which includes detailed instructions. Thanks so much for you support <span class="dashicons dashicons-heart"></span>.</p>
+				<button type="button" class="notice-dismiss">
+					<span class="screen-reader-text">Dismiss this notice.</span>
+				</button>
+			</div>
+		<?php
+		endif;
+	}
+
+	/**
+	 * Get saved option data for dismissed admin notice.
+	 *
+	 * @return stdClass Dismissed admin notice data.
+	 */
+	private function get_dismissed_admin_notice_testing_data() {
+		$dismissed_option_key = self::SLUG . '-dismissed-notice-testing';
+		return get_option( $dismissed_option_key, new stdClass() );
+	}
+
+	/**
+	 * Dismiss testing admin notice.
+	 *
+	 * @since  1.7.3
+	 */
+	public function dismiss_testing_admin_notice() {
+		$dismissed_option_key = self::SLUG . '-dismissed-notice-testing';
+		$dismissed_option_data = $this->get_dismissed_admin_notice_testing_data();
+		$updated_option_data = $dismissed_option_data;
+		$updated_option_data->{get_current_user_id()} = true;
+
+		update_option( $dismissed_option_key, $updated_option_data );
+
+		wp_die();
+	}
+
+    /**
      * Create the plugin settings page.
      */
     function add_settings_page() {
@@ -430,6 +486,7 @@ class Better_Font_Awesome_Plugin {
      */
     public function admin_enqueue_scripts( $hook ) {
 
+    	// Settings-specific functionality.
         if ( 'settings_page_better-font-awesome' === $hook ) {
 
             wp_enqueue_style(
@@ -444,15 +501,21 @@ class Better_Font_Awesome_Plugin {
             );
 
             wp_localize_script(
-                self::SLUG . '-admin',
-                'bfa_ajax_object',
-                array(
-                    'ajax_url' => admin_url( 'admin-ajax.php' )
-                )
-            );
+	        	self::SLUG . '-admin',
+	        	'bfa_ajax_object',
+	        	array(
+	        		'ajax_url' => admin_url( 'admin-ajax.php' )
+	        	)
+	        );
 
         }
 
+        // Admin notices.
+        wp_enqueue_script(
+            self::SLUG . '-admin-notices',
+            plugin_dir_url( __FILE__ ) . 'js/admin-notices.js',
+            array( 'jquery' )
+        );
     }
 
     /**

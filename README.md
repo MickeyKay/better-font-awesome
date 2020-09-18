@@ -1,16 +1,16 @@
 [![Build Status](https://travis-ci.org/MickeyKay/better-font-awesome.svg?branch=master)](https://travis-ci.org/MickeyKay/better-font-awesome) [![Downloads](https://img.shields.io/wordpress/plugin/dt/better-font-awesome.svg)](https://wordpress.org/plugins/better-font-awesome/) [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 # Better Font Awesome #
-**Contributors:** [McGuive7](https://profiles.wordpress.org/McGuive7)  
-**Tags:** better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode  
-**Donate link:** https://mickeykay.me  
-**Requires at least:** 3.0  
-**Tested up to:** 4.9  
-**Stable tag:** 1.7.1  
-**License:** GPLv2+  
-**License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
+**Contributors:** [McGuive7](https://profiles.wordpress.org/McGuive7)
+**Tags:** better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode
+**Donate link:** https://mickeykay.me
+**Requires at least:** 3.0
+**Tested up to:** 5.5
+**Stable tag:** 1.7.2
+**License:** GPLv2+
+**License URI:** http://www.gnu.org/licenses/gpl-2.0.html
 
-**Now supports Font Awesome 5+!** The Better Font Awesome plugin for WordPress. Shortcodes, HTML, TinyMCE, various Font Awesome versions, backwards compatibility, CDN speeds, and more.
+The Better Font Awesome plugin for WordPress. Shortcodes, HTML, TinyMCE, various Font Awesome versions, backwards compatibility, CDN speeds, and more.
 
 ## Description ##
 
@@ -21,7 +21,7 @@ Better Font Awesome allows you to automatically integrate the latest available v
 
 ### Features ###
 
-* **Always up-to-date** - supports Font Awesome 5+! Automatically fetches the most recent available version of Font Awesome, meaning you no longer need to manually update the version included in your theme/plugin.
+* **Always up-to-date** - automatically fetches the most recent available version of Font Awesome, meaning you no longer need to manually update the version included in your theme/plugin.
 
 * **Backwards compatible** - shortcode output is automatically updated depending on which version of Font Awesome you choose, meaning that you can switch versions without having to modify your shortcodes.
 
@@ -110,10 +110,6 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 ## Changelog ##
-
-### 2.0.0 ###
-* Add support for Font Awesome 5
-* Add upgrade logic to map legacy icons to current versions
 
 ### 1.7.1 ###
 * Fix functionality to hide/show admin notices.
@@ -241,10 +237,6 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 ## Upgrade Notice ##
-
-### 2.0.0 ###
-* Add support for Font Awesome 5
-* Add upgrade logic to map legacy icons to current versions
 
 ### 1.7.1 ###
 * Fix functionality to hide/show admin notices.
