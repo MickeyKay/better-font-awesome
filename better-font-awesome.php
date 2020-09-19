@@ -334,11 +334,11 @@ class Better_Font_Awesome_Plugin {
 			) :
 			?>
 			<div class="notice notice-info is-dismissible" id="<?php esc_attr_e( self::SLUG . '-testing-notice' ); ?>">
-				<p><strong>Better Font Awesome <span class="dashicons dashicons-flag"></span></strong></p>
-				<p><a href="https://mickeykay.me/2020/09/better-font-awesome-v2-ready-for-testing/" target="_blank">Better Font Awesome 2.0</a> is <i>almost</i> ready for you to use! This update adds a few major improvements, most notably support for Font Awesome 5 icons. Before publishing the update, it's important that we get plenty of real user testing to verify everything is working as expected.</p>
-				<p>If you are interested in testing, please read the official <a href="https://mickeykay.me/2020/09/better-font-awesome-v2-ready-for-testing/" target="_blank">blog post</a>, which includes detailed instructions. Thanks so much for you support <span class="dashicons dashicons-heart"></span>.</p>
+				<p><strong><?php _e( 'Better Font Awesome - We need your help!', 'better-font-awesome' ); ?></strong> </p>
+				<p><?php printf( __( "First of all, thanks so much for using the plugin! Second of all, %sBetter Font Awesome 2.0%s is <i>almost</i> ready for use! The new version adds a few major improvements, most notably support for Font Awesome 5 icons. Before publishing the update, it's important that we get plenty of user testing to validate that everything is working as expected, and we could really use your help.", 'better-font-awesome' ), '<a href="https://mickeykay.me/2020/09/better-font-awesome-v2-ready-for-testing/" target="_blank">', '</a>' ); ?></p>
+				<p><?php printf( __( "If you are interested in helping us test the new update, please read the official %sblog post%s, which includes simple instructions for how to get involved. Thanks so much for you support", 'better-font-awesome' ), '<a href="https://mickeykay.me/2020/09/better-font-awesome-v2-ready-for-testing/" target="_blank">', '</a>' ); ?> <span class="dashicons dashicons-heart"></span>.</p>
 				<button type="button" class="notice-dismiss">
-					<span class="screen-reader-text">Dismiss this notice.</span>
+					<span class="screen-reader-text"><?php _e( 'Dismiss this notice.', 'better-font-awesome' ); ?></span>
 				</button>
 			</div>
 		<?php
