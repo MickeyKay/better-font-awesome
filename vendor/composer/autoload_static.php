@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit4726ac49c55bd50c9072260d6cc2d0d4
+class ComposerStaticInita56f7e4fdbbb7876981b697cf6421ee6
 {
     public static $files = array (
         '04c6c5c2f7095ccf6c481d3e53e1776f' => __DIR__ . '/..' . '/mustangostang/spyc/Spyc.php',
