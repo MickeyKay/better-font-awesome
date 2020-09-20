@@ -8,7 +8,8 @@
     "grunt": "grunt build",
     "clean": "rm -rf vendor",
     "checkout-svn": "svn co https://plugins.svn.wordpress.org/better-font-awesome svn",
-    "build": "npm run clean && npm run composer && npm run grunt"
+    "build": "npm run clean && npm run composer && npm run grunt",
+    "test": "./vendor/bin/phpunit"
   },
   "author": {
     "name": "Mickey Kay",
