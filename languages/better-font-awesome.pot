@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: Better Font Awesome 1.7.3\n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/better-font-awesome\n"
-"POT-Creation-Date: 2020-09-19 20:50:10+00:00\n"
+"POT-Creation-Date: 2020-09-20 00:53:44+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -79,11 +79,13 @@ msgstr ""
 msgid "Back to the plugins page &rarr;"
 msgstr ""
 
-#: better-font-awesome.php:337
+#: better-font-awesome.php:337 svn/tags/1.7.3/better-font-awesome.php:337
+#: svn/trunk/better-font-awesome.php:337
 msgid "Better Font Awesome - We need your help!"
 msgstr ""
 
-#: better-font-awesome.php:338
+#: better-font-awesome.php:338 svn/tags/1.7.3/better-font-awesome.php:338
+#: svn/trunk/better-font-awesome.php:338
 msgid ""
 "First of all, thanks so much for using the plugin! Second of all, %sBetter "
 "Font Awesome 2.0%s is <i>almost</i> ready for use! The new version adds a "
@@ -93,14 +95,16 @@ msgid ""
 "really use your help."
 msgstr ""
 
-#: better-font-awesome.php:339
+#: better-font-awesome.php:339 svn/tags/1.7.3/better-font-awesome.php:339
+#: svn/trunk/better-font-awesome.php:339
 msgid ""
 "If you are interested in helping us test the new update, please read the "
 "official %sblog post%s, which includes simple instructions for how to get "
 "involved. Thanks so much for you support"
 msgstr ""
 
-#: better-font-awesome.php:341
+#: better-font-awesome.php:341 svn/tags/1.7.3/better-font-awesome.php:341
+#: svn/trunk/better-font-awesome.php:341
 msgid "Dismiss this notice."
 msgstr ""
 
