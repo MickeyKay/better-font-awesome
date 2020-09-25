@@ -10,9 +10,9 @@ git clone https://github.com/MickeyKay/better-font-awesome.git
 cd better-font-awesome && npm run develop
 
 // Create your development branch
-git branch issue-1234-bugfix
+git checkout -b issue-1234-bugfix
 
-// Once you've made your changes, run the build command
+// Compile/build changes
 npm run build
 
 // Run tests to ensure everything is working as expected
