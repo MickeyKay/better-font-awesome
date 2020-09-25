@@ -24,7 +24,7 @@ git commit -m 'Do thing X to fix thing Y'
 
 That's it! Once your changes are complete, just push your branch and file a PR with a detailed description.
 
-## Better Font Awesome Library
+### A note on the `Better Font Awesome Library` dependency
 This plugin is dependent on the [Better Font Awesome Library](https://github.com/MickeyKay/better-font-awesome-library) for much of its core functionality. If you need to make changes to the underlying library's functionality, please make changes and file PR's into that repo.
 
 ## Testing
