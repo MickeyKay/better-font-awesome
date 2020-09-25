@@ -1,8 +1,6 @@
 # How to contribute
 
-First of all, thanks for your interest in contributing 🎉👍.
-
-Getting started is pretty simple:
+First of all, thanks for your interest in contributing 🎉👍. Getting started is pretty simple:
 
 ```
 // Clone the repo locally
