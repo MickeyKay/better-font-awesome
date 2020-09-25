@@ -105,6 +105,9 @@ Nope. Better Font Awesome automatically pulls in everything you need, and it doe
 
 Better Font Awesome does it's best to load after any existing Font Awesome CSS, which can minimize conflicts. If you are experiencing any unexpected behavior resulting from plugin/theme conflicts, you can try checking the box to "Remove existing Font Awesome styles" in under **Settings &rarr; Better Font Awesome**.
 
+## Contributing & Development ##
+Please see our [contributing guidelines](https://github.com/MickeyKay/better-font-awesome/blob/master/CONTRIBUTING.md) to get involved.
+
 
 ## Screenshots ##
 1. The icon shortcode dropdown selector
