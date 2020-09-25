@@ -1,75 +1,6 @@
 'use strict';
 module.exports = function(grunt) {
-    const parsedIconPicker = 'prod/src/js/iconpicker.js';
-    const tempIconsFile = '.icons.temp';
     grunt.initConfig({
-        download: {
-            somefile: {
-                src: ['https://raw.githubusercontent.com/FortAwesome/Font-Awesome/5.0.8/advanced-options/metadata/icons.yml'],
-                dest: tempIconsFile
-            },
-        },
-        yaml: {
-            getIcons: {
-                options: {
-                    space: 2,
-                    disableDest: true,
-                    middleware: function(response, sourceJSON, src, dest) {
-                        let targetJSON = {
-                            icons: []
-                        };
-                        sourceJSON = JSON.parse(sourceJSON);
-                        Object.keys(sourceJSON).forEach(function(key) {
-                            let ele = sourceJSON[key];
-                            let icon = 'fa-' + key;
-                            ele.styles.forEach(function(style) {
-                                style = style.toLowerCase();
-                                if (style.startsWith('brand')) {
-                                    targetJSON.icons.push({
-                                        title: 'fab ' + icon,
-                                        searchTerms: ele.search.terms
-                                    });
-                                } else if (style.startsWith('solid')) {
-                                    targetJSON.icons.push({
-                                        title: 'fas ' + icon,
-                                        searchTerms: ele.search.terms
-                                    });
-                                } else if (style.startsWith('regular')) {
-                                    targetJSON.icons.push({
-                                        title: 'far ' + icon,
-                                        searchTerms: ele.search.terms
-                                    });
-                                } else if (style.startsWith('light')) {
-                                    targetJSON.icons.push({
-                                        title: 'fal ' + icon,
-                                        searchTerms: ele.search.terms
-                                    });
-                                }
-                            });
-                        });
-                        grunt.file.write(dest, JSON.stringify(targetJSON));
-                    }
-                },
-                files: [{
-                    expand: false,
-                    src: [tempIconsFile],
-                    dest: tempIconsFile
-                }]
-            },
-        },
-        'string-replace': {
-            dist: {
-                files: {
-                    'prod/': ['src/js/iconpicker.js'],
-                },
-                options: {
-                    replacements: [{
-                        pattern: '//###REPLACE-WITH-FONT-AWESOME-5-FONTS###',
-                        replacement: "<%= grunt.file.read('" + tempIconsFile + "') %>"
-                    }]
-                }
-            }
-        },
         less: {
             dist: {
                 options: {
@@ -95,34 +26,30 @@ module.exports = function(grunt) {
             }
         },
         jsbeautifier: {
-            files: ['Gruntfile.js', 'src/js/*.js', parsedIconPicker]
+            files: ['Gruntfile.js', 'src/js/*.js']
         },
         uglify: {
             distMin: {
                 options: {
                     compress: {},
-                    beautify: false,
-                    preserveComments: 'some'
+                    beautify: false
                 },
                 files: {
                     'dist/js/fontawesome-iconpicker.min.js': [
-                        'src/js/license.js',
                         'src/js/jquery.ui.pos.js',
-                        parsedIconPicker
+                        'src/js/iconpicker.js'
                     ]
                 }
             },
             dist: {
                 options: {
                     compress: false,
-                    beautify: true,
-                    preserveComments: 'some'
+                    beautify: true
                 },
                 files: {
                     'dist/js/fontawesome-iconpicker.js': [
-                        'src/js/license.js',
                         'src/js/jquery.ui.pos.js',
-                        parsedIconPicker
+                        'src/js/iconpicker.js'
                     ]
                 }
             }
@@ -145,10 +72,6 @@ module.exports = function(grunt) {
             dist: [
                 'dist/css',
                 'dist/js/*.js'
-            ],
-            temp: [
-                tempIconsFile,
-                'prod/'
             ]
         }
     });
@@ -159,20 +82,13 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-jsbeautifier');
-    grunt.loadNpmTasks('grunt-yaml');
-    grunt.loadNpmTasks('grunt-http-download');
-    grunt.loadNpmTasks('grunt-string-replace');
 
     // Register tasks
     grunt.registerTask('default', [
-        'download',
-        'yaml',
-        'string-replace',
-        'clean:dist',
+        'clean',
         'less',
         'jsbeautifier',
-        'uglify',
-        'clean:temp'
+        'uglify'
     ]);
     grunt.registerTask('dev', [
         'watch'
