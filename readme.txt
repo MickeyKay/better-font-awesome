@@ -4,7 +4,7 @@ Tags: better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode
 Donate link: https://mickeykay.me
 Requires at least: 3.0
 Tested up to: 5.5
-Stable tag: 1.7.3
+Stable tag: 1.7.4
 License: GPLv2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -103,6 +103,9 @@ Nope. Better Font Awesome automatically pulls in everything you need, and it doe
 
 Better Font Awesome does it's best to load after any existing Font Awesome CSS, which can minimize conflicts. If you are experiencing any unexpected behavior resulting from plugin/theme conflicts, you can try checking the box to "Remove existing Font Awesome styles" in under **Settings &rarr; Better Font Awesome**.
 
+== Contributing & Development ==
+Please see our [contributing guidelines](https://github.com/MickeyKay/better-font-awesome/blob/master/CONTRIBUTING.md) to get involved.
+
 
 == Screenshots ==
 1. The icon shortcode dropdown selector
@@ -110,6 +113,15 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 == Changelog ==
+
+= 1.7.4 =
+* Fix: revert accidental bump to underlying Better Font Awesome Library dependency.
+
+= 1.7.3 =
+* Add admin notice to invite beta testers.
+
+= 1.7.2 =
+* Bump "tested up to" value to 5.5.
 
 = 1.7.1 =
 * Fix functionality to hide/show admin notices.
@@ -237,6 +249,15 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 == Upgrade Notice ==
+
+= 1.7.4 =
+* Fix: revert accidental bump to underlying Better Font Awesome Library dependency.
+
+= 1.7.3 =
+* Add admin notice to invite beta testers.
+
+= 1.7.2 =
+* Bump "tested up to" value to 5.5.
 
 = 1.7.1 =
 * Fix functionality to hide/show admin notices.

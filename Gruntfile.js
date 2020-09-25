@@ -29,7 +29,7 @@ module.exports = function( grunt ) {
 						{
 							config:  'newVersion',
 							type:    'input',
-							message: 'What specific version would you like',
+							message: 'What specific version would you like?',
 							default: '<%= pkg.version %>'
 						},
 						{
