@@ -8,9 +8,10 @@
     "grunt": "grunt build",
     "clean": "rm -rf vendor",
     "checkout-svn": "svn co https://plugins.svn.wordpress.org/better-font-awesome svn",
-    "develop": "npm run clean && npm install && npm run composer",
+    "develop": "npm run clean && npm install && npm run composer && npm run test-setup",
     "build": "npm run develop && npm run grunt",
-    "test": "export TMPDIR=/tmp && bash bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1 && ./vendor/bin/phpunit"
+    "test": "export TMPDIR=/tmp && ./vendor/bin/phpunit",
+    "test-setup": "export TMPDIR=/tmp && bash bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1"
   },
   "author": {
     "name": "Mickey Kay",
