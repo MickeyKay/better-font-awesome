@@ -49,7 +49,7 @@ before_script:
       phpcs --config-set installed_paths $HOME/.composer/vendor/wp-coding-standards/wpcs,$HOME/.composer/vendor/phpcompatibility/php-compatibility,$HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie,$HOME/.composer/vendor/phpcompatibility/phpcompatibility-wp
     fi
 script:
-  - npm run develop
+  - npm run composer
   - |
     if [[ ! -z "$WP_VERSION" ]] ; then
       npm run test
