@@ -52,8 +52,8 @@ script:
   - composer install --no-dev
   - |
     if [[ ! -z "$WP_VERSION" ]] ; then
-      npm run test
-      WP_MULTISITE=1 npm run test
+      phpunit
+      WP_MULTISITE=1 phpunit
     fi
   - |
     if [[ "$WP_TRAVISCI" == "phpcs" ]] ; then
