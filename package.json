@@ -10,7 +10,7 @@
     "checkout-svn": "svn co https://plugins.svn.wordpress.org/better-font-awesome svn",
     "develop": "npm run clean && npm install && npm run composer",
     "build": "npm run develop && npm run grunt",
-    "test": "./vendor/bin/phpunit"
+    "test": "export TMPDIR=/tmp && bash bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1 && ./vendor/bin/phpunit"
   },
   "author": {
     "name": "Mickey Kay",
