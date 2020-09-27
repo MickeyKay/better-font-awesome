@@ -137,7 +137,6 @@ class Better_Font_Awesome_Plugin {
 		}
 
 		return self::$instance;
-
 	}
 
 	/**
@@ -176,7 +175,6 @@ class Better_Font_Awesome_Plugin {
 		// Handle saving options via AJAX
 		add_action( 'wp_ajax_bfa_save_options', array( $this, 'save_options' ) );
 		add_action( 'wp_ajax_bfa_dismiss_testing_admin_notice', array( $this, 'dismiss_testing_admin_notice' ) );
-
 	}
 
 	/**
@@ -197,7 +195,6 @@ class Better_Font_Awesome_Plugin {
 
 		// Get plugin options, and populate defaults as needed.
 		$this->initialize_options( $this->option_name );
-
 	}
 
 	/**
@@ -205,7 +202,7 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @since 1.7.0
 	 *
-	 * @param   string  $prop  Prop to fetch.
+	 * @param   string $prop  Prop to fetch.
 	 *
 	 * @return  mixed          Value of the prop.
 	 */
@@ -219,13 +216,11 @@ class Better_Font_Awesome_Plugin {
 	 * @since  0.10.0
 	 */
 	public function bfal_exists() {
-
 		if ( ! is_readable( $this->bfa_lib_file_path ) ) {
 			return false;
 		} else {
 			return true;
 		}
-
 	}
 
 	/**
@@ -234,15 +229,13 @@ class Better_Font_Awesome_Plugin {
 	 * @since  0.10.0
 	 */
 	public function deactivate() {
-
 		deactivate_plugins( plugin_basename( __FILE__ ) );
 
-		$message = '<h2>' . __( 'Better Font Awesome', 'better-font-awesome' ) . '</h2>';
-			$message .= '<p>' . __( 'It appears that Better Font Awesome is missing it\'s <a href="https://github.com/MickeyKay/better-font-awesome-library" target="_blank">core library</a>, which typically occurs when cloning the Git repository and failing to run <code>composer install</code>. Please refer to the plugin\'s <a href="https://github.com/MickeyKay/better-font-awesome" target="_blank">installation instructions</a> for details on how to properly install Better Font Awesome via Git. If you installed from within WordPress, or via the wordpress.org repo, then chances are the install failed and you can try again. If the issue persists, please create a new topic on the plugin\'s <a href="http://wordpress.org/support/plugin/better-font-awesome" target="_blank">support forum</a> or file an issue on the <a href="https://github.com/MickeyKay/better-font-awesome/issues" target="_blank">Github repo</a>.' , 'better-font-awesome' ) . '</p>';
-			$message .= '<p><a href="' . get_admin_url( null, 'plugins.php' ) . '">' . __( 'Back to the plugins page &rarr;', 'better-font-awesome' ) . '</a></p>';
+		$message  = '<h2>' . __( 'Better Font Awesome', 'better-font-awesome' ) . '</h2>';
+		$message .= '<p>' . __( 'It appears that Better Font Awesome is missing it\'s <a href="https://github.com/MickeyKay/better-font-awesome-library" target="_blank">core library</a>, which typically occurs when cloning the Git repository and failing to run <code>composer install</code>. Please refer to the plugin\'s <a href="https://github.com/MickeyKay/better-font-awesome" target="_blank">installation instructions</a> for details on how to properly install Better Font Awesome via Git. If you installed from within WordPress, or via the wordpress.org repo, then chances are the install failed and you can try again. If the issue persists, please create a new topic on the plugin\'s <a href="http://wordpress.org/support/plugin/better-font-awesome" target="_blank">support forum</a> or file an issue on the <a href="https://github.com/MickeyKay/better-font-awesome/issues" target="_blank">Github repo</a>.', 'better-font-awesome' ) . '</p>';
+		$message .= '<p><a href="' . get_admin_url( null, 'plugins.php' ) . '">' . __( 'Back to the plugins page &rarr;', 'better-font-awesome' ) . '</a></p>';
 
-			wp_die( $message );
-
+		wp_die( $message );
 	}
 
 	/**
@@ -254,7 +247,6 @@ class Better_Font_Awesome_Plugin {
 
 		// Better Font Awesome Library.
 		require_once $this->bfa_lib_file_path;
-
 	}
 
 	/**
@@ -278,7 +270,6 @@ class Better_Font_Awesome_Plugin {
 		if ( empty( $this->options ) ) {
 			update_option( $option_name, $this->option_defaults );
 		}
-
 	}
 
 	/**
@@ -286,7 +277,7 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @since  0.9.0
 	 *
-	 * @param  array  $options  Plugin options.
+	 * @param  array $options  Plugin options.
 	 */
 	private function initialize_better_font_awesome_library( $options ) {
 
@@ -299,7 +290,7 @@ class Better_Font_Awesome_Plugin {
 		$args = array(
 			'version'             => isset( $options['version'] ) ? $options['version'] : $this->option_defaults['version'],
 			'minified'            => isset( $options['minified'] ) ? $options['minified'] : '',
-			'remove_existing_fa'  => isset( $options['remove_existing_fa'] ) ? $options['remove_existing_fa'] :'',
+			'remove_existing_fa'  => isset( $options['remove_existing_fa'] ) ? $options['remove_existing_fa'] : '',
 			'load_styles'         => true,
 			'load_admin_styles'   => true,
 			'load_shortcode'      => true,
@@ -307,7 +298,6 @@ class Better_Font_Awesome_Plugin {
 		);
 
 		$this->bfa_lib = Better_Font_Awesome_Library::get_instance( $args );
-
 	}
 
 	/**
@@ -325,23 +315,22 @@ class Better_Font_Awesome_Plugin {
 	 * @since  1.7.3
 	 */
 	public function do_admin_notices() {
-
 		$user_dismissed_option_data = $this->get_dismissed_admin_notice_testing_data();
 
 		if (
-				!isset( $user_dismissed_option_data->{get_current_user_id()} ) ||
+				! isset( $user_dismissed_option_data->{get_current_user_id()} ) ||
 				true !== $user_dismissed_option_data->{get_current_user_id()}
 			) :
 			?>
 			<div class="notice notice-info is-dismissible" id="<?php esc_attr_e( self::SLUG . '-testing-notice' ); ?>">
 				<p><strong><?php _e( 'Better Font Awesome - We need your help!', 'better-font-awesome' ); ?></strong> </p>
-				<p><?php printf( __( "First of all, thanks so much for using the plugin! Second of all, %sBetter Font Awesome 2.0%s is <i>almost</i> ready for use! The new version adds a few major improvements, most notably support for Font Awesome 5 icons. Before publishing the update, it's important that we get plenty of user testing to validate that everything is working as expected, and we could really use your help.", 'better-font-awesome' ), '<a href="https://mickeykay.me/2020/09/better-font-awesome-v2-ready-for-testing/" target="_blank">', '</a>' ); ?></p>
-				<p><?php printf( __( "If you are interested in helping us test the new update, please read the official %sblog post%s, which includes simple instructions for how to get involved. Thanks so much for you support", 'better-font-awesome' ), '<a href="https://mickeykay.me/2020/09/better-font-awesome-v2-ready-for-testing/" target="_blank">', '</a>' ); ?> <span class="dashicons dashicons-heart"></span>.</p>
+				<p><?php printf( __( "First of all, thanks so much for using the plugin! Second of all, %1\$sBetter Font Awesome 2.0%2\$s is <i>almost</i> ready for use! The new version adds a few major improvements, most notably support for Font Awesome 5 icons. Before publishing the update, it's important that we get plenty of user testing to validate that everything is working as expected, and we could really use your help.", 'better-font-awesome' ), '<a href="https://mickeykay.me/2020/09/better-font-awesome-v2-ready-for-testing/" target="_blank">', '</a>' ); ?></p>
+				<p><?php printf( __( 'If you are interested in helping us test the new update, please read the official %1$sblog post%2$s, which includes simple instructions for how to get involved. Thanks so much for you support', 'better-font-awesome' ), '<a href="https://mickeykay.me/2020/09/better-font-awesome-v2-ready-for-testing/" target="_blank">', '</a>' ); ?> <span class="dashicons dashicons-heart"></span>.</p>
 				<button type="button" class="notice-dismiss">
 					<span class="screen-reader-text"><?php _e( 'Dismiss this notice.', 'better-font-awesome' ); ?></span>
 				</button>
 			</div>
-		<?php
+			<?php
 		endif;
 	}
 
@@ -361,9 +350,9 @@ class Better_Font_Awesome_Plugin {
 	 * @since  1.7.3
 	 */
 	public function dismiss_testing_admin_notice() {
-		$dismissed_option_key = self::SLUG . '-dismissed-notice-testing';
-		$dismissed_option_data = $this->get_dismissed_admin_notice_testing_data();
-		$updated_option_data = $dismissed_option_data;
+		$dismissed_option_key                         = self::SLUG . '-dismissed-notice-testing';
+		$dismissed_option_data                        = $this->get_dismissed_admin_notice_testing_data();
+		$updated_option_data                          = $dismissed_option_data;
 		$updated_option_data->{get_current_user_id()} = true;
 
 		update_option( $dismissed_option_key, $updated_option_data );
@@ -375,7 +364,6 @@ class Better_Font_Awesome_Plugin {
 	 * Create the plugin settings page.
 	 */
 	function add_settings_page() {
-
 		add_options_page(
 			$this->plugin_display_name,
 			$this->plugin_display_name,
@@ -383,7 +371,6 @@ class Better_Font_Awesome_Plugin {
 			self::SLUG,
 			array( $this, 'create_admin_page' )
 		);
-
 	}
 
 	/**
@@ -392,7 +379,7 @@ class Better_Font_Awesome_Plugin {
 	 * @since  0.10.0
 	 */
 	public function create_admin_page() {
-	?>
+		?>
 		<div class="wrap bfa-settings">
 			<?php screen_icon(); ?>
 			<h2><?php echo $this->plugin_display_name; ?></h2>
@@ -409,7 +396,7 @@ class Better_Font_Awesome_Plugin {
 				<?php echo $this->get_usage_text(); ?>
 			</form>
 		</div>
-	<?php
+		<?php
 	}
 
 	/**
@@ -418,7 +405,6 @@ class Better_Font_Awesome_Plugin {
 	 * @since  0.10.0
 	 */
 	function add_settings() {
-
 		register_setting(
 			'option_group', // Option group
 			$this->option_name, // Option name
@@ -448,7 +434,7 @@ class Better_Font_Awesome_Plugin {
 			self::SLUG,
 			'settings_section_primary',
 			array(
-				'id' => 'minified',
+				'id'          => 'minified',
 				'description' => __( 'Whether to include the minified version of the CSS (checked), or the unminified version (unchecked).', 'better-font-awesome' ),
 			)
 		);
@@ -460,7 +446,7 @@ class Better_Font_Awesome_Plugin {
 			self::SLUG,
 			'settings_section_primary',
 			array(
-				'id' => 'remove_existing_fa',
+				'id'          => 'remove_existing_fa',
 				'description' => __( 'Attempt to remove Font Awesome CSS and shortcodes added by other plugins and themes.', 'better-font-awesome' ),
 			)
 		);
@@ -472,11 +458,10 @@ class Better_Font_Awesome_Plugin {
 			self::SLUG,
 			'settings_section_primary',
 			array(
-				'id' => 'hide_admin_notices',
+				'id'          => 'hide_admin_notices',
 				'description' => __( 'Hide the default admin warnings that are shown when API and CDN errors occur.', 'better-font-awesome' ),
 			)
 		);
-
 	}
 
 	/**
@@ -488,7 +473,6 @@ class Better_Font_Awesome_Plugin {
 
 		// Settings-specific functionality.
 		if ( 'settings_page_better-font-awesome' === $hook ) {
-
 			wp_enqueue_style(
 				self::SLUG . '-admin',
 				plugin_dir_url( __FILE__ ) . 'css/admin.css'
@@ -504,10 +488,9 @@ class Better_Font_Awesome_Plugin {
 				self::SLUG . '-admin',
 				'bfa_ajax_object',
 				array(
-					'ajax_url' => admin_url( 'admin-ajax.php' )
+					'ajax_url' => admin_url( 'admin-ajax.php' ),
 				)
 			);
-
 		}
 
 		// Admin notices.
@@ -524,7 +507,6 @@ class Better_Font_Awesome_Plugin {
 	 * @since  1.0.10
 	 */
 	public function save_options() {
-
 		$options = array(
 			'version'            => $_POST['version'],
 			'minified'           => $_POST['minified'],
@@ -539,7 +521,6 @@ class Better_Font_Awesome_Plugin {
 		echo '<div class="updated"><p>' . esc_html( 'Settings saved.', 'better-font-awesome' ) . '</p></div>';
 
 		wp_die();
-
 	}
 
 	/**
@@ -551,20 +532,17 @@ class Better_Font_Awesome_Plugin {
 	 *                 empty array if the API fetch fails.
 	 */
 	function get_versions_list() {
-
-		if ( $this->bfa_lib->get_api_value('versions') ) {
+		if ( $this->bfa_lib->get_api_value( 'versions' ) ) {
 			$versions['latest'] = __( 'Always Latest', 'better-font-awesome' );
 
-			foreach ( $this->bfa_lib->get_api_value('versions') as $version ) {
+			foreach ( $this->bfa_lib->get_api_value( 'versions' ) as $version ) {
 				$versions[ $version ] = $version;
 			}
-
 		} else {
 			$versions = array();
 		}
 
 		return $versions;
-
 	}
 
 	/**
@@ -572,10 +550,9 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @since  0.10.0
 	 *
-	 * @param array  $versions  All available Font Awesome versions
+	 * @param array $versions  All available Font Awesome versions
 	 */
 	public function version_callback( $versions ) {
-
 		if ( $versions ) {
 
 			// Add 'Always Latest' option.
@@ -586,56 +563,53 @@ class Better_Font_Awesome_Plugin {
 			 * algorith and no one needs 2.0 anyways.
 			 */
 			foreach ( $versions as $index => $version ) {
-
 				if ( '2.0' == $version ) {
 					unset( $versions[ $index ] );
 				}
-
 			}
 
 			// Output the <select> element.
 			printf( '<select id="version" name="%s[version]">', esc_attr( $this->option_name ) );
 
 			foreach ( $versions as $version => $text ) {
-
 				printf(
 					'<option value="%s" %s>%s</option>',
 					esc_attr( $version ),
 					selected( $version, $this->options['version'], false ),
 					esc_attr( $text )
 				);
-
 			}
 
 			echo '</select>';
-
 		} else {
 			?>
 			<p>
 				<?php
-				printf( __( 'Version selection is currently unavailable. The attempt to reach the jsDelivr API server failed with the following error: %s', 'better-font-awesome' ),
-					'<code>' . $this->bfa_lib->get_error('api')->get_error_code() . ': ' . $this->bfa_lib->get_error('api')->get_error_message() . '</code>'
+				printf(
+					__( 'Version selection is currently unavailable. The attempt to reach the jsDelivr API server failed with the following error: %s', 'better-font-awesome' ),
+					'<code>' . $this->bfa_lib->get_error( 'api' )->get_error_code() . ': ' . $this->bfa_lib->get_error( 'api' )->get_error_message() . '</code>'
 				);
 				?>
 			</p>
 			<p>
 				<?php
-				printf( __( 'Font Awesome will still render using version: %s', 'better-font-awesome' ),
+				printf(
+					__( 'Font Awesome will still render using version: %s', 'better-font-awesome' ),
 					'<code>' . $this->bfa_lib->get_fallback_version() . '</code>'
 				);
 				?>
 			</p>
 			<p>
 				<?php
-				printf( __( 'This may be the result of a temporary server or connectivity issue which will resolve shortly. However if the problem persists please file a support ticket on the %splugin forum%s, citing the errors listed above. ', 'better-font-awesome' ),
-						'<a href="http://wordpress.org/support/plugin/better-font-awesome" target="_blank" title="Better Font Awesome support forum">',
-						'</a>'
+				printf(
+					__( 'This may be the result of a temporary server or connectivity issue which will resolve shortly. However if the problem persists please file a support ticket on the %1$splugin forum%2$s, citing the errors listed above. ', 'better-font-awesome' ),
+					'<a href="http://wordpress.org/support/plugin/better-font-awesome" target="_blank" title="Better Font Awesome support forum">',
+					'</a>'
 				);
 				?>
 			</small></p>
 			<?php
 		}
-
 	}
 
 	/**
@@ -644,7 +618,7 @@ class Better_Font_Awesome_Plugin {
 	 * @since  0.10.0
 	 */
 	public function checkbox_callback( $args ) {
-		$option_name = esc_attr( $this->option_name ) . '[' . $args['id'] . ']';
+		$option_name  = esc_attr( $this->option_name ) . '[' . $args['id'] . ']';
 		$option_value = isset( $this->options[ $args['id'] ] ) ? $this->options[ $args['id'] ] : '';
 		printf(
 			'<label for="%s"><input type="checkbox" value="1" id="%s" name="%s" %s/> %s</label>',
@@ -674,7 +648,8 @@ class Better_Font_Awesome_Plugin {
 	 */
 	public function get_usage_text() {
 		return '<div class="bfa-usage-text">' .
-				__( '<h3>Usage</h3>
+				__(
+					'<h3>Usage</h3>
 					 <b>Font Awesome version 4.x +</b>&nbsp;&nbsp;&nbsp;<small><a href="http://fontawesome.io/examples/">See all available options &raquo;</a></small><br /><br />
 					 <i class="icon-coffee fa fa-coffee"></i> <code>[icon name="coffee"]</code> or <code>&lt;i class="fa-coffee"&gt;&lt;/i&gt;</code><br /><br />
 					 <i class="icon-coffee fa fa-coffee icon-2x fa-2x"></i> <code>[icon name="coffee" class="fa-2x"]</code> or <code>&lt;i class="fa-coffee fa-2x"&gt;&lt;/i&gt;</code><br /><br />
@@ -683,17 +658,17 @@ class Better_Font_Awesome_Plugin {
 					 <i class="icon-coffee fa fa-coffee"></i> <code>[icon name="coffee"]</code> or <code>&lt;i class="icon icon-coffee"&gt;&lt;/i&gt;</code><br /><br />
 					 <i class="icon-coffee fa fa-coffee icon-2x fa-2x"></i> <code>[icon name="coffee" class="icon-2x"]</code> or <code>&lt;i class="icon icon-coffee icon-2x"&gt;&lt;/i&gt;</code><br /><br />
 					 <i class="icon-coffee fa fa-coffee icon-2x fa-2x icon-rotate-90 fa-rotate-90"></i> <code>[icon name="coffee" class="icon-2x icon-rotate-90"]</code> or <code>&lt;i class="icon icon-coffee icon-2x icon-rotate-90"&gt;&lt;/i&gt;</code>',
-				'better-font-awesome' ) .
+					'better-font-awesome'
+				) .
 				'</div>';
 	}
 
 	/**
 	 * Sanitize each settings field as needed.
 	 *
-	 * @param  array  $input  Contains all settings fields as array keys.
+	 * @param  array $input  Contains all settings fields as array keys.
 	 */
 	public function sanitize( $input ) {
-
 		$new_input = array();
 
 		// Sanitize options to match their type
@@ -714,7 +689,6 @@ class Better_Font_Awesome_Plugin {
 		}
 
 		return $new_input;
-
 	}
 
 }
