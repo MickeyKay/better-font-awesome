@@ -33,6 +33,7 @@ add_action( 'init', 'bfa_start', 5 );
  */
 function bfa_start() {
 	global $better_font_awesome;
+	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 	$better_font_awesome = Better_Font_Awesome_Plugin::get_instance();
 }
 
@@ -127,12 +128,14 @@ class Better_Font_Awesome_Plugin {
 	 * Returns the instance of this class, and initializes the instance if it
 	 * doesn't already exist.
 	 *
-	 * @return  Better_Font_Awesome  The BFA object.
+	 * @param   array $args Args to instantiate the plugin object.
+	 *
+	 * @return  std_class Better_Font_Awesome  The BFA object.
 	 */
 	public static function get_instance( $args = array() ) {
 
 		// If the single instance hasn't been set, set it now.
-		if ( null == self::$instance ) {
+		if ( null === self::$instance ) {
 			self::$instance = new self( $args );
 		}
 
@@ -144,7 +147,7 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @since  0.9.0
 	 */
-	function __construct() {
+	protected function __construct() {
 
 		// Perform plugin initialization actions.
 		$this->initialize();
@@ -172,7 +175,7 @@ class Better_Font_Awesome_Plugin {
 		add_action( 'admin_init', array( $this, 'add_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 
-		// Handle saving options via AJAX
+		// Handle saving options via AJAX.
 		add_action( 'wp_ajax_bfa_save_options', array( $this, 'save_options' ) );
 		add_action( 'wp_ajax_bfa_dismiss_testing_admin_notice', array( $this, 'dismiss_testing_admin_notice' ) );
 	}
@@ -235,7 +238,7 @@ class Better_Font_Awesome_Plugin {
 		$message .= '<p>' . __( 'It appears that Better Font Awesome is missing it\'s <a href="https://github.com/MickeyKay/better-font-awesome-library" target="_blank">core library</a>, which typically occurs when cloning the Git repository and failing to run <code>composer install</code>. Please refer to the plugin\'s <a href="https://github.com/MickeyKay/better-font-awesome" target="_blank">installation instructions</a> for details on how to properly install Better Font Awesome via Git. If you installed from within WordPress, or via the wordpress.org repo, then chances are the install failed and you can try again. If the issue persists, please create a new topic on the plugin\'s <a href="http://wordpress.org/support/plugin/better-font-awesome" target="_blank">support forum</a> or file an issue on the <a href="https://github.com/MickeyKay/better-font-awesome/issues" target="_blank">Github repo</a>.', 'better-font-awesome' ) . '</p>';
 		$message .= '<p><a href="' . get_admin_url( null, 'plugins.php' ) . '">' . __( 'Back to the plugins page &rarr;', 'better-font-awesome' ) . '</a></p>';
 
-		wp_die( $message );
+		wp_die( esc_html( $message ) );
 	}
 
 	/**
@@ -254,7 +257,7 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @since   0.10.0
 	 *
-	 * @return  array  Plugin options.
+	 * @param string $option_name Options key.
 	 */
 	private function initialize_options( $option_name ) {
 
@@ -305,7 +308,7 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @since  0.10.0
 	 */
-	function load_text_domain() {
+	public function load_text_domain() {
 		load_plugin_textdomain( self::SLUG, false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 	}
 
@@ -322,12 +325,23 @@ class Better_Font_Awesome_Plugin {
 				true !== $user_dismissed_option_data->{get_current_user_id()}
 			) :
 			?>
-			<div class="notice notice-info is-dismissible" id="<?php esc_attr_e( self::SLUG . '-testing-notice' ); ?>">
-				<p><strong><?php _e( 'Better Font Awesome - We need your help!', 'better-font-awesome' ); ?></strong> </p>
-				<p><?php printf( __( "First of all, thanks so much for using the plugin! Second of all, %1\$sBetter Font Awesome 2.0%2\$s is <i>almost</i> ready for use! The new version adds a few major improvements, most notably support for Font Awesome 5 icons. Before publishing the update, it's important that we get plenty of user testing to validate that everything is working as expected, and we could really use your help.", 'better-font-awesome' ), '<a href="https://mickeykay.me/2020/09/better-font-awesome-v2-ready-for-testing/" target="_blank">', '</a>' ); ?></p>
-				<p><?php printf( __( 'If you are interested in helping us test the new update, please read the official %1$sblog post%2$s, which includes simple instructions for how to get involved. Thanks so much for you support', 'better-font-awesome' ), '<a href="https://mickeykay.me/2020/09/better-font-awesome-v2-ready-for-testing/" target="_blank">', '</a>' ); ?> <span class="dashicons dashicons-heart"></span>.</p>
+			<div class="notice notice-info is-dismissible" id="<?php echo esc_attr( self::SLUG . '-testing-notice' ); ?>">
+				<p><strong><?php esc_html_e( 'Better Font Awesome - We need your help!', 'better-font-awesome' ); ?></strong> </p>
+				<p>
+					<?php
+						/* translators: placeholders are the opening and closing <a> tags.*/
+						printf( wp_kses_post( __( "First of all, thanks so much for using the plugin! Second of all, %1\$sBetter Font Awesome 2.0%2\$s is <i>almost</i> ready for use! The new version adds a few major improvements, most notably support for Font Awesome 5 icons. Before publishing the update, it's important that we get plenty of user testing to validate that everything is working as expected, and we could really use your help.", 'better-font-awesome' ) ), '<a href="https://mickeykay.me/2020/09/better-font-awesome-v2-ready-for-testing/" target="_blank">', '</a>' );
+					?>
+				</p>
+				<p>
+					<?php
+						/* translators: placeholders are the opening and closing <a> tags.*/
+						printf( wp_kses_post( __( 'If you are interested in helping us test the new update, please read the official %1$sblog post%2$s, which includes simple instructions for how to get involved. Thanks so much for you support', 'better-font-awesome' ) ), '<a href="https://mickeykay.me/2020/09/better-font-awesome-v2-ready-for-testing/" target="_blank">', '</a>' );
+					?>
+					<span class="dashicons dashicons-heart"></span>.
+				</p>
 				<button type="button" class="notice-dismiss">
-					<span class="screen-reader-text"><?php _e( 'Dismiss this notice.', 'better-font-awesome' ); ?></span>
+					<span class="screen-reader-text"><?php esc_html_e( 'Dismiss this notice.', 'better-font-awesome' ); ?></span>
 				</button>
 			</div>
 			<?php
@@ -363,7 +377,7 @@ class Better_Font_Awesome_Plugin {
 	/**
 	 * Create the plugin settings page.
 	 */
-	function add_settings_page() {
+	public function add_settings_page() {
 		add_options_page(
 			$this->plugin_display_name,
 			$this->plugin_display_name,
@@ -381,19 +395,18 @@ class Better_Font_Awesome_Plugin {
 	public function create_admin_page() {
 		?>
 		<div class="wrap bfa-settings">
-			<?php screen_icon(); ?>
-			<h2><?php echo $this->plugin_display_name; ?></h2>
+			<h2><?php echo esc_html( $this->plugin_display_name ); ?></h2>
 			<form method="post" action="options.php" id="bfa-settings-form">
 			<?php
-				// This prints out all hidden setting fields
+				// This prints out all hidden setting fields.
 				settings_fields( 'option_group' );
 				do_settings_sections( self::SLUG );
 			?>
 				<p>
-					<span class="button-primary bfa-save-settings-button"><?php _e( 'Save Settings', 'better-font-awesome' ); ?></span> <img class="bfa-loading-gif" src="<?php echo includes_url() . 'images/spinner.gif'; ?>" />
+					<span class="button-primary bfa-save-settings-button"><?php esc_html_e( 'Save Settings', 'better-font-awesome' ); ?></span> <img class="bfa-loading-gif" src="<?php echo esc_attr( includes_url() . 'images/spinner.gif' ); ?>" />
 				</p>
 				<div class="bfa-ajax-response-holder"></div>
-				<?php echo $this->get_usage_text(); ?>
+				<?php echo wp_kses_post( $this->get_usage_text() ); ?>
 			</form>
 		</div>
 		<?php
@@ -404,27 +417,27 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @since  0.10.0
 	 */
-	function add_settings() {
+	public function add_settings() {
 		register_setting(
-			'option_group', // Option group
-			$this->option_name, // Option name
-			array( $this, 'sanitize' ) // Sanitize
+			'option_group', // Option group.
+			$this->option_name, // Option name.
+			array( $this, 'sanitize' ) // Sanitize.
 		);
 
 		add_settings_section(
-			'settings_section_primary', // ID
-			null, // Title
-			null, // Callback
-			self::SLUG // Page
+			'settings_section_primary', // ID.
+			null, // Title.
+			null, // Callback.
+			self::SLUG // Page.
 		);
 
 		add_settings_field(
-			'version', // ID
-			__( 'Version', 'better-font-awesome' ), // Title
-			array( $this, 'version_callback' ), // Callback
-			self::SLUG, // Page
-			'settings_section_primary', // Section
-			$this->get_versions_list() // Args
+			'version', // ID.
+			__( 'Version', 'better-font-awesome' ), // Title.
+			array( $this, 'version_callback' ), // Callback.
+			self::SLUG, // Page.
+			'settings_section_primary', // Section.
+			$this->get_versions_list() // Args.
 		);
 
 		add_settings_field(
@@ -467,17 +480,21 @@ class Better_Font_Awesome_Plugin {
 	/**
 	 * Enqueue admin scripts and styles.
 	 *
+	 * @param string $hook Settings page hook.
+	 *
 	 * @since 1.0.10
 	 */
 	public function admin_enqueue_scripts( $hook ) {
 
 		// Settings-specific functionality.
 		if ( 'settings_page_better-font-awesome' === $hook ) {
+			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 			wp_enqueue_style(
 				self::SLUG . '-admin',
 				plugin_dir_url( __FILE__ ) . 'css/admin.css'
 			);
 
+			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 			wp_enqueue_script(
 				self::SLUG . '-admin',
 				plugin_dir_url( __FILE__ ) . 'js/admin.js',
@@ -494,6 +511,7 @@ class Better_Font_Awesome_Plugin {
 		}
 
 		// Admin notices.
+		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 		wp_enqueue_script(
 			self::SLUG . '-admin-notices',
 			plugin_dir_url( __FILE__ ) . 'js/admin-notices.js',
@@ -508,10 +526,10 @@ class Better_Font_Awesome_Plugin {
 	 */
 	public function save_options() {
 		$options = array(
-			'version'            => $_POST['version'],
-			'minified'           => $_POST['minified'],
-			'remove_existing_fa' => $_POST['remove_existing_fa'],
-			'hide_admin_notices' => $_POST['hide_admin_notices'],
+			'version'            => isset( $_POST['version'] ) && $_POST['version'],
+			'minified'           => isset( $_POST['minified'] ) && $_POST['minified'],
+			'remove_existing_fa' => isset( $_POST['remove_existing_fa'] ) && $_POST['remove_existing_fa'],
+			'hide_admin_notices' => isset( $_POST['hide_admin_notices'] ) && $_POST['hide_admin_notices'],
 		);
 
 		// Sanitize and update the options.
