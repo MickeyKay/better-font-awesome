@@ -126,11 +126,14 @@ class Better_Font_Awesome_Plugin {
 	 * Returns the instance of this class, and initializes the instance if it
 	 * doesn't already exist.
 	 *
+	 * @param array $args Args to instantiate BFA object.
+	 *
 	 * @return  Better_Font_Awesome  The BFA object.
 	 */
 	public static function get_instance( $args = array() ) {
 
 		// If the single instance hasn't been set, set it now.
+		// phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
 		if ( null == self::$instance ) {
 			self::$instance = new self( $args );
 		}
@@ -143,7 +146,7 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @since  0.9.0
 	 */
-	function __construct() {
+	public function __construct() {
 
 		// Perform plugin initialization actions.
 		$this->initialize();
@@ -168,7 +171,7 @@ class Better_Font_Awesome_Plugin {
 		add_action( 'admin_init', array( $this, 'add_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 
-		// Handle saving options via AJAX
+		// Handle saving options via AJAX.
 		add_action( 'wp_ajax_bfa_save_options', array( $this, 'save_options' ) );
 	}
 
@@ -241,7 +244,7 @@ class Better_Font_Awesome_Plugin {
 			$message .= '<p>' . __( 'It appears that Better Font Awesome is missing it\'s <a href="https://github.com/MickeyKay/better-font-awesome-library" target="_blank">core library</a>, which typically occurs when cloning the Git repository and failing to run <code>composer install</code>. Please refer to the plugin\'s <a href="https://github.com/MickeyKay/better-font-awesome" target="_blank">installation instructions</a> for details on how to properly install Better Font Awesome via Git. If you installed from within WordPress, or via the wordpress.org repo, then chances are the install failed and you can try again. If the issue persists, please create a new topic on the plugin\'s <a href="http://wordpress.org/support/plugin/better-font-awesome" target="_blank">support forum</a> or file an issue on the <a href="https://github.com/MickeyKay/better-font-awesome/issues" target="_blank">Github repo</a>.', 'better-font-awesome' ) . '</p>';
 			$message .= '<p><a href="' . get_admin_url( null, 'plugins.php' ) . '">' . __( 'Back to the plugins page &rarr;', 'better-font-awesome' ) . '</a></p>';
 
-			wp_die( $message );
+			wp_die( wp_kses_post( $message ) );
 	}
 
 	/**
@@ -260,7 +263,7 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @since   0.10.0
 	 *
-	 * @return  array  Plugin options.
+	 * @param string $option_name Name/slug for the plugin options object.
 	 */
 	private function initialize_options( $option_name ) {
 
@@ -288,6 +291,7 @@ class Better_Font_Awesome_Plugin {
 	private function initialize_better_font_awesome_library( $options ) {
 
 		// Hide admin notices if setting is checked.
+		// phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
 		if ( $options && true == $options['hide_admin_notices'] ) {
 			add_filter( 'bfa_show_errors', '__return_false' );
 		}
@@ -310,14 +314,14 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @since  0.10.0
 	 */
-	function load_text_domain() {
+	public function load_text_domain() {
 		load_plugin_textdomain( self::SLUG, false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 	}
 
 	/**
 	 * Create the plugin settings page.
 	 */
-	function add_settings_page() {
+	public function add_settings_page() {
 		add_options_page(
 			$this->plugin_display_name,
 			$this->plugin_display_name,
@@ -335,16 +339,15 @@ class Better_Font_Awesome_Plugin {
 	public function create_admin_page() {
 		?>
 		<div class="wrap bfa-settings">
-			<?php screen_icon(); ?>
-			<h2><?php echo $this->plugin_display_name; ?></h2>
+			<h2><?php echo esc_html( $this->plugin_display_name ); ?></h2>
 			<form method="post" action="options.php" id="bfa-settings-form">
 			<?php
-				// This prints out all hidden setting fields
+				// This prints out all hidden setting fields.
 				settings_fields( 'option_group' );
 				do_settings_sections( self::SLUG );
 			?>
 				<p>
-					<span class="button-primary bfa-save-settings-button"><?php _e( 'Save Settings', 'better-font-awesome' ); ?></span> <img class="bfa-loading-gif" src="<?php echo includes_url() . 'images/spinner.gif'; ?>" />
+					<span class="button-primary bfa-save-settings-button"><?php esc_html_e( 'Save Settings', 'better-font-awesome' ); ?></span> <img class="bfa-loading-gif" src="<?php echo esc_attr( includes_url() . 'images/spinner.gif' ); ?>" />
 				</p>
 				<div class="bfa-ajax-response-holder"></div>
 			</form>
@@ -357,34 +360,34 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @since  0.10.0
 	 */
-	function add_settings() {
+	public function add_settings() {
 		register_setting(
-			'option_group', // Option group
-			$this->option_name, // Option name
-			array( $this, 'sanitize' ) // Sanitize
+			'option_group', // Option group.
+			$this->option_name, // Option name.
+			array( $this, 'sanitize' ) // Sanitize.
 		);
 
 		add_settings_section(
-			'settings_section_primary', // ID
-			null, // Title
-			null, // Callback
-			self::SLUG // Page
+			'settings_section_primary', // ID.
+			null, // Title.
+			null, // Callback.
+			self::SLUG // Page.
 		);
 
 		add_settings_field(
-			'version', // ID
-			__( 'Font Awesome version', 'better-font-awesome' ), // Title
-			array( $this, 'version_callback' ), // Callback
-			self::SLUG, // Page
-			'settings_section_primary' // Section
+			'version', // ID.
+			__( 'Font Awesome version', 'better-font-awesome' ), // Title.
+			array( $this, 'version_callback' ), // Callback.
+			self::SLUG, // Page.
+			'settings_section_primary' // Section.
 		);
 
 		add_settings_field(
-			'version_check_frequency', // ID
-			__( 'Version check frequency', 'better-font-awesome' ), // Title
-			array( $this, 'version_check_frequency_callback' ), // Callback
-			self::SLUG, // Page
-			'settings_section_primary' // Section
+			'version_check_frequency', // ID.
+			__( 'Version check frequency', 'better-font-awesome' ), // Title.
+			array( $this, 'version_check_frequency_callback' ), // Callback.
+			self::SLUG, // Page.
+			'settings_section_primary' // Section.
 		);
 
 		add_settings_field(
@@ -428,20 +431,25 @@ class Better_Font_Awesome_Plugin {
 	 * Enqueue admin scripts and styles.
 	 *
 	 * @since 1.0.10
+	 *
+	 * @param string $hook Current admin page hook.
 	 */
 	public function admin_enqueue_scripts( $hook ) {
 		if ( 'settings_page_better-font-awesome' === $hook ) {
+			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 			wp_enqueue_style(
 				self::SLUG . '-admin',
 				plugin_dir_url( __FILE__ ) . 'css/admin.css'
 			);
 
+			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion, WordPress.WP.EnqueuedResourceParameters.NotInFooter
 			wp_enqueue_script(
 				self::SLUG . '-admin',
 				plugin_dir_url( __FILE__ ) . 'js/admin.js',
 				array( 'jquery' )
 			);
 
+			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter
 			wp_localize_script(
 				self::SLUG . '-admin',
 				'bfa_ajax_object',
@@ -450,6 +458,14 @@ class Better_Font_Awesome_Plugin {
 				)
 			);
 		}
+
+		// Admin notices.
+		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion, WordPress.WP.EnqueuedResourceParameters.NotInFooter
+		wp_enqueue_script(
+			self::SLUG . '-admin-notices',
+			plugin_dir_url( __FILE__ ) . 'js/admin-notices.js',
+			array( 'jquery' )
+		);
 	}
 
 	/**
@@ -459,16 +475,16 @@ class Better_Font_Awesome_Plugin {
 	 */
 	public function save_options() {
 		$options = array(
-			'include_v4_shim'    => $_POST['include_v4_shim'],
-			'remove_existing_fa' => $_POST['remove_existing_fa'],
-			'hide_admin_notices' => $_POST['hide_admin_notices'],
+			'include_v4_shim'    => isset( $_POST['include_v4_shim'] ) && $_POST['include_v4_shim'],
+			'remove_existing_fa' => isset( $_POST['remove_existing_fa'] ) && $_POST['remove_existing_fa'],
+			'hide_admin_notices' => isset( $_POST['hide_admin_notices'] ) && $_POST['hide_admin_notices'],
 		);
 
 		// Sanitize and update the options.
 		update_option( $this->option_name, $options );
 
 		// Return a message.
-		echo '<div class="updated"><p>' . esc_html( 'Settings saved.', 'better-font-awesome' ) . '</p></div>';
+		echo '<div class="updated"><p>' . esc_html__( 'Settings saved.', 'better-font-awesome' ) . '</p></div>';
 
 		wp_die();
 	}
@@ -479,7 +495,7 @@ class Better_Font_Awesome_Plugin {
 	 * @since  0.10.0
 	 */
 	public function version_callback() {
-		echo "<code>{$this->bfa_lib->get_version()}</code>";
+		echo wp_kses_post( "<code>{$this->bfa_lib->get_version()}</code>" );
 	}
 
 	/**
@@ -491,25 +507,27 @@ class Better_Font_Awesome_Plugin {
 		$current_time              = time();
 		$expiration_time           = time() + $this->bfa_lib->get_transient_expiration() - 1; // -1 to improve readability (e.g. "24 hours" instead of "1 days")
 		$human_readable_expiration = human_time_diff( $current_time, $expiration_time );
-
-		echo "<code>{$human_readable_expiration}</code> (The plugin automatically uses the latest version of Font Awesome, and checks for updates at this frequency)";
+		/* translators: placeholder is the numeric current version number. */
+		echo wp_kses_post( sprintf( __( '%s (The plugin automatically uses the latest version of Font Awesome, and checks for updates at this frequency)', 'better-font-awesome' ), "<code>{$human_readable_expiration}</code>" ) );
 	}
 
 	/**
 	 * Output a checkbox setting.
 	 *
 	 * @since  0.10.0
+	 *
+	 * @param array $args Args to callback.
 	 */
 	public function checkbox_callback( $args ) {
 		$option_name  = esc_attr( $this->option_name ) . '[' . $args['id'] . ']';
 		$option_value = isset( $this->options[ $args['id'] ] ) ? $this->options[ $args['id'] ] : '';
 		printf(
 			'<label for="%s"><input type="checkbox" value="1" id="%s" name="%s" %s/> %s</label>',
-			$args['id'],
-			$args['id'],
-			$option_name,
-			checked( 1, $option_value, false ),
-			$args['description']
+			esc_attr( $args['id'] ),
+			esc_attr( $args['id'] ),
+			esc_attr( $option_name ),
+			esc_attr( checked( 1, $option_value, false ) ),
+			wp_kses_post( $args['description'] )
 		);
 	}
 
@@ -517,9 +535,11 @@ class Better_Font_Awesome_Plugin {
 	 * Output a text setting.
 	 *
 	 * @since 0.10.0
+	 *
+	 * @param array $args Args to callback.
 	 */
 	public function text_callback( $args ) {
-		echo '<div class="bfa-text">' . $args['text'] . '</div>';
+		echo '<div class="bfa-text">' . esc_html( $args['text'] ) . '</div>';
 	}
 
 	/**
