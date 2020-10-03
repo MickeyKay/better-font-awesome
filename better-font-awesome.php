@@ -285,6 +285,7 @@ class Better_Font_Awesome_Plugin {
 	private function initialize_better_font_awesome_library( $options ) {
 
 		// Hide admin notices if setting is checked.
+		// phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
 		if ( true == $options['hide_admin_notices'] ) {
 			add_filter( 'bfa_show_errors', '__return_false' );
 		}
@@ -494,13 +495,14 @@ class Better_Font_Awesome_Plugin {
 				plugin_dir_url( __FILE__ ) . 'css/admin.css'
 			);
 
-			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion, WordPress.WP.EnqueuedResourceParameters.NotInFooter
 			wp_enqueue_script(
 				self::SLUG . '-admin',
 				plugin_dir_url( __FILE__ ) . 'js/admin.js',
 				array( 'jquery' )
 			);
 
+			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter
 			wp_localize_script(
 				self::SLUG . '-admin',
 				'bfa_ajax_object',
@@ -511,7 +513,7 @@ class Better_Font_Awesome_Plugin {
 		}
 
 		// Admin notices.
-		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion, WordPress.WP.EnqueuedResourceParameters.NotInFooter
 		wp_enqueue_script(
 			self::SLUG . '-admin-notices',
 			plugin_dir_url( __FILE__ ) . 'js/admin-notices.js',
@@ -536,7 +538,7 @@ class Better_Font_Awesome_Plugin {
 		update_option( $this->option_name, $options );
 
 		// Return a message.
-		echo '<div class="updated"><p>' . esc_html( 'Settings saved.', 'better-font-awesome' ) . '</p></div>';
+		echo '<div class="updated"><p>' . esc_html__( 'Settings saved.', 'better-font-awesome' ) . '</p></div>';
 
 		wp_die();
 	}
@@ -581,6 +583,7 @@ class Better_Font_Awesome_Plugin {
 			 * algorith and no one needs 2.0 anyways.
 			 */
 			foreach ( $versions as $index => $version ) {
+				// phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
 				if ( '2.0' == $version ) {
 					unset( $versions[ $index ] );
 				}
