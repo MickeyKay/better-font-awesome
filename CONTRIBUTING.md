@@ -18,6 +18,10 @@ npm run build
 // Run tests to ensure everything is working as expected
 npm run test
 
+// Run linting checks to ensure coding standards are met
+npm run lint
+npm run lint-fix // Optionally fix errors that can be handled automatically.
+
 // Commit your changes
 git commit -m 'Do thing X to fix thing Y'
 ```
