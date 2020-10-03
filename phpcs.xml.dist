@@ -52,7 +52,9 @@
     </rule>
 
     <rule ref="WordPress.Security">
-        <exclude name="WordPress.Security.NonceVerification.Missing"/>
+        <exclude name="WordPress.Security.NonceVerification.Missing" />
+        <exclude name="WordPress.Security.ValidatedSanitizedInput.MissingUnslash" />
+        <exclude name="WordPress.Security.ValidatedSanitizedInput.InputNotSanitized" />
     </rule>
 
     <rule ref="WordPress.WhiteSpace.ControlStructureSpacing">

@@ -549,7 +549,7 @@ class Better_Font_Awesome_Plugin {
 	 * @return  array  All available versions and the latest version, or an
 	 *                 empty array if the API fetch fails.
 	 */
-	function get_versions_list() {
+	public function get_versions_list() {
 		if ( $this->bfa_lib->get_api_value( 'versions' ) ) {
 			$versions['latest'] = __( 'Always Latest', 'better-font-awesome' );
 
@@ -568,7 +568,7 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @since  0.10.0
 	 *
-	 * @param array $versions  All available Font Awesome versions
+	 * @param array $versions  All available Font Awesome versions.
 	 */
 	public function version_callback( $versions ) {
 		if ( $versions ) {
@@ -604,23 +604,26 @@ class Better_Font_Awesome_Plugin {
 			<p>
 				<?php
 				printf(
-					__( 'Version selection is currently unavailable. The attempt to reach the jsDelivr API server failed with the following error: %s', 'better-font-awesome' ),
-					'<code>' . $this->bfa_lib->get_error( 'api' )->get_error_code() . ': ' . $this->bfa_lib->get_error( 'api' )->get_error_message() . '</code>'
+					// translators: string is the error code + message.
+					esc_html__( 'Version selection is currently unavailable. The attempt to reach the jsDelivr API server failed with the following error: %s', 'better-font-awesome' ),
+					'<code>' . esc_html( $this->bfa_lib->get_error( 'api' )->get_error_code() . ': ' . $this->bfa_lib->get_error( 'api' )->get_error_message() ) . '</code>'
 				);
 				?>
 			</p>
 			<p>
 				<?php
 				printf(
-					__( 'Font Awesome will still render using version: %s', 'better-font-awesome' ),
-					'<code>' . $this->bfa_lib->get_fallback_version() . '</code>'
+					// translators: string is the fallback version of font awesome.
+					esc_html__( 'Font Awesome will still render using version: %s', 'better-font-awesome' ),
+					'<code>' . esc_html( $this->bfa_lib->get_fallback_version() ) . '</code>'
 				);
 				?>
 			</p>
 			<p>
 				<?php
 				printf(
-					__( 'This may be the result of a temporary server or connectivity issue which will resolve shortly. However if the problem persists please file a support ticket on the %1$splugin forum%2$s, citing the errors listed above. ', 'better-font-awesome' ),
+					// translators: placeholders are the opening and closing <a> tags.
+					esc_html__( 'This may be the result of a temporary server or connectivity issue which will resolve shortly. However if the problem persists please file a support ticket on the %1$splugin forum%2$s, citing the errors listed above. ', 'better-font-awesome' ),
 					'<a href="http://wordpress.org/support/plugin/better-font-awesome" target="_blank" title="Better Font Awesome support forum">',
 					'</a>'
 				);
@@ -634,27 +637,20 @@ class Better_Font_Awesome_Plugin {
 	 * Output a checkbox setting.
 	 *
 	 * @since  0.10.0
+	 *
+	 * @param array $args Args to the checkbox callback.
 	 */
 	public function checkbox_callback( $args ) {
 		$option_name  = esc_attr( $this->option_name ) . '[' . $args['id'] . ']';
 		$option_value = isset( $this->options[ $args['id'] ] ) ? $this->options[ $args['id'] ] : '';
 		printf(
 			'<label for="%s"><input type="checkbox" value="1" id="%s" name="%s" %s/> %s</label>',
-			$args['id'],
-			$args['id'],
-			$option_name,
-			checked( 1, $option_value, false ),
-			$args['description']
+			esc_attr( $args['id'] ),
+			esc_attr( $args['id'] ),
+			esc_attr( $option_name ),
+			esc_attr( checked( 1, $option_value, false ) ),
+			esc_attr( $args['description'] )
 		);
-	}
-
-	/**
-	 * Output a text setting.
-	 *
-	 * @since 0.10.0
-	 */
-	public function text_callback( $args ) {
-		echo '<div class="bfa-text">' . $args['text'] . '</div>';
 	}
 
 	/**
@@ -689,7 +685,7 @@ class Better_Font_Awesome_Plugin {
 	public function sanitize( $input ) {
 		$new_input = array();
 
-		// Sanitize options to match their type
+		// Sanitize options to match their type.
 		if ( isset( $input['version'] ) ) {
 			$new_input['version'] = sanitize_text_field( $input['version'] );
 		}
