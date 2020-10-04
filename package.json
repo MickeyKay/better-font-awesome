@@ -1,15 +1,19 @@
 {
   "title": "Better Font Awesome",
   "description": "The best WordPress extension ever made!",
-  "version": "2.0.0-beta4",
+  "version": "1.7.4",
   "homepage": "http://wordpress.org/plugins/better-font-awesome",
   "scripts": {
     "composer": "composer install",
     "grunt": "grunt build",
     "clean": "rm -rf vendor",
     "checkout-svn": "svn co https://plugins.svn.wordpress.org/better-font-awesome svn",
-    "build": "npm run clean && npm run composer && npm run grunt",
-    "test": "./vendor/bin/phpunit"
+    "develop": "npm run clean && npm install && npm run composer && npm run test-setup",
+    "build": "npm run develop && npm run grunt",
+    "lint": "./vendor/bin/phpcs",
+    "lint-fix": "./vendor/bin/phpcbf",
+    "test": "export TMPDIR=/tmp && ./vendor/bin/phpunit",
+    "test-setup": "export TMPDIR=/tmp && bash bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1"
   },
   "author": {
     "name": "Mickey Kay",

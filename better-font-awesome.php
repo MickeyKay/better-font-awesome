@@ -21,12 +21,6 @@
  * GitHub Plugin URI: https://github.com/MickeyKay/better-font-awesome
  */
 
-/**
- * @todo
- *
- * - [ ] Handle errors in version_callback()
- */
-
 add_action( 'init', 'bfa_start', 5 );
 /**
  * Initialize the Better Font Awesome plugin.
