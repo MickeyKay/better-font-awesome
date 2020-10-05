@@ -146,7 +146,7 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @since  0.9.0
 	 */
-	public function __construct() {
+	protected function __construct() {
 
 		// Perform plugin initialization actions.
 		$this->initialize();
