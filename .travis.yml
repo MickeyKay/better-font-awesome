@@ -48,7 +48,7 @@ before_script:
 script:
   - |
     if [[ ! -z "$WP_VERSION" ]] ; then
-      ./vendor/bin/phpunit
+      php vendor/bin/phpunit
       WP_MULTISITE=1 phpunit
     fi
   - |
