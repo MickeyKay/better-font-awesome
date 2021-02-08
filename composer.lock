@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d40a51fe446efff0dd793b147579e84d",
+    "content-hash": "e64e3360b7507bc36c90efa0453919bd",
     "packages": [
         {
             "name": "mickey-kay/better-font-awesome-library",
