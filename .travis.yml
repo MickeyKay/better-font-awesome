@@ -35,7 +35,7 @@ before_install:
 
 install:
   # Install our Composer dependencies
-  - composer install --prefer-dist --no-interaction
+  - composer install
 
   # Install an older version of PHPUnit if we're still running PHP 5.6.
   - |
