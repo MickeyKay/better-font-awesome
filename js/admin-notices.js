@@ -7,7 +7,7 @@
 
     'use strict';
 
-    $( document ).ready( function() {
+    $( function() {
 
         $( '#better-font-awesome-testing-notice' ).on( 'click', '.notice-dismiss', function() {
 

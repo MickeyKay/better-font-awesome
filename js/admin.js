@@ -7,7 +7,7 @@
 
 	'use strict';
 
-	$( document ).ready( function() {
+	$( function() {
 
 		$( '.bfa-save-settings-button' ).on( 'click', function() {
 

@@ -12,7 +12,7 @@
  * Plugin Name:       Better Font Awesome
  * Plugin URI:        http://wordpress.org/plugins/better-font-awesome
  * Description:       The ultimate Font Awesome icon plugin for WordPress.
- * Version:           1.7.4
+ * Version:           1.7.5
  * Author:            Mickey Kay
  * Author URI:        mickeyskay@gmail.com
  * License:           GPLv2+
@@ -341,9 +341,6 @@ class Better_Font_Awesome_Plugin {
 					?>
 					<span class="dashicons dashicons-heart"></span>.
 				</p>
-				<button type="button" class="notice-dismiss">
-					<span class="screen-reader-text"><?php esc_html_e( 'Dismiss this notice.', 'better-font-awesome' ); ?></span>
-				</button>
 			</div>
 			<?php
 		endif;
@@ -528,11 +525,14 @@ class Better_Font_Awesome_Plugin {
 	 */
 	public function save_options() {
 		$options = array(
-			'version'            => isset( $_POST['version'] ) && $_POST['version'],
 			'minified'           => isset( $_POST['minified'] ) && $_POST['minified'],
 			'remove_existing_fa' => isset( $_POST['remove_existing_fa'] ) && $_POST['remove_existing_fa'],
 			'hide_admin_notices' => isset( $_POST['hide_admin_notices'] ) && $_POST['hide_admin_notices'],
 		);
+
+		if ( isset( $_POST['version'] ) ) {
+			$options['version'] = $_POST['version'];
+		}
 
 		// Sanitize and update the options.
 		update_option( $this->option_name, $options );

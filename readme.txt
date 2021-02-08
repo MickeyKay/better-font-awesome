@@ -3,8 +3,8 @@ Contributors: McGuive7
 Tags: better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode
 Donate link: https://mickeykay.me
 Requires at least: 3.0
-Tested up to: 5.5
-Stable tag: 1.7.4
+Tested up to: 5.6.1
+Stable tag: 1.7.5
 License: GPLv2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -111,6 +111,10 @@ Please see our [contributing guidelines](https://github.com/MickeyKay/better-fon
 
 
 == Changelog ==
+
+= 1.7.5 =
+* Fix: remove calls to `ready()` jQuery method to support latest jQuery versions.
+* Fix: update fontawesome-iconpicker dependency to repair broken icon select functionality.
 
 = 1.7.4 =
 * Fix: revert accidental bump to underlying Better Font Awesome Library dependency.
@@ -219,34 +223,11 @@ Please see our [contributing guidelines](https://github.com/MickeyKay/better-fon
 * Implement improved fallback handling (transient &rarr; wp_remote_get() &rarr; locally included files)
 * Switch out bulky Titan Framework for native Settings API.
 
-= 0.9.6 =
-* Fixed missing icon previews in WordPress 3.8 and below.
-
-= 0.9.5 =
-* Added ability to choose which CDN to use.
-* Added `unprefixed_class` shortcode attribute to allow for unprefixed shortcodes.
-* Updated prefixes to now return just the prefix without the dash (-).
-
-= 0.9.4 =
-* Switched default &nbsp; being output. Now the default "space" attribute is false, and can be set to true to optionally include a space.
-* PLEASE NOTE: this will affect existing shortcodes.
-
-= 0.9.3 =
-* Fixed admin-styles.css bug that was applying FontAwesome font-face outside TinyMCE
-* Print JS variables in front-end to aid developers
-* Create global $better_font_awesome object for developers to access
-
-= 0.9.2 =
-* Fixes issue of missing icon drop-down select menu in TinyMCE (adds compatibility for TinyMCE v4)
-
-= 0.9.1 =
-* Added fixes for older versions of PHP (Titan Framework not found, unexpected "[")
-
-= 0.9.0 =
-* First release!
-
-
 == Upgrade Notice ==
+
+= 1.7.5 =
+* Fix: remove calls to `ready()` jQuery method to support latest jQuery versions.
+* Fix: update fontawesome-iconpicker dependency to repair broken icon select functionality.
 
 = 1.7.4 =
 * Fix: revert accidental bump to underlying Better Font Awesome Library dependency.
@@ -354,29 +335,3 @@ Please see our [contributing guidelines](https://github.com/MickeyKay/better-fon
 * Implement transients to minimize load time.
 * Implement improved fallback handling (transient &rarr; wp_remote_get() &rarr; locally included files)
 * Switch out bulky Titan Framework for native Settings API.
-
-= 0.9.6 =
-* Fixed missing icon previews in WordPress 3.8 and below.
-
-= 0.9.5 =
-* Added ability to choose which CDN to use.
-* Added `unprefixed_class` shortcode attribute to allow for unprefixed shortcodes.
-* Updated prefixes to now return just the prefix without the dash (-).
-
-= 0.9.4 =
-* Switched default &nbsp; being output. Now the default "space" attribute is false, and can be set to true to optionally include a space.
-* PLEASE NOTE: this will affect existing shortcodes.
-
-= 0.9.3 =
-* Fixed admin-styles.css bug that was applying FontAwesome font-face outside TinyMCE
-* Print JS variables in front-end to aid developers
-* Create global $better_font_awesome object for developers to access
-
-= 0.9.2 =
-* Fixes issue of missing icon drop-down select menu in TinyMCE (adds compatibility for TinyMCE v4)
-
-= 0.9.1 =
-* Added fixes for older versions of PHP (Titan Framework not found, unexpected "[")
-
-= 0.9.0 =
-* First release!
