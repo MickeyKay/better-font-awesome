@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: Better Font Awesome 1.7.4\n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/better-font-awesome\n"
-"POT-Creation-Date: 2020-10-03 19:23:30+00:00\n"
+"POT-Creation-Date: 2020-09-20 15:41:17+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -18,7 +18,7 @@ msgstr ""
 msgid "Better Font Awesome"
 msgstr ""
 
-#: better-font-awesome.php:238 svn/tags/1.7.0/better-font-awesome.php:237
+#: better-font-awesome.php:241 svn/tags/1.7.0/better-font-awesome.php:237
 #: svn/tags/1.7.1/better-font-awesome.php:237
 #: svn/tags/1.7.2/better-font-awesome.php:237
 #: svn/tags/1.7.3/better-font-awesome.php:241
@@ -46,7 +46,7 @@ msgid ""
 "target=\"_blank\">Github repo</a>."
 msgstr ""
 
-#: better-font-awesome.php:239 svn/tags/1.0.0/better-font-awesome.php:218
+#: better-font-awesome.php:242 svn/tags/1.0.0/better-font-awesome.php:218
 #: svn/tags/1.0.1/better-font-awesome.php:218
 #: svn/tags/1.0.10/better-font-awesome.php:219
 #: svn/tags/1.0.2/better-font-awesome.php:218
@@ -85,38 +85,40 @@ msgstr ""
 msgid "Back to the plugins page &rarr;"
 msgstr ""
 
-#: better-font-awesome.php:330 svn/tags/1.7.3/better-font-awesome.php:337
+#: better-font-awesome.php:337 svn/tags/1.7.3/better-font-awesome.php:337
 #: svn/tags/1.7.4/better-font-awesome.php:337
 #: svn/trunk/better-font-awesome.php:337
 msgid "Better Font Awesome - We need your help!"
 msgstr ""
 
-#: better-font-awesome.php:334
-#. translators: placeholders are the opening and closing <a> tags.
+#: better-font-awesome.php:338 svn/tags/1.7.3/better-font-awesome.php:338
+#: svn/tags/1.7.4/better-font-awesome.php:338
+#: svn/trunk/better-font-awesome.php:338
 msgid ""
-"First of all, thanks so much for using the plugin! Second of all, "
-"%1$sBetter Font Awesome 2.0%2$s is <i>almost</i> ready for use! The new "
-"version adds a few major improvements, most notably support for Font "
-"Awesome 5 icons. Before publishing the update, it's important that we get "
-"plenty of user testing to validate that everything is working as expected, "
-"and we could really use your help."
+"First of all, thanks so much for using the plugin! Second of all, %sBetter "
+"Font Awesome 2.0%s is <i>almost</i> ready for use! The new version adds a "
+"few major improvements, most notably support for Font Awesome 5 icons. "
+"Before publishing the update, it's important that we get plenty of user "
+"testing to validate that everything is working as expected, and we could "
+"really use your help."
 msgstr ""
 
-#: better-font-awesome.php:340
-#. translators: placeholders are the opening and closing <a> tags.
+#: better-font-awesome.php:339 svn/tags/1.7.3/better-font-awesome.php:339
+#: svn/tags/1.7.4/better-font-awesome.php:339
+#: svn/trunk/better-font-awesome.php:339
 msgid ""
 "If you are interested in helping us test the new update, please read the "
-"official %1$sblog post%2$s, which includes simple instructions for how to "
-"get involved. Thanks so much for you support"
+"official %sblog post%s, which includes simple instructions for how to get "
+"involved. Thanks so much for you support"
 msgstr ""
 
-#: better-font-awesome.php:345 svn/tags/1.7.3/better-font-awesome.php:341
+#: better-font-awesome.php:341 svn/tags/1.7.3/better-font-awesome.php:341
 #: svn/tags/1.7.4/better-font-awesome.php:341
 #: svn/trunk/better-font-awesome.php:341
 msgid "Dismiss this notice."
 msgstr ""
 
-#: better-font-awesome.php:407 svn/tags/1.1.0/better-font-awesome.php:335
+#: better-font-awesome.php:406 svn/tags/1.1.0/better-font-awesome.php:335
 #: svn/tags/1.2.0/better-font-awesome.php:335
 #: svn/tags/1.2.1/better-font-awesome.php:337
 #: svn/tags/1.3.0/better-font-awesome.php:337
@@ -407,11 +409,7 @@ msgid ""
 "occur."
 msgstr ""
 
-#: better-font-awesome.php:541
-msgid "Settings saved."
-msgstr ""
-
-#: better-font-awesome.php:556 better-font-awesome.php:579
+#: better-font-awesome.php:556 better-font-awesome.php:582
 #: svn/tags/1.0.0/better-font-awesome.php:396
 #: svn/tags/1.0.0/better-font-awesome.php:422
 #: svn/tags/1.0.1/better-font-awesome.php:396
@@ -486,7 +484,7 @@ msgstr ""
 msgid "Always Latest"
 msgstr ""
 
-#: better-font-awesome.php:611 svn/tags/1.0.0/better-font-awesome.php:456
+#: better-font-awesome.php:616 svn/tags/1.0.0/better-font-awesome.php:456
 #: svn/tags/1.0.1/better-font-awesome.php:456
 #: svn/tags/1.0.10/better-font-awesome.php:475
 #: svn/tags/1.0.2/better-font-awesome.php:456
@@ -522,13 +520,12 @@ msgstr ""
 #: svn/tags/2.0.0-beta2/better-font-awesome.php:553
 #: svn/tags/2.0.0-beta3/better-font-awesome.php:553
 #: svn/trunk/better-font-awesome.php:616
-#. translators: string is the error code + message.
 msgid ""
 "Version selection is currently unavailable. The attempt to reach the "
 "jsDelivr API server failed with the following error: %s"
 msgstr ""
 
-#: better-font-awesome.php:620 svn/tags/1.0.0/better-font-awesome.php:463
+#: better-font-awesome.php:623 svn/tags/1.0.0/better-font-awesome.php:463
 #: svn/tags/1.0.1/better-font-awesome.php:463
 #: svn/tags/1.0.10/better-font-awesome.php:482
 #: svn/tags/1.0.2/better-font-awesome.php:463
@@ -564,94 +561,10 @@ msgstr ""
 #: svn/tags/2.0.0-beta2/better-font-awesome.php:560
 #: svn/tags/2.0.0-beta3/better-font-awesome.php:560
 #: svn/trunk/better-font-awesome.php:623
-#. translators: string is the fallback version of font awesome.
 msgid "Font Awesome will still render using version: %s"
 msgstr ""
 
-#: better-font-awesome.php:629
-#. translators: placeholders are the opening and closing <a> tags.
-msgid ""
-"This may be the result of a temporary server or connectivity issue which "
-"will resolve shortly. However if the problem persists please file a support "
-"ticket on the %1$splugin forum%2$s, citing the errors listed above. "
-msgstr ""
-
-#: better-font-awesome.php:668 svn/tags/1.7.4/better-font-awesome.php:677
-#: svn/trunk/better-font-awesome.php:677
-msgid ""
-"<h3>Usage</h3>\n"
-"\t\t\t\t\t <b>Font Awesome version 4.x +</b>&nbsp;&nbsp;&nbsp;<small><a "
-"href=\"http://fontawesome.io/examples/\">See all available options "
-"&raquo;</a></small><br /><br />\n"
-"\t\t\t\t\t <i class=\"icon-coffee fa fa-coffee\"></i> <code>[icon "
-"name=\"coffee\"]</code> or <code>&lt;i "
-"class=\"fa-coffee\"&gt;&lt;/i&gt;</code><br /><br />\n"
-"\t\t\t\t\t <i class=\"icon-coffee fa fa-coffee icon-2x fa-2x\"></i> "
-"<code>[icon name=\"coffee\" class=\"fa-2x\"]</code> or <code>&lt;i "
-"class=\"fa-coffee fa-2x\"&gt;&lt;/i&gt;</code><br /><br />\n"
-"\t\t\t\t\t <i class=\"icon-coffee fa fa-coffee icon-2x fa-2x icon-rotate-90 "
-"fa-rotate-90\"></i> <code>[icon name=\"coffee\" class=\"fa-2x "
-"fa-rotate-90\"]</code> or <code>&lt;i class=\"fa-coffee fa-2x "
-"fa-rotate-90\"&gt;&lt;/i&gt;</code><br /><br /><br />\n"
-"\t\t\t\t\t <b>Font Awesome version 3.x</b>&nbsp;&nbsp;&nbsp;<small><a "
-"href=\"http://fontawesome.io/3.2.1/examples/\">See all available options "
-"&raquo;</a></small><br /><br />\n"
-"\t\t\t\t\t <i class=\"icon-coffee fa fa-coffee\"></i> <code>[icon "
-"name=\"coffee\"]</code> or <code>&lt;i class=\"icon "
-"icon-coffee\"&gt;&lt;/i&gt;</code><br /><br />\n"
-"\t\t\t\t\t <i class=\"icon-coffee fa fa-coffee icon-2x fa-2x\"></i> "
-"<code>[icon name=\"coffee\" class=\"icon-2x\"]</code> or <code>&lt;i "
-"class=\"icon icon-coffee icon-2x\"&gt;&lt;/i&gt;</code><br /><br />\n"
-"\t\t\t\t\t <i class=\"icon-coffee fa fa-coffee icon-2x fa-2x icon-rotate-90 "
-"fa-rotate-90\"></i> <code>[icon name=\"coffee\" class=\"icon-2x "
-"icon-rotate-90\"]</code> or <code>&lt;i class=\"icon icon-coffee icon-2x "
-"icon-rotate-90\"&gt;&lt;/i&gt;</code>"
-msgstr ""
-
-#: svn/tags/1.0.0/better-font-awesome.php:217
-#: svn/tags/1.0.1/better-font-awesome.php:217
-#: svn/tags/1.0.10/better-font-awesome.php:218
-#: svn/tags/1.0.2/better-font-awesome.php:217
-#: svn/tags/1.0.3/better-font-awesome.php:217
-#: svn/tags/1.0.4/better-font-awesome.php:217
-#: svn/tags/1.0.5/better-font-awesome.php:217
-#: svn/tags/1.0.6/better-font-awesome.php:217
-#: svn/tags/1.0.7/better-font-awesome.php:217
-#: svn/tags/1.0.8/better-font-awesome.php:218
-#: svn/tags/1.0.9/better-font-awesome.php:218
-#: svn/tags/1.1.0/better-font-awesome.php:222
-#: svn/tags/1.2.0/better-font-awesome.php:222
-#: svn/tags/1.2.1/better-font-awesome.php:224
-#: svn/tags/1.3.0/better-font-awesome.php:224
-#: svn/tags/1.3.1/better-font-awesome.php:224
-#: svn/tags/1.3.2/better-font-awesome.php:224
-#: svn/tags/1.3.3/better-font-awesome.php:224
-#: svn/tags/1.3.4/better-font-awesome.php:224
-#: svn/tags/1.3.5/better-font-awesome.php:224
-#: svn/tags/1.4.0/better-font-awesome.php:224
-#: svn/tags/1.4.1/better-font-awesome.php:224
-#: svn/tags/1.4.2/better-font-awesome.php:224
-#: svn/tags/1.4.3/better-font-awesome.php:224
-#: svn/tags/1.5.0/better-font-awesome.php:224
-#: svn/tags/1.6.0/better-font-awesome.php:224
-msgid ""
-"It appears that Better Font Awesome is missing it's <a "
-"href=\"https://github.com/MickeyKay/better-font-awesome-library\" "
-"target=\"_blank\">core library</a>, which typically occurs when cloning the "
-"Git repository and not updating all submodules. Please refer to the "
-"plugin's <a href=\"https://github.com/MickeyKay/better-font-awesome\" "
-"target=\"_blank\">installation instructions</a> for details on how to "
-"properly install Better Font Awesome via Git. If you installed from within "
-"WordPress, or via the wordpress.org repo, then chances are the install "
-"failed and you can try again. If the issue persists, please create a new "
-"topic on the plugin's <a "
-"href=\"http://wordpress.org/support/plugin/better-font-awesome\" "
-"target=\"_blank\">support forum</a> or file an issue on the <a "
-"href=\"https://github.com/MickeyKay/better-font-awesome/issues\" "
-"target=\"_blank\">Github repo</a>."
-msgstr ""
-
-#: svn/tags/1.0.0/better-font-awesome.php:470
+#: better-font-awesome.php:630 svn/tags/1.0.0/better-font-awesome.php:470
 #: svn/tags/1.0.0/lib/better-font-awesome-library/better-font-awesome-library.php:1044
 #: svn/tags/1.0.1/better-font-awesome.php:470
 #: svn/tags/1.0.1/lib/better-font-awesome-library/better-font-awesome-library.php:1052
@@ -729,6 +642,104 @@ msgid ""
 "This may be the result of a temporary server or connectivity issue which "
 "will resolve shortly. However if the problem persists please file a support "
 "ticket on the %splugin forum%s, citing the errors listed above. "
+msgstr ""
+
+#: better-font-awesome.php:677 svn/tags/1.3.0/better-font-awesome.php:601
+#: svn/tags/1.3.1/better-font-awesome.php:601
+#: svn/tags/1.3.2/better-font-awesome.php:601
+#: svn/tags/1.3.3/better-font-awesome.php:601
+#: svn/tags/1.3.4/better-font-awesome.php:601
+#: svn/tags/1.3.5/better-font-awesome.php:601
+#: svn/tags/1.4.0/better-font-awesome.php:601
+#: svn/tags/1.4.1/better-font-awesome.php:601
+#: svn/tags/1.4.2/better-font-awesome.php:601
+#: svn/tags/1.4.3/better-font-awesome.php:601
+#: svn/tags/1.5.0/better-font-awesome.php:601
+#: svn/tags/1.6.0/better-font-awesome.php:601
+#: svn/tags/1.7.0/better-font-awesome.php:614
+#: svn/tags/1.7.1/better-font-awesome.php:614
+#: svn/tags/1.7.2/better-font-awesome.php:614
+#: svn/tags/1.7.3/better-font-awesome.php:677
+#: svn/tags/1.7.4/better-font-awesome.php:677
+#: svn/tags/2.0.0-beta/better-font-awesome.php:614
+#: svn/tags/2.0.0-beta1/better-font-awesome.php:614
+#: svn/tags/2.0.0-beta2/better-font-awesome.php:614
+#: svn/tags/2.0.0-beta3/better-font-awesome.php:614
+#: svn/trunk/better-font-awesome.php:677
+msgid ""
+"<h3>Usage</h3>\n"
+"                     <b>Font Awesome version 4.x "
+"+</b>&nbsp;&nbsp;&nbsp;<small><a "
+"href=\"http://fontawesome.io/examples/\">See all available options "
+"&raquo;</a></small><br /><br />\n"
+"                     <i class=\"icon-coffee fa fa-coffee\"></i> <code>[icon "
+"name=\"coffee\"]</code> or <code>&lt;i "
+"class=\"fa-coffee\"&gt;&lt;/i&gt;</code><br /><br />\n"
+"                     <i class=\"icon-coffee fa fa-coffee icon-2x "
+"fa-2x\"></i> <code>[icon name=\"coffee\" class=\"fa-2x\"]</code> or "
+"<code>&lt;i class=\"fa-coffee fa-2x\"&gt;&lt;/i&gt;</code><br /><br />\n"
+"                     <i class=\"icon-coffee fa fa-coffee icon-2x fa-2x "
+"icon-rotate-90 fa-rotate-90\"></i> <code>[icon name=\"coffee\" "
+"class=\"fa-2x fa-rotate-90\"]</code> or <code>&lt;i class=\"fa-coffee fa-2x "
+"fa-rotate-90\"&gt;&lt;/i&gt;</code><br /><br /><br />\n"
+"                     <b>Font Awesome version "
+"3.x</b>&nbsp;&nbsp;&nbsp;<small><a "
+"href=\"http://fontawesome.io/3.2.1/examples/\">See all available options "
+"&raquo;</a></small><br /><br />\n"
+"                     <i class=\"icon-coffee fa fa-coffee\"></i> <code>[icon "
+"name=\"coffee\"]</code> or <code>&lt;i class=\"icon "
+"icon-coffee\"&gt;&lt;/i&gt;</code><br /><br />\n"
+"                     <i class=\"icon-coffee fa fa-coffee icon-2x "
+"fa-2x\"></i> <code>[icon name=\"coffee\" class=\"icon-2x\"]</code> or "
+"<code>&lt;i class=\"icon icon-coffee icon-2x\"&gt;&lt;/i&gt;</code><br "
+"/><br />\n"
+"                     <i class=\"icon-coffee fa fa-coffee icon-2x fa-2x "
+"icon-rotate-90 fa-rotate-90\"></i> <code>[icon name=\"coffee\" "
+"class=\"icon-2x icon-rotate-90\"]</code> or <code>&lt;i class=\"icon "
+"icon-coffee icon-2x icon-rotate-90\"&gt;&lt;/i&gt;</code>"
+msgstr ""
+
+#: svn/tags/1.0.0/better-font-awesome.php:217
+#: svn/tags/1.0.1/better-font-awesome.php:217
+#: svn/tags/1.0.10/better-font-awesome.php:218
+#: svn/tags/1.0.2/better-font-awesome.php:217
+#: svn/tags/1.0.3/better-font-awesome.php:217
+#: svn/tags/1.0.4/better-font-awesome.php:217
+#: svn/tags/1.0.5/better-font-awesome.php:217
+#: svn/tags/1.0.6/better-font-awesome.php:217
+#: svn/tags/1.0.7/better-font-awesome.php:217
+#: svn/tags/1.0.8/better-font-awesome.php:218
+#: svn/tags/1.0.9/better-font-awesome.php:218
+#: svn/tags/1.1.0/better-font-awesome.php:222
+#: svn/tags/1.2.0/better-font-awesome.php:222
+#: svn/tags/1.2.1/better-font-awesome.php:224
+#: svn/tags/1.3.0/better-font-awesome.php:224
+#: svn/tags/1.3.1/better-font-awesome.php:224
+#: svn/tags/1.3.2/better-font-awesome.php:224
+#: svn/tags/1.3.3/better-font-awesome.php:224
+#: svn/tags/1.3.4/better-font-awesome.php:224
+#: svn/tags/1.3.5/better-font-awesome.php:224
+#: svn/tags/1.4.0/better-font-awesome.php:224
+#: svn/tags/1.4.1/better-font-awesome.php:224
+#: svn/tags/1.4.2/better-font-awesome.php:224
+#: svn/tags/1.4.3/better-font-awesome.php:224
+#: svn/tags/1.5.0/better-font-awesome.php:224
+#: svn/tags/1.6.0/better-font-awesome.php:224
+msgid ""
+"It appears that Better Font Awesome is missing it's <a "
+"href=\"https://github.com/MickeyKay/better-font-awesome-library\" "
+"target=\"_blank\">core library</a>, which typically occurs when cloning the "
+"Git repository and not updating all submodules. Please refer to the "
+"plugin's <a href=\"https://github.com/MickeyKay/better-font-awesome\" "
+"target=\"_blank\">installation instructions</a> for details on how to "
+"properly install Better Font Awesome via Git. If you installed from within "
+"WordPress, or via the wordpress.org repo, then chances are the install "
+"failed and you can try again. If the issue persists, please create a new "
+"topic on the plugin's <a "
+"href=\"http://wordpress.org/support/plugin/better-font-awesome\" "
+"target=\"_blank\">support forum</a> or file an issue on the <a "
+"href=\"https://github.com/MickeyKay/better-font-awesome/issues\" "
+"target=\"_blank\">Github repo</a>."
 msgstr ""
 
 #: svn/tags/1.0.0/better-font-awesome.php:517
@@ -1074,59 +1085,6 @@ msgid ""
 "fallback version:</b> "
 msgstr ""
 
-#: svn/tags/1.3.0/better-font-awesome.php:601
-#: svn/tags/1.3.1/better-font-awesome.php:601
-#: svn/tags/1.3.2/better-font-awesome.php:601
-#: svn/tags/1.3.3/better-font-awesome.php:601
-#: svn/tags/1.3.4/better-font-awesome.php:601
-#: svn/tags/1.3.5/better-font-awesome.php:601
-#: svn/tags/1.4.0/better-font-awesome.php:601
-#: svn/tags/1.4.1/better-font-awesome.php:601
-#: svn/tags/1.4.2/better-font-awesome.php:601
-#: svn/tags/1.4.3/better-font-awesome.php:601
-#: svn/tags/1.5.0/better-font-awesome.php:601
-#: svn/tags/1.6.0/better-font-awesome.php:601
-#: svn/tags/1.7.0/better-font-awesome.php:614
-#: svn/tags/1.7.1/better-font-awesome.php:614
-#: svn/tags/1.7.2/better-font-awesome.php:614
-#: svn/tags/1.7.3/better-font-awesome.php:677
-#: svn/tags/2.0.0-beta/better-font-awesome.php:614
-#: svn/tags/2.0.0-beta1/better-font-awesome.php:614
-#: svn/tags/2.0.0-beta2/better-font-awesome.php:614
-#: svn/tags/2.0.0-beta3/better-font-awesome.php:614
-msgid ""
-"<h3>Usage</h3>\n"
-"                     <b>Font Awesome version 4.x "
-"+</b>&nbsp;&nbsp;&nbsp;<small><a "
-"href=\"http://fontawesome.io/examples/\">See all available options "
-"&raquo;</a></small><br /><br />\n"
-"                     <i class=\"icon-coffee fa fa-coffee\"></i> <code>[icon "
-"name=\"coffee\"]</code> or <code>&lt;i "
-"class=\"fa-coffee\"&gt;&lt;/i&gt;</code><br /><br />\n"
-"                     <i class=\"icon-coffee fa fa-coffee icon-2x "
-"fa-2x\"></i> <code>[icon name=\"coffee\" class=\"fa-2x\"]</code> or "
-"<code>&lt;i class=\"fa-coffee fa-2x\"&gt;&lt;/i&gt;</code><br /><br />\n"
-"                     <i class=\"icon-coffee fa fa-coffee icon-2x fa-2x "
-"icon-rotate-90 fa-rotate-90\"></i> <code>[icon name=\"coffee\" "
-"class=\"fa-2x fa-rotate-90\"]</code> or <code>&lt;i class=\"fa-coffee fa-2x "
-"fa-rotate-90\"&gt;&lt;/i&gt;</code><br /><br /><br />\n"
-"                     <b>Font Awesome version "
-"3.x</b>&nbsp;&nbsp;&nbsp;<small><a "
-"href=\"http://fontawesome.io/3.2.1/examples/\">See all available options "
-"&raquo;</a></small><br /><br />\n"
-"                     <i class=\"icon-coffee fa fa-coffee\"></i> <code>[icon "
-"name=\"coffee\"]</code> or <code>&lt;i class=\"icon "
-"icon-coffee\"&gt;&lt;/i&gt;</code><br /><br />\n"
-"                     <i class=\"icon-coffee fa fa-coffee icon-2x "
-"fa-2x\"></i> <code>[icon name=\"coffee\" class=\"icon-2x\"]</code> or "
-"<code>&lt;i class=\"icon icon-coffee icon-2x\"&gt;&lt;/i&gt;</code><br "
-"/><br />\n"
-"                     <i class=\"icon-coffee fa fa-coffee icon-2x fa-2x "
-"icon-rotate-90 fa-rotate-90\"></i> <code>[icon name=\"coffee\" "
-"class=\"icon-2x icon-rotate-90\"]</code> or <code>&lt;i class=\"icon "
-"icon-coffee icon-2x icon-rotate-90\"&gt;&lt;/i&gt;</code>"
-msgstr ""
-
 #: svn/tags/1.3.0/lib/better-font-awesome-library/better-font-awesome-library.php:1031
 #: svn/tags/1.3.1/lib/better-font-awesome-library/better-font-awesome-library.php:1039
 #: svn/tags/1.3.2/lib/better-font-awesome-library/better-font-awesome-library.php:1039
@@ -1152,27 +1110,6 @@ msgstr ""
 #: svn/trunk/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1051
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1051
 msgid "Insert Icon"
-msgstr ""
-
-#: svn/tags/1.7.3/better-font-awesome.php:338
-#: svn/tags/1.7.4/better-font-awesome.php:338
-#: svn/trunk/better-font-awesome.php:338
-msgid ""
-"First of all, thanks so much for using the plugin! Second of all, %sBetter "
-"Font Awesome 2.0%s is <i>almost</i> ready for use! The new version adds a "
-"few major improvements, most notably support for Font Awesome 5 icons. "
-"Before publishing the update, it's important that we get plenty of user "
-"testing to validate that everything is working as expected, and we could "
-"really use your help."
-msgstr ""
-
-#: svn/tags/1.7.3/better-font-awesome.php:339
-#: svn/tags/1.7.4/better-font-awesome.php:339
-#: svn/trunk/better-font-awesome.php:339
-msgid ""
-"If you are interested in helping us test the new update, please read the "
-"official %sblog post%s, which includes simple instructions for how to get "
-"involved. Thanks so much for you support"
 msgstr ""
 
 #. Plugin URI of the plugin/theme

@@ -14,6 +14,8 @@ The Better Font Awesome plugin for WordPress. Shortcodes, HTML, TinyMCE, various
 
 ## Description ##
 
+[![Build Status](https://travis-ci.org/MickeyKay/better-font-awesome.svg?branch=master)](https://travis-ci.org/MickeyKay/better-font-awesome)
+
 **Do you find this plugin helpful? Please consider [leaving a 5-star review](https://wordpress.org/support/view/plugin-reviews/better-font-awesome).**
 
 Better Font Awesome allows you to automatically integrate the latest available version of [Font Awesome](http://fontawesome.io/) into your WordPress project, along with accompanying CSS, shortcodes, and TinyMCE icon shortcode generator.
@@ -102,9 +104,6 @@ Nope. Better Font Awesome automatically pulls in everything you need, and it doe
 ### What happens if I have another plugin/theme that uses Font Awesome? ###
 
 Better Font Awesome does it's best to load after any existing Font Awesome CSS, which can minimize conflicts. If you are experiencing any unexpected behavior resulting from plugin/theme conflicts, you can try checking the box to "Remove existing Font Awesome styles" in under **Settings &rarr; Better Font Awesome**.
-
-## Contributing & Development ##
-Please see our [contributing guidelines](https://github.com/MickeyKay/better-font-awesome/blob/master/CONTRIBUTING.md) to get involved.
 
 
 ## Screenshots ##
