@@ -37,15 +37,15 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
   	 */
 
   	public function test_bfal_version() {
-		$this->assertEquals( '5.15.0', $this->bfa_lib->get_version() );
+		$this->assertEquals( '5.15.2', $this->bfa_lib->get_version() );
   	}
 
   	public function test_get_stylesheet_url() {
-  		$this->assertEquals( 'https://use.fontawesome.com/releases/v5.15.0/css/all.css', $this->bfa_lib->get_stylesheet_url() );
+  		$this->assertEquals( 'https://use.fontawesome.com/releases/v5.15.2/css/all.css', $this->bfa_lib->get_stylesheet_url() );
   	}
 
   	public function test_get_stylesheet_url_v4_shim() {
-  		$this->assertEquals( 'https://use.fontawesome.com/releases/v5.15.0/css/v4-shims.css', $this->bfa_lib->get_stylesheet_url_v4_shim() );
+  		$this->assertEquals( 'https://use.fontawesome.com/releases/v5.15.2/css/v4-shims.css', $this->bfa_lib->get_stylesheet_url_v4_shim() );
   	}
 
   	public function test_get_icons() {
