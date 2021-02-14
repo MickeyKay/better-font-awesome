@@ -1,7 +1,7 @@
 {
   "title": "Better Font Awesome",
   "description": "The best WordPress extension ever made!",
-  "version": "1.7.4",
+  "version": "1.7.6",
   "homepage": "http://wordpress.org/plugins/better-font-awesome",
   "scripts": {
     "composer": "composer install",
@@ -9,7 +9,7 @@
     "clean": "rm -rf vendor",
     "checkout-svn": "svn co https://plugins.svn.wordpress.org/better-font-awesome svn",
     "develop": "npm run clean && npm install && npm run composer && npm run test-setup",
-    "build": "npm run develop && npm run grunt",
+    "build": "npm run grunt",
     "lint": "./vendor/bin/phpcs",
     "lint-fix": "./vendor/bin/phpcbf",
     "test": "export TMPDIR=/tmp && ./vendor/bin/phpunit",

@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/MickeyKay/better-font-awesome.svg?branch=master)](https://travis-ci.org/MickeyKay/better-font-awesome) [![Downloads](https://img.shields.io/wordpress/plugin/dt/better-font-awesome.svg)](https://wordpress.org/plugins/better-font-awesome/) [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 # Better Font Awesome #
-**Contributors:** [McGuive7](https://profiles.wordpress.org/McGuive7)  
+**Contributors:** [McGuive7](https://profiles.wordpress.org/McGuive7), [aaronbmm](https://profiles.wordpress.org/aaronbmm), [mightyminnow](https://profiles.wordpress.org/mightyminnow)  
 **Tags:** better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode  
 **Donate link:** https://mickeykay.me  
 **Requires at least:** 3.0  
@@ -13,6 +13,8 @@
 The Better Font Awesome plugin for WordPress. Shortcodes, HTML, TinyMCE, various Font Awesome versions, backwards compatibility, CDN speeds, and more.
 
 ## Description ##
+
+[![Build Status](https://travis-ci.org/MickeyKay/better-font-awesome.svg?branch=master)](https://travis-ci.org/MickeyKay/better-font-awesome)
 
 **Do you find this plugin helpful? Please consider [leaving a 5-star review](https://wordpress.org/support/view/plugin-reviews/better-font-awesome).**
 
@@ -103,9 +105,6 @@ Nope. Better Font Awesome automatically pulls in everything you need, and it doe
 
 Better Font Awesome does it's best to load after any existing Font Awesome CSS, which can minimize conflicts. If you are experiencing any unexpected behavior resulting from plugin/theme conflicts, you can try checking the box to "Remove existing Font Awesome styles" in under **Settings &rarr; Better Font Awesome**.
 
-## Contributing & Development ##
-Please see our [contributing guidelines](https://github.com/MickeyKay/better-font-awesome/blob/master/CONTRIBUTING.md) to get involved.
-
 
 ## Screenshots ##
 1. The icon shortcode dropdown selector
@@ -113,6 +112,15 @@ Please see our [contributing guidelines](https://github.com/MickeyKay/better-fon
 
 
 ## Changelog ##
+
+### 1.7.6 ###
+* Fix: revert to 1.7.4 codebase.
+* Fix: remove calls to `ready()` jQuery method to support latest jQuery versions.
+
+### 1.7.5 ###
+(BAD BUILD)
+* Fix: remove calls to `ready()` jQuery method to support latest jQuery versions.
+* Fix: update fontawesome-iconpicker dependency to repair broken icon select functionality.
 
 ### 1.7.4 ###
 * Fix: revert accidental bump to underlying Better Font Awesome Library dependency.
@@ -249,6 +257,15 @@ Please see our [contributing guidelines](https://github.com/MickeyKay/better-fon
 
 
 ## Upgrade Notice ##
+
+### 1.7.6 ###
+* Fix: revert to 1.7.4 codebase.
+* Fix: remove calls to `ready()` jQuery method to support latest jQuery versions.
+
+### 1.7.5 ###
+(BAD BUILD)
+* Fix: remove calls to `ready()` jQuery method to support latest jQuery versions.
+* Fix: update fontawesome-iconpicker dependency to repair broken icon select functionality.
 
 ### 1.7.4 ###
 * Fix: revert accidental bump to underlying Better Font Awesome Library dependency.
