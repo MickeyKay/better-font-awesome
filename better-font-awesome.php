@@ -177,6 +177,9 @@ class Better_Font_Awesome_Plugin {
         add_action( 'wp_ajax_bfa_save_options', array( $this, 'save_options' ) );
         add_action( 'wp_ajax_bfa_dismiss_testing_admin_notice', array( $this, 'dismiss_testing_admin_notice' ) );
 
+        // Clear transients on plugin update.
+        add_action( 'upgrader_process_complete', array( $this, 'handle_plugin_upgrade' ), 10, 2 );
+
     }
 
     /**
@@ -367,6 +370,25 @@ class Better_Font_Awesome_Plugin {
 
 		wp_die();
 	}
+
+	/**
+	 * Clear transients on plugin upgrade to ensure icon structure matches logic.
+	 *
+	 * @param  WP_Upgrader  $upgrader_object  Upgrader object.
+	 * @param  array 	    $options          Upgrade options.
+	 */
+	public function handle_plugin_upgrade( $upgrader_object, $options ) {
+        	$bfa_plugin = plugin_basename( __FILE__ );
+
+        	if ( $options['action'] == 'update' && $options['type'] == 'plugin' && isset( $options['plugins'] ) ) {
+        		foreach ( $options['plugins'] as $plugin ) {
+        			if ( $plugin == $bfa_plugin ) {
+        				delete_transient( $this->bfa_lib::SLUG . '-api-versions' );
+        				delete_transient( $this->bfa_lib::SLUG . '-css' );
+        			}
+        		}
+        	}
+        }
 
     /**
      * Create the plugin settings page.
