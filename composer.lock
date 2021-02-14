@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "137f3020c646a61c892a08e0b876bc79",
+    "content-hash": "36884bd9e52fd4884ef407dbb3acded5",
     "packages": [
         {
             "name": "mickey-kay/better-font-awesome-library",
-            "version": "v2.0.0-beta4",
+            "version": "2.0.0-beta5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MickeyKay/better-font-awesome-library.git",
-                "reference": "9c64bae3795e8bdce3e2a9bcdeb4cf3becb92037"
+                "reference": "26aac36b65fcdc29773b82e1d150100ccf1a4d4a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/9c64bae3795e8bdce3e2a9bcdeb4cf3becb92037",
-                "reference": "9c64bae3795e8bdce3e2a9bcdeb4cf3becb92037",
+                "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/26aac36b65fcdc29773b82e1d150100ccf1a4d4a",
+                "reference": "26aac36b65fcdc29773b82e1d150100ccf1a4d4a",
                 "shasum": ""
             },
             "type": "library",
@@ -26,7 +26,7 @@
                 "GPL-2.0"
             ],
             "description": "Better Font Awesome Library for WordPress",
-            "time": "2020-09-15T00:58:04+00:00"
+            "time": "2021-02-14T07:56:22+00:00"
         }
     ],
     "packages-dev": [
