@@ -383,6 +383,7 @@ class Better_Font_Awesome_Plugin {
         	if ( $options['action'] == 'update' && $options['type'] == 'plugin' && isset( $options['plugins'] ) ) {
         		foreach ( $options['plugins'] as $plugin ) {
         			if ( $plugin == $bfa_plugin ) {
+        				error_log( print_r('Better Font Awesome plugin updated! Clearing transients to ensure fresh data.', true) );
         				delete_transient( $this->bfa_lib::SLUG . '-api-versions' );
         				delete_transient( $this->bfa_lib::SLUG . '-css' );
         			}
