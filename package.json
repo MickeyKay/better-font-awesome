@@ -1,7 +1,7 @@
 {
   "title": "Better Font Awesome",
   "description": "The best WordPress extension ever made!",
-  "version": "1.7.6",
+  "version": "2.0.0-beta5",
   "homepage": "http://wordpress.org/plugins/better-font-awesome",
   "scripts": {
     "composer": "composer install",
