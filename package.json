@@ -8,7 +8,7 @@
     "grunt": "grunt build",
     "clean": "rm -rf vendor",
     "checkout-svn": "svn co https://plugins.svn.wordpress.org/better-font-awesome svn",
-    "develop": "npm run clean && npm install && npm run composer && npm run test-setup",
+    "develop": "npm run clean && npm install && npm run composer -- --prefer-source && npm run test-setup",
     "build": "npm run grunt",
     "lint": "./vendor/bin/phpcs",
     "lint-fix": "./vendor/bin/phpcbf",

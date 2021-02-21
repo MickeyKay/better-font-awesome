@@ -53,6 +53,15 @@ class Better_Font_Awesome_Plugin {
 	const SLUG = 'better-font-awesome';
 
 	/**
+	 * Plugin version.
+	 *
+	 * @since  2.0.0
+	 *
+	 * @var    string
+	 */
+	const VERSION = '2.0.0-beta5';
+
+	/**
 	 * The Better Font Awesome Library object.
 	 *
 	 * @since  0.1.0
@@ -266,7 +275,6 @@ class Better_Font_Awesome_Plugin {
 	 * @param string $option_name Name/slug for the plugin options object.
 	 */
 	private function initialize_options( $option_name ) {
-
 		/**
 		 * Get plugin options.
 		 *
@@ -439,14 +447,17 @@ class Better_Font_Awesome_Plugin {
 			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 			wp_enqueue_style(
 				self::SLUG . '-admin',
-				plugin_dir_url( __FILE__ ) . 'css/admin.css'
+				plugin_dir_url( __FILE__ ) . 'css/admin.css',
+				array(),
+				self::VERSION
 			);
 
 			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion, WordPress.WP.EnqueuedResourceParameters.NotInFooter
 			wp_enqueue_script(
 				self::SLUG . '-admin',
 				plugin_dir_url( __FILE__ ) . 'js/admin.js',
-				array( 'jquery' )
+				array( 'jquery' ),
+				self::VERSION
 			);
 
 			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter
@@ -458,14 +469,6 @@ class Better_Font_Awesome_Plugin {
 				)
 			);
 		}
-
-		// Admin notices.
-		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion, WordPress.WP.EnqueuedResourceParameters.NotInFooter
-		wp_enqueue_script(
-			self::SLUG . '-admin-notices',
-			plugin_dir_url( __FILE__ ) . 'js/admin-notices.js',
-			array( 'jquery' )
-		);
 	}
 
 	/**
