@@ -220,11 +220,7 @@ class Better_Font_Awesome_Plugin {
      */
     public function bfal_exists() {
 
-        if ( ! is_readable( $this->bfa_lib_file_path ) ) {
-            return false;
-        } else {
-            return true;
-        }
+        return is_readable( $this->bfa_lib_file_path );
 
     }
 
