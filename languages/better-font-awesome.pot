@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: Better Font Awesome 2.0.0-beta6\n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/better-font-awesome\n"
-"POT-Creation-Date: 2021-02-23 02:29:03+00:00\n"
+"POT-Creation-Date: 2021-02-23 02:43:38+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -30,8 +30,7 @@ msgstr ""
 #: svn/tags/2.0.0-beta2/better-font-awesome.php:237
 #: svn/tags/2.0.0-beta3/better-font-awesome.php:237
 #: svn/tags/2.0.0-beta5/better-font-awesome.php:244
-#: svn/tags/2.0.0-beta6/better-font-awesome.php:253
-#: svn/trunk/better-font-awesome.php:253
+#: svn/trunk/better-font-awesome.php:244
 msgid ""
 "It appears that Better Font Awesome is missing it's <a "
 "href=\"https://github.com/MickeyKay/better-font-awesome-library\" "
@@ -88,8 +87,7 @@ msgstr ""
 #: svn/tags/2.0.0-beta2/better-font-awesome.php:238
 #: svn/tags/2.0.0-beta3/better-font-awesome.php:238
 #: svn/tags/2.0.0-beta5/better-font-awesome.php:245
-#: svn/tags/2.0.0-beta6/better-font-awesome.php:254
-#: svn/trunk/better-font-awesome.php:254
+#: svn/trunk/better-font-awesome.php:245
 msgid "Back to the plugins page &rarr;"
 msgstr ""
 
@@ -120,32 +118,27 @@ msgstr ""
 #: svn/tags/2.0.0-beta2/better-font-awesome.php:350
 #: svn/tags/2.0.0-beta3/better-font-awesome.php:350
 #: svn/tags/2.0.0-beta5/better-font-awesome.php:350
-#: svn/tags/2.0.0-beta6/better-font-awesome.php:358
-#: svn/trunk/better-font-awesome.php:358
+#: svn/trunk/better-font-awesome.php:350
 msgid "Save Settings"
 msgstr ""
 
 #: better-font-awesome.php:387 svn/tags/2.0.0-beta5/better-font-awesome.php:379
-#: svn/tags/2.0.0-beta6/better-font-awesome.php:387
-#: svn/trunk/better-font-awesome.php:387
+#: svn/trunk/better-font-awesome.php:379
 msgid "Font Awesome version"
 msgstr ""
 
 #: better-font-awesome.php:395 svn/tags/2.0.0-beta5/better-font-awesome.php:387
-#: svn/tags/2.0.0-beta6/better-font-awesome.php:395
-#: svn/trunk/better-font-awesome.php:395
+#: svn/trunk/better-font-awesome.php:387
 msgid "Version check frequency"
 msgstr ""
 
 #: better-font-awesome.php:403 svn/tags/2.0.0-beta5/better-font-awesome.php:395
-#: svn/tags/2.0.0-beta6/better-font-awesome.php:403
-#: svn/trunk/better-font-awesome.php:403
+#: svn/trunk/better-font-awesome.php:395
 msgid "Include v4 CSS shim"
 msgstr ""
 
 #: better-font-awesome.php:409 svn/tags/2.0.0-beta5/better-font-awesome.php:401
-#: svn/tags/2.0.0-beta6/better-font-awesome.php:409
-#: svn/trunk/better-font-awesome.php:409
+#: svn/trunk/better-font-awesome.php:401
 msgid ""
 "Include the Font Awesome v4 CSS shim to support legacy icons (<a "
 "href=\"https://fontawesome.com/how-to-use/on-the-web/setup/upgrading-from-"
@@ -190,8 +183,7 @@ msgstr ""
 #: svn/tags/2.0.0-beta2/better-font-awesome.php:402
 #: svn/tags/2.0.0-beta3/better-font-awesome.php:402
 #: svn/tags/2.0.0-beta5/better-font-awesome.php:407
-#: svn/tags/2.0.0-beta6/better-font-awesome.php:415
-#: svn/trunk/better-font-awesome.php:415
+#: svn/trunk/better-font-awesome.php:407
 msgid "Remove existing Font Awesome"
 msgstr ""
 
@@ -233,8 +225,7 @@ msgstr ""
 #: svn/tags/2.0.0-beta2/better-font-awesome.php:408
 #: svn/tags/2.0.0-beta3/better-font-awesome.php:408
 #: svn/tags/2.0.0-beta5/better-font-awesome.php:413
-#: svn/tags/2.0.0-beta6/better-font-awesome.php:421
-#: svn/trunk/better-font-awesome.php:421
+#: svn/trunk/better-font-awesome.php:413
 msgid ""
 "Attempt to remove Font Awesome CSS and shortcodes added by other plugins "
 "and themes."
@@ -270,8 +261,7 @@ msgstr ""
 #: svn/tags/2.0.0-beta2/better-font-awesome.php:414
 #: svn/tags/2.0.0-beta3/better-font-awesome.php:414
 #: svn/tags/2.0.0-beta5/better-font-awesome.php:419
-#: svn/tags/2.0.0-beta6/better-font-awesome.php:427
-#: svn/trunk/better-font-awesome.php:427
+#: svn/trunk/better-font-awesome.php:419
 msgid "Hide admin notices"
 msgstr ""
 
@@ -305,8 +295,7 @@ msgstr ""
 #: svn/tags/2.0.0-beta2/better-font-awesome.php:420
 #: svn/tags/2.0.0-beta3/better-font-awesome.php:420
 #: svn/tags/2.0.0-beta5/better-font-awesome.php:425
-#: svn/tags/2.0.0-beta6/better-font-awesome.php:433
-#: svn/trunk/better-font-awesome.php:433
+#: svn/trunk/better-font-awesome.php:425
 msgid ""
 "Hide the default admin warnings that are shown when API and CDN errors "
 "occur."
@@ -314,14 +303,12 @@ msgstr ""
 
 #: better-font-awesome.php:490 svn/tags/1.7.5/better-font-awesome.php:541
 #: svn/tags/2.0.0-beta5/better-font-awesome.php:487
-#: svn/tags/2.0.0-beta6/better-font-awesome.php:490
-#: svn/trunk/better-font-awesome.php:490
+#: svn/trunk/better-font-awesome.php:487
 msgid "Settings saved."
 msgstr ""
 
 #: better-font-awesome.php:514 svn/tags/2.0.0-beta5/better-font-awesome.php:511
-#: svn/tags/2.0.0-beta6/better-font-awesome.php:514
-#: svn/trunk/better-font-awesome.php:514
+#: svn/trunk/better-font-awesome.php:511
 #. translators: placeholder is the numeric current version number.
 msgid ""
 "%s (The plugin automatically uses the latest version of Font Awesome, and "
@@ -728,12 +715,9 @@ msgstr ""
 #: svn/tags/2.0.0-beta2/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1313
 #: svn/tags/2.0.0-beta3/better-font-awesome.php:567
 #: svn/tags/2.0.0-beta3/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1317
-#: svn/tags/2.0.0-beta5/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:916
+#: svn/tags/2.0.0-beta5/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:877
 #: svn/tags/2.0.0-beta5/vendor/mickey-kay/better-font-awesome-library-bk/better-font-awesome-library.php:877
-#: svn/tags/2.0.0-beta6/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:916
-#: svn/tags/2.0.0-beta6/vendor/mickey-kay/better-font-awesome-library-bk/better-font-awesome-library.php:877
-#: svn/trunk/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:916
-#: svn/trunk/vendor/mickey-kay/better-font-awesome-library-bk/better-font-awesome-library.php:877
+#: svn/trunk/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:877
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:916
 msgid ""
 "This may be the result of a temporary server or connectivity issue which "
@@ -1164,12 +1148,9 @@ msgstr ""
 #: svn/tags/2.0.0-beta1/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1256
 #: svn/tags/2.0.0-beta2/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1257
 #: svn/tags/2.0.0-beta3/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:1261
-#: svn/tags/2.0.0-beta5/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:877
+#: svn/tags/2.0.0-beta5/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:838
 #: svn/tags/2.0.0-beta5/vendor/mickey-kay/better-font-awesome-library-bk/better-font-awesome-library.php:838
-#: svn/tags/2.0.0-beta6/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:877
-#: svn/tags/2.0.0-beta6/vendor/mickey-kay/better-font-awesome-library-bk/better-font-awesome-library.php:838
-#: svn/trunk/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:877
-#: svn/trunk/vendor/mickey-kay/better-font-awesome-library-bk/better-font-awesome-library.php:838
+#: svn/trunk/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:838
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:877
 msgid "Insert Icon"
 msgstr ""
@@ -1265,24 +1246,18 @@ msgid ""
 "icon-rotate-90\"&gt;&lt;/i&gt;</code>"
 msgstr ""
 
-#: svn/tags/2.0.0-beta5/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:904
+#: svn/tags/2.0.0-beta5/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:865
 #: svn/tags/2.0.0-beta5/vendor/mickey-kay/better-font-awesome-library-bk/better-font-awesome-library.php:865
-#: svn/tags/2.0.0-beta6/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:904
-#: svn/tags/2.0.0-beta6/vendor/mickey-kay/better-font-awesome-library-bk/better-font-awesome-library.php:865
-#: svn/trunk/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:904
-#: svn/trunk/vendor/mickey-kay/better-font-awesome-library-bk/better-font-awesome-library.php:865
+#: svn/trunk/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:865
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:904
 msgid ""
 "It looks like something went wrong when trying to fetch data from the Font "
 "Awesome API:"
 msgstr ""
 
-#: svn/tags/2.0.0-beta5/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:915
+#: svn/tags/2.0.0-beta5/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:876
 #: svn/tags/2.0.0-beta5/vendor/mickey-kay/better-font-awesome-library-bk/better-font-awesome-library.php:876
-#: svn/tags/2.0.0-beta6/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:915
-#: svn/tags/2.0.0-beta6/vendor/mickey-kay/better-font-awesome-library-bk/better-font-awesome-library.php:876
-#: svn/trunk/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:915
-#: svn/trunk/vendor/mickey-kay/better-font-awesome-library-bk/better-font-awesome-library.php:876
+#: svn/trunk/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:876
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:915
 msgid ""
 "Don't worry! Better Font Awesome will still render using the included "

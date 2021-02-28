@@ -287,6 +287,16 @@ class Better_Font_Awesome_Plugin {
 		if ( empty( $this->options ) ) {
 			update_option( $option_name, $this->option_defaults );
 		}
+
+		/**
+		 * Set v4 shim option to true if this is the first time the
+		 * option is present, indicating an update from legacy v4
+		 * support and will need shim support.
+		 */
+		if ( ! empty( $this->options ) && ! isset( $this->options['include_v4_shim'] ) ) {
+			$this->options['include_v4_shim'] = 1;
+			update_option( $option_name, $this->options );
+		}
 	}
 
 	/**
