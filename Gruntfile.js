@@ -98,7 +98,7 @@ module.exports = function( grunt ) {
                 options: {
                     post_convert: function(text) {
                         var prefix = [
-                        '[![Build Status](https://travis-ci.org/MickeyKay/better-font-awesome.svg?branch=master)](https://travis-ci.org/MickeyKay/better-font-awesome)',
+                        '[![Build Status](https://travis-ci.com/MickeyKay/better-font-awesome.svg?branch=master)](https://travis-ci.com/MickeyKay/better-font-awesome)',
                         '[![Downloads](https://img.shields.io/wordpress/plugin/dt/better-font-awesome.svg)](https://wordpress.org/plugins/better-font-awesome/)',
                         '[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)'
                         ].join(' ');
