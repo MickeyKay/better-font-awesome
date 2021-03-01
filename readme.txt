@@ -12,7 +12,7 @@ The Better Font Awesome plugin for WordPress. Shortcodes, HTML, TinyMCE, various
 
 == Description ==
 
-[![Build Status](https://travis-ci.org/MickeyKay/better-font-awesome.svg?branch=master)](https://travis-ci.org/MickeyKay/better-font-awesome)
+[![Build Status](https://travis-ci.com/MickeyKay/better-font-awesome.svg?branch=master)](https://travis-ci.com/MickeyKay/better-font-awesome)
 
 **Do you find this plugin helpful? Please consider [leaving a 5-star review](https://wordpress.org/support/view/plugin-reviews/better-font-awesome).**
 
