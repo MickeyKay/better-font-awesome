@@ -111,6 +111,18 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 == Changelog ==
 
+= 2.0.0 =
+* Add support for Font Awesome v5
+* Integration with Font Awesome GraphQL API for all data fetching (improve performance)
+* Integrate with Font Awesome CDN for all CSS
+* Add option to include the v4 Font Awesome CSS shim to support older icons (default on for upgrades)
+* Updatee hard-coded fallback Font Awesome version
+* Modify version check frequency to a saner 24 hour interval
+* Ensure admin notices are dismissible
+* Lower data fetch timeout to mitigate performance risks
+* Remove legacy options that are no longer relevant (version select, minification opt-out)
+* Add more/better unit tests to ensure things are working as expected
+
 = 1.7.6 =
 * Fix: revert to 1.7.4 codebase.
 * Fix: remove calls to `ready()` jQuery method to support latest jQuery versions.
@@ -135,127 +147,21 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 = 1.7.0 =
 * Update fallback Font Awesome to v4.7.0.
 * Switch from using git submodules to composer dependency management for core library inclusion.
-
-= 1.6.0 =
-* Update fallback Font Awesome to v4.6.3.
-
-= 1.5.0 =
-* Update fallback Font Awesome to v4.5.0.
-* Add new `bfa_icon_tag` to allow for filtering default `<i>` tag.
-
-= 1.4.3 =
-* Fix: refactor JS to allow icon shortcode insertion button to work in all instances (ACF Flexible and Repeater fields, divi, Black Studio TinyMCE ).
-
-= 1.4.2 =
-* Fix: icon picker not working for ACF Pro repeater field.
-
-= 1.4.1 =
-* Fix: icon picker not working for ACF repeater field.
-
-= 1.4.0 =
-* Fix: icon picker not working for Black Studio TinyMCE Widget. (props @EJOweb and @marcochiesi)
-* Update fallback Font Awesome to version 4.4.0.
-
-= 1.3.4 =
-* Update Better Font Awesome Library to version 1.3.4.
-* Fix double shortcode insert issue.
-* Fix behavior in which clicking shortcode insert button scrolls to top of page.
-
-= 1.3.3 =
-* Update plugin and BFAL to all fire on `init` hook instead of mix of `plugins_loaded` and `after_theme_setup`. This should fix issues in which icons don't show up when BFAL is used in other plugins.
-* Update iconpicker JS to avoid conflict that arose from preventing subsequent `mouseup` event listeners from firing.
-* Change appearance of iconpicker button to match default buttons.
-
-= 1.3.2 =
-* Update Better Font Awesome Library with better prefix removal method for filtered icons.
-
-= 1.3.1 =
-* Update admin JS to trigger icon picker on ALL TinyMCE initializations (e.g. Visual Composer and AJAX)
-
-= 1.3.0 =
-* Replace outdated TinyMCE shortcode selector brand new jQuery dropdown selector that works in both the visual and text editor
-* Clean up CSS and JS
-
-= 1.2.1 =
-* Update get_instance() call to work for older versions of PHP (< 5.3)
-
-= 1.2.0 =
-* Attach load functionality to after_theme_setup hook to allow themes to filter options
-* Update fallback Font Awesome to version 4.3.0
-
-= 1.1.0 =
-* Implement Ajax to save plugin settings (thanks [Braad](https://profiles.wordpress.org/braad))
-
-= 1.0.10 =
-* Fix SSL bug breaking wp_remote_get() from https.
-
-= 1.0.9 =
-* Fix debuggin hook set to init instead of plugins_loaded.
-
-= 1.0.8 =
-* Add admin setting to hide admin notices for API and CDN connectivity warnings.
-* Update translations.
-
-= 1.0.7 =
-* Update included fallback to Font Awesome version 4.3.
-
-= 1.0.6 =
-* Unhook library load() function from plugins_loaded and run directly from constructor (fixes bug preventing developers from overriding initialization easily).
-
-= 1.0.5 =
-* Add fa_force_fallback and bfa_show_errors filters.
-* Add hex icon values as $icon array indexes.
-
-= 1.0.4 =
-* Add missing isset() check that was causing intermittent warning.
-
-= 1.0.3 =
-* Add French translation.
-* Correct text domain slug.
-
-= 1.0.2 =
-* Add updated .pot file.
-* Further improve error handling and fallback.
-
-= 1.0.1 =
-* Fix error handling for 404 API requests.
-
-= 1.0.0 =
-* Fully refactor the back-end.
-* Switch to just using the jsDelivr CDN.
-* Implement transients to minimize load time.
-* Implement improved fallback handling (transient &rarr; wp_remote_get() &rarr; locally included files)
-* Switch out bulky Titan Framework for native Settings API.
-
-= 0.9.6 =
-* Fixed missing icon previews in WordPress 3.8 and below.
-
-= 0.9.5 =
-* Added ability to choose which CDN to use.
-* Added `unprefixed_class` shortcode attribute to allow for unprefixed shortcodes.
-* Updated prefixes to now return just the prefix without the dash (-).
-
-= 0.9.4 =
-* Switched default &nbsp; being output. Now the default "space" attribute is false, and can be set to true to optionally include a space.
-* PLEASE NOTE: this will affect existing shortcodes.
-
-= 0.9.3 =
-* Fixed admin-styles.css bug that was applying FontAwesome font-face outside TinyMCE
-* Print JS variables in front-end to aid developers
-* Create global $better_font_awesome object for developers to access
-
-= 0.9.2 =
-* Fixes issue of missing icon drop-down select menu in TinyMCE (adds compatibility for TinyMCE v4)
-
-= 0.9.1 =
-* Added fixes for older versions of PHP (Titan Framework not found, unexpected "[")
-
-= 0.9.0 =
-* First release!
-
 
 == Upgrade Notice ==
 
+= 2.0.0 =
+* Add support for Font Awesome v5
+* Integration with Font Awesome GraphQL API for all data fetching (improve performance)
+* Integrate with Font Awesome CDN for all CSS
+* Add option to include the v4 Font Awesome CSS shim to support older icons (default on for upgrades)
+* Updatee hard-coded fallback Font Awesome version
+* Modify version check frequency to a saner 24 hour interval
+* Ensure admin notices are dismissible
+* Lower data fetch timeout to mitigate performance risks
+* Remove legacy options that are no longer relevant (version select, minification opt-out)
+* Add more/better unit tests to ensure things are working as expected
+
 = 1.7.6 =
 * Fix: revert to 1.7.4 codebase.
 * Fix: remove calls to `ready()` jQuery method to support latest jQuery versions.
@@ -280,120 +186,3 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 = 1.7.0 =
 * Update fallback Font Awesome to v4.7.0.
 * Switch from using git submodules to composer dependency management for core library inclusion.
-
-= 1.6.0 =
-* Update fallback Font Awesome to v4.6.3.
-
-= 1.5.0 =
-* Update fallback Font Awesome to v4.5.0.
-* Add new `bfa_icon_tag` to allow for filtering default `<i>` tag.
-
-= 1.4.3 =
-* Fix: refactor JS to allow icon shortcode insertion button to work in all instances (ACF Flexible and Repeater fields, divi, Black Studio TinyMCE ).
-
-= 1.4.2 =
-* Fix: icon picker not working for ACF Pro repeater field.
-
-= 1.4.1 =
-* Fix: icon picker not working for ACF repeater field.
-
-= 1.4.0 =
-* Fix: icon picker not working for Black Studio TinyMCE Widget. (props @EJOweb and @marcochiesi)
-* Update fallback Font Awesome to version 4.4.0.
-
-= 1.3.4 =
-* Update Better Font Awesome Library to version 1.3.4.
-* Fix double shortcode insert issue.
-* Fix behavior in which clicking shortcode insert button scrolls to top of page.
-
-= 1.3.3 =
-* Update plugin and BFAL to all fire on `init` hook instead of mix of `plugins_loaded` and `after_theme_setup`. This should fix issues in which icons don't show up when BFAL is used in other plugins.
-* Update iconpicker JS to avoid conflict that arose from preventing subsequent `mouseup` event listeners from firing.
-* Change appearance of iconpicker button to match default buttons.
-
-= 1.3.2 =
-* Update Better Font Awesome Library with better prefix removal method.
-
-= 1.3.1 =
-* Update admin JS to trigger icon picker on ALL TinyMCE initializations (e.g. Visual Composer and AJAX)
-
-= 1.3.0 =
-* Replace outdated TinyMCE shortcode selector brand new jQuery dropdown selector that works in both the visual and text editor
-* Clean up CSS and JS
-
-= 1.2.1 =
-* Update get_instance() call to work for older versions of PHP (< 5.3)
-
-= 1.2.0 =
-* Attach load functionality to after_theme_setup hook to allow themes to filter options
-* Update fallback Font Awesome to version 4.3.0
-
-= 1.1.0 =
-* Implement Ajax to save plugin settings (thanks [Braad](https://profiles.wordpress.org/braad))
-
-= 1.0.10 =
-* Fix SSL bug breaking wp_remote_get() from https
-
-= 1.0.9 =
-* Fix debuggin hook set to init instead of plugins_loaded.
-
-= 1.0.8 =
-* Add admin setting to hide admin notices for API and CDN connectivity warnings.
-* Update translations.
-
-= 1.0.7 =
-* Update included fallback to Font Awesome version 4.3.
-
-= 1.0.6 =
-* Unhook library load() function from plugins_loaded and run directly from constructor (fixes bug preventing developers from overriding initialization easily).
-
-= 1.0.5 =
-* Add fa_force_fallback and bfa_show_errors filters.
-* Add hex icon values as $icon array indexes.
-
-= 1.0.4 =
-* Add missing isset() check that was causing intermittent warning.
-
-= 1.0.3 =
-* Add French translation.
-* Correct text domain slug.
-
-= 1.0.2 =
-* Add updated .pot file.
-* Further improve error handling and fallback.
-
-= 1.0.1 =
-* Fix error handling for 404 API requests.
-
-= 1.0.0 =
-* Fully refactor the back-end.
-* Switch to just using the jsDelivr CDN.
-* Implement transients to minimize load time.
-* Implement improved fallback handling (transient &rarr; wp_remote_get() &rarr; locally included files)
-* Switch out bulky Titan Framework for native Settings API.
-
-= 0.9.6 =
-* Fixed missing icon previews in WordPress 3.8 and below.
-
-= 0.9.5 =
-* Added ability to choose which CDN to use.
-* Added `unprefixed_class` shortcode attribute to allow for unprefixed shortcodes.
-* Updated prefixes to now return just the prefix without the dash (-).
-
-= 0.9.4 =
-* Switched default &nbsp; being output. Now the default "space" attribute is false, and can be set to true to optionally include a space.
-* PLEASE NOTE: this will affect existing shortcodes.
-
-= 0.9.3 =
-* Fixed admin-styles.css bug that was applying FontAwesome font-face outside TinyMCE
-* Print JS variables in front-end to aid developers
-* Create global $better_font_awesome object for developers to access
-
-= 0.9.2 =
-* Fixes issue of missing icon drop-down select menu in TinyMCE (adds compatibility for TinyMCE v4)
-
-= 0.9.1 =
-* Added fixes for older versions of PHP (Titan Framework not found, unexpected "[")
-
-= 0.9.0 =
-* First release!
