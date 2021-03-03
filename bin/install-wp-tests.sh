@@ -54,11 +54,7 @@ fi
 set -ex
 
 install_wp() {
-
-  if [ -d $WP_CORE_DIR ]; then
-    return;
-  fi
-
+  rm -rf $WP_CORE_DIR
   mkdir -p $WP_CORE_DIR
 
   if [[ $WP_VERSION == 'nightly' || $WP_VERSION == 'trunk' ]]; then
@@ -102,13 +98,11 @@ install_test_suite() {
     local ioption='-i'
   fi
 
-  # set up testing suite if it doesn't yet exist
-  if [ ! -d $WP_TESTS_DIR ]; then
-    # set up testing suite
-    mkdir -p $WP_TESTS_DIR
-    svn export --quiet --ignore-externals https://develop.svn.wordpress.org/${WP_TESTS_TAG}/tests/phpunit/includes/ $WP_TESTS_DIR/includes
-    svn export --quiet --ignore-externals https://develop.svn.wordpress.org/${WP_TESTS_TAG}/tests/phpunit/data/ $WP_TESTS_DIR/data
-  fi
+  # set up testing suite
+  rm -rf $WP_TESTS_DIR
+  mkdir -p $WP_TESTS_DIR
+  svn export --quiet --ignore-externals https://develop.svn.wordpress.org/${WP_TESTS_TAG}/tests/phpunit/includes/ $WP_TESTS_DIR/includes
+  svn export --quiet --ignore-externals https://develop.svn.wordpress.org/${WP_TESTS_TAG}/tests/phpunit/data/ $WP_TESTS_DIR/data
 
   if [ ! -f wp-tests-config.php ]; then
     download https://develop.svn.wordpress.org/${WP_TESTS_TAG}/wp-tests-config-sample.php "$WP_TESTS_DIR"/wp-tests-config.php
