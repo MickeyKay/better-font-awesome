@@ -111,6 +111,9 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 == Changelog ==
 
+= 2.0.1 =
+* Bugfix: add necessary @font-face mappings to ensure site-specific CSS and pseudo-elements render correctly
+
 = 2.0.0 =
 * Add support for Font Awesome v5
 * Integration with Font Awesome GraphQL API for all data fetching (improve performance)
@@ -149,6 +152,9 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 * Switch from using git submodules to composer dependency management for core library inclusion.
 
 == Upgrade Notice ==
+
+= 2.0.1 =
+* Bugfix: add necessary @font-face mappings to ensure site-specific CSS and pseudo-elements render correctly
 
 = 2.0.0 =
 * Add support for Font Awesome v5
