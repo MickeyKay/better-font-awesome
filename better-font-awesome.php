@@ -365,7 +365,16 @@ class Better_Font_Awesome_Plugin {
 				do_settings_sections( self::SLUG );
 			?>
 				<p>
-					<span class="button-primary bfa-save-settings-button"><?php esc_html_e( 'Save Settings', 'better-font-awesome' ); ?></span> <img class="bfa-loading-gif" src="<?php echo esc_attr( includes_url() . 'images/spinner.gif' ); ?>" />
+					<?php
+					submit_button(
+						__( 'Save Settings', 'better-font-awesome' ),
+						'primary bfa-save-settings-button',
+						'submit',
+						false
+					);
+					?>
+					&nbsp;
+					<img class="bfa-loading-gif" src="<?php echo esc_attr( includes_url() . 'images/spinner.gif' ); ?>">
 				</p>
 				<div class="bfa-ajax-response-holder"></div>
 			</form>

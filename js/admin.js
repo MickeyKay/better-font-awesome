@@ -9,7 +9,8 @@
 
 	$( function() {
 
-		$( '.bfa-save-settings-button' ).on( 'click', function() {
+		$( '#bfa-settings-form' ).on( 'submit', function( event ) {
+			event.preventDefault();
 
 			$( '.bfa-ajax-response-holder' ).empty();
 			$( '.bfa-loading-gif' ).fadeIn();
