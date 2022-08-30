@@ -361,7 +361,7 @@ class Better_Font_Awesome_Plugin {
 			<form method="post" action="options.php" id="bfa-settings-form">
 			<?php
 				// This prints out all hidden setting fields.
-				settings_fields( 'option_group' );
+				settings_fields( self::SLUG );
 				do_settings_sections( self::SLUG );
 			?>
 				<p>
@@ -380,7 +380,7 @@ class Better_Font_Awesome_Plugin {
 	 */
 	public function add_settings() {
 		register_setting(
-			'option_group', // Option group.
+			self::SLUG, // Option group.
 			$this->option_name, // Option name.
 			array( $this, 'sanitize' ) // Sanitize.
 		);
@@ -487,7 +487,7 @@ class Better_Font_Awesome_Plugin {
 	 * @since  1.0.10
 	 */
 	public function save_options() {
-		if ( false == check_ajax_referer( 'option_group-options', 'bfa_security', false ) ) {
+		if ( false == check_ajax_referer( self::SLUG . '-options', 'bfa_security', false ) ) {
 			wp_die( __( 'Something went wrong. Refresh the page and try again.', 'better-font-awesome' ), 403 );
 		}
 
