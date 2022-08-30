@@ -487,6 +487,10 @@ class Better_Font_Awesome_Plugin {
 	 * @since  1.0.10
 	 */
 	public function save_options() {
+		if ( false == check_ajax_referer( 'option_group-options', 'bfa_security', false ) ) {
+			wp_die( __( 'Something went wrong. Refresh the page and try again.', 'better-font-awesome' ), 403 );
+		}
+
 		$options = array(
 			'include_v4_shim'    => isset( $_POST['include_v4_shim'] ) && $_POST['include_v4_shim'],
 			'remove_existing_fa' => isset( $_POST['remove_existing_fa'] ) && $_POST['remove_existing_fa'],
