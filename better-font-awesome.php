@@ -497,7 +497,7 @@ class Better_Font_Awesome_Plugin {
 	 */
 	public function save_options() {
 		if ( false == check_ajax_referer( self::SLUG . '-options', 'bfa_security', false ) ) {
-			wp_die( __( 'Something went wrong. Refresh the page and try again.', 'better-font-awesome' ), 403 );
+			wp_die( __( 'Settings were not saved due to a missing nonce.', 'better-font-awesome' ), 403 );
 		}
 
 		$options = array(
