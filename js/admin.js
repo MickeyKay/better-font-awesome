@@ -26,7 +26,7 @@
 
 			data = {
 				'action': 'bfa_save_options',
-				'bfa_security': nonce,
+				'bfa_nonce': nonce,
 				'include_v4_shim': include_v4_shim,
 				'remove_existing_fa': remove_existing_fa,
 				'hide_admin_notices': hide_admin_notices,
