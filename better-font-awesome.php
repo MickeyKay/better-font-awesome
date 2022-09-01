@@ -496,7 +496,7 @@ class Better_Font_Awesome_Plugin {
 	 * @since  1.0.10
 	 */
 	public function save_options() {
-		if ( false == check_ajax_referer( self::SLUG . '-options', 'bfa_security', false ) ) {
+		if ( false == check_ajax_referer( self::SLUG . '-options', 'bfa_nonce', false ) ) {
 			wp_die( __( 'Settings were not saved due to a missing nonce.', 'better-font-awesome' ), 403 );
 		}
 
