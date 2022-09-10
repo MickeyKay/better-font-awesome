@@ -12,7 +12,7 @@
  * Plugin Name:       Better Font Awesome
  * Plugin URI:        http://wordpress.org/plugins/better-font-awesome
  * Description:       The ultimate Font Awesome icon plugin for WordPress.
- * Version:           2.0.1
+ * Version:           2.0.2
  * Author:            Mickey Kay
  * Author URI:        mickeyskay@gmail.com
  * License:           GPLv2+
@@ -59,7 +59,7 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @var    string
 	 */
-	const VERSION = '2.0.1';
+	const VERSION = '2.0.2';
 
 	/**
 	 * The Better Font Awesome Library object.
@@ -361,7 +361,7 @@ class Better_Font_Awesome_Plugin {
 			<form method="post" action="options.php" id="bfa-settings-form">
 			<?php
 				// This prints out all hidden setting fields.
-				settings_fields( 'option_group' );
+				settings_fields( self::SLUG );
 				do_settings_sections( self::SLUG );
 			?>
 				<p>
@@ -380,7 +380,7 @@ class Better_Font_Awesome_Plugin {
 	 */
 	public function add_settings() {
 		register_setting(
-			'option_group', // Option group.
+			self::SLUG, // Option group.
 			$this->option_name, // Option name.
 			array( $this, 'sanitize' ) // Sanitize.
 		);
@@ -487,6 +487,15 @@ class Better_Font_Awesome_Plugin {
 	 * @since  1.0.10
 	 */
 	public function save_options() {
+		if ( false == check_ajax_referer( self::SLUG . '-options', 'bfa_nonce', false ) ) {
+			wp_die(
+				'<div class="error"><p>'
+				. __( 'Settings were not saved due to a missing nonce. Refresh the page and try again.', 'better-font-awesome' )
+				. '</p></div>',
+				403
+			);
+		}
+
 		$options = array(
 			'include_v4_shim'    => isset( $_POST['include_v4_shim'] ) && $_POST['include_v4_shim'],
 			'remove_existing_fa' => isset( $_POST['remove_existing_fa'] ) && $_POST['remove_existing_fa'],

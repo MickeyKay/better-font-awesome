@@ -1,12 +1,12 @@
 [![Build Status](https://travis-ci.com/MickeyKay/better-font-awesome.svg?branch=master)](https://travis-ci.com/MickeyKay/better-font-awesome) [![Downloads](https://img.shields.io/wordpress/plugin/dt/better-font-awesome.svg)](https://wordpress.org/plugins/better-font-awesome/) [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 # Better Font Awesome #
-**Contributors:** [McGuive7](https://profiles.wordpress.org/McGuive7), [aaronbmm](https://profiles.wordpress.org/aaronbmm), [mightyminnow](https://profiles.wordpress.org/mightyminnow)  
+**Contributors:** [mcguive7](https://profiles.wordpress.org/mcguive7/), [aaronbmm](https://profiles.wordpress.org/aaronbmm/), [mightyminnow](https://profiles.wordpress.org/mightyminnow/)  
 **Tags:** better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode  
 **Donate link:** https://mickeykay.me  
 **Requires at least:** 3.0  
 **Tested up to:** 5.6.2  
-**Stable tag:** 2.0.1  
+**Stable tag:** 2.0.2  
 **License:** GPLv2+  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -112,6 +112,9 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 ## Changelog ##
+
+### 2.0.2 ###
+* Bugfix: fix CSRF vulnerability
 
 ### 2.0.1 ###
 * Bugfix: add necessary @font-face mappings to ensure site-specific CSS and pseudo-elements render correctly
