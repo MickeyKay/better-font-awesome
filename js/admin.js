@@ -39,7 +39,7 @@
 						$( '.bfa-ajax-response-holder' ).html( response ).slideDown().delay(2000).fadeTo(600, 0).delay(300).slideUp().fadeTo(0, 100);
 					});
 				}
-			).fail( function(response ) {
+			).fail( function( response ) {
 				$( '.bfa-loading-gif' ).fadeOut( function() {
 					$( '.bfa-ajax-response-holder' ).html( response.responseText ).slideDown().delay(2000).fadeTo(600, 0).delay(300).slideUp().fadeTo(0, 100);
 				});
