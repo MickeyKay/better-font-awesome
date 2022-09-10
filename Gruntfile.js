@@ -84,6 +84,7 @@ module.exports = function( grunt ) {
     makepot: {
         target: {
             options: {
+                  exclude: ['svn'],
                   domainPath: '/languages/',    // Where to save the POT file.
                   potFilename: 'better-font-awesome.pot',   // Name of the POT file.
                   type: 'wp-plugin'  // Type of project (wp-plugin or wp-theme).
