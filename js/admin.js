@@ -34,17 +34,29 @@
 			$.post(
 				bfa_ajax_object.ajax_url, // Array passed via wp_localize_script()
 				data,
-				function( response ) {
-					$( '.bfa-loading-gif' ).fadeOut( function() {
-						$( '.bfa-ajax-response-holder' ).html( response ).slideDown().delay(2000).fadeTo(600, 0).delay(300).slideUp().fadeTo(0, 100);
-					});
+				function() {}, // Empty success handler since success/errors handled below.
+			).always( function( response, status, thing ) {
+				var message, messageClass;
+
+				if ('success' == status) {
+					message = response;
+					messageClass = 'updated';
+				} else {
+					message = response.responseText;
+					messageClass = 'error';
 				}
-			).fail( function( response ) {
+
 				$( '.bfa-loading-gif' ).fadeOut( function() {
-					$( '.bfa-ajax-response-holder' ).html( response.responseText ).slideDown().delay(2000).fadeTo(600, 0).delay(300).slideUp().fadeTo(0, 100);
+					$( '.bfa-ajax-response-holder' )
+						.html( `<div class="${messageClass}"><p>${message}</p></div>` )
+						.slideDown()
+						.delay(2000)
+						.fadeTo(600, 0)
+						.delay(300)
+						.slideUp()
+						.fadeTo(0, 100);
 				});
 			});
-
 		});
 	});
 })( jQuery );
