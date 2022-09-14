@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: Better Font Awesome 2.0.3\n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/better-font-awesome\n"
-"POT-Creation-Date: 2022-09-14 06:23:02+00:00\n"
+"POT-Creation-Date: 2022-09-14 06:25:05+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -102,26 +102,22 @@ msgid ""
 msgstr ""
 
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:927
-#: vendor/mickey-kay/better-font-awesome-library-bk-lib/better-font-awesome-library.php:927
 msgid "Insert Icon"
 msgstr ""
 
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:954
-#: vendor/mickey-kay/better-font-awesome-library-bk-lib/better-font-awesome-library.php:954
 msgid ""
 "It looks like something went wrong when trying to fetch data from the Font "
 "Awesome API:"
 msgstr ""
 
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:965
-#: vendor/mickey-kay/better-font-awesome-library-bk-lib/better-font-awesome-library.php:965
 msgid ""
 "Don't worry! Better Font Awesome will still render using the included "
 "fallback version:</b> "
 msgstr ""
 
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:966
-#: vendor/mickey-kay/better-font-awesome-library-bk-lib/better-font-awesome-library.php:966
 msgid ""
 "This may be the result of a temporary server or connectivity issue which "
 "will resolve shortly. However if the problem persists please file a support "
