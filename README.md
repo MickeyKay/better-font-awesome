@@ -5,7 +5,7 @@
 **Tags:** better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode  
 **Donate link:** https://mickeykay.me  
 **Requires at least:** 3.0  
-**Tested up to:** 5.6.2  
+**Tested up to:** 6.0.2  
 **Stable tag:** 2.0.2  
 **License:** GPLv2+  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
@@ -157,6 +157,9 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 * Switch from using git submodules to composer dependency management for core library inclusion.
 
 ## Upgrade Notice ##
+
+### 2.0.2 ###
+* Bugfix: fix CSRF vulnerability
 
 ### 2.0.1 ###
 * Bugfix: add necessary @font-face mappings to ensure site-specific CSS and pseudo-elements render correctly
