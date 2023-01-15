@@ -12,7 +12,7 @@
  * Plugin Name:       Better Font Awesome
  * Plugin URI:        http://wordpress.org/plugins/better-font-awesome
  * Description:       The ultimate Font Awesome icon plugin for WordPress.
- * Version:           2.0.2
+ * Version:           2.0.3
  * Author:            Mickey Kay
  * Author URI:        mickeyskay@gmail.com
  * License:           GPLv2+
@@ -59,7 +59,7 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @var    string
 	 */
-	const VERSION = '2.0.2';
+	const VERSION = '2.0.3';
 
 	/**
 	 * The Better Font Awesome Library object.
@@ -489,9 +489,7 @@ class Better_Font_Awesome_Plugin {
 	public function save_options() {
 		if ( false == check_ajax_referer( self::SLUG . '-options', 'bfa_nonce', false ) ) {
 			wp_die(
-				'<div class="error"><p>'
-				. __( 'Settings were not saved due to a missing nonce. Refresh the page and try again.', 'better-font-awesome' )
-				. '</p></div>',
+				__( 'Settings were not saved due to a missing nonce. Refresh the page and try again.', 'better-font-awesome' ),
 				403
 			);
 		}
@@ -506,7 +504,7 @@ class Better_Font_Awesome_Plugin {
 		update_option( $this->option_name, $options );
 
 		// Return a message.
-		echo '<div class="updated"><p>' . esc_html__( 'Settings saved.', 'better-font-awesome' ) . '</p></div>';
+		esc_html_e( 'Settings saved.', 'better-font-awesome' );
 
 		wp_die();
 	}
