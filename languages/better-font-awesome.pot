@@ -2,10 +2,10 @@
 # This file is distributed under the GPLv2+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Better Font Awesome 2.0.3\n"
+"Project-Id-Version: Better Font Awesome 2.0.4\n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/better-font-awesome\n"
-"POT-Creation-Date: 2023-01-15 17:47:10+00:00\n"
+"POT-Creation-Date: 2023-01-15 18:03:37+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -102,26 +102,22 @@ msgid ""
 msgstr ""
 
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:928
-#: vendor/mickey-kay/better-font-awesome-library-git/better-font-awesome-library.php:928
 msgid "Insert Icon"
 msgstr ""
 
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:955
-#: vendor/mickey-kay/better-font-awesome-library-git/better-font-awesome-library.php:955
 msgid ""
 "It looks like something went wrong when trying to fetch data from the Font "
 "Awesome API:"
 msgstr ""
 
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:966
-#: vendor/mickey-kay/better-font-awesome-library-git/better-font-awesome-library.php:966
 msgid ""
 "Don't worry! Better Font Awesome will still render using the included "
 "fallback version:</b> "
 msgstr ""
 
 #: vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php:967
-#: vendor/mickey-kay/better-font-awesome-library-git/better-font-awesome-library.php:967
 msgid ""
 "This may be the result of a temporary server or connectivity issue which "
 "will resolve shortly. However if the problem persists please file a support "
