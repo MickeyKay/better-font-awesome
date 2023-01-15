@@ -3,8 +3,8 @@ Contributors: McGuive7, aaronbmm, mightyminnow
 Tags: better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode
 Donate link: https://mickeykay.me
 Requires at least: 3.0
-Tested up to: 6.0.2
-Stable tag: 2.0.3
+Tested up to: 6.1.1
+Stable tag: 2.0.4
 License: GPLv2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -111,6 +111,10 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 == Changelog ==
 
+= 2.0.4 =
+* Bump BFAL to properly esc attributes
+* Add unit tests
+
 = 2.0.3 =
 * Bugfix: fix broken icon text selection
 * Improve admin settings success/error message logic
@@ -159,6 +163,10 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 * Switch from using git submodules to composer dependency management for core library inclusion.
 
 == Upgrade Notice ==
+
+= 2.0.4 =
+* Bump BFAL to properly esc attributes
+* Add unit tests
 
 = 2.0.3 =
 * Bugfix: fix broken icon text selection
