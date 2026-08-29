@@ -1,6 +1,6 @@
 # Vendored WordPress agent skills
 
-These project-scoped skills are copied without modification from the official
+These project-scoped skills are copied from the official
 [WordPress/agent-skills](https://github.com/WordPress/agent-skills) repository.
 They are committed so Codex sessions and contributors working in this repository
 use the same WordPress development guidance.
@@ -25,6 +25,15 @@ use the same WordPress development guidance.
 `wp-project-triage` is required by the block and plugin development workflows.
 `blueprint` is required for the Blueprint workflows delegated by `wp-playground`.
 
+## Carried project patches
+
+The project carries focused changes to the two `wp-project-triage` detector scripts:
+
+- Ignore `.codex`, `.conductor`, and `.context` directories during repository scans.
+- Recognize normal PHPDoc-style plugin and theme headers whose lines begin with `*`.
+
+These patches prevent recursive local-tooling scans and allow the detectors to identify this plugin's standard WordPress header. Re-evaluate and preserve them when refreshing the vendored skills unless upstream has incorporated equivalent behavior.
+
 ## Project compatibility
 
 Repository instructions in `AGENTS.md` take precedence over the generic skill
@@ -35,6 +44,7 @@ upstream skill lists WordPress 7.0 as its current target.
 ## Updating
 
 Review upstream changes and select a single commit before replacing these
-directories. Keep all included skills on the same upstream revision, do not
-edit vendored files locally, update the revision and import date above, and run
-the repository validation suite before committing the update.
+directories. Keep all included skills on the same upstream revision, reapply or
+retire the documented project patches as appropriate, update the revision and
+import date above, and run the repository validation suite before committing the
+update.
