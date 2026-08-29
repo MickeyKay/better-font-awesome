@@ -12,7 +12,7 @@ icon = "globe"
 
 [scripts.run.tests]
 available_in = [ "local" ]
-command = "WP_ENV_PORT=$CONDUCTOR_PORT WP_ENV_TESTS_PORT=$((CONDUCTOR_PORT + 1)) npm test"
+command = "WP_ENV_PORT=$CONDUCTOR_PORT WP_ENV_TESTS_PORT=$((CONDUCTOR_PORT + 1)) npm run env:start && WP_ENV_PORT=$CONDUCTOR_PORT WP_ENV_TESTS_PORT=$((CONDUCTOR_PORT + 1)) npm test"
 icon = "test-tube"
 
 [scripts.run.quality]
