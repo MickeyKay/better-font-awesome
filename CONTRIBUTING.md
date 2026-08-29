@@ -50,6 +50,17 @@ npm run test
 
 As you develop new features, you get major bonus points for adding tests along the way!
 
+## Preparing a WordPress.org release tree
+
+Generate translations, then build the canonical WordPress.org SVN tree with an explicit release version:
+
+```sh
+npm run i18n
+npx grunt release --release-version=2.0.5 --update-stable
+```
+
+Omit `--update-stable` when the WordPress.org stable tag should not move. The task recreates `svn/trunk` and `svn/tags/<version>` from scratch, applies `.distignore`, and copies only the production BFAL files required at runtime. CI runs Plugin Check against this same `svn/trunk` output.
+
 ## Submitting changes
 
 Please file a [GitHub Pull Request](https://github.com/MickeyKay/better-font-awesome/pull/new/master) with a clear list of the changes you've made (read more about [pull requests](http://help.github.com/pull-requests/)). Please follow [WordPress coding standards](https://make.wordpress.org/core/handbook/best-practices/coding-standards/) and as best as possible ensure your commits are atomic (one feature per commit).

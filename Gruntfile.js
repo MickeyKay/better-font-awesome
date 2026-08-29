@@ -5,8 +5,17 @@ module.exports = function( grunt ) {
 
   // Grab package as variable for later use/
   var pkg = grunt.file.readJSON( 'package.json' );
-  var releaseVersion = grunt.option( 'version' ) || pkg.version;
+  var releaseVersion = grunt.option( 'release-version' ) || pkg.version;
   var updateStable = Boolean( grunt.option( 'update-stable' ) );
+  var distIgnorePatterns = grunt.file.read( '.distignore' )
+    .split( /\r?\n/ )
+    .filter( function( entry ) {
+      return entry && '#' !== entry.charAt( 0 );
+    } )
+    .reduce( function( patterns, entry ) {
+      return patterns.concat( [ '!' + entry, '!' + entry.replace( /\/$/, '' ) + '/**' ] );
+    }, [] );
+  var svnTrunkSources = [ '**' ].concat( distIgnorePatterns, [ '!vendor/**' ] );
 
   // Load all tasks.
   require('load-grunt-tasks')(grunt, {scope: 'devDependencies'});
@@ -58,7 +67,7 @@ module.exports = function( grunt ) {
     wp_readme_to_markdown: {
             readme: {
                 files: {
-                    'readme.md': 'readme.txt'
+                    'README.md': 'readme.txt'
                 },
                 options: {
                     post_convert: function(text) {
@@ -76,10 +85,22 @@ module.exports = function( grunt ) {
         },
         copy: {
             composerDeps: {
+                cwd: 'vendor/mickey-kay/better-font-awesome-library/',
                 src: [
-                'vendor/mickey-kay/**'
+                'better-font-awesome-library.php',
+                'composer.json',
+                'css/admin-styles.css',
+                'css/admin-styles.min.css',
+                'inc/fallback-release-data.json',
+                'js/admin.js',
+                'js/admin.min.js',
+                'lib/fontawesome-iconpicker/dist/css/fontawesome-iconpicker.css',
+                'lib/fontawesome-iconpicker/dist/css/fontawesome-iconpicker.min.css',
+                'lib/fontawesome-iconpicker/dist/js/fontawesome-iconpicker.js',
+                'lib/fontawesome-iconpicker/dist/js/fontawesome-iconpicker.min.js'
                 ],
-                dest: 'svn/trunk/'
+                dest: 'svn/trunk/vendor/mickey-kay/better-font-awesome-library/',
+                expand: true,
             },
             svnAssets: {
                 cwd: 'assets/',
@@ -88,26 +109,7 @@ module.exports = function( grunt ) {
                 expand: true,
             },
             svnTrunk: {
-                src:  [
-                '**',
-                '!node_modules/**',
-                '!vendor/**',
-                '!svn/**',
-                '!.git/**',
-                '!.gitignore',
-                '!.gitmodules',
-                '!.sass-cache/**',
-                '!bin/**',
-                '!tests/**',
-                '!css/src/**',
-                '!js/src/**',
-                '!img/src/**',
-                '!assets/**',
-                '!design/**',
-                '!Gruntfile.js',
-                '!package.json',
-                '!composer*',
-                ],
+                src: svnTrunkSources,
                 dest: 'svn/trunk/',
             },
             svnTags: {
@@ -123,9 +125,25 @@ module.exports = function( grunt ) {
     'wp_readme_to_markdown'
     ] );
 
+  grunt.registerTask( 'prepare-svn-release', function() {
+    var releaseDirectories = [
+      'svn/trunk',
+      'svn/tags/' + grunt.config( 'newVersion' )
+    ];
+
+    releaseDirectories.forEach( function( directory ) {
+      if ( grunt.file.exists( directory ) ) {
+        grunt.file.delete( directory, { force: true } );
+      }
+
+      grunt.file.mkdir( directory );
+    } );
+  } );
+
   grunt.registerTask( 'release', [
     'replace',
     'wp_readme_to_markdown',
+    'prepare-svn-release',
     'copy'
     ] );
 

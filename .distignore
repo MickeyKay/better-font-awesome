@@ -14,6 +14,7 @@ AGENTS.md
 CONTRIBUTING.md
 Gruntfile.js
 README.md
+readme.md
 assets
 bin
 composer.lock

@@ -11,10 +11,10 @@ This is the release gate for the first conservative maintenance release. It inte
 - [x] PHPStan level 5 on first-party runtime code
 - [x] PHPUnit 9 compatibility and current local WordPress execution
 - [x] GitHub Actions quality, compatibility, and official Plugin Check jobs defined
-- [ ] GitHub Actions passes on WordPress 6.5, 6.7, and latest with PHP 7.4, 8.1, 8.3, and 8.4
+- [x] GitHub Actions passes on WordPress 6.5, 6.7, and latest with PHP 7.4, 8.1, 8.3, and 8.4
 - [x] PHPUnit uses only deterministic HTTP fixtures
 - [ ] Browser smoke tests cover activation, settings save, Classic Editor picker, and shortcode rendering
-- [x] Production archive build and checks are defined separately from the source tree
+- [x] The canonical WordPress.org SVN release tree is built separately from the source tree and checked by CI
 
 ## Security gates
 
@@ -23,7 +23,7 @@ This is the release gate for the first conservative maintenance release. It inte
 - [ ] Enable TLS verification in BFAL
 - [ ] Validate remote metadata before persistence or output
 - [x] Review every external service and disclose it in `readme.txt`
-- [x] Run Plugin Check against the exact production archive
+- [x] Run Plugin Check against the exact WordPress.org SVN release tree
 - [x] Review admin notices and logs for sensitive upstream data
 
 The notice review found that BFAL 2.0.3 can print raw upstream error details without escaping. That confirmed defect remains a release blocker and must be fixed in BFAL rather than patched in this repository.
@@ -39,6 +39,8 @@ The notice review found that BFAL 2.0.3 can print raw upstream error details wit
 - [ ] No duplicate Font Awesome load when a supported theme or plugin already provides it
 - [ ] Multisite network activation is either tested or explicitly unsupported
 
+Automated initialization coverage now preserves current 2.0.4 options and normalizes both array and serialized legacy options while retaining the v4 shim migration. The upgrade gate remains open until complete installs are exercised across the supported upgrade paths.
+
 ## BFAL gates
 
 - [ ] BFAL live-update contract is implemented and independently released
@@ -51,8 +53,8 @@ The notice review found that BFAL 2.0.3 can print raw upstream error details wit
 ## Release process gates
 
 - [ ] Version matches plugin header, class constant, `package.json`, changelog, tag, GitHub release, and WordPress.org stable tag
-- [x] Archive includes production BFAL files and excludes `.codex`, `.conductor`, `.context`, `.github`, tests, source tooling, caches, and development dependencies
-- [x] Archive installs on a clean site without Composer
+- [x] Release tree includes production BFAL files and excludes `.codex`, `.conductor`, `.context`, `.github`, tests, source tooling, caches, and development dependencies
+- [x] Release tree installs on a clean site without Composer
 - [ ] Database and filesystem writes are documented and reversible
 - [ ] Changelog names compatibility floors and external service changes
 - [ ] Release candidate receives manual testing on at least two independent sites
@@ -60,4 +62,4 @@ The notice review found that BFAL 2.0.3 can print raw upstream error details wit
 
 ## Current recommendation
 
-Do not publish yet. The repository setup now passes its local quality suite and the production archive has been audited with Plugin Check. The release remains blocked on BFAL TLS, validation, asynchronous refresh, durable last-known-good behavior, failure-mode integration tests, compatibility and browser coverage, and the first complete CI matrix run.
+Do not publish yet. The repository setup now passes its local quality suite and the canonical WordPress.org SVN release tree has been audited with Plugin Check. The release remains blocked on BFAL TLS, validation, asynchronous refresh, durable last-known-good behavior, failure-mode integration tests, and compatibility and browser coverage.
