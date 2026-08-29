@@ -5,21 +5,28 @@
  * @package   Better Font Awesome
  * @author    Mickey Kay <mickeykay.me>
  * @license   GPL-2.0+
- * @link      http://wordpress.org/plugins/better-font-awesome
+ * @link      https://wordpress.org/plugins/better-font-awesome/
  * @copyright 2017 Mickey Kay
  *
  * @wordpress-plugin
  * Plugin Name:       Better Font Awesome
- * Plugin URI:        http://wordpress.org/plugins/better-font-awesome
+ * Plugin URI:        https://github.com/MickeyKay/better-font-awesome
  * Description:       The ultimate Font Awesome icon plugin for WordPress.
  * Version:           2.0.4
  * Author:            Mickey Kay
- * Author URI:        mickeyskay@gmail.com
+ * Author URI:        https://mickeykay.me/
  * License:           GPLv2+
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Requires at least: 6.5
+ * Requires PHP:      7.4
  * Text Domain:       better-font-awesome
  * Domain Path:       /languages
  * GitHub Plugin URI: https://github.com/MickeyKay/better-font-awesome
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 add_action( 'init', 'bfa_start', 5 );
 /**
@@ -75,7 +82,7 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @since  0.1.0
 	 *
-	 * @var    Better_Font_Awesome_Library
+	 * @var    string
 	 */
 	private $bfa_lib_file_path;
 
@@ -102,7 +109,7 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @since  0.9.0
 	 *
-	 * @var    string
+	 * @var    array
 	 */
 	protected $options;
 
@@ -137,14 +144,13 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @param array $args Args to instantiate BFA object.
 	 *
-	 * @return  Better_Font_Awesome  The BFA object.
+	 * @return  Better_Font_Awesome_Plugin  The BFA plugin object.
 	 */
 	public static function get_instance( $args = array() ) {
 
 		// If the single instance hasn't been set, set it now.
-		// phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
-		if ( null == self::$instance ) {
-			self::$instance = new self( $args );
+		if ( null === self::$instance ) {
+			self::$instance = new self();
 		}
 
 		return self::$instance;
@@ -163,7 +169,7 @@ class Better_Font_Awesome_Plugin {
 		// Stop if the Better Font Awesome Library isn't included.
 		if ( ! $this->bfal_exists() ) {
 			add_action( 'admin_init', array( $this, 'deactivate' ) );
-			return false;
+			return;
 		}
 
 		// Include required files.
@@ -281,10 +287,12 @@ class Better_Font_Awesome_Plugin {
 		 * Run maybe_unserialize() in case we're updating from the old
 		 * serialized Titan Framwork option to a new, array-based options.
 		 */
-		$this->options = maybe_unserialize( get_option( $option_name ) );
+		$options       = maybe_unserialize( get_option( $option_name ) );
+		$this->options = is_array( $options ) ? $options : array();
 
 		// Initialize the plugin options with defaults if they're not set.
 		if ( empty( $this->options ) ) {
+			$this->options = $this->option_defaults;
 			update_option( $option_name, $this->option_defaults );
 		}
 
@@ -309,8 +317,7 @@ class Better_Font_Awesome_Plugin {
 	private function initialize_better_font_awesome_library( $options ) {
 
 		// Hide admin notices if setting is checked.
-		// phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
-		if ( $options && true == $options['hide_admin_notices'] ) {
+		if ( ! empty( $options['hide_admin_notices'] ) ) {
 			add_filter( 'bfa_show_errors', '__return_false' );
 		}
 
@@ -387,8 +394,8 @@ class Better_Font_Awesome_Plugin {
 
 		add_settings_section(
 			'settings_section_primary', // ID.
-			null, // Title.
-			null, // Callback.
+			'', // Title.
+			'__return_null', // Callback.
 			self::SLUG // Page.
 		);
 
@@ -487,17 +494,26 @@ class Better_Font_Awesome_Plugin {
 	 * @since  1.0.10
 	 */
 	public function save_options() {
-		if ( false == check_ajax_referer( self::SLUG . '-options', 'bfa_nonce', false ) ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die(
-				__( 'Settings were not saved due to a missing nonce. Refresh the page and try again.', 'better-font-awesome' ),
-				403
+				esc_html__( 'You are not allowed to change these settings.', 'better-font-awesome' ),
+				'',
+				array( 'response' => 403 )
+			);
+		}
+
+		if ( false === check_ajax_referer( self::SLUG . '-options', 'bfa_nonce', false ) ) {
+			wp_die(
+				esc_html__( 'Settings were not saved due to a missing nonce. Refresh the page and try again.', 'better-font-awesome' ),
+				'',
+				array( 'response' => 403 )
 			);
 		}
 
 		$options = array(
-			'include_v4_shim'    => isset( $_POST['include_v4_shim'] ) && $_POST['include_v4_shim'],
-			'remove_existing_fa' => isset( $_POST['remove_existing_fa'] ) && $_POST['remove_existing_fa'],
-			'hide_admin_notices' => isset( $_POST['hide_admin_notices'] ) && $_POST['hide_admin_notices'],
+			'include_v4_shim'    => isset( $_POST['include_v4_shim'] ) && (bool) absint( wp_unslash( $_POST['include_v4_shim'] ) ),
+			'remove_existing_fa' => isset( $_POST['remove_existing_fa'] ) && (bool) absint( wp_unslash( $_POST['remove_existing_fa'] ) ),
+			'hide_admin_notices' => isset( $_POST['hide_admin_notices'] ) && (bool) absint( wp_unslash( $_POST['hide_admin_notices'] ) ),
 		);
 
 		// Sanitize and update the options.
@@ -584,5 +600,4 @@ class Better_Font_Awesome_Plugin {
 
 		return $new_input;
 	}
-
 }
