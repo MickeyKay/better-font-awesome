@@ -20,6 +20,8 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 	public function setUp(): void {
 		parent::setUp();
 
+		$this->reset_plugin_instance();
+		delete_option( Better_Font_Awesome_Plugin::SLUG . '_options' );
 		$this->bfa     = Better_Font_Awesome_Plugin::get_instance( [] );
 		$this->bfa_lib = $this->bfa->get_bfa_lib_instance( [] );
 	}
@@ -29,7 +31,31 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 		$_POST    = array();
 		$_REQUEST = array();
 		wp_set_current_user( 0 );
+		remove_filter( 'bfa_show_errors', '__return_false' );
+		$this->reset_plugin_instance();
 		parent::tearDown();
+	}
+
+	/**
+	 * Reset the plugin singleton between initialization scenarios.
+	 */
+	protected function reset_plugin_instance() {
+		$instance = new ReflectionProperty( Better_Font_Awesome_Plugin::class, 'instance' );
+		$instance->setAccessible( true );
+		$instance->setValue( null, null );
+	}
+
+	/**
+	 * Initialize the plugin with an existing option value.
+	 *
+	 * @param mixed $options Stored plugin options.
+	 * @return Better_Font_Awesome_Plugin
+	 */
+	protected function initialize_with_stored_options( $options ) {
+		update_option( Better_Font_Awesome_Plugin::SLUG . '_options', $options );
+		$this->reset_plugin_instance();
+
+		return Better_Font_Awesome_Plugin::get_instance( [] );
 	}
 
 	public function filter_wp_die_handler() {
@@ -58,6 +84,53 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 
 	public function test_options_are_initialized_with_defaults() {
 		$this->assertSame( $this->bfa->get( 'option_defaults' ), $this->bfa->get( 'options' ) );
+	}
+
+	public function test_current_settings_are_preserved_during_initialization() {
+		$stored_options = array(
+			'include_v4_shim'    => 0,
+			'remove_existing_fa' => 1,
+			'hide_admin_notices' => 0,
+		);
+
+		$bfa = $this->initialize_with_stored_options( $stored_options );
+
+		$this->assertSame( $stored_options, $bfa->get( 'options' ) );
+		$this->assertSame( $stored_options, get_option( $bfa->get( 'option_name' ) ) );
+	}
+
+	public function test_legacy_settings_enable_v4_shim_and_preserve_existing_values() {
+		$stored_options = array(
+			'remove_existing_fa' => 1,
+			'hide_admin_notices' => 0,
+		);
+		$expected       = array(
+			'remove_existing_fa' => 1,
+			'hide_admin_notices' => 0,
+			'include_v4_shim'    => 1,
+		);
+
+		$bfa = $this->initialize_with_stored_options( $stored_options );
+
+		$this->assertSame( $expected, $bfa->get( 'options' ) );
+		$this->assertSame( $expected, get_option( $bfa->get( 'option_name' ) ) );
+	}
+
+	public function test_serialized_legacy_settings_are_normalized_and_preserved() {
+		$stored_options = array(
+			'remove_existing_fa' => 0,
+			'hide_admin_notices' => 1,
+		);
+		$expected       = array(
+			'remove_existing_fa' => 0,
+			'hide_admin_notices' => 1,
+			'include_v4_shim'    => 1,
+		);
+
+		$bfa = $this->initialize_with_stored_options( maybe_serialize( $stored_options ) );
+
+		$this->assertSame( $expected, $bfa->get( 'options' ) );
+		$this->assertSame( $expected, get_option( $bfa->get( 'option_name' ) ) );
 	}
 
 	public function test_settings_are_sanitized_as_checkboxes() {
