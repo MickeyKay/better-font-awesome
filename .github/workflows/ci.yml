@@ -1,0 +1,154 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Quality checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer:v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-interaction
+
+      - name: Install Node.js dependencies
+        run: npm ci
+
+      - name: Validate Composer metadata
+        run: composer validate --no-check-publish
+
+      - name: Check PHP coding standards
+        run: npm run lint
+
+      - name: Run static analysis
+        run: npm run analyze
+
+      - name: Verify generated readme
+        run: |
+          npm run build
+          git diff --exit-code -- readme.md
+
+      - name: Audit PHP dependencies
+        run: composer audit
+
+      - name: Audit Node.js dependencies
+        run: npm audit --audit-level=high
+
+  phpunit:
+    name: WordPress ${{ matrix.wordpress }} on PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: '7.4'
+            wordpress: '6.5'
+          - php: '8.1'
+            wordpress: '6.7'
+          - php: '8.3'
+            wordpress: latest
+          - php: '8.4'
+            wordpress: latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: wordpress_test
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --host=127.0.0.1 --user=root --password=root"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer:v2
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install --yes default-mysql-client subversion
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-interaction
+
+      - name: Install WordPress test suite
+        run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1:3306 "${{ matrix.wordpress }}" true
+
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit --configuration phpunit.xml.dist
+
+  plugin-check:
+    name: WordPress Plugin Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer:v2, wp-cli
+
+      - name: Install production dependencies
+        run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+      - name: Install archive command
+        run: wp package install wp-cli/dist-archive-command:v3.1.0
+
+      - name: Build production archive
+        run: |
+          wp dist-archive . ./better-font-awesome.zip --plugin-dirname=better-font-awesome
+          mkdir tmp-build
+          unzip better-font-awesome.zip -d tmp-build
+
+      - name: Audit production archive
+        run: |
+          test -f tmp-build/better-font-awesome/better-font-awesome.php
+          test -f tmp-build/better-font-awesome/composer.json
+          test -f tmp-build/better-font-awesome/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php
+          test -f tmp-build/better-font-awesome/vendor/mickey-kay/better-font-awesome-library/inc/fallback-release-data.json
+          test ! -e tmp-build/better-font-awesome/.phpunit.result.cache
+          test ! -d tmp-build/better-font-awesome/tests
+          test ! -d tmp-build/better-font-awesome/.codex
+          test ! -d tmp-build/better-font-awesome/.context
+          test ! -d tmp-build/better-font-awesome/node_modules
+          test ! -d tmp-build/better-font-awesome/vendor/phpunit
+
+      - name: Run Plugin Check
+        uses: wordpress/plugin-check-action@v1
+        with:
+          build-dir: './tmp-build/better-font-awesome'
+          slug: better-font-awesome

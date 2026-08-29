@@ -5,43 +5,17 @@ module.exports = function( grunt ) {
 
   // Grab package as variable for later use/
   var pkg = grunt.file.readJSON( 'package.json' );
+  var releaseVersion = grunt.option( 'version' ) || pkg.version;
+  var updateStable = Boolean( grunt.option( 'update-stable' ) );
 
   // Load all tasks.
   require('load-grunt-tasks')(grunt, {scope: 'devDependencies'});
 
   // Project configuration
   grunt.initConfig( {
+    newVersion: releaseVersion,
+    updateStable: updateStable,
     pkg: pkg,
-    devUpdate: {
-        main: {
-            options: {
-                updateType: 'prompt',
-                packages: {
-                    devDependencies: true
-                },
-            }
-        }
-    },
-    prompt: {
-        version: {
-            options: {
-                questions: [
-                {
-                    config:  'newVersion',
-                    type:    'input',
-                    message: 'What specific version would you like?',
-                    default: '<%= pkg.version %>'
-                },
-                {
-                    config:  'updateStable',
-                    type:    'confirm',
-                    message: 'Bump stable version?',
-                    default: false
-                }
-                ]
-            }
-        }
-    },
     replace: {
         package: {
             src: ['package.json'],
@@ -81,17 +55,7 @@ module.exports = function( grunt ) {
             ]
         }
     },
-    makepot: {
-        target: {
-            options: {
-                  exclude: ['svn'],
-                  domainPath: '/languages/',    // Where to save the POT file.
-                  potFilename: 'better-font-awesome.pot',   // Name of the POT file.
-                  type: 'wp-plugin'  // Type of project (wp-plugin or wp-theme).
-                }
-            }
-        },
-        wp_readme_to_markdown: {
+    wp_readme_to_markdown: {
             readme: {
                 files: {
                     'readme.md': 'readme.txt'
@@ -99,10 +63,11 @@ module.exports = function( grunt ) {
                 options: {
                     post_convert: function(text) {
                         var prefix = [
-                        '[![Build Status](https://travis-ci.com/MickeyKay/better-font-awesome.svg?branch=master)](https://travis-ci.com/MickeyKay/better-font-awesome)',
+                        '[![CI](https://github.com/MickeyKay/better-font-awesome/actions/workflows/ci.yml/badge.svg)](https://github.com/MickeyKay/better-font-awesome/actions/workflows/ci.yml)',
                         '[![Downloads](https://img.shields.io/wordpress/plugin/dt/better-font-awesome.svg)](https://wordpress.org/plugins/better-font-awesome/)',
                         '[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)'
                         ].join(' ');
+						text = text.replace( /  \n/g, '<br>\n' );
 
                         return [prefix,text].join('\n\n');
                     }
@@ -155,9 +120,11 @@ module.exports = function( grunt ) {
     } );
 
   grunt.registerTask( 'build', [
-    'prompt',
+    'wp_readme_to_markdown'
+    ] );
+
+  grunt.registerTask( 'release', [
     'replace',
-    'makepot',
     'wp_readme_to_markdown',
     'copy'
     ] );

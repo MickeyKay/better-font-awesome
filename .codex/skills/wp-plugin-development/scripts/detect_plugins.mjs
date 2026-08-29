@@ -3,6 +3,9 @@ import path from "node:path";
 
 const DEFAULT_IGNORES = new Set([
   ".git",
+  ".codex",
+  ".conductor",
+  ".context",
   "node_modules",
   "vendor",
   "dist",
@@ -78,7 +81,7 @@ function parsePluginHeader(contents) {
     ["Domain Path", "domainPath"],
   ];
   for (const [label, key] of pairs) {
-    const m = contents.match(new RegExp(`^\\s*${label}:\\s*(.+)\\s*$`, "im"));
+    const m = contents.match(new RegExp(`^\\s*(?:\\*\\s*)?${label}:\\s*(.+?)\\s*$`, "im"));
     if (m) header[key] = m[1].trim();
   }
   if (!header.name) return null;
@@ -119,4 +122,3 @@ function main() {
 }
 
 main();
-

@@ -1,18 +1,27 @@
 {
   "title": "Better Font Awesome",
-  "description": "The best WordPress extension ever made!",
+  "description": "A WordPress plugin for always-current Font Awesome icons.",
   "version": "2.0.4",
-  "homepage": "http://wordpress.org/plugins/better-font-awesome",
+  "homepage": "https://wordpress.org/plugins/better-font-awesome/",
+  "private": true,
   "scripts": {
-    "composer": "composer install",
-    "grunt": "grunt build",
-    "clean": "rm -rf vendor",
+    "analyze": "sh bin/composer.sh exec phpstan -- analyse --configuration=phpstan.neon.dist",
+    "build": "grunt build",
+    "check": "npm run lint && npm run analyze && npm test",
     "checkout-svn": "svn co https://plugins.svn.wordpress.org/better-font-awesome svn",
-    "develop": "npm run clean && npm install && npm run composer && npm run test-setup",
-    "build": "npm run grunt",
-    "lint": "./vendor/bin/phpcs",
-    "lint-fix": "./vendor/bin/phpcbf",
-    "test": "export TMPDIR=/tmp && ./vendor/bin/phpunit",
+    "composer": "npm run composer:install",
+    "composer:install": "sh bin/composer.sh install --prefer-dist --no-interaction",
+    "composer:update": "sh bin/composer.sh update --with-all-dependencies",
+    "develop": "npm ci && npm run composer:install && npm run env:start",
+    "env:destroy": "wp-env destroy",
+    "env:run": "sh bin/wp-env-run.sh",
+    "env:start": "wp-env start",
+    "env:stop": "wp-env stop",
+    "i18n": "sh bin/make-pot.sh",
+    "lint": "sh bin/composer.sh exec phpcs --",
+    "lint:fix": "sh bin/composer.sh exec phpcbf --",
+    "release": "npm run i18n && grunt release",
+    "test": "npm run env:run -- vendor/bin/phpunit -- -c phpunit.xml.dist",
     "test-setup": "export TMPDIR=/tmp && bash bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1"
   },
   "author": {
@@ -21,14 +30,15 @@
     "url": "https://mickeykay.me/"
   },
   "devDependencies": {
-    "grunt": "latest",
-    "load-grunt-tasks": "latest",
-    "grunt-dev-update": "latest",
-    "grunt-prompt": "latest",
-    "grunt-text-replace": "latest",
-    "grunt-wp-readme-to-markdown": "latest",
-    "grunt-wp-i18n": "latest",
-    "grunt-contrib-copy": "^0.7.0"
+    "@wordpress/env": "11.14.0",
+    "grunt": "1.6.3",
+    "grunt-contrib-copy": "1.0.0",
+    "grunt-text-replace": "0.4.0",
+    "grunt-wp-readme-to-markdown": "2.1.0",
+    "load-grunt-tasks": "5.1.0"
+  },
+  "overrides": {
+    "lodash": "4.18.1"
   },
   "keywords": []
 }

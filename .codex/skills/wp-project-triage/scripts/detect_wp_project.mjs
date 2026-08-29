@@ -6,6 +6,9 @@ const TOOL_VERSION = "0.1.0";
 
 const DEFAULT_IGNORES = new Set([
   ".git",
+  ".codex",
+  ".conductor",
+  ".context",
   "node_modules",
   "vendor",
   "dist",
@@ -124,7 +127,7 @@ function findFilesRecursive(repoRoot, predicate, { maxFiles = 6000, maxDepth = 8
 function detectPluginHeaderFromPhpFile(filePath) {
   const contents = readFileSafe(filePath, 128 * 1024);
   if (!contents) return null;
-  const headerMatch = contents.match(/^\s*Plugin Name:\s*(.+)\s*$/im);
+  const headerMatch = contents.match(/^\s*(?:\*\s*)?Plugin Name:\s*(.+?)\s*$/im);
   if (!headerMatch) return null;
   return headerMatch[1].trim();
 }
@@ -132,7 +135,7 @@ function detectPluginHeaderFromPhpFile(filePath) {
 function detectThemeHeaderFromStyleCss(filePath) {
   const contents = readFileSafe(filePath, 128 * 1024);
   if (!contents) return null;
-  const headerMatch = contents.match(/^\s*Theme Name:\s*(.+)\s*$/im);
+  const headerMatch = contents.match(/^\s*(?:\*\s*)?Theme Name:\s*(.+?)\s*$/im);
   if (!headerMatch) return null;
   return headerMatch[1].trim();
 }
