@@ -5,7 +5,8 @@ module.exports = function( grunt ) {
 
   // Grab package as variable for later use/
   var pkg = grunt.file.readJSON( 'package.json' );
-  var releaseVersion = grunt.option( 'release-version' ) || pkg.version;
+  var requestedReleaseVersion = grunt.option( 'release-version' );
+  var releaseVersion = requestedReleaseVersion || pkg.version;
   var updateStable = Boolean( grunt.option( 'update-stable' ) );
   var distIgnorePatterns = grunt.file.read( '.distignore' )
     .split( /\r?\n/ )
@@ -125,22 +126,47 @@ module.exports = function( grunt ) {
     'wp_readme_to_markdown'
     ] );
 
-  grunt.registerTask( 'prepare-svn-release', function() {
-    var releaseDirectories = [
-      'svn/trunk',
-      'svn/tags/' + grunt.config( 'newVersion' )
-    ];
+  grunt.registerTask( 'validate-release-version', function() {
+    var versionPattern = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
+    var tagDirectory = 'svn/tags/' + requestedReleaseVersion;
 
-    releaseDirectories.forEach( function( directory ) {
-      if ( grunt.file.exists( directory ) ) {
-        grunt.file.delete( directory, { force: true } );
-      }
+    if ( 'string' !== typeof requestedReleaseVersion || ! versionPattern.test( requestedReleaseVersion ) ) {
+      grunt.fail.fatal( 'Pass an explicit semantic version with --release-version, for example --release-version=2.0.5.' );
+    }
 
-      grunt.file.mkdir( directory );
-    } );
+    if ( grunt.file.exists( tagDirectory ) ) {
+      grunt.fail.fatal( 'Refusing to replace existing WordPress.org tag: ' + tagDirectory );
+    }
   } );
 
+  grunt.registerTask( 'prepare-svn-trunk', function() {
+    if ( grunt.file.exists( 'svn/trunk' ) ) {
+      grunt.file.delete( 'svn/trunk', { force: true } );
+    }
+
+    grunt.file.mkdir( 'svn/trunk' );
+  } );
+
+  grunt.registerTask( 'prepare-svn-release', function() {
+    var tagDirectory = 'svn/tags/' + grunt.config( 'newVersion' );
+
+    if ( grunt.file.exists( tagDirectory ) ) {
+      grunt.fail.fatal( 'Refusing to replace existing WordPress.org tag: ' + tagDirectory );
+    }
+
+    grunt.task.run( 'prepare-svn-trunk' );
+    grunt.file.mkdir( tagDirectory );
+  } );
+
+  grunt.registerTask( 'build-release-tree', [
+    'wp_readme_to_markdown',
+    'prepare-svn-trunk',
+    'copy:composerDeps',
+    'copy:svnTrunk'
+    ] );
+
   grunt.registerTask( 'release', [
+    'validate-release-version',
     'replace',
     'wp_readme_to_markdown',
     'prepare-svn-release',

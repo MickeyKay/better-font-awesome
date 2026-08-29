@@ -55,11 +55,12 @@ As you develop new features, you get major bonus points for adding tests along t
 Generate translations, then build the canonical WordPress.org SVN tree with an explicit release version:
 
 ```sh
-npm run i18n
-npx grunt release --release-version=2.0.5 --update-stable
+npm run release -- --release-version=2.0.5 --update-stable
 ```
 
-Omit `--update-stable` when the WordPress.org stable tag should not move. The task recreates `svn/trunk` and `svn/tags/<version>` from scratch, applies `.distignore`, and copies only the production BFAL files required at runtime. CI runs Plugin Check against this same `svn/trunk` output.
+Omit `--update-stable` when the WordPress.org stable tag should not move. A release version is always required and must be a semantic version such as `2.0.5` or `2.0.5-rc.1`. The task recreates `svn/trunk`, creates a new `svn/tags/<version>`, applies `.distignore`, and copies only the production BFAL files required at runtime. It aborts without changing source versions when the requested tag already exists.
+
+CI uses `npx grunt build-release-tree` to build and run Plugin Check against the same `svn/trunk` output without creating a publishable tag.
 
 ## Submitting changes
 

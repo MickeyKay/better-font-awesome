@@ -135,8 +135,26 @@ jobs:
       - name: Install Node.js dependencies
         run: npm ci
 
+      - name: Verify release safeguards
+        run: |
+          if npx grunt release; then
+            echo "Release unexpectedly accepted a missing version."
+            exit 1
+          fi
+          if npx grunt release --release-version=invalid; then
+            echo "Release unexpectedly accepted an invalid version."
+            exit 1
+          fi
+          mkdir -p svn/tags/9.9.9
+          touch svn/tags/9.9.9/existing-tag-marker
+          if npx grunt release --release-version=9.9.9; then
+            echo "Release unexpectedly replaced an existing tag."
+            exit 1
+          fi
+          test -f svn/tags/9.9.9/existing-tag-marker
+
       - name: Build WordPress.org release tree
-        run: npx grunt release
+        run: npx grunt build-release-tree
 
       - name: Audit WordPress.org release tree
         run: |
