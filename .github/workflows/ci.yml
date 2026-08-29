@@ -126,7 +126,9 @@ jobs:
         run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 
       - name: Install archive command
-        run: wp package install wp-cli/dist-archive-command:v3.1.0
+        run: |
+          composer config --global --unset github-oauth.github.com
+          wp package install wp-cli/dist-archive-command:v3.1.0
 
       - name: Build production archive
         run: |
