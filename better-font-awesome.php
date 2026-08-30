@@ -311,8 +311,16 @@ class Better_Font_Awesome_Plugin {
 			return false;
 		}
 
-		// @phpstan-ignore-next-line BFAL 2.0.3 rollback compatibility is intentional.
-		return method_exists( 'Better_Font_Awesome_Library', 'refresh_release_data' );
+		return method_exists( 'Better_Font_Awesome_Library', $this->metadata_refresh_method_name() );
+	}
+
+	/**
+	 * Get the reviewed BFAL refresh method name.
+	 *
+	 * @return string BFAL method name.
+	 */
+	private function metadata_refresh_method_name(): string {
+		return 'refresh_release_data';
 	}
 
 	/**

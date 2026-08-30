@@ -230,7 +230,8 @@ class Better_Font_Awesome_Metadata_Manager {
 	 * @return array|WP_Error Refresh result.
 	 */
 	public function run_refresh( $force = false ) {
-		if ( ! $this->library ) {
+		$refresh_callback = $this->get_refresh_callback();
+		if ( ! $refresh_callback ) {
 			return new WP_Error( 'bfa_worker_unavailable', 'The Font Awesome metadata worker is unavailable.' );
 		}
 
@@ -253,7 +254,7 @@ class Better_Font_Awesome_Metadata_Manager {
 		$this->store->save_state( $state );
 
 		try {
-			$result = $this->library->refresh_release_data();
+			$result = call_user_func( $refresh_callback );
 			if ( is_wp_error( $result ) ) {
 				$this->record_failure( $result );
 				return $result;
@@ -292,6 +293,34 @@ class Better_Font_Awesome_Metadata_Manager {
 				$this->schedule_refresh();
 			}
 		}
+	}
+
+	/**
+	 * Get the reviewed BFAL refresh callback when the installed version supports it.
+	 *
+	 * The method name remains dynamic so static analysis can also run against the
+	 * supported emergency rollback dependency, BFAL 2.0.3.
+	 *
+	 * @return callable|false BFAL refresh callback, or false when unavailable.
+	 */
+	private function get_refresh_callback() {
+		if ( ! $this->library ) {
+			return false;
+		}
+
+		$method   = $this->refresh_method_name();
+		$callback = array( $this->library, $method );
+
+		return is_callable( $callback ) ? $callback : false;
+	}
+
+	/**
+	 * Get the reviewed BFAL refresh method name.
+	 *
+	 * @return string BFAL method name.
+	 */
+	private function refresh_method_name(): string {
+		return 'refresh_release_data';
 	}
 
 	/**

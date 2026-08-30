@@ -9,6 +9,6 @@ parameters:
 
     scanFiles:
         - vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php
-        - vendor/mickey-kay/better-font-awesome-library/inc/class-bfa-release-data-validator.php
+        - tests/stubs/bfal-2.1.php
 
     tmpDir: .context/phpstan

@@ -53,6 +53,12 @@ abstract class Better_Font_Awesome_Metadata_Test_Case extends WP_UnitTestCase {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		if (
+			! class_exists( 'Better_Font_Awesome_Release_Data_Validator' ) ||
+			! method_exists( 'Better_Font_Awesome_Library', 'refresh_release_data' )
+		) {
+			$this->markTestSkipped( 'Requires the reviewed BFAL 2.1 integration API.' );
+		}
 		$this->reset_singletons();
 		$this->clear_metadata_state();
 		$this->font_awesome_http_calls    = 0;
