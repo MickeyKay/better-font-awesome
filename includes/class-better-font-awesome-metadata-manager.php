@@ -149,10 +149,11 @@ class Better_Font_Awesome_Metadata_Manager {
 			return false;
 		}
 
-		$state   = $this->store->get_state();
-		$run_at  = $force ? $now + 1 : max( $now + 1, (int) $state['next_retry_at'] );
-		$marker  = $this->new_schedule_marker( $run_at, $force );
-		$created = $this->add_non_autoloaded_option( self::SCHEDULE_OPTION, $marker );
+		$stored_state = get_option( self::STATE_OPTION, null );
+		$state        = $this->store->get_state();
+		$run_at       = $force ? $now + 1 : max( $now + 1, (int) $state['next_retry_at'] );
+		$marker       = $this->new_schedule_marker( $run_at, $force );
+		$created      = $this->add_non_autoloaded_option( self::SCHEDULE_OPTION, $marker );
 
 		if ( ! $created ) {
 			$existing = get_option( self::SCHEDULE_OPTION, array() );
@@ -207,7 +208,17 @@ class Better_Font_Awesome_Metadata_Manager {
 		if ( 'never' === $state['status'] || $force ) {
 			$state['status'] = 'scheduled';
 		}
-		$this->store->save_state( $state );
+
+		/*
+		 * The persisted event can run before this request resumes. Annotate only
+		 * the exact state observed before publication so a completed worker keeps
+		 * ownership of its success, failure, and retry state.
+		 */
+		if ( null === $stored_state ) {
+			$this->add_non_autoloaded_option( self::STATE_OPTION, $state );
+		} else {
+			$this->atomic_update_option( self::STATE_OPTION, $stored_state, $state );
+		}
 
 		return true;
 	}

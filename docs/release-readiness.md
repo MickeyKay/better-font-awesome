@@ -61,7 +61,7 @@ Automated initialization coverage now preserves current 2.0.4 options and normal
 - [x] Candidate-required bootstrap fails closed on the wrong BFAL version, wrong reference, or missing API
 - [x] Stable BFAL 2.0.3 rollback activation creates no asynchronous cron event or orphaned marker
 - [x] BFA exact Composer constraint and lockfile validated against public BFAL `2.1.0-rc.1`
-- [ ] Hosted WordPress and PHP compatibility matrix rerun with the public BFAL package
+- [x] Hosted WordPress and PHP compatibility matrix rerun with the public BFAL package
 - [ ] Independent review and two-site release candidate testing complete
 
 ## Release process gates
@@ -76,4 +76,4 @@ Automated initialization coverage now preserves current 2.0.4 options and normal
 
 ## Current recommendation
 
-Do not merge or publish yet. Public BFAL `2.1.0-rc.1` at `a05508043ea885fa611f559ab59cff73161b37d2` is the exact BFA candidate dependency under the approved first-caller precedence contract. BFA remains blocked on the hosted candidate compatibility matrix, browser and upgrade coverage, final-version and stable-release decisions, packaging and changelog review, two-site release candidate testing, and the remaining WordPress.org publication gates.
+Do not merge or publish yet. Public BFAL `2.1.0-rc.1` at `a05508043ea885fa611f559ab59cff73161b37d2` is the exact BFA candidate dependency under the approved first-caller precedence contract. BFA remains blocked on browser and upgrade coverage, final-version and stable-release decisions, packaging and changelog review, two-site release candidate testing, and the remaining WordPress.org publication gates.

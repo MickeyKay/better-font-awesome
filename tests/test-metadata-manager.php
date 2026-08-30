@@ -116,6 +116,134 @@ class Better_Font_Awesome_Metadata_Manager_Test extends Better_Font_Awesome_Meta
 	}
 
 	/**
+	 * A failed worker owns state after consuming a newly persisted event.
+	 */
+	public function test_scheduler_does_not_overwrite_interleaved_worker_failure() {
+		$this->persist_release( '5.15.4', time() - HOUR_IN_SECONDS );
+		$plugin    = $this->initialize_plugin();
+		$scheduler = new Better_Font_Awesome_Metadata_Manager();
+		$worker    = new Better_Font_Awesome_Metadata_Manager();
+		$worker->set_library( $plugin->get_bfa_lib_instance() );
+		wp_clear_scheduled_hook( Better_Font_Awesome_Metadata_Manager::CRON_HOOK );
+		delete_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
+
+		$store                    = new Better_Font_Awesome_Metadata_Store();
+		$before                   = $store->get_state();
+		$before['attempt_count']  = 4;
+		$before['fetched_at']     = time() - DAY_IN_SECONDS;
+		$before['failure_count']  = 2;
+		$before['next_retry_at']  = 0;
+		$before['status']         = 'stale';
+		$before['scheduled_for']  = 0;
+		$before['last_error_code'] = 'earlier_failure';
+		$before['last_error']      = 'Earlier sanitized failure.';
+		$this->assertTrue( $store->save_state( $before ) );
+		$this->font_awesome_http_response = new WP_Error( 'bfa_transport_error', 'Deterministic transport failure.' );
+
+		$interleaving = $this->schedule_with_post_persistence_worker( $scheduler, $worker );
+		$state        = $store->get_state();
+		$retry        = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
+
+		$this->assertTrue( $interleaving['schedule_result'] );
+		$this->assertWPError( $interleaving['worker_result'] );
+		$this->assertSame( 'bfa_transport_error', $interleaving['worker_result']->get_error_code() );
+		$this->assertSame( 'failed', $state['status'] );
+		$this->assertSame( 3, $state['failure_count'] );
+		$this->assertSame( 5, $state['attempt_count'] );
+		$this->assertSame( $before['fetched_at'], $state['fetched_at'] );
+		$this->assertGreaterThan( time(), $state['next_retry_at'] );
+		$this->assertSame( 'bfa_transport_error', $state['last_error_code'] );
+		$this->assertSame( 'The Font Awesome metadata service could not be reached.', $state['last_error'] );
+		$this->assertIsArray( $retry );
+		$this->assertNotSame( $interleaving['published_marker']['token'], $retry['token'] );
+		$this->assertSame( $retry['run_at'], $state['scheduled_for'] );
+		$this->assertSame(
+			$retry['run_at'],
+			wp_next_scheduled(
+				Better_Font_Awesome_Metadata_Manager::CRON_HOOK,
+				array( $retry['token'], false )
+			)
+		);
+		$this->assertFalse(
+			wp_next_scheduled(
+				Better_Font_Awesome_Metadata_Manager::CRON_HOOK,
+				array( $interleaving['published_marker']['token'], false )
+			)
+		);
+		$this->assertSame( 1, $this->font_awesome_http_calls );
+	}
+
+	/**
+	 * A successful worker owns state after consuming a newly persisted event.
+	 */
+	public function test_scheduler_does_not_overwrite_interleaved_worker_success() {
+		$this->persist_release( '5.15.4', time() - HOUR_IN_SECONDS );
+		$plugin    = $this->initialize_plugin();
+		$scheduler = new Better_Font_Awesome_Metadata_Manager();
+		$worker    = new Better_Font_Awesome_Metadata_Manager();
+		$worker->set_library( $plugin->get_bfa_lib_instance() );
+		wp_clear_scheduled_hook( Better_Font_Awesome_Metadata_Manager::CRON_HOOK );
+		delete_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
+
+		$store                     = new Better_Font_Awesome_Metadata_Store();
+		$before                    = $store->get_state();
+		$before['attempt_count']   = 7;
+		$before['failure_count']   = 2;
+		$before['next_retry_at']   = 0;
+		$before['status']          = 'failed';
+		$before['scheduled_for']   = 0;
+		$before['last_error_code'] = 'earlier_failure';
+		$before['last_error']      = 'Earlier sanitized failure.';
+		$this->assertTrue( $store->save_state( $before ) );
+		$this->font_awesome_http_response = $this->successful_response( $this->valid_release( '5.15.5' ) );
+		$started_at = time();
+
+		$interleaving = $this->schedule_with_post_persistence_worker( $scheduler, $worker );
+		$state        = $store->get_state();
+
+		$this->assertTrue( $interleaving['schedule_result'] );
+		$this->assertSame( '5.15.5', $interleaving['worker_result']['version'] );
+		$this->assertSame( 'fresh', $state['status'] );
+		$this->assertSame( 8, $state['attempt_count'] );
+		$this->assertGreaterThanOrEqual( $started_at, $state['fetched_at'] );
+		$this->assertSame( 0, $state['failure_count'] );
+		$this->assertSame( 0, $state['next_retry_at'] );
+		$this->assertSame( '', $state['last_error_code'] );
+		$this->assertSame( '', $state['last_error'] );
+		$this->assertSame( 0, $state['scheduled_for'] );
+		$this->assertSame( '5.15.5', $store->get_valid_record()['release']['version'] );
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+		$this->assertFalse(
+			wp_next_scheduled(
+				Better_Font_Awesome_Metadata_Manager::CRON_HOOK,
+				array( $interleaving['published_marker']['token'], false )
+			)
+		);
+		$this->assertSame( 1, $this->font_awesome_http_calls );
+	}
+
+	/**
+	 * The first scheduling annotation is created without autoloading state.
+	 */
+	public function test_first_schedule_creates_non_autoloaded_state() {
+		global $wpdb;
+
+		delete_option( Better_Font_Awesome_Metadata_Manager::STATE_OPTION );
+		$manager = new Better_Font_Awesome_Metadata_Manager();
+
+		$this->assertTrue( $manager->schedule_refresh() );
+		$marker = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
+		$state  = ( new Better_Font_Awesome_Metadata_Store() )->get_state();
+		$this->assertSame( 'scheduled', $state['status'] );
+		$this->assertSame( $marker['run_at'], $state['scheduled_for'] );
+		$this->assertArrayNotHasKey( Better_Font_Awesome_Metadata_Manager::STATE_OPTION, wp_load_alloptions( true ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Verify the persisted autoload mode across supported WordPress versions.
+		$autoload = $wpdb->get_var( $wpdb->prepare( "SELECT autoload FROM {$wpdb->options} WHERE option_name = %s", Better_Font_Awesome_Metadata_Manager::STATE_OPTION ) );
+		$this->assertContains( $autoload, array( 'no', 'off', 'auto-off' ) );
+		$this->assertSame( 0, $this->font_awesome_http_calls );
+	}
+
+	/**
 	 * A newly claimed marker is not stolen before its event is written.
 	 */
 	public function test_new_schedule_marker_without_event_is_temporarily_reserved() {
@@ -428,5 +556,48 @@ class Better_Font_Awesome_Metadata_Manager_Test extends Better_Font_Awesome_Meta
 		$this->initialize_plugin();
 		$new = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
 		$this->assertNotSame( $old['token'], $new['token'] );
+	}
+
+	/**
+	 * Run a worker after WordPress persists the scheduler's event.
+	 *
+	 * @param Better_Font_Awesome_Metadata_Manager $scheduler Scheduling request manager.
+	 * @param Better_Font_Awesome_Metadata_Manager $worker    Separate worker manager.
+	 * @return array Scheduling result, worker result, and published marker.
+	 */
+	private function schedule_with_post_persistence_worker( $scheduler, $worker ) {
+		$interleaved      = false;
+		$worker_result    = null;
+		$published_marker = null;
+		$interleave = function ( $option ) use ( $worker, &$interleaved, &$worker_result, &$published_marker ) {
+			if ( 'cron' !== $option || $interleaved ) {
+				return;
+			}
+
+			$marker = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION, array() );
+			if ( ! is_array( $marker ) || empty( $marker['token'] ) ) {
+				return;
+			}
+
+			$interleaved      = true;
+			$published_marker = $marker;
+			$worker_result    = $worker->run_scheduled_refresh( (string) $marker['token'], (bool) $marker['force'] );
+		};
+		add_action( 'updated_option', $interleave, 10, 1 );
+
+		try {
+			$schedule_result = $scheduler->schedule_refresh();
+		} finally {
+			remove_action( 'updated_option', $interleave, 10 );
+		}
+
+		$this->assertTrue( $interleaved );
+		$this->assertIsArray( $published_marker );
+
+		return array(
+			'schedule_result'  => $schedule_result,
+			'worker_result'    => $worker_result,
+			'published_marker' => $published_marker,
+		);
 	}
 }
