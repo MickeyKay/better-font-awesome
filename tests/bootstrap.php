@@ -39,6 +39,9 @@ function better_font_awesome_mock_http_request( $preempt, $parsed_args, $url ) {
 	if ( 'https://api.fontawesome.com' !== $url ) {
 		return $preempt;
 	}
+	if ( false !== $preempt ) {
+		return $preempt;
+	}
 
 	return array(
 		'headers'  => array(),
