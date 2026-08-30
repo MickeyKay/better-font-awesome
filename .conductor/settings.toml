@@ -1,0 +1,24 @@
+"$schema" = "https://conductor.build/schemas/settings.repo.schema.json"
+
+[scripts]
+setup = "npm ci && npm run composer:install"
+run_mode = "concurrent"
+
+[scripts.run.wordpress]
+available_in = [ "local" ]
+command = "WP_ENV_PORT=$CONDUCTOR_PORT WP_ENV_TESTS_PORT=$((CONDUCTOR_PORT + 1)) npm run env:start"
+default = true
+icon = "globe"
+
+[scripts.run.tests]
+available_in = [ "local" ]
+command = "WP_ENV_PORT=$CONDUCTOR_PORT WP_ENV_TESTS_PORT=$((CONDUCTOR_PORT + 1)) npm run env:start && WP_ENV_PORT=$CONDUCTOR_PORT WP_ENV_TESTS_PORT=$((CONDUCTOR_PORT + 1)) npm test"
+icon = "test-tube"
+
+[scripts.run.quality]
+command = "npm run lint && npm run analyze"
+icon = "shield-check"
+
+[prompts]
+general = "Prefer small, backward-compatible changes. Run the narrowest relevant tests and call out any effect on the live Font Awesome update path."
+code_review = "Prioritize regressions, security, WordPress compatibility, remote request failure modes, cache correctness, accessibility, and missing tests."

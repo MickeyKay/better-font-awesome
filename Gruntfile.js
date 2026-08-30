@@ -5,43 +5,27 @@ module.exports = function( grunt ) {
 
   // Grab package as variable for later use/
   var pkg = grunt.file.readJSON( 'package.json' );
+  var requestedReleaseVersion = grunt.option( 'release-version' );
+  var releaseVersion = requestedReleaseVersion || pkg.version;
+  var updateStable = Boolean( grunt.option( 'update-stable' ) );
+  var distIgnorePatterns = grunt.file.read( '.distignore' )
+    .split( /\r?\n/ )
+    .filter( function( entry ) {
+      return entry && '#' !== entry.charAt( 0 );
+    } )
+    .reduce( function( patterns, entry ) {
+      return patterns.concat( [ '!' + entry, '!' + entry.replace( /\/$/, '' ) + '/**' ] );
+    }, [] );
+  var svnTrunkSources = [ '**' ].concat( distIgnorePatterns, [ '!vendor/**' ] );
 
   // Load all tasks.
   require('load-grunt-tasks')(grunt, {scope: 'devDependencies'});
 
   // Project configuration
   grunt.initConfig( {
+    newVersion: releaseVersion,
+    updateStable: updateStable,
     pkg: pkg,
-    devUpdate: {
-        main: {
-            options: {
-                updateType: 'prompt',
-                packages: {
-                    devDependencies: true
-                },
-            }
-        }
-    },
-    prompt: {
-        version: {
-            options: {
-                questions: [
-                {
-                    config:  'newVersion',
-                    type:    'input',
-                    message: 'What specific version would you like?',
-                    default: '<%= pkg.version %>'
-                },
-                {
-                    config:  'updateStable',
-                    type:    'confirm',
-                    message: 'Bump stable version?',
-                    default: false
-                }
-                ]
-            }
-        }
-    },
     replace: {
         package: {
             src: ['package.json'],
@@ -81,28 +65,19 @@ module.exports = function( grunt ) {
             ]
         }
     },
-    makepot: {
-        target: {
-            options: {
-                  exclude: ['svn'],
-                  domainPath: '/languages/',    // Where to save the POT file.
-                  potFilename: 'better-font-awesome.pot',   // Name of the POT file.
-                  type: 'wp-plugin'  // Type of project (wp-plugin or wp-theme).
-                }
-            }
-        },
-        wp_readme_to_markdown: {
+    wp_readme_to_markdown: {
             readme: {
                 files: {
-                    'readme.md': 'readme.txt'
+                    'README.md': 'readme.txt'
                 },
                 options: {
                     post_convert: function(text) {
                         var prefix = [
-                        '[![Build Status](https://travis-ci.com/MickeyKay/better-font-awesome.svg?branch=master)](https://travis-ci.com/MickeyKay/better-font-awesome)',
+                        '[![CI](https://github.com/MickeyKay/better-font-awesome/actions/workflows/ci.yml/badge.svg)](https://github.com/MickeyKay/better-font-awesome/actions/workflows/ci.yml)',
                         '[![Downloads](https://img.shields.io/wordpress/plugin/dt/better-font-awesome.svg)](https://wordpress.org/plugins/better-font-awesome/)',
                         '[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)'
                         ].join(' ');
+						text = text.replace( /  \n/g, '<br>\n' );
 
                         return [prefix,text].join('\n\n');
                     }
@@ -111,10 +86,22 @@ module.exports = function( grunt ) {
         },
         copy: {
             composerDeps: {
+                cwd: 'vendor/mickey-kay/better-font-awesome-library/',
                 src: [
-                'vendor/mickey-kay/**'
+                'better-font-awesome-library.php',
+                'composer.json',
+                'css/admin-styles.css',
+                'css/admin-styles.min.css',
+                'inc/fallback-release-data.json',
+                'js/admin.js',
+                'js/admin.min.js',
+                'lib/fontawesome-iconpicker/dist/css/fontawesome-iconpicker.css',
+                'lib/fontawesome-iconpicker/dist/css/fontawesome-iconpicker.min.css',
+                'lib/fontawesome-iconpicker/dist/js/fontawesome-iconpicker.js',
+                'lib/fontawesome-iconpicker/dist/js/fontawesome-iconpicker.min.js'
                 ],
-                dest: 'svn/trunk/'
+                dest: 'svn/trunk/vendor/mickey-kay/better-font-awesome-library/',
+                expand: true,
             },
             svnAssets: {
                 cwd: 'assets/',
@@ -123,26 +110,7 @@ module.exports = function( grunt ) {
                 expand: true,
             },
             svnTrunk: {
-                src:  [
-                '**',
-                '!node_modules/**',
-                '!vendor/**',
-                '!svn/**',
-                '!.git/**',
-                '!.gitignore',
-                '!.gitmodules',
-                '!.sass-cache/**',
-                '!bin/**',
-                '!tests/**',
-                '!css/src/**',
-                '!js/src/**',
-                '!img/src/**',
-                '!assets/**',
-                '!design/**',
-                '!Gruntfile.js',
-                '!package.json',
-                '!composer*',
-                ],
+                src: svnTrunkSources,
                 dest: 'svn/trunk/',
             },
             svnTags: {
@@ -155,10 +123,53 @@ module.exports = function( grunt ) {
     } );
 
   grunt.registerTask( 'build', [
-    'prompt',
-    'replace',
-    'makepot',
+    'wp_readme_to_markdown'
+    ] );
+
+  grunt.registerTask( 'validate-release-version', function() {
+    var versionPattern = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
+    var tagDirectory = 'svn/tags/' + requestedReleaseVersion;
+
+    if ( 'string' !== typeof requestedReleaseVersion || ! versionPattern.test( requestedReleaseVersion ) ) {
+      grunt.fail.fatal( 'Pass an explicit semantic version with --release-version, for example --release-version=2.0.5.' );
+    }
+
+    if ( grunt.file.exists( tagDirectory ) ) {
+      grunt.fail.fatal( 'Refusing to replace existing WordPress.org tag: ' + tagDirectory );
+    }
+  } );
+
+  grunt.registerTask( 'prepare-svn-trunk', function() {
+    if ( grunt.file.exists( 'svn/trunk' ) ) {
+      grunt.file.delete( 'svn/trunk', { force: true } );
+    }
+
+    grunt.file.mkdir( 'svn/trunk' );
+  } );
+
+  grunt.registerTask( 'prepare-svn-release', function() {
+    var tagDirectory = 'svn/tags/' + grunt.config( 'newVersion' );
+
+    if ( grunt.file.exists( tagDirectory ) ) {
+      grunt.fail.fatal( 'Refusing to replace existing WordPress.org tag: ' + tagDirectory );
+    }
+
+    grunt.task.run( 'prepare-svn-trunk' );
+    grunt.file.mkdir( tagDirectory );
+  } );
+
+  grunt.registerTask( 'build-release-tree', [
     'wp_readme_to_markdown',
+    'prepare-svn-trunk',
+    'copy:composerDeps',
+    'copy:svnTrunk'
+    ] );
+
+  grunt.registerTask( 'release', [
+    'validate-release-version',
+    'replace',
+    'wp_readme_to_markdown',
+    'prepare-svn-release',
     'copy'
     ] );
 

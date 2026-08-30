@@ -40,3 +40,6 @@ cache
 vendor
 node_modules
 svn
+.wp-env.override.json
+.wp-env-home/
+.phpunit.result.cache

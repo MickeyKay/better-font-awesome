@@ -1,20 +1,21 @@
-[![Build Status](https://travis-ci.com/MickeyKay/better-font-awesome.svg?branch=master)](https://travis-ci.com/MickeyKay/better-font-awesome) [![Downloads](https://img.shields.io/wordpress/plugin/dt/better-font-awesome.svg)](https://wordpress.org/plugins/better-font-awesome/) [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![CI](https://github.com/MickeyKay/better-font-awesome/actions/workflows/ci.yml/badge.svg)](https://github.com/MickeyKay/better-font-awesome/actions/workflows/ci.yml) [![Downloads](https://img.shields.io/wordpress/plugin/dt/better-font-awesome.svg)](https://wordpress.org/plugins/better-font-awesome/) [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 # Better Font Awesome #
-**Contributors:** [mcguive7](https://profiles.wordpress.org/mcguive7/), [aaronbmm](https://profiles.wordpress.org/aaronbmm/), [mightyminnow](https://profiles.wordpress.org/mightyminnow/)  
-**Tags:** better, font, awesome, icon, icons, bootstrap, fontstrap, cdn, shortcode  
-**Donate link:** https://mickeykay.me  
-**Requires at least:** 3.0  
-**Tested up to:** 6.1.1  
-**Stable tag:** 2.0.4  
-**License:** GPLv2+  
-**License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
+**Contributors:** [mcguive7](https://profiles.wordpress.org/mcguive7/), [aaronbmm](https://profiles.wordpress.org/aaronbmm/), [mightyminnow](https://profiles.wordpress.org/mightyminnow/)<br>
+**Tags:** font awesome, icons, icon font, shortcode, classic editor<br>
+**Donate link:** https://mickeykay.me<br>
+**Requires at least:** 6.5<br>
+**Tested up to:** 7.1<br>
+**Requires PHP:** 7.4<br>
+**Stable tag:** 2.0.4<br>
+**License:** GPLv2+<br>
+**License URI:** https://www.gnu.org/licenses/gpl-2.0.html<br>
 
 The Better Font Awesome plugin for WordPress. Shortcodes, HTML, TinyMCE, various Font Awesome versions, backwards compatibility, CDN speeds, and more.
 
 ## Description ##
 
-[![Build Status](https://travis-ci.com/MickeyKay/better-font-awesome.svg?branch=master)](https://travis-ci.com/MickeyKay/better-font-awesome)
+[![CI](https://github.com/MickeyKay/better-font-awesome/actions/workflows/ci.yml/badge.svg)](https://github.com/MickeyKay/better-font-awesome/actions/workflows/ci.yml)
 
 **Do you find this plugin helpful? Please consider [leaving a 5-star review](https://wordpress.org/support/view/plugin-reviews/better-font-awesome).**
 
@@ -29,7 +30,7 @@ Better Font Awesome allows you to automatically integrate the latest available v
 
 * **Compatible with other plugins** - designed to work with shortcodes generated with plugins like [Font Awesome Icons](http://wordpress.org/plugins/font-awesome/ "Font Awesome Icons"), [Font Awesome More Icons](https://wordpress.org/plugins/font-awesome-more-icons/ "Font Awesome More Icons"), and [Font Awesome Shortcodes](https://wordpress.org/plugins/font-awesome-shortcodes/), so you can switch to Better Font Awesome and your existing shortcodes will still work.
 
-* **CDN speeds** - Font Awesome CSS is pulled from the super-fast and reliable [jsDelivr CDN](http://www.jsdelivr.com/#!fontawesome).
+* **CDN speeds** - Font Awesome CSS is loaded from a versioned public CDN URL.
 
 * **Shortcode generator** - includes an easy-to-use TinyMCE dropdown shortcode generator.
 
@@ -59,6 +60,14 @@ Note that prefixes are required for HTML usage, and are version-specific. For th
 
 ### Advanced / Integration ###
 Better Font Awesome is built around the [Better Font Awesome Library](https://github.com/MickeyKay/better-font-awesome-library). This library allows you to integrate Better Font Awesome into any custom project you want to create (perhaps a theme or plugin with a constantly up-to-date icon list), and includes all the [filters](https://github.com/MickeyKay/better-font-awesome-library#filters) you might need.
+
+### External services ###
+Better Font Awesome uses two Font Awesome services to provide current Free icon metadata and browser assets. No Font Awesome account or API token is required.
+
+* **Font Awesome GraphQL API** (`https://api.fontawesome.com`) - the site server requests public release and icon metadata when the local cache expires. The plugin does not intentionally send site, user, or content data in this request. With the currently bundled library, a cache miss can trigger this request during an ordinary WordPress request.
+* **Font Awesome Free CDN** (`https://use.fontawesome.com`) - visitors' browsers request the versioned CSS and font files needed to display icons. Font Awesome receives normal web request data such as the visitor's IP address and user agent.
+
+These services are provided by Fonticons, Inc. Review the [Font Awesome terms of service](https://fontawesome.com/tos) and [privacy policy](https://fontawesome.com/privacy) for details.
 
 ### Languages / Translations ###
 * English
@@ -99,7 +108,7 @@ This plugin is unique in that it automatically pulls in *all* available versions
 
 ### Do I have to install any font files? ###
 
-Nope. Better Font Awesome automatically pulls in everything you need, and it does it from the lightning-fast jsDelivr CDN.
+Nope. Better Font Awesome automatically loads the required CSS and font files from the Font Awesome Free CDN.
 
 ### What happens if I have another plugin/theme that uses Font Awesome? ###
 
@@ -181,16 +190,7 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 * Bugfix: add necessary @font-face mappings to ensure site-specific CSS and pseudo-elements render correctly
 
 ### 2.0.0 ###
-* Add support for Font Awesome v5
-* Integration with Font Awesome GraphQL API for all data fetching (improve performance)
-* Integrate with Font Awesome CDN for all CSS
-* Add option to include the v4 Font Awesome CSS shim to support older icons (default on for upgrades)
-* Updatee hard-coded fallback Font Awesome version
-* Modify version check frequency to a saner 24 hour interval
-* Ensure admin notices are dismissible
-* Lower data fetch timeout to mitigate performance risks
-* Remove legacy options that are no longer relevant (version select, minification opt-out)
-* Add more/better unit tests to ensure things are working as expected
+* Adds Font Awesome 5, GraphQL metadata, CDN CSS, an optional v4 shim, daily update checks, refreshed fallback data, dismissible notices, and compatibility tests.
 
 ### 1.7.6 ###
 * Fix: revert to 1.7.4 codebase.

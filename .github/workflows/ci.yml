@@ -1,0 +1,190 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Quality checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer:v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-interaction
+
+      - name: Install Node.js dependencies
+        run: npm ci
+
+      - name: Validate Composer metadata
+        run: composer validate --no-check-publish
+
+      - name: Check PHP coding standards
+        run: npm run lint
+
+      - name: Run static analysis
+        run: npm run analyze
+
+      - name: Verify generated readme
+        run: |
+          npm run build
+          git diff --exit-code -- README.md
+          test -z "$(git ls-files --others --exclude-standard -- readme.md)"
+
+      - name: Audit PHP dependencies
+        run: composer audit
+
+      - name: Audit Node.js dependencies
+        run: npm audit --audit-level=high
+
+  phpunit:
+    name: WordPress ${{ matrix.wordpress }} on PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: '7.4'
+            wordpress: '6.5'
+          - php: '8.1'
+            wordpress: '6.7'
+          - php: '8.3'
+            wordpress: latest
+          - php: '8.4'
+            wordpress: latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: wordpress_test
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --host=127.0.0.1 --user=root --password=root"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer:v2
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install --yes default-mysql-client subversion
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-interaction
+
+      - name: Install WordPress test suite
+        run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1:3306 "${{ matrix.wordpress }}" true
+
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit --configuration phpunit.xml.dist
+
+  plugin-check:
+    name: WordPress Plugin Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer:v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install production dependencies
+        run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+      - name: Install Node.js dependencies
+        run: npm ci
+
+      - name: Verify release safeguards
+        run: |
+          if npx grunt release; then
+            echo "Release unexpectedly accepted a missing version."
+            exit 1
+          fi
+          if npx grunt release --release-version=invalid; then
+            echo "Release unexpectedly accepted an invalid version."
+            exit 1
+          fi
+          mkdir -p svn/tags/9.9.9
+          touch svn/tags/9.9.9/existing-tag-marker
+          if npx grunt release --release-version=9.9.9; then
+            echo "Release unexpectedly replaced an existing tag."
+            exit 1
+          fi
+          test -f svn/tags/9.9.9/existing-tag-marker
+
+      - name: Build WordPress.org release tree
+        run: npx grunt build-release-tree
+
+      - name: Audit WordPress.org release tree
+        run: |
+          test -f svn/trunk/better-font-awesome.php
+          test -f svn/trunk/composer.json
+          test -f svn/trunk/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php
+          test -f svn/trunk/vendor/mickey-kay/better-font-awesome-library/inc/fallback-release-data.json
+          test ! -e svn/trunk/.phpunit.result.cache
+          test ! -d svn/trunk/tests
+          test ! -d svn/trunk/.codex
+          test ! -d svn/trunk/.conductor
+          test ! -d svn/trunk/.context
+          test ! -d svn/trunk/.github
+          test ! -d svn/trunk/docs
+          test ! -d svn/trunk/node_modules
+          test ! -d svn/trunk/vendor/phpunit
+          test ! -e svn/trunk/vendor/mickey-kay/better-font-awesome-library/Gruntfile.js
+          test ! -e svn/trunk/vendor/mickey-kay/better-font-awesome-library/package-lock.json
+          test ! -e svn/trunk/vendor/mickey-kay/better-font-awesome-library/package.json
+          test ! -e svn/trunk/vendor/mickey-kay/better-font-awesome-library/README.md
+          test ! -e svn/trunk/AGENTS.md
+          test ! -e svn/trunk/CONTRIBUTING.md
+          test ! -e svn/trunk/README.md
+          test ! -e svn/trunk/package-lock.json
+          test ! -e svn/trunk/phpcs.xml.dist
+          test ! -e svn/trunk/phpstan.neon.dist
+          test ! -e svn/trunk/phpunit.xml.dist
+
+      - name: Run Plugin Check
+        uses: wordpress/plugin-check-action@v1
+        with:
+          build-dir: './svn/trunk'
+          slug: better-font-awesome

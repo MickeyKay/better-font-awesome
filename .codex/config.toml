@@ -1,0 +1,8 @@
+[mcp_servers.wordpress-design-system]
+command = "npx"
+args = [
+	"-y",
+	"--ignore-scripts",
+	"--min-release-age=2",
+	"@wordpress/design-system-mcp@latest",
+]
