@@ -46,7 +46,7 @@ class Better_Font_Awesome_Metadata_Request_Test extends Better_Font_Awesome_Meta
 		$this->assertSame( 0, $this->font_awesome_http_calls );
 
 		$this->font_awesome_http_response = $this->successful_response( $this->valid_release( '5.15.5' ) );
-		$result = $manager->run_refresh( true );
+		$result = $this->run_scheduled_worker( $manager );
 
 		$this->assertSame( '5.15.5', $result['version'] );
 		$this->assertSame( 1, $this->font_awesome_http_calls );
@@ -68,7 +68,7 @@ class Better_Font_Awesome_Metadata_Request_Test extends Better_Font_Awesome_Meta
 		$library = $plugin->get_bfa_lib_instance();
 		$this->font_awesome_http_response = $this->successful_response( $this->valid_release( '5.15.5' ) );
 
-		$this->assertSame( '5.15.5', $manager->run_refresh( true )['version'] );
+		$this->assertSame( '5.15.5', $this->run_scheduled_worker( $manager )['version'] );
 		$this->assertSame( '5.15.5', $library->get_version() );
 		$this->assertStringContainsString( '/v5.15.5/css/all.css', $library->get_stylesheet_url() );
 		$this->assertStringContainsString( '/v5.15.5/css/v4-shims.css', $library->get_stylesheet_url_v4_shim() );

@@ -8,6 +8,32 @@
 require_once __DIR__ . '/MetadataTestCase.php';
 
 /**
+ * Worker that invokes a separate scheduler immediately after lock acquisition.
+ */
+class Better_Font_Awesome_Interleaving_Metadata_Manager extends Better_Font_Awesome_Metadata_Manager {
+
+	/** @var Better_Font_Awesome_Metadata_Manager|null */
+	public $concurrent_manager;
+
+	/** @var bool|null */
+	public $concurrent_schedule_result;
+
+	/**
+	 * Acquire ownership and run the deterministic scheduler interleaving.
+	 *
+	 * @param string $schedule_token Expected schedule token.
+	 * @return string|false Ownership token, or false.
+	 */
+	protected function acquire_lock( $schedule_token = '' ) {
+		$owner = parent::acquire_lock( $schedule_token );
+		if ( false !== $owner && $this->concurrent_manager ) {
+			$this->concurrent_schedule_result = $this->concurrent_manager->schedule_refresh();
+		}
+		return $owner;
+	}
+}
+
+/**
  * Validate request behavior, scheduling, locks, and retry state.
  */
 class Better_Font_Awesome_Metadata_Manager_Test extends Better_Font_Awesome_Metadata_Test_Case {
@@ -138,6 +164,101 @@ class Better_Font_Awesome_Metadata_Manager_Test extends Better_Font_Awesome_Meta
 	}
 
 	/**
+	 * Worker ownership is established before its schedule marker is consumed.
+	 */
+	public function test_worker_claim_has_no_unowned_scheduler_window() {
+		$this->persist_release( '5.15.4', time() - HOUR_IN_SECONDS );
+		$plugin     = $this->initialize_plugin();
+		$marker     = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
+		$concurrent = new Better_Font_Awesome_Metadata_Manager();
+		$worker     = new Better_Font_Awesome_Interleaving_Metadata_Manager();
+		$worker->set_library( $plugin->get_bfa_lib_instance() );
+		$worker->concurrent_manager = $concurrent;
+		$this->font_awesome_http_response = $this->successful_response( $this->valid_release( '5.15.5' ) );
+
+		$result = $worker->run_scheduled_refresh( $marker['token'], false );
+
+		$this->assertFalse( $worker->concurrent_schedule_result );
+		$this->assertSame( '5.15.5', $result['version'] );
+		$this->assertSame( 1, $this->font_awesome_http_calls );
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION ) );
+		$this->assertFalse(
+			wp_next_scheduled(
+				Better_Font_Awesome_Metadata_Manager::CRON_HOOK,
+				array( $marker['token'], false )
+			)
+		);
+	}
+
+	/**
+	 * A separate request cannot enqueue while the worker performs HTTP.
+	 */
+	public function test_concurrent_scheduler_is_suppressed_during_worker_http() {
+		$this->persist_release( '5.15.4', time() - HOUR_IN_SECONDS );
+		$plugin     = $this->initialize_plugin();
+		$worker     = $this->metadata_manager( $plugin );
+		$marker     = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
+		$concurrent = new Better_Font_Awesome_Metadata_Manager();
+		$schedule_result = null;
+		$interleave = function ( $preempt, $parsed_args, $url ) use ( $concurrent, &$schedule_result ) {
+			unset( $parsed_args );
+			if ( Better_Font_Awesome_Library::FONT_AWESOME_API_BASE_URL === $url && null === $schedule_result ) {
+				$schedule_result = $concurrent->schedule_refresh();
+			}
+			return $preempt;
+		};
+		add_filter( 'pre_http_request', $interleave, 4, 3 );
+		$this->font_awesome_http_response = $this->successful_response( $this->valid_release( '5.15.5' ) );
+
+		try {
+			$result = $worker->run_scheduled_refresh( $marker['token'], false );
+		} finally {
+			remove_filter( 'pre_http_request', $interleave, 4 );
+		}
+
+		$this->assertFalse( $schedule_result );
+		$this->assertSame( '5.15.5', $result['version'] );
+		$this->assertSame( 1, $this->font_awesome_http_calls );
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION ) );
+	}
+
+	/**
+	 * An expired crashed worker lease is recovered and retried by later traffic.
+	 */
+	public function test_expired_crashed_worker_recovers_and_eventually_retries() {
+		$this->persist_release( '5.15.4', time() - HOUR_IN_SECONDS );
+		$plugin  = $this->initialize_plugin();
+		$marker  = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
+		$crashed = new Better_Font_Awesome_Metadata_Manager();
+		$owner   = $this->invoke_method( $crashed, 'acquire_lock', array( $marker['token'] ) );
+		$this->assertIsString( $owner );
+		$this->assertTrue( $this->invoke_method( $crashed, 'atomic_delete_option', array( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION, $marker ) ) );
+		$this->invoke_method( $crashed, 'unschedule_marker', array( $marker ) );
+
+		$concurrent = new Better_Font_Awesome_Metadata_Manager();
+		$this->assertFalse( $concurrent->schedule_refresh() );
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+
+		$expired = get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION );
+		$expired['expires_at'] = time() - 1;
+		update_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION, $expired, false );
+
+		$recovery = new Better_Font_Awesome_Metadata_Manager();
+		$recovery->set_library( $plugin->get_bfa_lib_instance() );
+		$this->assertTrue( $recovery->schedule_refresh() );
+		$retry = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
+		$this->font_awesome_http_response = $this->successful_response( $this->valid_release( '5.15.5' ) );
+		$result = $recovery->run_scheduled_refresh( $retry['token'], false );
+
+		$this->assertSame( '5.15.5', $result['version'] );
+		$this->assertSame( 1, $this->font_awesome_http_calls );
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION ) );
+	}
+
+	/**
 	 * An expired worker lock can be recovered.
 	 */
 	public function test_expired_worker_lock_is_recovered() {
@@ -181,7 +302,7 @@ class Better_Font_Awesome_Metadata_Manager_Test extends Better_Font_Awesome_Meta
 
 		foreach ( $expected as $index => $delay ) {
 			$before = time();
-			$result = $manager->run_refresh( true );
+			$result = $this->run_scheduled_worker( $manager );
 			$state  = ( new Better_Font_Awesome_Metadata_Store() )->get_state();
 			$this->assertWPError( $result );
 			$this->assertSame( $index + 1, $state['failure_count'] );
@@ -212,7 +333,7 @@ class Better_Font_Awesome_Metadata_Manager_Test extends Better_Font_Awesome_Meta
 		$manager = $this->metadata_manager();
 		$this->font_awesome_http_response = $this->http_response( 500, 'failure' );
 		$before = time();
-		$manager->run_refresh( true );
+		$this->run_scheduled_worker( $manager );
 		$state = ( new Better_Font_Awesome_Metadata_Store() )->get_state();
 
 		$this->assertGreaterThanOrEqual( $before + HOUR_IN_SECONDS, $state['next_retry_at'] );
@@ -228,10 +349,10 @@ class Better_Font_Awesome_Metadata_Manager_Test extends Better_Font_Awesome_Meta
 		$plugin  = $this->initialize_plugin();
 		$manager = $this->metadata_manager( $plugin );
 		$this->font_awesome_http_response = $this->http_response( 500, 'failure' );
-		$this->assertWPError( $manager->run_refresh( true ) );
+		$this->assertWPError( $this->run_scheduled_worker( $manager ) );
 
 		$this->font_awesome_http_response = $this->successful_response( $this->valid_release( '5.15.5' ) );
-		$this->assertSame( '5.15.5', $manager->run_refresh( true )['version'] );
+		$this->assertSame( '5.15.5', $this->run_scheduled_worker( $manager )['version'] );
 		$store = new Better_Font_Awesome_Metadata_Store();
 		$state = $store->get_state();
 
@@ -260,11 +381,18 @@ class Better_Font_Awesome_Metadata_Manager_Test extends Better_Font_Awesome_Meta
 		$this->assertLessThan( $regular['run_at'], $manual['run_at'] );
 		$this->assertTrue( $manual['force'] );
 
-		$owner  = $this->invoke_method( $manager, 'acquire_lock' );
+		$active_lock = array(
+			'schema_version' => 1,
+			'owner'          => wp_generate_uuid4(),
+			'acquired_at'    => time(),
+			'expires_at'     => time() + Better_Font_Awesome_Metadata_Manager::LOCK_TTL,
+		);
+		add_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION, $active_lock, '', false );
 		$result = $manager->run_scheduled_refresh( $manual['token'], true );
 		$this->assertWPError( $result );
 		$this->assertSame( 'bfa_refresh_locked', $result->get_error_code() );
-		$this->assertSame( $owner, get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION )['owner'] );
+		$this->assertSame( $active_lock, get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION ) );
+		$this->assertSame( $manual, get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
 	}
 
 	/**

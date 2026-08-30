@@ -210,7 +210,7 @@ class Better_Font_Awesome_Plugin {
 		add_action( 'wp_ajax_bfa_save_options', array( $this, 'save_options' ) );
 		add_action( 'wp_ajax_bfa_refresh_release_data', array( $this, 'manual_refresh' ) );
 
-		if ( is_multisite() ) {
+		if ( is_multisite() && $this->metadata_manager ) {
 			add_action( 'wp_initialize_site', array( 'Better_Font_Awesome_Metadata_Manager', 'initialize_site' ) );
 		}
 	}
@@ -307,11 +307,33 @@ class Better_Font_Awesome_Plugin {
 	 * @return bool Whether BFA can own metadata orchestration.
 	 */
 	private function supports_async_metadata() {
+		return self::dependency_supports_async_metadata();
+	}
+
+	/**
+	 * Check the installed BFAL package without constructing its singleton.
+	 *
+	 * Activation can run after the normal init hook has passed, so it cannot
+	 * assume the plugin constructor already loaded BFAL. Loading only the class
+	 * file allows lifecycle scheduling to fail closed in BFAL 2.0.3 rollback
+	 * mode without attempting the unsupported early-hook singleton workaround.
+	 *
+	 * @return bool Whether BFA can own asynchronous metadata orchestration.
+	 */
+	private static function dependency_supports_async_metadata() {
+		if ( ! class_exists( 'Better_Font_Awesome_Library', false ) ) {
+			$library_file = plugin_dir_path( __FILE__ ) . 'vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php';
+			if ( ! is_readable( $library_file ) ) {
+				return false;
+			}
+			require_once $library_file;
+		}
+
 		if ( ! class_exists( 'Better_Font_Awesome_Release_Data_Validator' ) ) {
 			return false;
 		}
 
-		return method_exists( 'Better_Font_Awesome_Library', $this->metadata_refresh_method_name() );
+		return method_exists( 'Better_Font_Awesome_Library', self::metadata_refresh_method_name() );
 	}
 
 	/**
@@ -319,7 +341,7 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @return string BFAL method name.
 	 */
-	private function metadata_refresh_method_name(): string {
+	private static function metadata_refresh_method_name(): string {
 		return 'refresh_release_data';
 	}
 
@@ -669,6 +691,10 @@ class Better_Font_Awesome_Plugin {
 	 * @param bool $network_wide Whether activation is network-wide.
 	 */
 	public static function activate( $network_wide = false ) {
+		if ( ! self::dependency_supports_async_metadata() ) {
+			return;
+		}
+
 		Better_Font_Awesome_Metadata_Manager::activate( $network_wide );
 	}
 

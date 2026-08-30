@@ -30,7 +30,7 @@ class Better_Font_Awesome_Metadata_Failure_Test extends Better_Font_Awesome_Meta
 			$response = $this->$response();
 		}
 		$this->font_awesome_http_response = $response;
-		$result = $manager->run_refresh( true );
+		$result = $this->run_scheduled_worker( $manager );
 		$store  = new Better_Font_Awesome_Metadata_Store();
 		$state  = $store->get_state();
 

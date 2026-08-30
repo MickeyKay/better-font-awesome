@@ -53,11 +53,8 @@ abstract class Better_Font_Awesome_Metadata_Test_Case extends WP_UnitTestCase {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		if (
-			! class_exists( 'Better_Font_Awesome_Release_Data_Validator' ) ||
-			! method_exists( 'Better_Font_Awesome_Library', 'refresh_release_data' )
-		) {
-			$this->markTestSkipped( 'Requires the reviewed BFAL 2.1 integration API.' );
+		if ( 'rollback' === getenv( 'BFA_BFAL_VALIDATION_MODE' ) ) {
+			$this->markTestSkipped( 'Expected candidate-only skip in the BFAL 2.0.3 rollback suite.' );
 		}
 		$this->reset_singletons();
 		$this->clear_metadata_state();
@@ -166,6 +163,22 @@ abstract class Better_Font_Awesome_Metadata_Test_Case extends WP_UnitTestCase {
 			$plugin = $this->initialize_plugin();
 		}
 		return $plugin->get( 'metadata_manager' );
+	}
+
+	/**
+	 * Schedule and consume the exact explicit worker event.
+	 *
+	 * @param Better_Font_Awesome_Metadata_Manager $manager Metadata manager.
+	 * @param bool                                 $force   Whether retry timing is overridden.
+	 * @return array|WP_Error|null Worker result.
+	 */
+	protected function run_scheduled_worker( $manager, $force = true ) {
+		$manager->schedule_refresh( $force );
+		$marker = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION, array() );
+		$this->assertIsArray( $marker );
+		$this->assertArrayHasKey( 'token', $marker );
+
+		return $manager->run_scheduled_refresh( (string) $marker['token'], $force );
 	}
 
 	/**

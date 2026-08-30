@@ -144,7 +144,11 @@ class Better_Font_Awesome_Metadata_Manager {
 	 * @return bool Whether a new event was scheduled.
 	 */
 	public function schedule_refresh( $force = false ) {
-		$now     = time();
+		$now = time();
+		if ( $this->worker_lock_is_active( $now ) ) {
+			return false;
+		}
+
 		$state   = $this->store->get_state();
 		$run_at  = $force ? $now + 1 : max( $now + 1, (int) $state['next_retry_at'] );
 		$marker  = $this->new_schedule_marker( $run_at, $force );
@@ -154,8 +158,10 @@ class Better_Font_Awesome_Metadata_Manager {
 			$existing = get_option( self::SCHEDULE_OPTION, array() );
 
 			if ( $this->schedule_marker_is_stale( $existing, $now ) ) {
-				$this->atomic_delete_option( self::SCHEDULE_OPTION, $existing );
-				$created = $this->add_non_autoloaded_option( self::SCHEDULE_OPTION, $marker );
+				$created = $this->atomic_update_option( self::SCHEDULE_OPTION, $existing, $marker );
+				if ( $created ) {
+					$this->unschedule_marker( $existing );
+				}
 			} elseif ( $force && $this->can_replace_schedule( $existing, $run_at ) ) {
 				$created = $this->atomic_update_option( self::SCHEDULE_OPTION, $existing, $marker );
 				if ( $created ) {
@@ -165,6 +171,16 @@ class Better_Font_Awesome_Metadata_Manager {
 		}
 
 		if ( ! $created ) {
+			return false;
+		}
+
+		/*
+		 * A worker may acquire its lock after the first check but before this
+		 * marker is inserted. Recheck before enqueueing so a valid worker and a
+		 * future HTTP-capable event can never both become eligible.
+		 */
+		if ( $this->worker_lock_is_active( $now ) ) {
+			$this->atomic_delete_option( self::SCHEDULE_OPTION, $marker );
 			return false;
 		}
 
@@ -206,11 +222,23 @@ class Better_Font_Awesome_Metadata_Manager {
 			return null;
 		}
 
-		if ( ! $this->atomic_delete_option( self::SCHEDULE_OPTION, $marker ) ) {
-			return null;
+		/*
+		 * Claim worker ownership while the schedule marker still suppresses
+		 * concurrent schedulers. The scheduler's post-claim lock check closes
+		 * the inverse interleaving where it read the lock before this insert.
+		 */
+		$owner = $this->acquire_lock( $token );
+		if ( false === $owner ) {
+			return new WP_Error( 'bfa_refresh_locked', 'Another Font Awesome metadata refresh is already running.' );
 		}
 
-		return $this->run_refresh( (bool) $force );
+		if ( ! $this->atomic_delete_option( self::SCHEDULE_OPTION, $marker ) ) {
+			$this->release_lock( $owner );
+			return null;
+		}
+		$this->unschedule_marker( $marker );
+
+		return $this->run_refresh( (bool) $force, $owner );
 	}
 
 	/**
@@ -226,25 +254,34 @@ class Better_Font_Awesome_Metadata_Manager {
 	/**
 	 * Perform one explicit bounded BFAL refresh attempt.
 	 *
-	 * @param bool $force Whether retry timing is overridden.
+	 * @param bool   $force Whether retry timing is overridden.
+	 * @param string $owner Existing worker ownership token for a consumed event.
 	 * @return array|WP_Error Refresh result.
 	 */
-	public function run_refresh( $force = false ) {
+	public function run_refresh( $force = false, $owner = '' ) {
 		$refresh_callback = $this->get_refresh_callback();
 		if ( ! $refresh_callback ) {
+			if ( '' !== $owner ) {
+				$this->release_lock( $owner );
+			}
 			return new WP_Error( 'bfa_worker_unavailable', 'The Font Awesome metadata worker is unavailable.' );
 		}
 
 		$state = $this->store->get_state();
 		$now   = time();
 		if ( ! $force && (int) $state['next_retry_at'] > $now ) {
+			if ( '' !== $owner ) {
+				$this->release_lock( $owner );
+			}
 			$this->schedule_refresh();
 			return new WP_Error( 'bfa_refresh_backoff', 'The Font Awesome metadata refresh is waiting for its retry time.' );
 		}
 
-		$owner = $this->acquire_lock();
-		if ( false === $owner ) {
-			return new WP_Error( 'bfa_refresh_locked', 'Another Font Awesome metadata refresh is already running.' );
+		if ( '' === $owner ) {
+			$owner = $this->acquire_lock();
+			if ( false === $owner ) {
+				return new WP_Error( 'bfa_refresh_locked', 'Another Font Awesome metadata refresh is already running.' );
+			}
 		}
 
 		$state['attempt_count']   = (int) $state['attempt_count'] + 1;
@@ -377,14 +414,20 @@ class Better_Font_Awesome_Metadata_Manager {
 	 * @param WP_Site $site New site.
 	 */
 	public static function initialize_site( $site ) {
-		if ( ! is_multisite() ) {
+		if (
+			! is_multisite() ||
+			(int) get_current_network_id() !== (int) $site->network_id
+		) {
 			return;
 		}
 
 		switch_to_blog( (int) $site->blog_id );
-		$manager = new self();
-		$manager->schedule_refresh();
-		restore_current_blog();
+		try {
+			$manager = new self();
+			$manager->schedule_refresh();
+		} finally {
+			restore_current_blog();
+		}
 	}
 
 	/**
@@ -404,10 +447,26 @@ class Better_Font_Awesome_Metadata_Manager {
 	/**
 	 * Acquire the fleet-safe worker lock.
 	 *
+	 * @param string $schedule_token Scheduled worker ownership token.
 	 * @return string|false Ownership token, or false when another worker owns it.
 	 */
-	protected function acquire_lock() {
-		$now  = time();
+	protected function acquire_lock( $schedule_token = '' ) {
+		$now    = time();
+		$marker = get_option( self::SCHEDULE_OPTION, array() );
+		if ( '' === $schedule_token && ! empty( $marker ) ) {
+			return false;
+		}
+		if (
+			'' !== $schedule_token &&
+			(
+				! is_array( $marker ) ||
+				! isset( $marker['token'] ) ||
+				! hash_equals( (string) $marker['token'], $schedule_token )
+			)
+		) {
+			return false;
+		}
+
 		$lock = array(
 			'schema_version' => self::SCHEMA_VERSION,
 			'owner'          => wp_generate_uuid4(),
@@ -421,9 +480,7 @@ class Better_Font_Awesome_Metadata_Manager {
 
 		$existing = get_option( self::LOCK_OPTION, array() );
 		if (
-			is_array( $existing ) &&
-			isset( $existing['expires_at'] ) &&
-			(int) $existing['expires_at'] <= $now &&
+			! $this->lock_value_is_active( $existing, $now ) &&
 			$this->atomic_delete_option( self::LOCK_OPTION, $existing ) &&
 			$this->add_non_autoloaded_option( self::LOCK_OPTION, $lock )
 		) {
@@ -431,6 +488,48 @@ class Better_Font_Awesome_Metadata_Manager {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Check for a valid worker lease and recover an expired or malformed lock.
+	 *
+	 * The lock lifetime is intentionally much longer than BFAL's bounded HTTP
+	 * timeout. Once a lease expires, its worker is no longer eligible and an
+	 * ordinary request may create replacement work without performing HTTP.
+	 *
+	 * @param int $now Current Unix timestamp.
+	 * @return bool Whether a valid worker currently owns refresh work.
+	 */
+	private function worker_lock_is_active( $now ) {
+		$lock = get_option( self::LOCK_OPTION, array() );
+		if ( empty( $lock ) ) {
+			return false;
+		}
+
+		if ( $this->lock_value_is_active( $lock, $now ) ) {
+			return true;
+		}
+
+		if ( $this->atomic_delete_option( self::LOCK_OPTION, $lock ) ) {
+			return false;
+		}
+
+		$current = get_option( self::LOCK_OPTION, array() );
+		return $this->lock_value_is_active( $current, $now );
+	}
+
+	/**
+	 * Validate one worker lock value at a point in time.
+	 *
+	 * @param mixed $lock Lock option value.
+	 * @param int   $now  Current Unix timestamp.
+	 * @return bool Whether the value represents an active worker lease.
+	 */
+	private function lock_value_is_active( $lock, $now ) {
+		return is_array( $lock ) &&
+			! empty( $lock['owner'] ) &&
+			isset( $lock['expires_at'] ) &&
+			(int) $lock['expires_at'] > $now;
 	}
 
 	/**
@@ -655,15 +754,19 @@ class Better_Font_Awesome_Metadata_Manager {
 
 		$site_ids = get_sites(
 			array(
-				'fields' => 'ids',
-				'number' => 0,
+				'fields'     => 'ids',
+				'network_id' => get_current_network_id(),
+				'number'     => 0,
 			)
 		);
 
 		foreach ( $site_ids as $site_id ) {
 			switch_to_blog( (int) $site_id );
-			call_user_func( $callback );
-			restore_current_blog();
+			try {
+				call_user_func( $callback );
+			} finally {
+				restore_current_blog();
+			}
 		}
 	}
 }
