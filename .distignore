@@ -29,5 +29,6 @@ package.json
 phpcs.xml.dist
 phpstan.neon.dist
 phpunit.xml.dist
+phpunit-multisite.xml.dist
 svn
 tests

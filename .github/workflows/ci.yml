@@ -161,12 +161,18 @@ jobs:
           test -f svn/trunk/better-font-awesome.php
           test -f svn/trunk/composer.json
           test -f svn/trunk/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php
-          test -f svn/trunk/vendor/mickey-kay/better-font-awesome-library/inc/class-bfa-release-data-validator.php
           test -f svn/trunk/vendor/mickey-kay/better-font-awesome-library/inc/fallback-release-data.json
-          test -f svn/trunk/vendor/mickey-kay/better-font-awesome-library/inc/fallback-release-data.sha256
-          test -f svn/trunk/vendor/mickey-kay/better-font-awesome-library/LICENSE
-          test -f svn/trunk/vendor/mickey-kay/better-font-awesome-library/THIRD-PARTY-NOTICES.md
-          test -f svn/trunk/vendor/mickey-kay/better-font-awesome-library/lib/fontawesome-iconpicker/LICENSE
+          if test -f vendor/mickey-kay/better-font-awesome-library/inc/class-bfa-release-data-validator.php; then
+            test -f svn/trunk/vendor/mickey-kay/better-font-awesome-library/inc/class-bfa-release-data-validator.php
+            test -f svn/trunk/vendor/mickey-kay/better-font-awesome-library/inc/fallback-release-data.sha256
+            test -f svn/trunk/vendor/mickey-kay/better-font-awesome-library/LICENSE
+            test -f svn/trunk/vendor/mickey-kay/better-font-awesome-library/THIRD-PARTY-NOTICES.md
+            test -f svn/trunk/vendor/mickey-kay/better-font-awesome-library/lib/fontawesome-iconpicker/LICENSE
+          else
+            node -e 'const lock = JSON.parse(require("fs").readFileSync("composer.lock", "utf8")); const package = lock.packages.find((item) => item.name === "mickey-kay/better-font-awesome-library"); process.exit(package && package.version === "2.0.3" ? 0 : 1);'
+            test ! -e svn/trunk/vendor/mickey-kay/better-font-awesome-library/inc/class-bfa-release-data-validator.php
+            test ! -e svn/trunk/vendor/mickey-kay/better-font-awesome-library/inc/fallback-release-data.sha256
+          fi
           test ! -e svn/trunk/.phpunit.result.cache
           test ! -d svn/trunk/tests
           test ! -d svn/trunk/.codex
@@ -187,6 +193,7 @@ jobs:
           test ! -e svn/trunk/phpcs.xml.dist
           test ! -e svn/trunk/phpstan.neon.dist
           test ! -e svn/trunk/phpunit.xml.dist
+          test ! -e svn/trunk/phpunit-multisite.xml.dist
 
       - name: Run Plugin Check
         uses: wordpress/plugin-check-action@v1
