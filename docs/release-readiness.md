@@ -26,7 +26,7 @@ This is the release gate for the first conservative maintenance release. It inte
 - [x] Run Plugin Check against the exact WordPress.org SVN release tree
 - [x] Review admin notices and logs for sensitive upstream data
 
-The notice review found that BFAL 2.0.3 can print raw upstream error details without escaping. That confirmed defect remains a release blocker and must be fixed in BFAL rather than patched in this repository.
+The notice review found that BFAL 2.0.3 can print raw upstream error details without escaping. The reviewed BFAL draft sanitizes those failures, and BFA stores and displays only sanitized codes and summaries. The stable BFAL dependency remains a release blocker until the draft is independently merged and released.
 
 ## Compatibility gates
 
@@ -50,6 +50,17 @@ Automated initialization coverage now preserves current 2.0.4 options and normal
 - [ ] Font Awesome metadata and asset delivery versions cannot diverge
 - [ ] Rollback to the previous BFAL package requires only a lockfile change
 
+## BFAL candidate integration status
+
+- [x] Reviewed BFAL draft `9d9a4a60b291de5190f6e3f4ab7f289869e80798` tested through a local Composer path copy with symlinks disabled
+- [x] BFA is the first BFAL singleton caller and injects a local-only provider plus an asynchronous scheduling callback
+- [x] Versioned non-autoloaded durable storage, transient migration, duplicate suppression, ownership locks, stale lock recovery, backoff, jitter, lifecycle, and manual refresh implemented
+- [x] Single-site and multisite integration suites cover stale data, failures, zero-HTTP request paths, and synthetic Font Awesome 5.15.5 adoption
+- [ ] BFAL PR #39 merged and released as a public reproducible release candidate
+- [ ] BFA stable Composer constraint and lockfile updated to that BFAL release candidate
+- [ ] Hosted WordPress and PHP compatibility matrix rerun with the public BFAL package
+- [ ] Independent review and two-site release candidate testing complete
+
 ## Release process gates
 
 - [ ] Version matches plugin header, class constant, `package.json`, changelog, tag, GitHub release, and WordPress.org stable tag
@@ -62,4 +73,4 @@ Automated initialization coverage now preserves current 2.0.4 options and normal
 
 ## Current recommendation
 
-Do not publish yet. The repository setup now passes its local quality suite and the canonical WordPress.org SVN release tree has been audited with Plugin Check. The release remains blocked on BFAL TLS, validation, asynchronous refresh, durable last-known-good behavior, failure-mode integration tests, and compatibility and browser coverage.
+Do not publish yet. The reviewed BFAL draft now passes local BFA integration coverage for TLS, validation, asynchronous refresh, durable last-known-good behavior, failures, and multisite policy. Public release remains blocked on independent BFAL review and release, the final stable BFA Composer update, the hosted compatibility matrix, packaged activation checks, browser coverage, and release candidate testing on independent sites.

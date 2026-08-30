@@ -161,7 +161,12 @@ jobs:
           test -f svn/trunk/better-font-awesome.php
           test -f svn/trunk/composer.json
           test -f svn/trunk/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php
+          test -f svn/trunk/vendor/mickey-kay/better-font-awesome-library/inc/class-bfa-release-data-validator.php
           test -f svn/trunk/vendor/mickey-kay/better-font-awesome-library/inc/fallback-release-data.json
+          test -f svn/trunk/vendor/mickey-kay/better-font-awesome-library/inc/fallback-release-data.sha256
+          test -f svn/trunk/vendor/mickey-kay/better-font-awesome-library/LICENSE
+          test -f svn/trunk/vendor/mickey-kay/better-font-awesome-library/THIRD-PARTY-NOTICES.md
+          test -f svn/trunk/vendor/mickey-kay/better-font-awesome-library/lib/fontawesome-iconpicker/LICENSE
           test ! -e svn/trunk/.phpunit.result.cache
           test ! -d svn/trunk/tests
           test ! -d svn/trunk/.codex

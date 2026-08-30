@@ -62,7 +62,7 @@ Better Font Awesome is built around the [Better Font Awesome Library](https://gi
 = External services =
 Better Font Awesome uses two Font Awesome services to provide current Free icon metadata and browser assets. No Font Awesome account or API token is required.
 
-* **Font Awesome GraphQL API** (`https://api.fontawesome.com`) - the site server requests public release and icon metadata when the local cache expires. The plugin does not intentionally send site, user, or content data in this request. With the currently bundled library, a cache miss can trigger this request during an ordinary WordPress request.
+* **Font Awesome GraphQL API** (`https://api.fontawesome.com`) - the site server requests public Font Awesome 5 Free release and icon metadata in an asynchronous WP-Cron worker, normally about once per day. Browser, frontend, REST, editor, settings, and shortcode requests only read validated local data and never wait for this API. The plugin does not intentionally send site, user, or content data in the request. Failed requests retain the last validated metadata and use capped retry backoff.
 * **Font Awesome Free CDN** (`https://use.fontawesome.com`) - visitors' browsers request the versioned CSS and font files needed to display icons. Font Awesome receives normal web request data such as the visitor's IP address and user agent.
 
 These services are provided by Fonticons, Inc. Review the [Font Awesome terms of service](https://fontawesome.com/tos) and [privacy policy](https://fontawesome.com/privacy) for details.
