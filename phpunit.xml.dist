@@ -6,6 +6,10 @@
 	convertNoticesToExceptions="true"
 	convertWarningsToExceptions="true"
 	>
+	<php>
+		<env name="BFA_BFAL_VALIDATION_MODE" value="candidate" force="true" />
+		<env name="BFA_EXPECTED_BFAL_REFERENCE" value="9d9a4a60b291de5190f6e3f4ab7f289869e80798" force="true" />
+	</php>
 	<testsuites>
 		<testsuite name="Better Font Awesome">
 			<directory prefix="test-" suffix=".php">./tests/</directory>

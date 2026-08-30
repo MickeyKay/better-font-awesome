@@ -7,12 +7,11 @@
 	convertWarningsToExceptions="true"
 	>
 	<php>
-		<const name="WP_TESTS_MULTISITE" value="1" />
-		<env name="BFA_BFAL_VALIDATION_MODE" value="candidate" force="true" />
-		<env name="BFA_EXPECTED_BFAL_REFERENCE" value="9d9a4a60b291de5190f6e3f4ab7f289869e80798" force="true" />
+		<env name="BFA_BFAL_VALIDATION_MODE" value="rollback" force="true" />
+		<env name="BFA_EXPECTED_BFAL_REFERENCE" value="c5ae75d273ff8a594f9fa58b43542d6dc1482fb0" force="true" />
 	</php>
 	<testsuites>
-		<testsuite name="Better Font Awesome">
+		<testsuite name="Better Font Awesome stable BFAL 2.0.3 rollback">
 			<directory prefix="test-" suffix=".php">./tests/</directory>
 		</testsuite>
 	</testsuites>

@@ -20,10 +20,67 @@ if ( ! file_exists( $_tests_dir . '/includes/functions.php' ) ) {
 require_once $_tests_dir . '/includes/functions.php';
 
 /**
+ * Validate the exact Composer-installed BFAL dependency and requested mode.
+ *
+ * @return string Validation mode.
+ * @throws RuntimeException When mode or reference does not match.
+ */
+function better_font_awesome_validate_bfal_dependency() {
+	$mode      = getenv( 'BFA_BFAL_VALIDATION_MODE' );
+	$expected  = getenv( 'BFA_EXPECTED_BFAL_REFERENCE' );
+	$package   = 'mickey-kay/better-font-awesome-library';
+	$reference = Composer\InstalledVersions::getReference( $package );
+	$version   = Composer\InstalledVersions::getPrettyVersion( $package );
+
+	if ( ! in_array( $mode, array( 'candidate', 'rollback' ), true ) ) {
+		throw new RuntimeException( 'Set BFA_BFAL_VALIDATION_MODE to candidate or rollback.' );
+	}
+	if ( ! is_string( $expected ) || ! preg_match( '/^[a-f0-9]{40}$/', $expected ) ) {
+		throw new RuntimeException( 'BFA_EXPECTED_BFAL_REFERENCE must be an exact 40-character commit SHA.' );
+	}
+	if ( ! is_string( $reference ) || ! hash_equals( $expected, $reference ) ) {
+		throw new RuntimeException(
+			sprintf(
+				'BFAL %1$s validation requires reference %2$s, but Composer installed %3$s.',
+				$mode,
+				$expected,
+				is_string( $reference ) ? $reference : 'none'
+			)
+		);
+	}
+
+	fwrite(
+		STDERR,
+		sprintf(
+			"BFAL validation mode: %1\$s; version: %2\$s; reference: %3\$s\n",
+			$mode,
+			is_string( $version ) ? $version : 'unknown',
+			$reference
+		)
+	);
+
+	return $mode;
+}
+
+$better_font_awesome_bfal_validation_mode = better_font_awesome_validate_bfal_dependency();
+
+/**
  * Manually load the plugin being tested.
  */
 function _manually_load_plugin() {
+	global $better_font_awesome_bfal_validation_mode;
+
 	require dirname( dirname( __FILE__ ) ) . '/better-font-awesome.php';
+	require_once dirname( __DIR__ ) . '/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php';
+
+	$has_candidate_api = class_exists( 'Better_Font_Awesome_Release_Data_Validator' ) &&
+		method_exists( 'Better_Font_Awesome_Library', 'refresh_release_data' );
+	if ( 'candidate' === $better_font_awesome_bfal_validation_mode && ! $has_candidate_api ) {
+		throw new RuntimeException( 'Candidate mode requires the reviewed BFAL validator and refresh API.' );
+	}
+	if ( 'rollback' === $better_font_awesome_bfal_validation_mode && $has_candidate_api ) {
+		throw new RuntimeException( 'Rollback mode requires BFAL 2.0.3 without the candidate refresh API.' );
+	}
 }
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 

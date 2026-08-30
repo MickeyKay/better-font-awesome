@@ -59,7 +59,7 @@ jobs:
         run: npm audit --audit-level=high
 
   phpunit:
-    name: WordPress ${{ matrix.wordpress }} on PHP ${{ matrix.php }}
+    name: Stable BFAL 2.0.3 rollback - WordPress ${{ matrix.wordpress }} on PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -106,8 +106,11 @@ jobs:
       - name: Install WordPress test suite
         run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1:3306 "${{ matrix.wordpress }}" true
 
-      - name: Run PHPUnit
-        run: vendor/bin/phpunit --configuration phpunit.xml.dist
+      - name: Run single-site PHPUnit
+        run: vendor/bin/phpunit --configuration phpunit-rollback.xml.dist
+
+      - name: Run multisite PHPUnit
+        run: vendor/bin/phpunit --configuration phpunit-rollback-multisite.xml.dist
 
   plugin-check:
     name: WordPress Plugin Check
@@ -192,8 +195,7 @@ jobs:
           test ! -e svn/trunk/package-lock.json
           test ! -e svn/trunk/phpcs.xml.dist
           test ! -e svn/trunk/phpstan.neon.dist
-          test ! -e svn/trunk/phpunit.xml.dist
-          test ! -e svn/trunk/phpunit-multisite.xml.dist
+          test -z "$(find svn/trunk -type f -name 'phpunit*.xml*' -print -quit)"
 
       - name: Run Plugin Check
         uses: wordpress/plugin-check-action@v1
