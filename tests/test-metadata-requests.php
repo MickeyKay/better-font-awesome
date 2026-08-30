@@ -36,6 +36,50 @@ class Better_Font_Awesome_Metadata_Request_Test extends Better_Font_Awesome_Meta
 	}
 
 	/**
+	 * A deliberate earlier BFAL owner keeps its configuration without blocking requests.
+	 */
+	public function test_deliberate_earlier_bfal_owner_remains_authoritative_and_nonblocking() {
+		$release = $this->valid_release( '5.15.3' );
+		set_transient( 'bfa-release-data', $release, DAY_IN_SECONDS );
+		$earlier = Better_Font_Awesome_Library::get_instance(
+			array(
+				'include_v4_shim'     => false,
+				'remove_existing_fa'  => false,
+				'load_styles'         => false,
+				'load_admin_styles'   => false,
+				'load_shortcode'      => false,
+				'load_tinymce_plugin' => false,
+			)
+		);
+		$plugin  = Better_Font_Awesome_Plugin::get_instance();
+		$library = $plugin->get_bfa_lib_instance();
+		$args    = new ReflectionProperty( Better_Font_Awesome_Library::class, 'args' );
+		$args->setAccessible( true );
+		$first_configuration = $args->getValue( $library );
+
+		$this->assertSame( $earlier, $library );
+		$this->assertFalse( $first_configuration['load_styles'] );
+		$this->assertFalse( $first_configuration['load_admin_styles'] );
+		$this->assertFalse( $first_configuration['load_shortcode'] );
+		$this->assertFalse( $first_configuration['load_tinymce_plugin'] );
+		$this->assertNull( $first_configuration['release_data_provider'] );
+		$this->assertNull( $first_configuration['release_data_refresh_callback'] );
+
+		do_action( 'wp_enqueue_scripts' );
+		$plugin->add_settings();
+		do_action( 'rest_api_init', rest_get_server() );
+		do_action( 'enqueue_block_editor_assets' );
+		do_shortcode( '[icon name="flag"]' );
+		$library->get_version();
+		$library->get_icons();
+		$library->get_stylesheet_url();
+		$this->metadata_manager( $plugin )->schedule_refresh();
+
+		$this->assertSame( '5.15.3', $library->get_version() );
+		$this->assertSame( 0, $this->font_awesome_http_calls );
+	}
+
+	/**
 	 * Only the explicit worker performs metadata HTTP.
 	 */
 	public function test_only_explicit_worker_performs_metadata_http() {

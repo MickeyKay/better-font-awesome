@@ -1,10 +1,10 @@
 # BFAL 2.1 integration architecture
 
-Status: BFA-owned review corrections are implemented against the previously reviewed BFAL draft `9d9a4a60b291de5190f6e3f4ab7f289869e80798`. This branch is not ready to merge or release. Final candidate integration remains blocked on BFAL's supported post-construction collaborator-registration API and a new exact reviewed SHA.
+Status: BFA-owned review corrections are implemented and locally validated against corrected BFAL draft `f2f2e41ade5ac02d04a743772d01030f39b3dd31`. This branch is not ready to merge or release. Final dependency integration remains blocked on independent review and publication of a BFAL 2.1.0 release candidate.
 
 ## Compatibility boundary
 
-BFA currently remains the first caller of `Better_Font_Awesome_Library::get_instance()`. It injects two collaborators:
+BFA normally owns the BFAL singleton through its existing first `Better_Font_Awesome_Library::get_instance()` call. That call supplies two collaborators:
 
 - `release_data_provider` reads one validated local durable option and never performs HTTP or writes state.
 - `release_data_refresh_callback` requests one WP-Cron event and returns promptly.
@@ -13,7 +13,7 @@ Only the explicit `better_font_awesome_refresh_release_data` worker calls BFAL's
 
 BFA feature-detects the reviewed BFAL API. BFAL 2.0.3 can still load for emergency rollback, but it resumes the old transient-only synchronous request behavior and is not the intended production configuration for this architecture.
 
-BFA does not try to win singleton construction with an earlier WordPress hook. Once BFAL publishes the supported post-construction collaborator-registration API at a reviewed exact SHA, this isolated integration point will adopt it.
+BFAL intentionally keeps the first caller's singleton configuration. Hook priority is the supported precedence mechanism. A plugin or theme that deliberately initializes BFAL first remains authoritative, and BFA neither overrides that owner nor treats the condition as an initialization error. BFA's collaborators may therefore be ignored in that condition, while BFAL continues to serve validated transient or bundled fallback data without request-path metadata HTTP. Any new ownership API or precedence change requires concrete user-facing evidence and explicit repository-owner approval.
 
 ## Option schema
 
@@ -118,7 +118,7 @@ Local integration uses a gitignored path checkout at the exact reviewed SHA with
 
 Validation has two intentionally separate modes:
 
-- Candidate-required mode uses `phpunit.xml.dist` and `phpunit-multisite.xml.dist`. Bootstrap fails before loading tests unless Composer reports the configured exact BFAL reference and the candidate validator and refresh APIs exist. Candidate-only tests do not skip in this mode.
+- Candidate-required mode uses `phpunit.xml.dist` and `phpunit-multisite.xml.dist`. Bootstrap fails before loading tests unless Composer reports exact reference `f2f2e41ade5ac02d04a743772d01030f39b3dd31` and the validator, provider record, asynchronous request, and explicit worker APIs used by BFA exist. Candidate-only tests do not skip in this mode.
 - Stable rollback mode uses `phpunit-rollback.xml.dist` and `phpunit-rollback-multisite.xml.dist`. Bootstrap requires the exact BFAL 2.0.3 reference and requires candidate APIs to be absent. Candidate-only tests then report explicit expected skips, while rollback lifecycle coverage runs.
 
 Each mode prints its name, Composer version, and exact package reference in test output. Ordinary hosted CI installs the committed Composer lock and therefore runs the clearly named stable BFAL 2.0.3 rollback job. Hosted candidate coverage remains gated on a reviewed BFAL 2.1.0 release candidate and the final dependency update.

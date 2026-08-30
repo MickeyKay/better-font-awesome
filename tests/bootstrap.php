@@ -73,10 +73,23 @@ function _manually_load_plugin() {
 	require dirname( dirname( __FILE__ ) ) . '/better-font-awesome.php';
 	require_once dirname( __DIR__ ) . '/vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php';
 
+	$validator_methods = array( 'validate_release', 'validate_record' );
+	$library_methods   = array(
+		'get_release_record',
+		'get_release_channel',
+		'request_release_data_refresh',
+		'refresh_release_data',
+	);
 	$has_candidate_api = class_exists( 'Better_Font_Awesome_Release_Data_Validator' ) &&
-		method_exists( 'Better_Font_Awesome_Library', 'refresh_release_data' );
+		defined( 'Better_Font_Awesome_Release_Data_Validator::RELEASE_CHANNEL' );
+	foreach ( $validator_methods as $method ) {
+		$has_candidate_api = $has_candidate_api && is_callable( array( 'Better_Font_Awesome_Release_Data_Validator', $method ) );
+	}
+	foreach ( $library_methods as $method ) {
+		$has_candidate_api = $has_candidate_api && method_exists( 'Better_Font_Awesome_Library', $method );
+	}
 	if ( 'candidate' === $better_font_awesome_bfal_validation_mode && ! $has_candidate_api ) {
-		throw new RuntimeException( 'Candidate mode requires the reviewed BFAL validator and refresh API.' );
+		throw new RuntimeException( 'Candidate mode requires the reviewed BFAL validator, provider record, asynchronous request, and explicit worker APIs.' );
 	}
 	if ( 'rollback' === $better_font_awesome_bfal_validation_mode && $has_candidate_api ) {
 		throw new RuntimeException( 'Rollback mode requires BFAL 2.0.3 without the candidate refresh API.' );

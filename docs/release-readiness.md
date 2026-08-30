@@ -52,8 +52,8 @@ Automated initialization coverage now preserves current 2.0.4 options and normal
 
 ## BFAL candidate integration status
 
-- [x] Reviewed BFAL draft `9d9a4a60b291de5190f6e3f4ab7f289869e80798` tested through a local Composer path copy with symlinks disabled
-- [ ] BFA adopts BFAL's supported post-construction collaborator-registration API at the new exact reviewed SHA
+- [x] Corrected BFAL draft `f2f2e41ade5ac02d04a743772d01030f39b3dd31` tested through a local Composer path copy with symlinks disabled
+- [x] BFAL's intentional first-caller precedence and safe earlier-owner behavior are documented and covered by a WordPress-backed regression
 - [x] Versioned non-autoloaded durable storage, transient migration, scheduler-worker ownership invariants, stale lock and crashed-worker recovery, backoff, jitter, lifecycle, and manual refresh implemented
 - [x] Single-site and multisite candidate suites cover stale data, failures, deterministic scheduler-worker interleavings, two-network isolation, zero-HTTP request paths, and synthetic Font Awesome 5.15.5 adoption
 - [x] Candidate-required bootstrap fails closed on the wrong BFAL reference or missing API
@@ -75,4 +75,4 @@ Automated initialization coverage now preserves current 2.0.4 options and normal
 
 ## Current recommendation
 
-Do not merge or publish yet. The previously reviewed BFAL draft remains useful for local BFA validation, but final integration is blocked on BFAL's supported collaborator-registration API and a new exact reviewed SHA. Public release also remains blocked on a BFAL 2.1.0 release candidate, the final stable BFA Composer update, the hosted candidate compatibility matrix, browser coverage, and release candidate testing on independent sites.
+Do not merge or publish yet. Corrected BFAL draft `f2f2e41ade5ac02d04a743772d01030f39b3dd31` is locally validated under the approved first-caller precedence contract. Public release remains blocked on independent review, the BFAL merge decision and a published BFAL 2.1.0 release candidate, the final BFA Composer update, the hosted candidate compatibility matrix, browser and upgrade coverage, packaging and changelog review, rollback validation, and release candidate testing on independent sites.
