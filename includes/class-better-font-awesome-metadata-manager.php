@@ -531,7 +531,11 @@ class Better_Font_Awesome_Metadata_Manager {
 
 		$args = array( (string) $marker['token'], (bool) $marker['force'] );
 		$next = wp_next_scheduled( self::CRON_HOOK, $args );
-		return false === $next || (int) $marker['run_at'] + self::SCHEDULE_GRACE < $now;
+		if ( false === $next ) {
+			return ! isset( $marker['created_at'] ) || (int) $marker['created_at'] + self::SCHEDULE_GRACE < $now;
+		}
+
+		return (int) $marker['run_at'] + self::SCHEDULE_GRACE < $now;
 	}
 
 	/**
