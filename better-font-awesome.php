@@ -208,6 +208,10 @@ class Better_Font_Awesome_Plugin {
 
 		// Handle saving options via AJAX.
 		add_action( 'wp_ajax_bfa_save_options', array( $this, 'save_options' ) );
+
+		if ( is_multisite() ) {
+			add_action( 'wp_initialize_site', array( 'Better_Font_Awesome_Metadata_Manager', 'initialize_site' ) );
+		}
 	}
 
 	/**
@@ -568,6 +572,24 @@ class Better_Font_Awesome_Plugin {
 	}
 
 	/**
+	 * Schedule metadata work when the plugin is activated.
+	 *
+	 * @param bool $network_wide Whether activation is network-wide.
+	 */
+	public static function activate( $network_wide = false ) {
+		Better_Font_Awesome_Metadata_Manager::activate( $network_wide );
+	}
+
+	/**
+	 * Stop pending metadata work while preserving durable data.
+	 *
+	 * @param bool $network_wide Whether deactivation is network-wide.
+	 */
+	public static function deactivate_metadata( $network_wide = false ) {
+		Better_Font_Awesome_Metadata_Manager::deactivate( $network_wide );
+	}
+
+	/**
 	 * Output version information.
 	 *
 	 * @since  0.10.0
@@ -643,3 +665,6 @@ class Better_Font_Awesome_Plugin {
 		return $new_input;
 	}
 }
+
+register_activation_hook( __FILE__, array( 'Better_Font_Awesome_Plugin', 'activate' ) );
+register_deactivation_hook( __FILE__, array( 'Better_Font_Awesome_Plugin', 'deactivate_metadata' ) );
