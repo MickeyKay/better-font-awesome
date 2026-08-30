@@ -46,12 +46,19 @@ class Better_Font_Awesome_Metadata_Store {
 				$fetched_at  = time() < $timeout ? max( 1, $timeout - $fresh_interval ) : time();
 				$fresh_until = time() < $timeout ? $timeout : $fetched_at + $fresh_interval;
 				$record      = $this->build_record( $validation['record'], $fetched_at, $fresh_until );
-				$this->persist_record( $record );
+				if ( ! $this->persist_record( $record ) ) {
+					return;
+				}
+				$durable = $record;
+			}
+		}
 
-				$state               = $this->get_state();
-				$state['fetched_at'] = $fetched_at;
-				$state['status']     = $fresh_until <= time() ? 'stale' : 'fresh';
-				$this->save_state( $state );
+		if ( ! empty( $durable ) && isset( $durable['source'] ) && 'transient' === $durable['source'] ) {
+			$state               = $this->get_state();
+			$state['fetched_at'] = (int) $durable['fetched_at'];
+			$state['status']     = (int) $durable['fresh_until'] <= time() ? 'stale' : 'fresh';
+			if ( ! $this->save_state( $state ) ) {
+				return;
 			}
 		}
 
@@ -156,10 +163,11 @@ class Better_Font_Awesome_Metadata_Store {
 	 * Persist refresh state with autoload disabled.
 	 *
 	 * @param array $state Refresh state.
+	 * @return bool Whether the complete state is now stored.
 	 */
 	public function save_state( $state ) {
 		$state['schema_version'] = self::SCHEMA_VERSION;
-		$this->save_non_autoloaded_option( self::STATE_OPTION, $state );
+		return $this->save_non_autoloaded_option( self::STATE_OPTION, $state );
 	}
 
 	/**
@@ -167,11 +175,14 @@ class Better_Font_Awesome_Metadata_Store {
 	 *
 	 * @param string $name  Option name.
 	 * @param mixed  $value Option value.
+	 * @return bool Whether the complete value is now stored.
 	 */
 	private function save_non_autoloaded_option( $name, $value ) {
 		if ( ! add_option( $name, $value, '', false ) ) {
 			update_option( $name, $value, false );
 		}
+
+		return get_option( $name, null ) === $value;
 	}
 
 	/**
