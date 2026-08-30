@@ -11,7 +11,7 @@ This is the release gate for the first conservative maintenance release. It inte
 - [x] PHPStan level 5 on first-party runtime code
 - [x] PHPUnit 9 compatibility and current local WordPress execution
 - [x] GitHub Actions quality, compatibility, and official Plugin Check jobs defined
-- [x] GitHub Actions passes on WordPress 6.5, 6.7, and latest with PHP 7.4, 8.1, 8.3, and 8.4
+- [x] GitHub Actions stable BFAL 2.0.3 rollback job is defined for WordPress 6.5, 6.7, and latest with PHP 7.4, 8.1, 8.3, and 8.4
 - [x] PHPUnit uses only deterministic HTTP fixtures
 - [ ] Browser smoke tests cover activation, settings save, Classic Editor picker, and shortcode rendering
 - [x] The canonical WordPress.org SVN release tree is built separately from the source tree and checked by CI
@@ -37,7 +37,7 @@ The notice review found that BFAL 2.0.3 can print raw upstream error details wit
 - [ ] Classic Editor insertion and search work
 - [ ] Block Editor shortcode and Shortcode block rendering work before the native block ships
 - [ ] No duplicate Font Awesome load when a supported theme or plugin already provides it
-- [ ] Multisite network activation is either tested or explicitly unsupported
+- [x] Multisite lifecycle is tested across two networks and scoped to the current network
 
 Automated initialization coverage now preserves current 2.0.4 options and normalizes both array and serialized legacy options while retaining the v4 shim migration. The upgrade gate remains open until complete installs are exercised across the supported upgrade paths.
 
@@ -53,9 +53,11 @@ Automated initialization coverage now preserves current 2.0.4 options and normal
 ## BFAL candidate integration status
 
 - [x] Reviewed BFAL draft `9d9a4a60b291de5190f6e3f4ab7f289869e80798` tested through a local Composer path copy with symlinks disabled
-- [x] BFA is the first BFAL singleton caller and injects a local-only provider plus an asynchronous scheduling callback
-- [x] Versioned non-autoloaded durable storage, transient migration, duplicate suppression, ownership locks, stale lock recovery, backoff, jitter, lifecycle, and manual refresh implemented
-- [x] Single-site and multisite integration suites cover stale data, failures, zero-HTTP request paths, and synthetic Font Awesome 5.15.5 adoption
+- [ ] BFA adopts BFAL's supported post-construction collaborator-registration API at the new exact reviewed SHA
+- [x] Versioned non-autoloaded durable storage, transient migration, scheduler-worker ownership invariants, stale lock and crashed-worker recovery, backoff, jitter, lifecycle, and manual refresh implemented
+- [x] Single-site and multisite candidate suites cover stale data, failures, deterministic scheduler-worker interleavings, two-network isolation, zero-HTTP request paths, and synthetic Font Awesome 5.15.5 adoption
+- [x] Candidate-required bootstrap fails closed on the wrong BFAL reference or missing API
+- [x] Stable BFAL 2.0.3 rollback activation creates no asynchronous cron event or orphaned marker
 - [ ] BFAL PR #39 merged and released as a public reproducible release candidate
 - [ ] BFA stable Composer constraint and lockfile updated to that BFAL release candidate
 - [ ] Hosted WordPress and PHP compatibility matrix rerun with the public BFAL package
@@ -64,7 +66,7 @@ Automated initialization coverage now preserves current 2.0.4 options and normal
 ## Release process gates
 
 - [ ] Version matches plugin header, class constant, `package.json`, changelog, tag, GitHub release, and WordPress.org stable tag
-- [x] Release tree includes production BFAL files and excludes `.codex`, `.conductor`, `.context`, `.github`, tests, source tooling, caches, and development dependencies
+- [x] Release tree audit rejects every `phpunit*.xml*` file and excludes `.codex`, `.conductor`, `.context`, `.github`, tests, source tooling, caches, and development dependencies
 - [x] Release tree installs on a clean site without Composer
 - [ ] Database and filesystem writes are documented and reversible
 - [ ] Changelog names compatibility floors and external service changes
@@ -73,4 +75,4 @@ Automated initialization coverage now preserves current 2.0.4 options and normal
 
 ## Current recommendation
 
-Do not publish yet. The reviewed BFAL draft now passes local BFA integration coverage for TLS, validation, asynchronous refresh, durable last-known-good behavior, failures, and multisite policy. Public release remains blocked on independent BFAL review and release, the final stable BFA Composer update, the hosted compatibility matrix, packaged activation checks, browser coverage, and release candidate testing on independent sites.
+Do not merge or publish yet. The previously reviewed BFAL draft remains useful for local BFA validation, but final integration is blocked on BFAL's supported collaborator-registration API and a new exact reviewed SHA. Public release also remains blocked on a BFAL 2.1.0 release candidate, the final stable BFA Composer update, the hosted candidate compatibility matrix, browser coverage, and release candidate testing on independent sites.

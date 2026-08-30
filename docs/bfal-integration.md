@@ -1,10 +1,10 @@
 # BFAL 2.1 integration architecture
 
-Status: ready for independent review against BFAL draft `9d9a4a60b291de5190f6e3f4ab7f289869e80798`. This is not public release approval.
+Status: BFA-owned review corrections are implemented against the previously reviewed BFAL draft `9d9a4a60b291de5190f6e3f4ab7f289869e80798`. This branch is not ready to merge or release. Final candidate integration remains blocked on BFAL's supported post-construction collaborator-registration API and a new exact reviewed SHA.
 
 ## Compatibility boundary
 
-BFA remains the first caller of `Better_Font_Awesome_Library::get_instance()`. It injects two collaborators:
+BFA currently remains the first caller of `Better_Font_Awesome_Library::get_instance()`. It injects two collaborators:
 
 - `release_data_provider` reads one validated local durable option and never performs HTTP or writes state.
 - `release_data_refresh_callback` requests one WP-Cron event and returns promptly.
@@ -12,6 +12,8 @@ BFA remains the first caller of `Better_Font_Awesome_Library::get_instance()`. I
 Only the explicit `better_font_awesome_refresh_release_data` worker calls BFAL's bounded `refresh_release_data()` method. Frontend, administrator, REST, editor, shortcode, and ordinary cron-triggering requests do not perform Font Awesome metadata HTTP.
 
 BFA feature-detects the reviewed BFAL API. BFAL 2.0.3 can still load for emergency rollback, but it resumes the old transient-only synchronous request behavior and is not the intended production configuration for this architecture.
+
+BFA does not try to win singleton construction with an earlier WordPress hook. Once BFAL publishes the supported post-construction collaborator-registration API at a reviewed exact SHA, this isolated integration point will adopt it.
 
 ## Option schema
 
@@ -59,7 +61,15 @@ Font Awesome 7 remains a separate future product tranche. This integration suppo
 
 ## Scheduling, locking, and retries
 
-Scheduling uses an atomic non-autoloaded option claim plus an ownership token passed to one single WP-Cron event. Duplicate callers cannot create duplicate valid workers. A claim without its matching event is recoverable after a 10 minute grace period.
+Scheduling uses an atomic non-autoloaded option claim plus an ownership token passed to one single WP-Cron event. The following invariants define eligible work:
+
+1. Each site has at most one valid schedule claim or one valid in-flight worker lease.
+2. A scheduler checks for an active worker both before claiming the schedule marker and after its atomic claim. It removes its own claim if a worker won the interleaving.
+3. A scheduled worker acquires its worker lease while its matching schedule marker still suppresses schedulers. It consumes the marker only after ownership is established.
+4. A malformed or expired lease is removed only by exact compare-and-delete. The caller then claims replacement work through the normal schedule path.
+5. A crashed worker that already consumed its marker leaves an expiring lease. A later ordinary request recovers the expired lease and schedules a retry.
+
+A claim without its matching event is recoverable after a 10 minute grace period. The 10 minute worker lease is intentionally much longer than BFAL's bounded 5 second HTTP timeout. A worker whose lease has expired is no longer eligible, even if its process has not exited.
 
 Workers acquire a separate option lock using atomic insert. The lock contains a random owner, acquisition time, and 10 minute expiry. Stale locks are removed with compare-and-delete. A worker releases only a lock whose current owner matches its token, preventing one worker from releasing another worker's lock.
 
@@ -80,9 +90,9 @@ Existing BFA settings and shortcode behavior are outside this migration and rema
 
 ## Lifecycle and multisite
 
-Activation schedules background work. Deactivation clears pending events, schedule claims, and worker locks while preserving durable release data and failure history. Reactivation schedules work again. Ordinary startup recovers stale or missed schedules.
+Activation schedules background work only when the installed BFAL exposes the asynchronous validation and refresh API. BFAL 2.0.3 rollback activation creates no no-op cron event, marker, or multisite new-site hook. Deactivation clears pending events, schedule claims, and worker locks while preserving durable release data and failure history. Reactivation with candidate support schedules work again. Ordinary startup recovers stale or missed schedules.
 
-Multisite uses per-site options, state, locks, and cron events. Network activation and deactivation iterate existing sites in their own blog context. Newly initialized sites receive their own event. No network-global release record is shared between sites.
+Multisite uses per-site options, state, locks, and cron events. Network activation and deactivation iterate only sites belonging to `get_current_network_id()` and always restore the original blog context through `try`/`finally`. Newly initialized sites receive work only when they belong to that same relevant network. Lifecycle work on one network does not schedule or clear another network. No network-global release record is shared between sites.
 
 ## Administrator refresh
 
@@ -105,3 +115,10 @@ Rollback to BFAL 2.0.3 restores its known synchronous cache-miss HTTP, weaker TL
 ## Dependency handoff
 
 Local integration uses a gitignored path checkout at the exact reviewed SHA with Composer `symlink: false`. No path repository or development constraint may be committed. Before hosted CI can validate the candidate, BFAL must either publish an exact release candidate or BFA must adopt a separately reviewed public exact-SHA Composer mechanism. The final stable BFA Composer constraint remains unchanged until that decision.
+
+Validation has two intentionally separate modes:
+
+- Candidate-required mode uses `phpunit.xml.dist` and `phpunit-multisite.xml.dist`. Bootstrap fails before loading tests unless Composer reports the configured exact BFAL reference and the candidate validator and refresh APIs exist. Candidate-only tests do not skip in this mode.
+- Stable rollback mode uses `phpunit-rollback.xml.dist` and `phpunit-rollback-multisite.xml.dist`. Bootstrap requires the exact BFAL 2.0.3 reference and requires candidate APIs to be absent. Candidate-only tests then report explicit expected skips, while rollback lifecycle coverage runs.
+
+Each mode prints its name, Composer version, and exact package reference in test output. Ordinary hosted CI installs the committed Composer lock and therefore runs the clearly named stable BFAL 2.0.3 rollback job. Hosted candidate coverage remains gated on a reviewed BFAL 2.1.0 release candidate and the final dependency update.
