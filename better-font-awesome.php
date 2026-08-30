@@ -28,6 +28,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-better-font-awesome-metadata-manager.php';
+
 add_action( 'init', 'bfa_start', 5 );
 /**
  * Initialize the Better Font Awesome plugin.
@@ -85,6 +87,15 @@ class Better_Font_Awesome_Plugin {
 	 * @var    string
 	 */
 	private $bfa_lib_file_path;
+
+	/**
+	 * BFA-owned metadata manager.
+	 *
+	 * @since 2.0.4
+	 *
+	 * @var Better_Font_Awesome_Metadata_Manager|null
+	 */
+	private $metadata_manager;
 
 	/**
 	 * Plugin display name.
@@ -175,8 +186,17 @@ class Better_Font_Awesome_Plugin {
 		// Include required files.
 		$this->includes();
 
+		// Prepare durable local metadata before BFAL resolves release data.
+		if ( $this->supports_async_metadata() ) {
+			$this->metadata_manager = new Better_Font_Awesome_Metadata_Manager();
+			$this->metadata_manager->boot();
+		}
+
 		// Initialize the Better Font Awesome Library.
 		$this->initialize_better_font_awesome_library( $this->options );
+		if ( $this->metadata_manager ) {
+			$this->metadata_manager->set_library( $this->bfa_lib );
+		}
 
 		// Load the plugin text domain.
 		$this->load_text_domain();
@@ -274,6 +294,23 @@ class Better_Font_Awesome_Plugin {
 	}
 
 	/**
+	 * Check whether the reviewed BFAL asynchronous metadata API is available.
+	 *
+	 * Keeping this compatibility check allows an emergency lockfile rollback to
+	 * BFAL 2.0.3 without making the plugin fail to load.
+	 *
+	 * @return bool Whether BFA can own metadata orchestration.
+	 */
+	private function supports_async_metadata() {
+		if ( ! class_exists( 'Better_Font_Awesome_Release_Data_Validator' ) ) {
+			return false;
+		}
+
+		// @phpstan-ignore-next-line BFAL 2.0.3 rollback compatibility is intentional.
+		return method_exists( 'Better_Font_Awesome_Library', 'refresh_release_data' );
+	}
+
+	/**
 	 * Get plugin options, or initialize with default values.
 	 *
 	 * @since   0.10.0
@@ -330,6 +367,11 @@ class Better_Font_Awesome_Plugin {
 			'load_shortcode'      => true,
 			'load_tinymce_plugin' => true,
 		);
+
+		if ( $this->metadata_manager ) {
+			$args['release_data_provider']         = array( $this->metadata_manager, 'provide_release_data' );
+			$args['release_data_refresh_callback'] = array( $this->metadata_manager, 'request_release_data_refresh' );
+		}
 
 		$this->bfa_lib = Better_Font_Awesome_Library::get_instance( $args );
 	}
