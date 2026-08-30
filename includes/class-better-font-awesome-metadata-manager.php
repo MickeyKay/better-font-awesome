@@ -141,7 +141,7 @@ class Better_Font_Awesome_Metadata_Manager {
 	 * worker lock. An administrator request may replace a later pending event.
 	 *
 	 * @param bool $force Whether an administrator requested an immediate retry.
-	 * @return bool Whether a new event was scheduled.
+	 * @return bool|WP_Error True when scheduled, false when owned work suppresses a duplicate, or an error when scheduling fails.
 	 */
 	public function schedule_refresh( $force = false ) {
 		$now = time();
@@ -193,7 +193,14 @@ class Better_Font_Awesome_Metadata_Manager {
 
 		if ( true !== $scheduled ) {
 			$this->atomic_delete_option( self::SCHEDULE_OPTION, $marker );
-			return false;
+			if ( $this->other_refresh_work_is_owned( $marker, $now ) ) {
+				return false;
+			}
+
+			return new WP_Error(
+				'bfa_refresh_schedule_failed',
+				__( 'Font Awesome metadata refresh could not be scheduled.', 'better-font-awesome' )
+			);
 		}
 
 		$state['scheduled_for'] = $run_at;
@@ -516,6 +523,29 @@ class Better_Font_Awesome_Metadata_Manager {
 
 		$current = get_option( self::LOCK_OPTION, array() );
 		return $this->lock_value_is_active( $current, $now );
+	}
+
+	/**
+	 * Check whether another valid marker or worker owns work after a failed enqueue.
+	 *
+	 * @param array $failed_marker Marker owned by the failed scheduling attempt.
+	 * @param int   $now           Current Unix timestamp.
+	 * @return bool Whether another request owns eligible refresh work.
+	 */
+	private function other_refresh_work_is_owned( $failed_marker, $now ) {
+		if ( $this->worker_lock_is_active( $now ) ) {
+			return true;
+		}
+
+		$current = get_option( self::SCHEDULE_OPTION, array() );
+		if ( ! is_array( $current ) || empty( $current['token'] ) ) {
+			return false;
+		}
+		if ( isset( $failed_marker['token'] ) && hash_equals( (string) $failed_marker['token'], (string) $current['token'] ) ) {
+			return false;
+		}
+
+		return ! $this->schedule_marker_is_stale( $current, $now );
 	}
 
 	/**

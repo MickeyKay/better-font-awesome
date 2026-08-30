@@ -202,7 +202,100 @@ class Better_Font_Awesome_Metadata_Request_Test extends Better_Font_Awesome_Meta
 		$response = $this->call_manual_refresh( $plugin, $user_id, $nonce );
 
 		$this->assertTrue( $response['success'] );
-		$this->assertIsArray( get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+		$this->assertSame( 'Font Awesome metadata refresh scheduled.', $response['data']['message'] );
+		$marker = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
+		$this->assertIsArray( $marker );
+		$this->assertSame(
+			$marker['run_at'],
+			wp_next_scheduled(
+				Better_Font_Awesome_Metadata_Manager::CRON_HOOK,
+				array( $marker['token'], true )
+			)
+		);
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION ) );
+		$this->assertSame( 0, $this->font_awesome_http_calls );
+	}
+
+	/**
+	 * Cron persistence failure returns a sanitized 503 without orphaned work.
+	 */
+	public function test_manual_refresh_reports_unowned_schedule_failure() {
+		$this->persist_release();
+		$plugin  = $this->initialize_plugin();
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+		$nonce   = wp_create_nonce( Better_Font_Awesome_Plugin::SLUG . '-refresh-release-data' );
+		$attempted_event = null;
+		$fail_schedule = function ( $pre, $event, $wp_error ) use ( &$attempted_event ) {
+			unset( $pre, $wp_error );
+			$attempted_event = $event;
+			return new WP_Error( 'raw_cron_storage_failure', 'Raw database and filesystem details.' );
+		};
+		add_filter( 'pre_schedule_event', $fail_schedule, 10, 3 );
+
+		try {
+			$response = $this->call_manual_refresh( $plugin, $user_id, $nonce );
+		} finally {
+			remove_filter( 'pre_schedule_event', $fail_schedule, 10 );
+		}
+
+		$this->assertFalse( $response['success'] );
+		$this->assertSame( 'bfa_refresh_schedule_failed', $response['data']['code'] );
+		$this->assertSame( 'Font Awesome metadata refresh could not be scheduled. Try again later.', $response['data']['message'] );
+		$this->assertSame( 503, $response['data']['status'] );
+		$this->assertStringNotContainsString( 'database', wp_json_encode( $response ) );
+		$this->assertInstanceOf( Better_Font_Awesome_Metadata_WP_Die_Exception::class, $response['exception'] );
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION ) );
+		$this->assertIsObject( $attempted_event );
+		$this->assertFalse( wp_next_scheduled( Better_Font_Awesome_Metadata_Manager::CRON_HOOK, $attempted_event->args ) );
+		$this->assertSame( 0, $this->font_awesome_http_calls );
+	}
+
+	/**
+	 * Existing scheduled work remains an informational AJAX success.
+	 */
+	public function test_manual_refresh_reports_existing_scheduled_work() {
+		$this->persist_release();
+		$plugin  = $this->initialize_plugin();
+		$manager = $this->metadata_manager( $plugin );
+		$this->assertTrue( $manager->schedule_refresh( true ) );
+		$marker  = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+		$nonce   = wp_create_nonce( Better_Font_Awesome_Plugin::SLUG . '-refresh-release-data' );
+
+		$response = $this->call_manual_refresh( $plugin, $user_id, $nonce );
+
+		$this->assertTrue( $response['success'] );
+		$this->assertSame( 'A Font Awesome metadata refresh is already scheduled or running.', $response['data']['message'] );
+		$this->assertSame( $marker, get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+		$this->assertSame( 0, $this->font_awesome_http_calls );
+	}
+
+	/**
+	 * Existing worker ownership remains an informational AJAX success.
+	 */
+	public function test_manual_refresh_reports_existing_worker_ownership() {
+		$this->persist_release();
+		$plugin = $this->initialize_plugin();
+		$lock   = array(
+			'schema_version' => 1,
+			'owner'          => wp_generate_uuid4(),
+			'acquired_at'    => time(),
+			'expires_at'     => time() + Better_Font_Awesome_Metadata_Manager::LOCK_TTL,
+		);
+		add_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION, $lock, '', false );
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+		$nonce   = wp_create_nonce( Better_Font_Awesome_Plugin::SLUG . '-refresh-release-data' );
+
+		$response = $this->call_manual_refresh( $plugin, $user_id, $nonce );
+
+		$this->assertTrue( $response['success'] );
+		$this->assertSame( 'A Font Awesome metadata refresh is already scheduled or running.', $response['data']['message'] );
+		$this->assertSame( $lock, get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION ) );
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
 		$this->assertSame( 0, $this->font_awesome_http_calls );
 	}
 

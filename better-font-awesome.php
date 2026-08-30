@@ -633,8 +633,20 @@ class Better_Font_Awesome_Plugin {
 		}
 
 		$scheduled = $this->metadata_manager->schedule_refresh( true );
-		$status    = $this->metadata_manager->get_status();
-		$message   = $scheduled
+		if ( is_wp_error( $scheduled ) ) {
+			$status_code = 503;
+			wp_send_json_error(
+				array(
+					'code'    => 'bfa_refresh_schedule_failed',
+					'message' => __( 'Font Awesome metadata refresh could not be scheduled. Try again later.', 'better-font-awesome' ),
+					'status'  => $status_code,
+				),
+				$status_code
+			);
+		}
+
+		$status  = $this->metadata_manager->get_status();
+		$message = $scheduled
 			? __( 'Font Awesome metadata refresh scheduled.', 'better-font-awesome' )
 			: __( 'A Font Awesome metadata refresh is already scheduled or running.', 'better-font-awesome' );
 

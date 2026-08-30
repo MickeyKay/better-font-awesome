@@ -86,6 +86,8 @@ Migration is idempotent and versioned. On the first upgrade request BFA:
 5. Preserves the established transient for BFAL and third-party compatibility.
 6. Never deletes or overwrites an existing valid durable record during migration.
 
+The schema version is the final migration commit marker. A valid transient migration records completion only after the durable record and migrated state are both verified as stored. Any required write failure leaves the schema incomplete, preserves the transient, and allows a later request to retry. Once the schema is complete, ordinary requests perform no recurring migration writes.
+
 Existing BFA settings and shortcode behavior are outside this migration and remain unchanged.
 
 ## Lifecycle and multisite
@@ -99,6 +101,8 @@ Multisite uses per-site options, state, locks, and cron events. Network activati
 Settings includes a minimal metadata status panel and refresh button. The AJAX action requires `manage_options` and the dedicated nonce. It performs no Font Awesome HTTP.
 
 The administrator override ignores `next_retry_at` and may replace a later pending event with an immediate event. It never bypasses an active worker lock. Repeated clicks remain duplicate-suppressed. The response and status panel expose only stable status labels, fetched time, and sanitized error code and summary.
+
+The scheduling result distinguishes a newly created event, valid existing scheduled or in-flight work, and an enqueue failure with no owner. The administrator endpoint returns a sanitized HTTP 503 JSON error for the unowned failure case and never reports that nonexistent work is scheduled.
 
 ## External services
 
