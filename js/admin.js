@@ -58,5 +58,40 @@
 				});
 			});
 		});
+
+		$( '.bfa-refresh-metadata-button' ).on( 'click', function() {
+			var $button, $response, $spinner;
+
+			$button = $( this );
+			$response = $( '.bfa-refresh-response' );
+			$spinner = $( '.bfa-refresh-metadata-spinner' );
+			$button.prop( 'disabled', true );
+			$spinner.addClass( 'is-active' );
+			$response.empty();
+
+			$.post(
+				bfa_ajax_object.ajax_url,
+				{
+					'action': 'bfa_refresh_release_data',
+					'bfa_nonce': bfa_ajax_object.refresh_nonce,
+				}
+			).done( function( response ) {
+				var message;
+
+				message = response && response.data && response.data.message ? response.data.message : '';
+				$response.text( message );
+				if ( response && response.success && response.data.status ) {
+					$( '.bfa-metadata-status-value' ).text( response.data.status );
+				}
+			}).fail( function( response ) {
+				var message;
+
+				message = response.responseJSON && response.responseJSON.data && response.responseJSON.data.message ? response.responseJSON.data.message : response.statusText;
+				$response.text( message );
+			}).always( function() {
+				$button.prop( 'disabled', false );
+				$spinner.removeClass( 'is-active' );
+			});
+		});
 	});
 })( jQuery );

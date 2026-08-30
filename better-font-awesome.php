@@ -208,6 +208,7 @@ class Better_Font_Awesome_Plugin {
 
 		// Handle saving options via AJAX.
 		add_action( 'wp_ajax_bfa_save_options', array( $this, 'save_options' ) );
+		add_action( 'wp_ajax_bfa_refresh_release_data', array( $this, 'manual_refresh' ) );
 
 		if ( is_multisite() ) {
 			add_action( 'wp_initialize_site', array( 'Better_Font_Awesome_Metadata_Manager', 'initialize_site' ) );
@@ -422,6 +423,7 @@ class Better_Font_Awesome_Plugin {
 				</p>
 				<div class="bfa-ajax-response-holder"></div>
 			</form>
+			<?php $this->metadata_status_callback(); ?>
 		</div>
 		<?php
 	}
@@ -528,7 +530,8 @@ class Better_Font_Awesome_Plugin {
 				self::SLUG . '-admin',
 				'bfa_ajax_object',
 				array(
-					'ajax_url' => admin_url( 'admin-ajax.php' ),
+					'ajax_url'      => admin_url( 'admin-ajax.php' ),
+					'refresh_nonce' => wp_create_nonce( self::SLUG . '-refresh-release-data' ),
 				)
 			);
 		}
@@ -569,6 +572,87 @@ class Better_Font_Awesome_Plugin {
 		esc_html_e( 'Settings saved.', 'better-font-awesome' );
 
 		wp_die();
+	}
+
+	/**
+	 * Schedule an administrator-requested refresh without performing HTTP.
+	 *
+	 * The override bypasses retry timing, but it does not bypass an active
+	 * worker lock. Duplicate and already-running work remains suppressed.
+	 */
+	public function manual_refresh() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error(
+				array( 'message' => __( 'You are not allowed to refresh Font Awesome metadata.', 'better-font-awesome' ) ),
+				403
+			);
+		}
+
+		if ( false === check_ajax_referer( self::SLUG . '-refresh-release-data', 'bfa_nonce', false ) ) {
+			wp_send_json_error(
+				array( 'message' => __( 'Metadata refresh was not scheduled due to a missing nonce. Refresh the page and try again.', 'better-font-awesome' ) ),
+				403
+			);
+		}
+
+		if ( ! $this->metadata_manager ) {
+			wp_send_json_error(
+				array( 'message' => __( 'The asynchronous metadata worker is unavailable.', 'better-font-awesome' ) ),
+				503
+			);
+		}
+
+		$scheduled = $this->metadata_manager->schedule_refresh( true );
+		$status    = $this->metadata_manager->get_status();
+		$message   = $scheduled
+			? __( 'Font Awesome metadata refresh scheduled.', 'better-font-awesome' )
+			: __( 'A Font Awesome metadata refresh is already scheduled or running.', 'better-font-awesome' );
+
+		wp_send_json_success(
+			array(
+				'message' => $message,
+				'status'  => sanitize_key( $status['status'] ),
+			)
+		);
+	}
+
+	/**
+	 * Display sanitized metadata status and the asynchronous refresh control.
+	 */
+	public function metadata_status_callback() {
+		if ( ! $this->metadata_manager || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		$status       = $this->metadata_manager->get_status();
+		$labels       = array(
+			'never'      => __( 'Waiting for the first background refresh', 'better-font-awesome' ),
+			'scheduled'  => __( 'Background refresh scheduled', 'better-font-awesome' ),
+			'refreshing' => __( 'Background refresh in progress', 'better-font-awesome' ),
+			'fresh'      => __( 'Metadata is fresh', 'better-font-awesome' ),
+			'stale'      => __( 'Serving stale metadata while a refresh is scheduled', 'better-font-awesome' ),
+			'failed'     => __( 'The last background refresh failed; existing metadata is still being served', 'better-font-awesome' ),
+		);
+		$status_key   = isset( $labels[ $status['status'] ] ) ? $status['status'] : 'never';
+		$fetched_text = empty( $status['fetched_at'] )
+			? __( 'Not fetched yet', 'better-font-awesome' )
+			: wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (int) $status['fetched_at'] );
+		?>
+		<div class="bfa-metadata-status">
+			<h3><?php esc_html_e( 'Font Awesome metadata', 'better-font-awesome' ); ?></h3>
+			<p><strong><?php esc_html_e( 'Status:', 'better-font-awesome' ); ?></strong> <span class="bfa-metadata-status-value"><?php echo esc_html( $labels[ $status_key ] ); ?></span></p>
+			<p><strong><?php esc_html_e( 'Fetched:', 'better-font-awesome' ); ?></strong> <?php echo esc_html( $fetched_text ); ?></p>
+			<?php if ( 'failed' === $status_key && ! empty( $status['last_error'] ) ) : ?>
+				<p><code><?php echo esc_html( $status['last_error_code'] . ': ' . $status['last_error'] ); ?></code></p>
+			<?php endif; ?>
+			<p>
+				<button type="button" class="button bfa-refresh-metadata-button"><?php esc_html_e( 'Refresh metadata', 'better-font-awesome' ); ?></button>
+				<span class="spinner bfa-refresh-metadata-spinner"></span>
+			</p>
+			<p class="description"><?php esc_html_e( 'This schedules background work and does not contact Font Awesome during this browser request.', 'better-font-awesome' ); ?></p>
+			<div class="bfa-refresh-response" aria-live="polite"></div>
+		</div>
+		<?php
 	}
 
 	/**
