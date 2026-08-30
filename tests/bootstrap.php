@@ -26,24 +26,38 @@ require_once $_tests_dir . '/includes/functions.php';
  * @throws RuntimeException When mode or reference does not match.
  */
 function better_font_awesome_validate_bfal_dependency() {
-	$mode      = getenv( 'BFA_BFAL_VALIDATION_MODE' );
-	$expected  = getenv( 'BFA_EXPECTED_BFAL_REFERENCE' );
-	$package   = 'mickey-kay/better-font-awesome-library';
-	$reference = Composer\InstalledVersions::getReference( $package );
-	$version   = Composer\InstalledVersions::getPrettyVersion( $package );
+	$mode               = getenv( 'BFA_BFAL_VALIDATION_MODE' );
+	$expected_version   = getenv( 'BFA_EXPECTED_BFAL_VERSION' );
+	$expected_reference = getenv( 'BFA_EXPECTED_BFAL_REFERENCE' );
+	$package            = 'mickey-kay/better-font-awesome-library';
+	$reference          = Composer\InstalledVersions::getReference( $package );
+	$version            = Composer\InstalledVersions::getPrettyVersion( $package );
 
 	if ( ! in_array( $mode, array( 'candidate', 'rollback' ), true ) ) {
 		throw new RuntimeException( 'Set BFA_BFAL_VALIDATION_MODE to candidate or rollback.' );
 	}
-	if ( ! is_string( $expected ) || ! preg_match( '/^[a-f0-9]{40}$/', $expected ) ) {
+	if ( ! is_string( $expected_version ) || '' === $expected_version ) {
+		throw new RuntimeException( 'BFA_EXPECTED_BFAL_VERSION must be an exact public version.' );
+	}
+	if ( ! is_string( $expected_reference ) || ! preg_match( '/^[a-f0-9]{40}$/', $expected_reference ) ) {
 		throw new RuntimeException( 'BFA_EXPECTED_BFAL_REFERENCE must be an exact 40-character commit SHA.' );
 	}
-	if ( ! is_string( $reference ) || ! hash_equals( $expected, $reference ) ) {
+	if ( ! is_string( $version ) || ! hash_equals( $expected_version, $version ) ) {
+		throw new RuntimeException(
+			sprintf(
+				'BFAL %1$s validation requires version %2$s, but Composer installed %3$s.',
+				$mode,
+				$expected_version,
+				is_string( $version ) ? $version : 'none'
+			)
+		);
+	}
+	if ( ! is_string( $reference ) || ! hash_equals( $expected_reference, $reference ) ) {
 		throw new RuntimeException(
 			sprintf(
 				'BFAL %1$s validation requires reference %2$s, but Composer installed %3$s.',
 				$mode,
-				$expected,
+				$expected_reference,
 				is_string( $reference ) ? $reference : 'none'
 			)
 		);

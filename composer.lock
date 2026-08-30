@@ -4,21 +4,28 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "11aa17aa2aa9b00df777b486663dca7b",
+    "content-hash": "2f53cde08877733eb0e1350b2fe9f772",
     "packages": [
         {
             "name": "mickey-kay/better-font-awesome-library",
-            "version": "2.0.3",
+            "version": "2.1.0-rc.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MickeyKay/better-font-awesome-library.git",
-                "reference": "c5ae75d273ff8a594f9fa58b43542d6dc1482fb0"
+                "reference": "a05508043ea885fa611f559ab59cff73161b37d2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/c5ae75d273ff8a594f9fa58b43542d6dc1482fb0",
-                "reference": "c5ae75d273ff8a594f9fa58b43542d6dc1482fb0",
+                "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/a05508043ea885fa611f559ab59cff73161b37d2",
+                "reference": "a05508043ea885fa611f559ab59cff73161b37d2",
                 "shasum": ""
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+                "phpstan/phpstan": "^2.1",
+                "phpunit/phpunit": "^9.6",
+                "szepeviktor/phpstan-wordpress": "^2.0.4",
+                "wp-coding-standards/wpcs": "^3.4"
             },
             "type": "library",
             "notification-url": "https://packagist.org/downloads/",
@@ -28,9 +35,9 @@
             "description": "Better Font Awesome Library for WordPress",
             "support": {
                 "issues": "https://github.com/MickeyKay/better-font-awesome-library/issues",
-                "source": "https://github.com/MickeyKay/better-font-awesome-library/tree/2.0.3"
+                "source": "https://github.com/MickeyKay/better-font-awesome-library/tree/2.1.0-rc.1"
             },
-            "time": "2022-12-25T23:06:29+00:00"
+            "time": "2026-08-30T18:56:29+00:00"
         }
     ],
     "packages-dev": [
@@ -2688,7 +2695,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "mickey-kay/better-font-awesome-library": 5
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

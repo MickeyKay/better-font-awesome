@@ -11,7 +11,7 @@ This is the release gate for the first conservative maintenance release. It inte
 - [x] PHPStan level 5 on first-party runtime code
 - [x] PHPUnit 9 compatibility and current local WordPress execution
 - [x] GitHub Actions quality, compatibility, and official Plugin Check jobs defined
-- [x] GitHub Actions stable BFAL 2.0.3 rollback job is defined for WordPress 6.5, 6.7, and latest with PHP 7.4, 8.1, 8.3, and 8.4
+- [x] GitHub Actions public BFAL 2.1.0-rc.1 candidate and stable BFAL 2.0.3 rollback jobs are defined for WordPress 6.5, 6.7, and latest with PHP 7.4, 8.1, 8.3, and 8.4
 - [x] PHPUnit uses only deterministic HTTP fixtures
 - [ ] Browser smoke tests cover activation, settings save, Classic Editor picker, and shortcode rendering
 - [x] The canonical WordPress.org SVN release tree is built separately from the source tree and checked by CI
@@ -20,13 +20,13 @@ This is the release gate for the first conservative maintenance release. It inte
 
 - [x] Add an explicit capability check to the AJAX settings endpoint
 - [x] Remove the broad PHPCS nonce and input suppressions after fixing each finding
-- [ ] Enable TLS verification in BFAL
-- [ ] Validate remote metadata before persistence or output
+- [x] Enable TLS verification in the public BFAL release candidate
+- [x] Validate remote metadata before persistence or output in the public BFAL release candidate
 - [x] Review every external service and disclose it in `readme.txt`
 - [x] Run Plugin Check against the exact WordPress.org SVN release tree
 - [x] Review admin notices and logs for sensitive upstream data
 
-The notice review found that BFAL 2.0.3 can print raw upstream error details without escaping. The reviewed BFAL draft sanitizes those failures, and BFA stores and displays only sanitized codes and summaries. The stable BFAL dependency remains a release blocker until the draft is independently merged and released.
+The notice review found that BFAL 2.0.3 can print raw upstream error details without escaping. Public BFAL `2.1.0-rc.1` sanitizes those failures, and BFA stores and displays only sanitized codes and summaries. BFAL 2.0.3 remains an emergency rollback path with its documented weaker security and request-path behavior.
 
 ## Compatibility gates
 
@@ -43,23 +43,24 @@ Automated initialization coverage now preserves current 2.0.4 options and normal
 
 ## BFAL gates
 
-- [ ] BFAL live-update contract is implemented and independently released
-- [ ] No frontend request performs a blocking Font Awesome API call
-- [ ] Last-known-good data survives transient expiry and upstream outages
-- [ ] 403, 429, timeout, invalid JSON, and invalid schema paths are tested
-- [ ] Font Awesome metadata and asset delivery versions cannot diverge
-- [ ] Rollback to the previous BFAL package requires only a lockfile change
+- [x] BFAL live-update contract is implemented and available as public release candidate `2.1.0-rc.1`
+- [x] Deterministic tests prove ordinary request paths perform no blocking Font Awesome metadata API call
+- [x] Last-known-good data survives transient expiry and upstream outages
+- [x] 403, 429, timeout, invalid JSON, and invalid schema paths are tested
+- [x] Font Awesome metadata and asset delivery versions cannot diverge
+- [x] Rollback to the previous BFAL package requires only an isolated dependency change
+- [ ] BFAL stable 2.1.0 is published after release-candidate review
 
 ## BFAL candidate integration status
 
-- [x] Corrected BFAL draft `f2f2e41ade5ac02d04a743772d01030f39b3dd31` tested through a local Composer path copy with symlinks disabled
+- [x] BFAL PR #39 and release-preparation PR #40 merged
+- [x] Public reproducible BFAL `2.1.0-rc.1` is available from GitHub and Packagist at `a05508043ea885fa611f559ab59cff73161b37d2`
 - [x] BFAL's intentional first-caller precedence and safe earlier-owner behavior are documented and covered by a WordPress-backed regression
 - [x] Versioned non-autoloaded durable storage, transient migration, scheduler-worker ownership invariants, stale lock and crashed-worker recovery, backoff, jitter, lifecycle, and manual refresh implemented
 - [x] Single-site and multisite candidate suites cover stale data, failures, deterministic scheduler-worker interleavings, two-network isolation, zero-HTTP request paths, and synthetic Font Awesome 5.15.5 adoption
-- [x] Candidate-required bootstrap fails closed on the wrong BFAL reference or missing API
+- [x] Candidate-required bootstrap fails closed on the wrong BFAL version, wrong reference, or missing API
 - [x] Stable BFAL 2.0.3 rollback activation creates no asynchronous cron event or orphaned marker
-- [ ] BFAL PR #39 merged and released as a public reproducible release candidate
-- [ ] BFA stable Composer constraint and lockfile updated to that BFAL release candidate
+- [x] BFA exact Composer constraint and lockfile validated against public BFAL `2.1.0-rc.1`
 - [ ] Hosted WordPress and PHP compatibility matrix rerun with the public BFAL package
 - [ ] Independent review and two-site release candidate testing complete
 
@@ -75,4 +76,4 @@ Automated initialization coverage now preserves current 2.0.4 options and normal
 
 ## Current recommendation
 
-Do not merge or publish yet. Corrected BFAL draft `f2f2e41ade5ac02d04a743772d01030f39b3dd31` is locally validated under the approved first-caller precedence contract. Public release remains blocked on independent review, the BFAL merge decision and a published BFAL 2.1.0 release candidate, the final BFA Composer update, the hosted candidate compatibility matrix, browser and upgrade coverage, packaging and changelog review, rollback validation, and release candidate testing on independent sites.
+Do not merge or publish yet. Public BFAL `2.1.0-rc.1` at `a05508043ea885fa611f559ab59cff73161b37d2` is the exact BFA candidate dependency under the approved first-caller precedence contract. BFA remains blocked on the hosted candidate compatibility matrix, browser and upgrade coverage, final-version and stable-release decisions, packaging and changelog review, two-site release candidate testing, and the remaining WordPress.org publication gates.
