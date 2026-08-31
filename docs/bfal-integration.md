@@ -1,6 +1,6 @@
 # BFAL 2.1 integration architecture
 
-Status: BFA-owned review corrections are integrated with public stable BFAL `2.1.0` at exact source and distribution reference `b845f8d2c105c34a9afe62e8470d67d0e3978164`. The reproducible stable release is available from GitHub and Packagist. This branch is not ready to merge or release.
+Status: The stable BFAL `2.1.0` integration is independently reviewed and safe to merge at exact source and distribution reference `b845f8d2c105c34a9afe62e8470d67d0e3978164`. BFA WordPress.org publication remains a separate later release process and is not authorized by this integration approval.
 
 ## Compatibility boundary
 
@@ -132,6 +132,8 @@ Each mode prints its name, Composer version, and exact package reference in test
 Historical rc.2 validation used the public Packagist package and passed current single-site and multisite PHPUnit on WordPress 6.5 with PHP 7.4, WordPress 6.7 with PHP 8.1, and WordPress latest with PHP 8.3 and 8.4. The same matrix passed in the isolated stable BFAL 2.0.3 rollback mode.
 
 Stable 2.1.0 promotion validation passed focused and complete current single-site and multisite PHPUnit plus isolated BFAL 2.0.3 rollback suites. PHPCS, PHPStan, strict Composer validation, Composer audit, npm audit, generated-readme verification, Plugin Check, syntax checks, `git diff --check`, canonical release-tree audits, packaged activation, settings save, hybrid `wp_editor()` picker insertion, and shortcode smoke also passed. Plugin Check reported only the established global-variable and `load_plugin_textdomain()` warnings.
+
+The final independently reviewed BFA head before this documentation correction was `02b0bb90931568bd7d43512875a848a9d4711948`. Two independent site upgrades covered official BFA 1.7.4 and 2.0.4 with settings and content preserved. Clean activation and deactivation, duplicate Font Awesome handling, the exact final package browser smoke, and the background-only settings experience all passed. These results close PR #52's integration merge gates, but do not complete the separate WordPress.org publication gates.
 
 Two independently regenerated production trees produced byte-identical ZIPs. The final archive contains 27 files, is 145,647 bytes, and has SHA-256 `db6d57d62d6af1cf4732bc2177413c0819ffe822f1bebdd4a74554fd30c0f76e`. Its 16 packaged BFAL production files are byte-for-byte identical to the public Packagist install and the verified GitHub stable release archive. No development files, tests, agent files, release tooling, `node_modules`, Composer development state, or unintended vendor packages are present.
 
