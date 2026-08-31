@@ -206,22 +206,67 @@ test "$(sed -n 's/^Stable tag:[[:space:]]*//p' "$svn_wc/trunk/readme.txt")" = "$
 test ! -e "$svn_wc/tags/$release_version"
 ```
 
-Build the SVN trunk from the exact release checkout, audit it, and create the local SVN tag:
+Build the SVN trunk from the exact release checkout. Because `build-release-tree` replaces `svn/trunk` with ordinary filesystem operations, reconcile the result with SVN before auditing or copying the local tag. Adding unversioned paths alone is insufficient because versioned paths removed from the production tree must also be scheduled for deletion.
 
 ```sh
+set -eu
 cd "$release_source"
 npx grunt build-release-tree --release-version="$release_version"
-sh bin/audit-release-tree.sh "$svn_wc/trunk"
 test "$(sed -n 's/^Stable tag:[[:space:]]*//p' "$svn_wc/trunk/readme.txt")" = "$release_version"
 test -f "$svn_wc/trunk/better-font-awesome.php"
 test ! -f "$svn_wc/trunk/$plugin_slug/better-font-awesome.php"
+
+svn_reconcile_status=$(LC_ALL=C svn status --no-ignore --depth infinity "$svn_wc/trunk")
+printf '%s\n' "$svn_reconcile_status" |
+while IFS= read -r svn_status_line; do
+    svn_item_status=$(printf '%s\n' "$svn_status_line" | cut -c 1)
+    svn_item_path=$(printf '%s\n' "$svn_status_line" | cut -c 9-)
+
+    case "$svn_item_status" in
+        '?'|'I')
+            svn add --force --parents "$svn_item_path"
+            ;;
+        '!')
+            svn delete --force "$svn_item_path"
+            ;;
+    esac
+done
+
+verify_versioned_tree() {
+    versioned_tree=$1
+    svn_unreconciled=$(LC_ALL=C svn status --no-ignore --depth infinity "$versioned_tree" | awk 'substr($0, 1, 1) ~ /[?!I~C]/ || substr($0, 2, 1) == "C"')
+    if test -n "$svn_unreconciled"; then
+        printf '%s\n' "$svn_unreconciled" >&2
+        return 1
+    fi
+
+    find "$versioned_tree" -type f -print |
+    while IFS= read -r production_file; do
+        svn info "$production_file" >/dev/null || exit 1
+    done
+}
+
+required_runtime_file=includes/class-better-font-awesome-metadata-manager.php
+verify_versioned_tree "$svn_wc/trunk"
+svn info "$svn_wc/trunk/$required_runtime_file" >/dev/null
+sh bin/audit-release-tree.sh "$svn_wc/trunk"
+diff -ru "$build_a/svn/trunk" "$svn_wc/trunk"
+diff -ru "$build_b/svn/trunk" "$svn_wc/trunk"
+
 svn copy "$svn_wc/trunk" "$svn_wc/tags/$release_version"
+verify_versioned_tree "$svn_wc/tags/$release_version"
+svn info "$svn_wc/tags/$release_version/$required_runtime_file" >/dev/null
+sh bin/audit-release-tree.sh "$svn_wc/tags/$release_version"
 diff -ru "$svn_wc/trunk" "$svn_wc/tags/$release_version"
+diff -ru "$build_a/svn/trunk" "$svn_wc/tags/$release_version"
+diff -ru "$build_b/svn/trunk" "$svn_wc/tags/$release_version"
 svn status "$svn_wc"
 svn diff "$svn_wc"
 ```
 
-Compare SVN trunk and the new tag with both independently verified production trees. Confirm that plugin files are directly inside `trunk`, all expected WordPress.org assets remain under `assets`, and no tests, development files, repository metadata, agent files, Conductor files, caches, `node_modules`, credentials, secrets, or unexpected paths are present.
+The quoted status parsing preserves paths containing spaces. The reconciliation schedules every unversioned or ignored production path for addition and every missing versioned path for deletion, then fails if any unversioned, ignored, missing, obstructed, or conflicted status remains. The `svn info` checks prove that every production file, including `includes/class-better-font-awesome-metadata-manager.php`, is versioned or scheduled for addition in both trunk and tag. The audits and recursive comparisons prove that trunk, tag, and both independent production builds have identical inventories and contents.
+
+Confirm that plugin files are directly inside `trunk`, all expected WordPress.org assets remain under `assets`, and no tests, development files, repository metadata, agent files, Conductor files, caches, `node_modules`, credentials, secrets, or unexpected paths are present.
 
 After explicit repository-owner authorization, and only then, the public WordPress.org publication boundary is:
 
