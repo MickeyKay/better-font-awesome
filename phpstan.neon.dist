@@ -5,8 +5,10 @@ parameters:
     level: 5
     paths:
         - better-font-awesome.php
+        - includes
 
     scanFiles:
         - vendor/mickey-kay/better-font-awesome-library/better-font-awesome-library.php
+        - tests/stubs/bfal-2.1.php
 
     tmpDir: .context/phpstan

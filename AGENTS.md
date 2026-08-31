@@ -15,6 +15,12 @@ The plugin delegates Font Awesome version and icon data to `mickey-kay/better-fo
 
 Do not make a production request wait on Font Awesome metadata. Remote refreshes should use the WordPress HTTP API, TLS verification, timeouts, validation, persistent last-known-good data, locking, backoff, and asynchronous scheduling.
 
+## BFAL ownership and live updates
+
+The live-ish Font Awesome Free update path serves validated local data immediately and uses bundled metadata only as a fallback. Normal requests must never perform metadata HTTP. Under the established precedence model, BFA owns WordPress persistence, freshness, scheduling, locking, retries, and migration when its first `Better_Font_Awesome_Library::get_instance()` call owns the BFAL singleton.
+
+BFAL first-caller ownership is intentional. BFA passes its provider and asynchronous refresh callback through its existing first call, but it does not override a deliberate earlier owner. Do not reclassify that precedence as a defect without concrete user-facing evidence and explicit repository-owner approval. New BFAL public APIs or precedence changes also require owner approval.
+
 ## Local workflow
 
 Prerequisites are Docker, Node.js 20 or newer, and npm.

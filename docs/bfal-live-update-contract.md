@@ -51,7 +51,7 @@ Required storage:
 - failure count, next retry time, and last sanitized error
 - a fresh-until timestamp with small random jitter to avoid fleet-wide refresh bursts
 
-Recommended retry progression is roughly 1 hour, 6 hours, then 24 hours, with jitter and a cap. A successful refresh resets it. Cron callbacks must be idempotent, and an authenticated WP-CLI or admin action must support a manual refresh for diagnosis.
+Recommended retry progression is roughly 1 hour, 6 hours, then 24 hours, with jitter and a cap. A successful refresh resets it. Cron callbacks must be idempotent. Metadata updates are automatic and background-only, and the normal settings page must not expose status, diagnostics, or a manual refresh control.
 
 ## Transport and validation rules
 
