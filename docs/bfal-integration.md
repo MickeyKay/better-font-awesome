@@ -1,6 +1,6 @@
 # BFAL 2.1 integration architecture
 
-Status: The stable BFAL `2.1.0` integration is independently reviewed and safe to merge at exact source and distribution reference `b845f8d2c105c34a9afe62e8470d67d0e3978164`. BFA WordPress.org publication remains a separate later release process and is not authorized by this integration approval.
+Status: The stable BFAL `2.1.0` dependency remains correct at exact source and distribution reference `b845f8d2c105c34a9afe62e8470d67d0e3978164`. BFA-owned cron-starvation and inactive-multisite corrections are implemented and awaiting focused review, so PR #52 is not currently represented as merge-ready. BFA WordPress.org publication remains a separate later release process.
 
 ## Compatibility boundary
 
@@ -66,10 +66,12 @@ Scheduling uses an atomic non-autoloaded option claim plus an ownership token pa
 1. Each site has at most one valid schedule claim or one valid in-flight worker lease.
 2. A scheduler checks for an active worker both before claiming the schedule marker and after its atomic claim. It removes its own claim if a worker won the interleaving.
 3. A scheduled worker acquires its worker lease while its matching schedule marker still suppresses schedulers. It consumes the marker only after ownership is established.
-4. A malformed or expired lease is removed only by exact compare-and-delete. The caller then claims replacement work through the normal schedule path.
-5. A crashed worker that already consumed its marker leaves an expiring lease. A later ordinary request recovers the expired lease and schedules a retry.
+4. A marker whose exact token and force arguments still have a WordPress cron event remains valid ownership even when that event is overdue. Startup and repeated scheduling requests do not postpone it.
+5. A marker is eligible for grace-period recovery only when its exact matching cron event is missing. A malformed marker remains immediately recoverable.
+6. A malformed or expired lease is removed only by exact compare-and-delete. The caller then claims replacement work through the normal schedule path.
+7. A crashed worker that already consumed its marker leaves an expiring lease. A later ordinary request recovers the expired lease and schedules a retry.
 
-A claim without its matching event is recoverable after a 10 minute grace period. The 10 minute worker lease is intentionally much longer than BFAL's bounded 5 second HTTP timeout. A worker whose lease has expired is no longer eligible, even if its process has not exited.
+A claim without its matching event is recoverable after a 10 minute grace period measured from marker creation. This protects a newly claimed marker while another request may not yet see its cron event. The grace period never expires valid ownership while the exact cron event remains present. The 10 minute worker lease is intentionally much longer than BFAL's bounded 5 second HTTP timeout. A worker whose lease has expired is no longer eligible, even if its process has not exited.
 
 Workers acquire a separate option lock using atomic insert. The lock contains a random owner, acquisition time, and 10 minute expiry. Stale locks are removed with compare-and-delete. A worker releases only a lock whose current owner matches its token, preventing one worker from releasing another worker's lock.
 
@@ -94,7 +96,7 @@ Existing BFA settings and shortcode behavior are outside this migration and rema
 
 Activation schedules background work only when the installed BFAL exposes the asynchronous validation and refresh API. BFAL 2.0.3 rollback activation creates no no-op cron event, marker, or multisite new-site hook. Deactivation clears pending events, schedule claims, and worker locks while preserving durable release data and failure history. Reactivation with current BFAL support schedules work again. Ordinary startup recovers stale or missed schedules.
 
-Multisite uses per-site options, state, locks, and cron events. Network activation and deactivation iterate only sites belonging to `get_current_network_id()` and always restore the original blog context through `try`/`finally`. Newly initialized sites receive work only when they belong to that same relevant network. Lifecycle work on one network does not schedule or clear another network. No network-global release record is shared between sites.
+Multisite uses per-site options, state, locks, and cron events. Network activation and deactivation iterate only sites belonging to `get_current_network_id()` and always restore the original blog context through `try`/`finally`. BFA registers its new-site lifecycle callback only when WordPress reports the plugin network-active, and the callback revalidates that canonical activation state before delegating. A site-only activation therefore never schedules metadata work for a new inactive site. Network-active BFA schedules newly initialized sites only when they belong to the same relevant network. Lifecycle work on one network does not schedule or clear another network. No network-global release record is shared between sites.
 
 ## Background-only update experience
 
@@ -133,9 +135,11 @@ Historical rc.2 validation used the public Packagist package and passed current 
 
 Stable 2.1.0 promotion validation passed focused and complete current single-site and multisite PHPUnit plus isolated BFAL 2.0.3 rollback suites. PHPCS, PHPStan, strict Composer validation, Composer audit, npm audit, generated-readme verification, Plugin Check, syntax checks, `git diff --check`, canonical release-tree audits, packaged activation, settings save, hybrid `wp_editor()` picker insertion, and shortcode smoke also passed. Plugin Check reported only the established global-variable and `load_plugin_textdomain()` warnings.
 
-The final independently reviewed BFA head before this documentation correction was `02b0bb90931568bd7d43512875a848a9d4711948`. Two independent site upgrades covered official BFA 1.7.4 and 2.0.4 with settings and content preserved. Clean activation and deactivation, duplicate Font Awesome handling, the exact final package browser smoke, and the background-only settings experience all passed. These results close PR #52's integration merge gates, but do not complete the separate WordPress.org publication gates.
+Focused follow-up regressions model WordPress boot before overdue cron dispatch, repeated boot calls, missing and newly claimed markers, malformed ownership, site-only activation, network activation, new sites in two networks, and blog-context restoration. These tests prove that an exact overdue event is preserved while only a missing old event is recovered, and that inactive multisite sites receive no marker, event, lock, state, or metadata record.
 
-Two independently regenerated production trees produced byte-identical ZIPs. The final archive contains 27 files, is 145,647 bytes, and has SHA-256 `db6d57d62d6af1cf4732bc2177413c0819ffe822f1bebdd4a74554fd30c0f76e`. Its 16 packaged BFAL production files are byte-for-byte identical to the public Packagist install and the verified GitHub stable release archive. No development files, tests, agent files, release tooling, `node_modules`, Composer development state, or unintended vendor packages are present.
+The final independently reviewed BFA head before the two active findings was `02b0bb90931568bd7d43512875a848a9d4711948`. Two independent site upgrades covered official BFA 1.7.4 and 2.0.4 with settings and content preserved. Clean activation and deactivation, duplicate Font Awesome handling, the exact package browser smoke, and the background-only settings experience all passed. That evidence remains applicable, but does not substitute for focused review of the current scheduler and multisite corrections or complete the separate WordPress.org publication gates.
+
+Two independently regenerated production trees produced byte-identical ZIPs after the scheduler and multisite corrections. The corrected integration archive contains 27 files, is 145,824 bytes, and has SHA-256 `ea8c954fcdee015fb155fda0566be9b234e0c382a81458333efae069fa6492cc`. Its 16 packaged BFAL production files are byte-for-byte identical to the public Packagist install and the verified GitHub stable release archive. No development files, tests, agent files, release tooling, `node_modules`, Composer development state, or unintended vendor packages are present.
 
 Browser transition validation used one persistent Chrome profile. The browser first loaded the published rc.1 main and v4 shim stylesheet URLs, retained its cache, and then loaded the generated BFA package with rc.2. Both rc.2 stylesheet links used `crossorigin="anonymous"`, returned `Access-Control-Allow-Origin: *`, and were CSSOM-readable under the new `?ver=2.1.0-rc.2` cache key. No rc.1 stylesheet response was reused and no Font Awesome console error occurred. WordPress 7.1 preserved the Shortcode blocks, rendered shortcode glyphs on the frontend, kept BFAL styles out of the block canvas, and supplied working picker search, insertion, and Font Awesome styling to a traditional `wp_editor()` meta box. WordPress 6.5 Classic Editor passed the same picker, insertion, TinyMCE, and frontend rendering checks with the v4 shim both enabled and disabled.
 

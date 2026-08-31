@@ -209,9 +209,39 @@ class Better_Font_Awesome_Plugin {
 		// Handle saving options via AJAX.
 		add_action( 'wp_ajax_bfa_save_options', array( $this, 'save_options' ) );
 
-		if ( is_multisite() && $this->metadata_manager ) {
-			add_action( 'wp_initialize_site', array( 'Better_Font_Awesome_Metadata_Manager', 'initialize_site' ) );
+		if ( is_multisite() && $this->metadata_manager && self::is_network_active() ) {
+			add_action( 'wp_initialize_site', array( __CLASS__, 'initialize_site_metadata' ) );
 		}
+	}
+
+	/**
+	 * Schedule metadata work for a new site only while BFA is network active.
+	 *
+	 * @param WP_Site $site New site.
+	 */
+	public static function initialize_site_metadata( $site ) {
+		if ( ! self::is_network_active() ) {
+			return;
+		}
+
+		Better_Font_Awesome_Metadata_Manager::initialize_site( $site );
+	}
+
+	/**
+	 * Check the current network's canonical plugin activation state.
+	 *
+	 * @return bool Whether BFA is active for the current network.
+	 */
+	private static function is_network_active() {
+		if ( ! is_multisite() ) {
+			return false;
+		}
+
+		if ( ! function_exists( 'is_plugin_active_for_network' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+
+		return is_plugin_active_for_network( plugin_basename( __FILE__ ) );
 	}
 
 	/**

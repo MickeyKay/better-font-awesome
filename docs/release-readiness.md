@@ -38,7 +38,7 @@ The notice review found that BFAL 2.0.3 can print raw upstream error details wit
 - [x] Classic Editor insertion and search work
 - [x] Block Editor shortcode and Shortcode block rendering work before the native block ships
 - [x] No duplicate Font Awesome load when a supported theme or plugin already provides it
-- [x] Multisite lifecycle is tested across two networks and scoped to the current network
+- [x] Multisite lifecycle is tested across two networks, scoped to the current network, and gated by canonical network activation for new sites
 
 Two independent site upgrades covered official BFA 1.7.4 and 2.0.4 installations, preserving settings and existing content. Clean lifecycle and duplicate Font Awesome handling also passed the final integration QA.
 
@@ -67,9 +67,9 @@ Two independent site upgrades covered official BFA 1.7.4 and 2.0.4 installations
 - [x] BFA exact Composer constraint and lockfile validated against public stable BFAL `2.1.0`
 - [x] Hosted WordPress and PHP compatibility matrix is configured for the exact public stable BFAL package
 - [x] Local public stable 2.1.0, stable 2.0.3 rollback, quality, package, activation, Plugin Check, and focused browser suites pass
-- [x] Independent review and two-site integration testing complete at BFA head `02b0bb90931568bd7d43512875a848a9d4711948`
+- [ ] Focused review of the cron-starvation and inactive-multisite corrections is complete
 
-The final independently reviewed BFA head before this documentation correction was `02b0bb90931568bd7d43512875a848a9d4711948`. It integrates stable BFAL `2.1.0` at reference `b845f8d2c105c34a9afe62e8470d67d0e3978164`. The exact stable BFA integration package has SHA-256 `db6d57d62d6af1cf4732bc2177413c0819ffe822f1bebdd4a74554fd30c0f76e`; its packaged browser smoke and background-only settings experience passed.
+The final independently reviewed BFA head before the two active findings was `02b0bb90931568bd7d43512875a848a9d4711948`. It integrates stable BFAL `2.1.0` at reference `b845f8d2c105c34a9afe62e8470d67d0e3978164`. Its packaged browser smoke and background-only settings experience passed. The follow-up scheduler and multisite corrections require focused review before the integration merge gate can close again.
 
 ## WordPress.org publication gates
 
@@ -85,4 +85,4 @@ The final independently reviewed BFA head before this documentation correction w
 
 ## Current recommendation
 
-PR #52 has completed its integration, review, compatibility, package, and manual QA gates and is safe to merge. A WordPress.org plugin release must not occur yet. Publication remains blocked on the final BFA version, synchronized headers and release identity, changelog and compatibility-floor disclosure, runtime-write and rollback documentation, the final rollback artifact, the WordPress.org SVN procedure, and explicit publication authorization.
+Do not merge PR #52 until focused review confirms the cron-starvation and inactive-multisite corrections. The prior compatibility, package, and manual QA evidence remains applicable, and the stable BFAL dependency is unchanged. A WordPress.org plugin release must not occur. Publication also remains blocked on the final BFA version, synchronized headers and release identity, changelog and compatibility-floor disclosure, runtime-write and rollback documentation, the final rollback artifact, the WordPress.org SVN procedure, and explicit publication authorization.

@@ -540,6 +540,86 @@ class Better_Font_Awesome_Metadata_Manager_Test extends Better_Font_Awesome_Meta
 	}
 
 	/**
+	 * An overdue event with the marker's exact arguments still owns the work.
+	 */
+	public function test_overdue_matching_event_is_preserved_by_schedule_refresh() {
+		$run_at  = time() - Better_Font_Awesome_Metadata_Manager::SCHEDULE_GRACE - MINUTE_IN_SECONDS;
+		$marker  = $this->create_schedule_marker( $run_at, $run_at - MINUTE_IN_SECONDS, false, true );
+		$manager = new Better_Font_Awesome_Metadata_Manager();
+
+		$this->assertFalse( $manager->schedule_refresh() );
+		$this->assertSame( $marker, get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+		$this->assertSame(
+			$run_at,
+			wp_next_scheduled(
+				Better_Font_Awesome_Metadata_Manager::CRON_HOOK,
+				array( $marker['token'], false )
+			)
+		);
+	}
+
+	/**
+	 * Boot before cron dispatch never postpones an overdue owned event.
+	 */
+	public function test_repeated_boot_does_not_postpone_overdue_matching_event() {
+		$this->persist_release( '5.15.4', time() - HOUR_IN_SECONDS );
+		$run_at = time() - Better_Font_Awesome_Metadata_Manager::SCHEDULE_GRACE - MINUTE_IN_SECONDS;
+		$marker = $this->create_schedule_marker( $run_at, $run_at - MINUTE_IN_SECONDS, false, true );
+
+		$first_request = new Better_Font_Awesome_Metadata_Manager();
+		$first_request->boot();
+		$this->assertSame( $marker, get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+
+		$second_request = new Better_Font_Awesome_Metadata_Manager();
+		$second_request->boot();
+		$this->assertSame( $marker, get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+		$this->assertSame(
+			$run_at,
+			wp_next_scheduled(
+				Better_Font_Awesome_Metadata_Manager::CRON_HOOK,
+				array( $marker['token'], false )
+			)
+		);
+	}
+
+	/**
+	 * A newly claimed marker is protected while its event is not yet visible.
+	 */
+	public function test_recent_marker_without_visible_event_is_protected_during_grace() {
+		$marker  = $this->create_schedule_marker( time() + MINUTE_IN_SECONDS, time(), false, false );
+		$manager = new Better_Font_Awesome_Metadata_Manager();
+
+		$this->assertFalse( $manager->schedule_refresh() );
+		$this->assertSame( $marker, get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+		$this->assertFalse(
+			wp_next_scheduled(
+				Better_Font_Awesome_Metadata_Manager::CRON_HOOK,
+				array( $marker['token'], false )
+			)
+		);
+	}
+
+	/**
+	 * Malformed ownership never prevents replacement scheduling.
+	 */
+	public function test_malformed_schedule_marker_is_recovered() {
+		$this->assertTrue( add_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION, 'malformed', '', false ) );
+		$manager = new Better_Font_Awesome_Metadata_Manager();
+
+		$this->assertTrue( $manager->schedule_refresh() );
+		$marker = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
+		$this->assertIsArray( $marker );
+		$this->assertArrayHasKey( 'token', $marker );
+		$this->assertSame(
+			$marker['run_at'],
+			wp_next_scheduled(
+				Better_Font_Awesome_Metadata_Manager::CRON_HOOK,
+				array( $marker['token'], false )
+			)
+		);
+	}
+
+	/**
 	 * A stale marker with no event is recovered during ordinary plugin startup.
 	 */
 	public function test_missed_schedule_is_recovered_during_boot() {
@@ -556,6 +636,46 @@ class Better_Font_Awesome_Metadata_Manager_Test extends Better_Font_Awesome_Meta
 		$this->initialize_plugin();
 		$new = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
 		$this->assertNotSame( $old['token'], $new['token'] );
+		$this->assertSame(
+			$new['run_at'],
+			wp_next_scheduled(
+				Better_Font_Awesome_Metadata_Manager::CRON_HOOK,
+				array( $new['token'], false )
+			)
+		);
+	}
+
+	/**
+	 * Persist a marker and optionally its exact WordPress cron event.
+	 *
+	 * @param int  $run_at         Event timestamp.
+	 * @param int  $created_at     Marker claim timestamp.
+	 * @param bool $force          Force argument.
+	 * @param bool $schedule_event Whether to persist the matching event.
+	 * @return array Schedule marker.
+	 */
+	private function create_schedule_marker( $run_at, $created_at, $force, $schedule_event ) {
+		$marker = array(
+			'schema_version' => Better_Font_Awesome_Metadata_Manager::SCHEMA_VERSION,
+			'token'          => wp_generate_uuid4(),
+			'created_at'     => (int) $created_at,
+			'run_at'         => (int) $run_at,
+			'force'          => (bool) $force,
+		);
+		$this->assertTrue( add_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION, $marker, '', false ) );
+
+		if ( $schedule_event ) {
+			$this->assertTrue(
+				wp_schedule_single_event(
+					(int) $run_at,
+					Better_Font_Awesome_Metadata_Manager::CRON_HOOK,
+					array( $marker['token'], (bool) $force ),
+					true
+				)
+			);
+		}
+
+		return $marker;
 	}
 
 	/**
