@@ -67,22 +67,28 @@ Two independent site upgrades covered official BFA 1.7.4 and 2.0.4 installations
 - [x] BFA exact Composer constraint and lockfile validated against public stable BFAL `2.1.0`
 - [x] Hosted WordPress and PHP compatibility matrix is configured for the exact public stable BFAL package
 - [x] Local public stable 2.1.0, stable 2.0.3 rollback, quality, package, activation, Plugin Check, and focused browser suites pass
-- [ ] Focused review of the external-cache timeout and failure-state retry corrections is complete
+- [x] Focused review of the external-cache timeout and failure-state retry corrections is complete
 
-The exact BFA head before the latest focused corrections was `94f24038152d7e546ce5ce4438e82cf5c88dbd12`. It integrates stable BFAL `2.1.0` at reference `b845f8d2c105c34a9afe62e8470d67d0e3978164`. Its packaged browser smoke and background-only settings experience passed. The external-cache timeout isolation, failure-state retry gating, and bounded-lease documentation require focused independent review before the integration merge gate can close again.
+PR #52 was independently reviewed and merged as `6631a86059dd30d4efe438e4f804082034ebf7b5`. Its reviewed head `28cd67c64a7b2b0f260a2f55f1a0707e6a1a4ed5` and the merge commit have the identical tree `a1d2ae6f260b2684b335f6876a861990a52e2af7`. The focused integration review gate is complete. This does not authorize a WordPress.org or GitHub release.
 
 ## WordPress.org publication gates
 
-- [ ] Final BFA version and synchronized plugin header, class constant, `package.json`, tag, GitHub release, and WordPress.org stable tag
+- [ ] Exact merge-commit post-merge verification for this release PR
+- [x] Final BFA 2.1.0 release identity is synchronized in the plugin header, class constant, package metadata, canonical readme, and generated readme
+- [ ] Git tag creation
+- [ ] GitHub release publication
+- [ ] WordPress.org SVN publication
+- [ ] WordPress.org Release Management confirmation
+- [ ] Public download and plugin-page verification
 - [x] Release tree audit rejects every `phpunit*.xml*` file and excludes `.codex`, `.conductor`, `.context`, `.github`, tests, source tooling, caches, and development dependencies
 - [x] Release tree installs on a clean site without Composer
-- [ ] Runtime writes, cleanup, and reversibility are documented
-- [ ] Changelog and compatibility-floor disclosure are complete
+- [x] Runtime writes, cleanup, and reversibility are documented
+- [x] Changelog and compatibility-floor disclosure are complete
 - [x] Manual testing on two independent sites is complete
-- [ ] Final rollback artifact is prepared
-- [ ] WordPress.org SVN procedure is prepared
+- [x] Official BFA 2.0.4 rollback artifact is verified and the rollback procedure is prepared
+- [x] WordPress.org SVN procedure is prepared
 - [ ] Explicit WordPress.org publication authorization is granted
 
 ## Current recommendation
 
-Do not merge PR #52 until focused independent review confirms the external-cache timeout and failure-state retry corrections. The prior compatibility, package, and manual QA evidence remains applicable, and the stable BFAL dependency is unchanged. A WordPress.org plugin release must not occur. Publication also remains blocked on the final BFA version, synchronized headers and release identity, changelog and compatibility-floor disclosure, runtime-write and rollback documentation, the final rollback artifact, the WordPress.org SVN procedure, and explicit publication authorization.
+PR #52 is reviewed and merged. BFA 2.1.0 release preparation may proceed, but no publication is authorized. Publication remains blocked on review and merge of the release-only PR, exact post-merge verification, Git tag creation, GitHub release publication, WordPress.org SVN publication, WordPress.org Release Management confirmation, public download verification, and explicit repository-owner authorization.

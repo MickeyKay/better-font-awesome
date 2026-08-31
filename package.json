@@ -1,7 +1,7 @@
 {
   "title": "Better Font Awesome",
-  "description": "A WordPress plugin for always-current Font Awesome icons.",
-  "version": "2.0.4",
+  "description": "A WordPress plugin for automatically updated Font Awesome 5 Free icons.",
+  "version": "2.1.0",
   "homepage": "https://wordpress.org/plugins/better-font-awesome/",
   "private": true,
   "scripts": {
