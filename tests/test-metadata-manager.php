@@ -645,6 +645,48 @@ class Better_Font_Awesome_Metadata_Manager_Test extends Better_Font_Awesome_Meta
 	}
 
 	/**
+	 * A failed failure-state write cannot publish an immediate retry.
+	 */
+	public function test_failure_state_write_failure_does_not_publish_immediate_retry() {
+		global $wpdb;
+
+		$manager = new Better_Font_Awesome_Metadata_Manager();
+		$library = new Better_Font_Awesome_Callback_Metadata_Library(
+			function () {
+				return new WP_Error( 'bfa_test_failure', 'Deterministic worker failure.' );
+			}
+		);
+		$manager->set_library( $library );
+		$failure_state_write_attempts = 0;
+		$intercept_state_write = function ( $query ) use ( $wpdb, &$failure_state_write_attempts ) {
+			if ( preg_match( '/^UPDATE/', $query ) && false !== strpos( $query, Better_Font_Awesome_Metadata_Manager::STATE_OPTION ) ) {
+				++$failure_state_write_attempts;
+				return "UPDATE {$wpdb->options} SET invalid_bfa_test_column = 1";
+			}
+
+			return $query;
+		};
+		add_filter( 'query', $intercept_state_write );
+		$previous_suppress_errors = $wpdb->suppress_errors( true );
+
+		try {
+			$result = $manager->run_refresh( true );
+			$state  = ( new Better_Font_Awesome_Metadata_Store() )->get_state();
+
+			$this->assertWPError( $result );
+			$this->assertSame( 'bfa_test_failure', $result->get_error_code() );
+			$this->assertGreaterThan( 0, $failure_state_write_attempts );
+			$this->assertSame( 'refreshing', $state['status'] );
+			$this->assertSame( 0, $state['next_retry_at'] );
+			$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+			$this->assertSame( 0, $this->count_scheduled_refresh_events() );
+		} finally {
+			$wpdb->suppress_errors( $previous_suppress_errors );
+			remove_filter( 'query', $intercept_state_write );
+		}
+	}
+
+	/**
 	 * Retry intervals progress to the cap and remain persisted.
 	 */
 	public function test_exponential_backoff_is_persisted_and_capped() {

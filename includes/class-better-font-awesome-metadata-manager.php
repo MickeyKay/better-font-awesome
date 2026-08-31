@@ -319,8 +319,7 @@ class Better_Font_Awesome_Metadata_Manager {
 				if ( ! $this->renew_lock( $owner ) ) {
 					return $this->ownership_lost_error();
 				}
-				$this->record_failure( $result );
-				$schedule_retry = true;
+				$schedule_retry = $this->record_failure( $result );
 				return $result;
 			}
 
@@ -330,8 +329,7 @@ class Better_Font_Awesome_Metadata_Manager {
 				if ( ! $this->renew_lock( $owner ) ) {
 					return $this->ownership_lost_error();
 				}
-				$this->record_failure( $error );
-				$schedule_retry = true;
+				$schedule_retry = $this->record_failure( $error );
 				return $error;
 			}
 
@@ -346,8 +344,7 @@ class Better_Font_Awesome_Metadata_Manager {
 				if ( ! $this->renew_lock( $owner ) ) {
 					return $this->ownership_lost_error();
 				}
-				$this->record_failure( $error );
-				$schedule_retry = true;
+				$schedule_retry = $this->record_failure( $error );
 				return $error;
 			}
 
@@ -643,6 +640,7 @@ class Better_Font_Awesome_Metadata_Manager {
 	 * Store sanitized failure state and calculate the next retry.
 	 *
 	 * @param WP_Error $error Sanitized BFAL or BFA error.
+	 * @return bool Whether the complete failure and backoff state was stored.
 	 */
 	private function record_failure( $error ) {
 		$state                  = $this->store->get_state();
@@ -659,7 +657,7 @@ class Better_Font_Awesome_Metadata_Manager {
 		$message                  = sanitize_text_field( $error->get_error_message() );
 		$state['last_error_code'] = substr( $code, 0, 100 );
 		$state['last_error']      = substr( $message, 0, 200 );
-		$this->store->save_state( $state );
+		return $this->store->save_state( $state );
 	}
 
 	/**

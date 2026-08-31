@@ -67,9 +67,9 @@ Two independent site upgrades covered official BFA 1.7.4 and 2.0.4 installations
 - [x] BFA exact Composer constraint and lockfile validated against public stable BFAL `2.1.0`
 - [x] Hosted WordPress and PHP compatibility matrix is configured for the exact public stable BFAL package
 - [x] Local public stable 2.1.0, stable 2.0.3 rollback, quality, package, activation, Plugin Check, and focused browser suites pass
-- [ ] Focused review of the worker-fencing and unknown-age transient migration corrections is complete
+- [ ] Focused review of the bounded worker-lease, conditional migration, external-cache timeout, and failure-state retry corrections is complete
 
-The last exact BFA head before the worker-fencing and persistent-cache corrections was `a1b7b5d379e60dbb461653c6f36080fec654323d`. It integrates stable BFAL `2.1.0` at reference `b845f8d2c105c34a9afe62e8470d67d0e3978164`. Its packaged browser smoke and background-only settings experience passed. The new stale-worker fencing and unknown-age transient migration corrections require focused independent review before the integration merge gate can close again.
+The exact BFA head before the latest bounded storage correction was `94f24038152d7e546ce5ce4438e82cf5c88dbd12`. It integrates stable BFAL `2.1.0` at reference `b845f8d2c105c34a9afe62e8470d67d0e3978164`. Its packaged browser smoke and background-only settings experience passed. The conditional transient promotion, external-cache timeout isolation, failure-state retry gating, and bounded-lease documentation require focused independent review before the integration merge gate can close again.
 
 ## WordPress.org publication gates
 
@@ -85,4 +85,4 @@ The last exact BFA head before the worker-fencing and persistent-cache correctio
 
 ## Current recommendation
 
-Do not merge PR #52 until focused independent review confirms the worker-fencing and unknown-age transient migration corrections. The prior compatibility, package, and manual QA evidence remains applicable, and the stable BFAL dependency is unchanged. A WordPress.org plugin release must not occur. Publication also remains blocked on the final BFA version, synchronized headers and release identity, changelog and compatibility-floor disclosure, runtime-write and rollback documentation, the final rollback artifact, the WordPress.org SVN procedure, and explicit publication authorization.
+Do not merge PR #52 until focused independent review confirms the latest bounded storage correction. The prior compatibility, package, and manual QA evidence remains applicable, and the stable BFAL dependency is unchanged. A WordPress.org plugin release must not occur. Publication also remains blocked on the final BFA version, synchronized headers and release identity, changelog and compatibility-floor disclosure, runtime-write and rollback documentation, the final rollback artifact, the WordPress.org SVN procedure, and explicit publication authorization.

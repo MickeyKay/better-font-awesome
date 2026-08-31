@@ -130,6 +130,142 @@ class Better_Font_Awesome_Metadata_Store_Test extends Better_Font_Awesome_Metada
 	}
 
 	/**
+	 * External-cache migration ignores a leftover database timeout.
+	 */
+	public function test_object_cached_transient_with_leftover_timeout_is_stale_and_schedules_once() {
+		$previous_cache_mode = wp_using_ext_object_cache();
+		$release             = $this->valid_release( '5.15.3' );
+		wp_using_ext_object_cache( true );
+
+		try {
+			set_transient( 'bfa-release-data', $release, DAY_IN_SECONDS );
+			update_option( '_transient_timeout_bfa-release-data', time() + DAY_IN_SECONDS, false );
+			$before = time();
+
+			$manager = new Better_Font_Awesome_Metadata_Manager();
+			$manager->boot();
+			$after  = time();
+			$store  = new Better_Font_Awesome_Metadata_Store();
+			$record = $store->get_valid_record();
+			$state  = $store->get_state();
+			$marker = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
+
+			$this->assertSame( 'stale', $state['status'] );
+			$this->assertLessThanOrEqual( $after, $record['fresh_until'] );
+			$this->assertGreaterThanOrEqual( $before, $record['fresh_until'] );
+			$this->assertIsArray( $marker );
+			$this->assertSame( 1, $this->count_scheduled_refresh_events() );
+			$this->assertSame( 0, $this->font_awesome_http_calls );
+			$this->assertSame( $release, get_transient( 'bfa-release-data' ) );
+		} finally {
+			delete_transient( 'bfa-release-data' );
+			delete_option( '_transient_timeout_bfa-release-data' );
+			wp_using_ext_object_cache( $previous_cache_mode );
+		}
+	}
+
+	/**
+	 * Migration never overwrites API metadata stored after its initial read.
+	 */
+	public function test_transient_migration_preserves_concurrent_api_record() {
+		global $wpdb;
+
+		$release = $this->valid_release( '5.15.3' );
+		set_transient( 'bfa-release-data', $release, DAY_IN_SECONDS );
+		$concurrent_store      = new Better_Font_Awesome_Metadata_Store();
+		$concurrent_validation = Better_Font_Awesome_Release_Data_Validator::validate_release( $this->valid_release( '5.15.5' ), 'api' );
+		$concurrent_record     = $concurrent_store->build_record( $concurrent_validation['record'], time(), time() + DAY_IN_SECONDS );
+		$interleaved           = false;
+		$intercept_insert      = function ( $query ) use ( $concurrent_store, $concurrent_record, &$interleaved ) {
+			if (
+				! $interleaved &&
+				preg_match( '/^INSERT/', $query ) &&
+				false !== strpos( $query, Better_Font_Awesome_Metadata_Store::RECORD_OPTION )
+			) {
+				$interleaved = true;
+				$this->assertTrue( $concurrent_store->persist_record( $concurrent_record ) );
+			}
+
+			return $query;
+		};
+		add_filter( 'query', $intercept_insert );
+		$previous_suppress_errors = $wpdb->suppress_errors( true );
+
+		try {
+			$store = new Better_Font_Awesome_Metadata_Store();
+			$store->maybe_migrate_transient( DAY_IN_SECONDS );
+			$record = $store->get_valid_record();
+
+			$this->assertTrue( $interleaved );
+			$this->assertSame( '5.15.5', $record['release']['version'] );
+			$this->assertSame( 'api', $record['source'] );
+			$this->assertSame( 1, get_option( Better_Font_Awesome_Metadata_Store::SCHEMA_OPTION ) );
+			$this->assertSame( $release, get_transient( 'bfa-release-data' ) );
+		} finally {
+			$wpdb->suppress_errors( $previous_suppress_errors );
+			remove_filter( 'query', $intercept_insert );
+		}
+	}
+
+	/**
+	 * Migration conditionally replaces an initially incomplete record.
+	 */
+	public function test_transient_migration_replaces_observed_incomplete_record_without_autoloading() {
+		global $wpdb;
+
+		$incomplete = array( 'incomplete' => true );
+		$this->assertTrue( add_option( Better_Font_Awesome_Metadata_Store::RECORD_OPTION, $incomplete, '', true ) );
+		set_transient( 'bfa-release-data', $this->valid_release( '5.15.3' ), DAY_IN_SECONDS );
+
+		$store = new Better_Font_Awesome_Metadata_Store();
+		$store->maybe_migrate_transient( DAY_IN_SECONDS );
+		$record = $store->get_valid_record();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Verify the direct conditional update's autoload mode.
+		$autoload = $wpdb->get_var( $wpdb->prepare( "SELECT autoload FROM {$wpdb->options} WHERE option_name = %s", Better_Font_Awesome_Metadata_Store::RECORD_OPTION ) );
+
+		$this->assertSame( '5.15.3', $record['release']['version'] );
+		$this->assertSame( 'transient', $record['source'] );
+		$this->assertNotContains( $autoload, array( 'yes', 'on', 'auto-on' ) );
+		$this->assertSame( 1, get_option( Better_Font_Awesome_Metadata_Store::SCHEMA_OPTION ) );
+	}
+
+	/**
+	 * A concurrent invalid winner leaves migration unresolved and retryable.
+	 */
+	public function test_transient_migration_does_not_complete_after_concurrent_invalid_record() {
+		$release = $this->valid_release( '5.15.3' );
+		set_transient( 'bfa-release-data', $release, DAY_IN_SECONDS );
+		$concurrent_invalid = array( 'concurrent' => 'incomplete' );
+		$interleaved        = false;
+		$intercept_insert   = function ( $query ) use ( $concurrent_invalid, &$interleaved ) {
+			if (
+				! $interleaved &&
+				preg_match( '/^INSERT/', $query ) &&
+				false !== strpos( $query, Better_Font_Awesome_Metadata_Store::RECORD_OPTION )
+			) {
+				$interleaved = true;
+				$this->assertTrue( add_option( Better_Font_Awesome_Metadata_Store::RECORD_OPTION, $concurrent_invalid, '', false ) );
+			}
+
+			return $query;
+		};
+		add_filter( 'query', $intercept_insert );
+
+		try {
+			$store = new Better_Font_Awesome_Metadata_Store();
+			$store->maybe_migrate_transient( DAY_IN_SECONDS );
+
+			$this->assertTrue( $interleaved );
+			$this->assertSame( $concurrent_invalid, get_option( Better_Font_Awesome_Metadata_Store::RECORD_OPTION ) );
+			$this->assertSame( array(), $store->get_valid_record() );
+			$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Store::SCHEMA_OPTION ) );
+			$this->assertSame( $release, get_transient( 'bfa-release-data' ) );
+		} finally {
+			remove_filter( 'query', $intercept_insert );
+		}
+	}
+
+	/**
 	 * A failed durable write leaves migration incomplete and retries safely.
 	 */
 	public function test_failed_transient_record_write_retries_and_completes_once() {
