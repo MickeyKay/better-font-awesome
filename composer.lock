@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8994e193a873b9de3f5f8bf0e4c36470",
+    "content-hash": "a63f06e02150d1c5470232624dc9d784",
     "packages": [
         {
             "name": "mickey-kay/better-font-awesome-library",
-            "version": "2.1.0-rc.2",
+            "version": "2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MickeyKay/better-font-awesome-library.git",
-                "reference": "b9b7da9c066572de10b18dcca9679ca8cc2a70c1"
+                "reference": "b845f8d2c105c34a9afe62e8470d67d0e3978164"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/b9b7da9c066572de10b18dcca9679ca8cc2a70c1",
-                "reference": "b9b7da9c066572de10b18dcca9679ca8cc2a70c1",
+                "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/b845f8d2c105c34a9afe62e8470d67d0e3978164",
+                "reference": "b845f8d2c105c34a9afe62e8470d67d0e3978164",
                 "shasum": ""
             },
             "require-dev": {
@@ -35,9 +35,9 @@
             "description": "Better Font Awesome Library for WordPress",
             "support": {
                 "issues": "https://github.com/MickeyKay/better-font-awesome-library/issues",
-                "source": "https://github.com/MickeyKay/better-font-awesome-library/tree/2.1.0-rc.2"
+                "source": "https://github.com/MickeyKay/better-font-awesome-library/tree/2.1.0"
             },
-            "time": "2026-08-31T16:11:45+00:00"
+            "time": "2026-08-31T19:03:14+00:00"
         }
     ],
     "packages-dev": [
@@ -2695,9 +2695,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "mickey-kay/better-font-awesome-library": 5
-    },
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

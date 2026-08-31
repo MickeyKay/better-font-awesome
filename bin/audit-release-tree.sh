@@ -5,8 +5,8 @@ set -eu
 release_root=${1:-svn/trunk}
 bfal_root="$release_root/vendor/mickey-kay/better-font-awesome-library"
 installed_bfal_root="vendor/mickey-kay/better-font-awesome-library"
-expected_version="2.1.0-rc.2"
-expected_reference="b9b7da9c066572de10b18dcca9679ca8cc2a70c1"
+expected_version="2.1.0"
+expected_reference="b845f8d2c105c34a9afe62e8470d67d0e3978164"
 
 php -r '
 $lock = json_decode( file_get_contents( "composer.lock" ), true );
@@ -14,8 +14,8 @@ $packages = array_filter( $lock["packages"], static function ( $package ) {
 	return "mickey-kay/better-font-awesome-library" === $package["name"];
 } );
 $package = reset( $packages );
-if ( ! $package || "2.1.0-rc.2" !== $package["version"] || "b9b7da9c066572de10b18dcca9679ca8cc2a70c1" !== $package["source"]["reference"] || "b9b7da9c066572de10b18dcca9679ca8cc2a70c1" !== $package["dist"]["reference"] ) {
-	fwrite( STDERR, "composer.lock does not contain the exact public BFAL release candidate.\n" );
+if ( ! $package || "2.1.0" !== $package["version"] || "b845f8d2c105c34a9afe62e8470d67d0e3978164" !== $package["source"]["reference"] || "b845f8d2c105c34a9afe62e8470d67d0e3978164" !== $package["dist"]["reference"] ) {
+	fwrite( STDERR, "composer.lock does not contain the exact public stable BFAL release.\n" );
 	exit( 1 );
 }
 '
@@ -23,8 +23,8 @@ if ( ! $package || "2.1.0-rc.2" !== $package["version"] || "b9b7da9c066572de10b1
 php -r '
 require "vendor/autoload.php";
 $package = "mickey-kay/better-font-awesome-library";
-if ( "2.1.0-rc.2" !== Composer\InstalledVersions::getPrettyVersion( $package ) || "b9b7da9c066572de10b18dcca9679ca8cc2a70c1" !== Composer\InstalledVersions::getReference( $package ) ) {
-	fwrite( STDERR, "The installed BFAL package does not match the exact public release candidate.\n" );
+if ( "2.1.0" !== Composer\InstalledVersions::getPrettyVersion( $package ) || "b845f8d2c105c34a9afe62e8470d67d0e3978164" !== Composer\InstalledVersions::getReference( $package ) ) {
+	fwrite( STDERR, "The installed BFAL package does not match the exact public stable release.\n" );
 	exit( 1 );
 }
 '

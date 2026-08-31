@@ -8,9 +8,9 @@
 	>
 	<php>
 		<const name="WP_TESTS_MULTISITE" value="1" />
-		<env name="BFA_BFAL_VALIDATION_MODE" value="candidate" force="true" />
-		<env name="BFA_EXPECTED_BFAL_VERSION" value="2.1.0-rc.2" force="true" />
-		<env name="BFA_EXPECTED_BFAL_REFERENCE" value="b9b7da9c066572de10b18dcca9679ca8cc2a70c1" force="true" />
+		<env name="BFA_BFAL_VALIDATION_MODE" value="current" force="true" />
+		<env name="BFA_EXPECTED_BFAL_VERSION" value="2.1.0" force="true" />
+		<env name="BFA_EXPECTED_BFAL_REFERENCE" value="b845f8d2c105c34a9afe62e8470d67d0e3978164" force="true" />
 	</php>
 	<testsuites>
 		<testsuite name="Better Font Awesome">

@@ -33,8 +33,8 @@ function better_font_awesome_validate_bfal_dependency() {
 	$reference          = Composer\InstalledVersions::getReference( $package );
 	$version            = Composer\InstalledVersions::getPrettyVersion( $package );
 
-	if ( ! in_array( $mode, array( 'candidate', 'rollback' ), true ) ) {
-		throw new RuntimeException( 'Set BFA_BFAL_VALIDATION_MODE to candidate or rollback.' );
+	if ( ! in_array( $mode, array( 'current', 'rollback' ), true ) ) {
+		throw new RuntimeException( 'Set BFA_BFAL_VALIDATION_MODE to current or rollback.' );
 	}
 	if ( ! is_string( $expected_version ) || '' === $expected_version ) {
 		throw new RuntimeException( 'BFA_EXPECTED_BFAL_VERSION must be an exact public version.' );
@@ -94,19 +94,19 @@ function _manually_load_plugin() {
 		'request_release_data_refresh',
 		'refresh_release_data',
 	);
-	$has_candidate_api = class_exists( 'Better_Font_Awesome_Release_Data_Validator' ) &&
+	$has_current_api = class_exists( 'Better_Font_Awesome_Release_Data_Validator' ) &&
 		defined( 'Better_Font_Awesome_Release_Data_Validator::RELEASE_CHANNEL' );
 	foreach ( $validator_methods as $method ) {
-		$has_candidate_api = $has_candidate_api && is_callable( array( 'Better_Font_Awesome_Release_Data_Validator', $method ) );
+		$has_current_api = $has_current_api && is_callable( array( 'Better_Font_Awesome_Release_Data_Validator', $method ) );
 	}
 	foreach ( $library_methods as $method ) {
-		$has_candidate_api = $has_candidate_api && method_exists( 'Better_Font_Awesome_Library', $method );
+		$has_current_api = $has_current_api && method_exists( 'Better_Font_Awesome_Library', $method );
 	}
-	if ( 'candidate' === $better_font_awesome_bfal_validation_mode && ! $has_candidate_api ) {
-		throw new RuntimeException( 'Candidate mode requires the reviewed BFAL validator, provider record, asynchronous request, and explicit worker APIs.' );
+	if ( 'current' === $better_font_awesome_bfal_validation_mode && ! $has_current_api ) {
+		throw new RuntimeException( 'Current mode requires the stable BFAL validator, provider record, asynchronous request, and explicit worker APIs.' );
 	}
-	if ( 'rollback' === $better_font_awesome_bfal_validation_mode && $has_candidate_api ) {
-		throw new RuntimeException( 'Rollback mode requires BFAL 2.0.3 without the candidate refresh API.' );
+	if ( 'rollback' === $better_font_awesome_bfal_validation_mode && $has_current_api ) {
+		throw new RuntimeException( 'Rollback mode requires BFAL 2.0.3 without the current refresh API.' );
 	}
 }
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );

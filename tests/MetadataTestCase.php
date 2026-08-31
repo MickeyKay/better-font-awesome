@@ -30,7 +30,7 @@ abstract class Better_Font_Awesome_Metadata_Test_Case extends WP_UnitTestCase {
 	public function setUp(): void {
 		parent::setUp();
 		if ( 'rollback' === getenv( 'BFA_BFAL_VALIDATION_MODE' ) ) {
-			$this->markTestSkipped( 'Expected candidate-only skip in the BFAL 2.0.3 rollback suite.' );
+			$this->markTestSkipped( 'Expected current-only skip in the BFAL 2.0.3 rollback suite.' );
 		}
 		$this->reset_singletons();
 		$this->clear_metadata_state();
