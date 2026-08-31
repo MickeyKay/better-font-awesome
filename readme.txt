@@ -17,7 +17,7 @@ Font Awesome 5 Free icons for WordPress with shortcodes, HTML, TinyMCE, automati
 
 **Do you find this plugin helpful? Please consider [leaving a 5-star review](https://wordpress.org/support/view/plugin-reviews/better-font-awesome).**
 
-Better Font Awesome integrates the latest available release in the supported [Font Awesome 5 Free](https://fontawesome.com/v5/search?o=r&m=free) channel into your WordPress project, along with accompanying CSS, shortcodes, and a TinyMCE icon shortcode generator. Font Awesome 6 and 7 are coming soon.
+Better Font Awesome integrates the latest available release in the supported [Font Awesome 5 Free](https://fontawesome.com/v5/search?o=r&m=free) channel into your WordPress project, along with accompanying CSS, shortcodes, and a TinyMCE icon shortcode generator.
 
 
 = Features =
@@ -102,7 +102,13 @@ This section describes how to install the plugin and get it working.
 
 = How is this plugin different from other Font Awesome plugins? =
 
-This plugin automatically refreshes validated metadata for the latest release in its supported Font Awesome 5 Free channel. Better Font Awesome is also designed to work with a wide variety of established shortcode formats used by other Font Awesome plugins, so existing compatible shortcodes can continue to work. Font Awesome 6 and 7 are not yet supported.
+This plugin automatically refreshes validated metadata for the latest release in its supported Font Awesome 5 Free channel. Better Font Awesome is also designed to work with a wide variety of established shortcode formats used by other Font Awesome plugins, so existing compatible shortcodes can continue to work. Font Awesome 6 and 7 are not currently supported.
+
+= How does automatic metadata refresh work? =
+
+Automatic metadata refresh depends on functioning WordPress cron. Default WP-Cron is request-driven, so refresh can be delayed on low-traffic sites. Sites using `DISABLE_WP_CRON` should invoke `wp-cron.php` through a real scheduler or an equivalent hosting mechanism. `wp cron test` is available as a WP-CLI diagnostic.
+
+If scheduled refresh does not run, Better Font Awesome continues serving validated last-known-good metadata or its bundled fallback. Normal page requests do not wait on the Font Awesome metadata service.
 
 = Do I have to install any font files? =
 

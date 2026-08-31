@@ -1,94 +1,99 @@
-# Maintenance release readiness
+# Release readiness checklist
 
-This is the release gate for the first conservative maintenance release. It intentionally precedes block editor feature work.
+Use a fresh copy of this checklist for each maintenance release. Keep the committed template unchecked. Record completed gates, exact commits, dependency references, test counts, and artifact checksums in the release PR and final release record.
 
-## Automated gates
+This checklist covers conservative maintenance releases. Feature work such as a native block should use separate planning and review.
 
-- [x] Project-local WordPress agent skills and durable `AGENTS.md` guidance
-- [x] Docker-based `wp-env` development and test sites
-- [x] Composer and npm lockfiles refreshed with no known dependency advisories
-- [x] PHPCS using current WordPress Coding Standards
-- [x] PHPStan level 5 on first-party runtime code
-- [x] PHPUnit 9 compatibility and current local WordPress execution
-- [x] GitHub Actions quality, compatibility, and official Plugin Check jobs defined
-- [x] GitHub Actions public stable BFAL 2.1.0 and stable BFAL 2.0.3 rollback jobs are defined for WordPress 6.5, 6.7, and latest with PHP 7.4, 8.1, 8.3, and 8.4
-- [x] PHPUnit uses only deterministic HTTP fixtures
-- [ ] Browser smoke tests cover activation, settings save, Classic Editor picker, and shortcode rendering
-- [x] Public BFAL rc.2 cache transition, CORS, CSSOM, Block Editor, traditional `wp_editor()`, Classic Editor, v4-shim, picker, insertion, and frontend rendering checks pass in one persistent browser profile
-- [x] The canonical WordPress.org SVN release tree is built separately from the source tree and checked by CI
+## Source and release identity
 
-## Security gates
+- [ ] The release starts from the approved base and the exact candidate commit is recorded.
+- [ ] The candidate worktree is clean and contains only reviewed release changes.
+- [ ] Plugin header, runtime version constant, package metadata, lockfile metadata, stable tag, POT identity, changelog, upgrade notice, and release-identity tests agree on the release version.
+- [ ] WordPress and PHP compatibility floors are intentional and synchronized across public metadata.
+- [ ] The required BFAL version and exact source and distribution references are recorded and reproducible from a clean Composer install.
+- [ ] Generated files are rebuilt with repository commands and are byte-stable.
 
-- [x] Add an explicit capability check to the AJAX settings endpoint
-- [x] Remove the broad PHPCS nonce and input suppressions after fixing each finding
-- [x] Enable TLS verification in public stable BFAL 2.1.0
-- [x] Validate remote metadata before persistence or output in public stable BFAL 2.1.0
-- [x] Review every external service and disclose it in `readme.txt`
-- [x] Run Plugin Check against the exact WordPress.org SVN release tree
-- [x] Review admin notices and logs for sensitive upstream data
+## Automated quality gates
 
-The notice review found that BFAL 2.0.3 can print raw upstream error details without escaping. Public stable BFAL `2.1.0` sanitizes those failures, and BFA stores only sanitized codes and summaries for internal diagnostics. The normal settings page exposes no metadata diagnostics. BFAL 2.0.3 remains an emergency rollback path with its documented weaker security and request-path behavior.
+- [ ] Current single-site PHPUnit passes with deterministic HTTP fixtures.
+- [ ] Current multisite PHPUnit passes with deterministic HTTP fixtures.
+- [ ] The isolated stable rollback single-site suite passes without changing committed dependency files.
+- [ ] The isolated stable rollback multisite suite passes without changing committed dependency files.
+- [ ] PHPCS passes on first-party code.
+- [ ] PHPStan passes on first-party runtime code.
+- [ ] Strict Composer validation passes.
+- [ ] Composer audit reports no known advisories.
+- [ ] npm audit reports no advisories at the configured severity.
+- [ ] PHP syntax checks pass for the source and packaged trees.
+- [ ] `git diff --check` passes.
+- [ ] Hosted quality, compatibility, and official Plugin Check jobs pass on the exact candidate commit.
+
+## Security and external services
+
+- [ ] Explicit input fields are sanitized and validated, output is escaped late, and state-changing requests pair nonces with capability checks.
+- [ ] Metadata transport uses the WordPress HTTP API, TLS verification, bounded timeouts, validation, locking, and backoff.
+- [ ] Normal frontend, administrator, REST, editor, settings, and shortcode requests perform no Font Awesome metadata HTTP.
+- [ ] Failed or malformed metadata never replaces validated last-known-good data.
+- [ ] External services and transmitted data are accurately disclosed in the canonical readme.
+- [ ] Admin notices and stored diagnostics expose no sensitive upstream data.
+- [ ] Secret scanning finds no credentials or tokens in the release history or candidate tree.
 
 ## Compatibility gates
 
-- [x] Clean activation and deactivation
-- [x] Upgrade from official BFA 1.7.4 and 2.0.4 with existing settings and content preserved
-- [x] Existing `[icon]` shortcode attributes and filters remain unchanged under automated and packaged smoke coverage
-- [x] v4 shim behavior remains unchanged for existing installs
-- [x] Classic Editor insertion and search work
-- [x] Block Editor shortcode and Shortcode block rendering work before the native block ships
-- [x] No duplicate Font Awesome load when a supported theme or plugin already provides it
-- [x] Multisite lifecycle is tested across two networks, scoped to the current network, and gated by canonical network activation for new sites
+- [ ] Clean activation, deactivation, and reactivation complete without plugin warnings or errors.
+- [ ] Upgrade from each selected official prior release preserves settings and existing shortcode content.
+- [ ] Existing `[icon]` shortcode attributes and filters remain unchanged.
+- [ ] Classic Editor insertion and search work.
+- [ ] Block Editor shortcode editing and Shortcode block rendering work before a native block ships.
+- [ ] Supported `wp_editor()` integrations continue to insert icons.
+- [ ] Frontend rendering and the optional v4 shim remain compatible.
+- [ ] Supported theme or plugin stylesheet ownership does not cause an unintended duplicate Font Awesome load.
+- [ ] Multisite lifecycle behavior is scoped to the current network and gated by canonical network activation for new sites.
 
-Two independent site upgrades covered official BFA 1.7.4 and 2.0.4 installations, preserving settings and existing content. Clean lifecycle and duplicate Font Awesome handling also passed the final integration QA.
+## Metadata and BFAL gates
 
-## BFAL gates
+- [ ] The required stable BFAL package is publicly available and matches its approved source reference.
+- [ ] BFAL first-caller singleton ownership remains unchanged unless a separately approved compatibility change says otherwise.
+- [ ] Durable storage, transient migration, scheduling, worker ownership, locking, retry, and lifecycle behavior pass focused regressions.
+- [ ] Fresh, stale, failed, malformed, rate-limited, timed-out, and invalid-schema paths are covered with fixtures.
+- [ ] Last-known-good metadata survives transient expiry and upstream outages.
+- [ ] Font Awesome metadata and asset delivery versions cannot diverge.
+- [ ] An explicit scheduled worker can persist validated fixture metadata.
+- [ ] Automatic refresh behavior and WP-Cron operational requirements are documented.
+- [ ] The selected prior BFAL rollback package loads through feature detection and its weaker behavior is documented.
 
-- [x] BFAL live-update contract is implemented and available as public stable `2.1.0`
-- [x] Deterministic tests prove ordinary request paths perform no blocking Font Awesome metadata API call
-- [x] Metadata refresh is automatic and background-only, with no metadata status, diagnostics, nonce, or refresh control on the normal settings page
-- [x] Last-known-good data survives transient expiry and upstream outages
-- [x] 403, 429, timeout, invalid JSON, and invalid schema paths are tested
-- [x] Font Awesome metadata and asset delivery versions cannot diverge
-- [x] Rollback to the previous BFAL package requires only an isolated dependency change
-- [x] BFAL stable 2.1.0 is published after release-candidate review
+## Package gates
 
-## BFAL stable integration status
+- [ ] Two independent clean exports of the exact candidate commit produce byte-identical production trees and ZIP archives.
+- [ ] The artifact file count, byte size, SHA-256, archive root, and exact source commit are recorded.
+- [ ] The canonical release-tree audit passes.
+- [ ] The extracted ZIP passes the same package audit.
+- [ ] Every packaged BFAL production file matches the exact clean Composer install.
+- [ ] The package excludes tests, agent files, repository metadata, release tooling, caches, `node_modules`, Composer development dependencies, credentials, secrets, and unexpected paths.
+- [ ] The exact ZIP installs and activates on a clean supported WordPress site without Composer.
+- [ ] Upgrade from the selected official rollback ZIP to the exact candidate ZIP preserves settings and shortcode content.
+- [ ] Packaged smoke coverage confirms the expected BFA and BFAL identities, zero metadata HTTP on normal paths, scheduled refresh behavior, last-known-good retention, and lifecycle persistence.
+- [ ] Plugin Check passes against the exact WordPress.org release tree, with any established warnings documented.
 
-- [x] BFAL PRs #39, #40, #43, and #44 merged
-- [x] Public reproducible BFAL `2.1.0` is available from GitHub and Packagist at `b845f8d2c105c34a9afe62e8470d67d0e3978164`
-- [x] Stable BFAL 2.1.0 preserves rc.2 runtime behavior byte-for-byte after normalizing only the version constant, with the expected stylesheet cache-key transition to `?ver=2.1.0`
-- [x] The historical rc.2 correction restores the static parent-document enqueue, adds anonymous CORS mode to the exact BFAL stylesheet handles, and changes the cache key so rc.1 responses cannot be reused
-- [x] BFAL's intentional first-caller precedence and safe earlier-owner behavior are documented and covered by a WordPress-backed regression
-- [x] Versioned non-autoloaded durable storage, transient migration, scheduler-worker ownership invariants, stale lock and crashed-worker recovery, backoff, jitter, and automatic lifecycle refresh implemented
-- [x] Single-site and multisite current suites cover stale data, failures, deterministic scheduler-worker interleavings, two-network isolation, zero-HTTP request paths, and synthetic Font Awesome 5.15.5 adoption
-- [x] Current-required bootstrap fails closed on the wrong BFAL version, wrong reference, or missing API
-- [x] Stable BFAL 2.0.3 rollback activation creates no asynchronous cron event or orphaned marker
-- [x] BFA exact Composer constraint and lockfile validated against public stable BFAL `2.1.0`
-- [x] Hosted WordPress and PHP compatibility matrix is configured for the exact public stable BFAL package
-- [x] Local public stable 2.1.0, stable 2.0.3 rollback, quality, package, activation, Plugin Check, and focused browser suites pass
-- [x] Focused review of the external-cache timeout and failure-state retry corrections is complete
+## Rollback gates
 
-PR #52 was independently reviewed and merged as `6631a86059dd30d4efe438e4f804082034ebf7b5`. Its reviewed head `28cd67c64a7b2b0f260a2f55f1a0707e6a1a4ed5` and the merge commit have the identical tree `a1d2ae6f260b2684b335f6876a861990a52e2af7`. The focused integration review gate is complete. This does not authorize a WordPress.org or GitHub release.
+- [ ] The prior official BFA ZIP is downloaded from WordPress.org and its final URL, size, SHA-256, archive root, BFA version, and BFAL version are recorded.
+- [ ] A database and files backup procedure is prepared.
+- [ ] The rollback ZIP activates successfully on a supported site.
+- [ ] Settings and shortcode content are verified before and after rollback.
+- [ ] Forward recovery is verified or its expected behavior is documented.
+- [ ] The WordPress.org stable-tag rollback procedure is prepared and does not delete an SVN tag.
 
-## WordPress.org publication gates
+## Publication gates
 
-- [ ] Exact merge-commit post-merge verification for this release PR
-- [x] Final BFA 2.1.0 release identity is synchronized in the plugin header, class constant, package metadata, canonical readme, and generated readme
-- [ ] Git tag creation
-- [ ] GitHub release publication
-- [ ] WordPress.org SVN publication
-- [ ] WordPress.org Release Management confirmation
-- [ ] Public download and plugin-page verification
-- [x] Release tree audit rejects every `phpunit*.xml*` file and excludes `.codex`, `.conductor`, `.context`, `.github`, tests, source tooling, caches, and development dependencies
-- [x] Release tree installs on a clean site without Composer
-- [x] Runtime writes, cleanup, and reversibility are documented
-- [x] Changelog and compatibility-floor disclosure are complete
-- [x] Manual testing on two independent sites is complete
-- [x] Official BFA 2.0.4 rollback artifact is verified and the rollback procedure is prepared
-- [x] WordPress.org SVN procedure is prepared
-- [ ] Explicit WordPress.org publication authorization is granted
-
-## Current recommendation
-
-PR #52 is reviewed and merged. BFA 2.1.0 release preparation may proceed, but no publication is authorized. Publication remains blocked on review and merge of the release-only PR, exact post-merge verification, Git tag creation, GitHub release publication, WordPress.org SVN publication, WordPress.org Release Management confirmation, public download verification, and explicit repository-owner authorization.
+- [ ] The release PR is reviewed and merged.
+- [ ] The exact merge commit and tree are verified after merge.
+- [ ] Deterministic build and package checks are repeated on the exact merge commit.
+- [ ] Explicit repository-owner authorization for publication is recorded.
+- [ ] The Git tag is created at the authorized release commit.
+- [ ] The GitHub release is published from the authorized tag and release notes.
+- [ ] WordPress.org SVN trunk and the new tag match the verified production tree.
+- [ ] The WordPress.org SVN commit is published only after explicit authorization.
+- [ ] Any required WordPress.org Release Management confirmation is complete.
+- [ ] The public plugin page, metadata, and download are verified.
+- [ ] The public ZIP checksum and activation smoke results are recorded in the final release record.
