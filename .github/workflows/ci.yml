@@ -59,7 +59,7 @@ jobs:
         run: npm audit --audit-level=high
 
   candidate-phpunit:
-    name: Public BFAL 2.1.0-rc.1 candidate - WordPress ${{ matrix.wordpress }} on PHP ${{ matrix.php }}
+    name: Public BFAL 2.1.0-rc.2 candidate - WordPress ${{ matrix.wordpress }} on PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -106,7 +106,7 @@ jobs:
       - name: Report exact candidate dependency
         run: |
           php -r 'require "vendor/autoload.php"; $package = "mickey-kay/better-font-awesome-library"; printf("BFAL version: %s\nBFAL reference: %s\n", Composer\InstalledVersions::getPrettyVersion($package), Composer\InstalledVersions::getReference($package));'
-          node -e 'const lock = JSON.parse(require("fs").readFileSync("composer.lock", "utf8")); const item = lock.packages.find((entry) => entry.name === "mickey-kay/better-font-awesome-library"); process.exit(item && item.version === "2.1.0-rc.1" && item.source.reference === "a05508043ea885fa611f559ab59cff73161b37d2" && item.dist.reference === "a05508043ea885fa611f559ab59cff73161b37d2" ? 0 : 1);'
+          node -e 'const lock = JSON.parse(require("fs").readFileSync("composer.lock", "utf8")); const item = lock.packages.find((entry) => entry.name === "mickey-kay/better-font-awesome-library"); process.exit(item && item.version === "2.1.0-rc.2" && item.source.reference === "b9b7da9c066572de10b18dcca9679ca8cc2a70c1" && item.dist.reference === "b9b7da9c066572de10b18dcca9679ca8cc2a70c1" ? 0 : 1);'
 
       - name: Install WordPress test suite
         run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1:3306 "${{ matrix.wordpress }}" true

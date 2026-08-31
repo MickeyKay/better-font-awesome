@@ -5,8 +5,8 @@ set -eu
 release_root=${1:-svn/trunk}
 bfal_root="$release_root/vendor/mickey-kay/better-font-awesome-library"
 installed_bfal_root="vendor/mickey-kay/better-font-awesome-library"
-expected_version="2.1.0-rc.1"
-expected_reference="a05508043ea885fa611f559ab59cff73161b37d2"
+expected_version="2.1.0-rc.2"
+expected_reference="b9b7da9c066572de10b18dcca9679ca8cc2a70c1"
 
 php -r '
 $lock = json_decode( file_get_contents( "composer.lock" ), true );
@@ -14,7 +14,7 @@ $packages = array_filter( $lock["packages"], static function ( $package ) {
 	return "mickey-kay/better-font-awesome-library" === $package["name"];
 } );
 $package = reset( $packages );
-if ( ! $package || "2.1.0-rc.1" !== $package["version"] || "a05508043ea885fa611f559ab59cff73161b37d2" !== $package["source"]["reference"] || "a05508043ea885fa611f559ab59cff73161b37d2" !== $package["dist"]["reference"] ) {
+if ( ! $package || "2.1.0-rc.2" !== $package["version"] || "b9b7da9c066572de10b18dcca9679ca8cc2a70c1" !== $package["source"]["reference"] || "b9b7da9c066572de10b18dcca9679ca8cc2a70c1" !== $package["dist"]["reference"] ) {
 	fwrite( STDERR, "composer.lock does not contain the exact public BFAL release candidate.\n" );
 	exit( 1 );
 }
@@ -23,7 +23,7 @@ if ( ! $package || "2.1.0-rc.1" !== $package["version"] || "a05508043ea885fa611f
 php -r '
 require "vendor/autoload.php";
 $package = "mickey-kay/better-font-awesome-library";
-if ( "2.1.0-rc.1" !== Composer\InstalledVersions::getPrettyVersion( $package ) || "a05508043ea885fa611f559ab59cff73161b37d2" !== Composer\InstalledVersions::getReference( $package ) ) {
+if ( "2.1.0-rc.2" !== Composer\InstalledVersions::getPrettyVersion( $package ) || "b9b7da9c066572de10b18dcca9679ca8cc2a70c1" !== Composer\InstalledVersions::getReference( $package ) ) {
 	fwrite( STDERR, "The installed BFAL package does not match the exact public release candidate.\n" );
 	exit( 1 );
 }

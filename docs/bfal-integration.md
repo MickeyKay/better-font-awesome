@@ -1,6 +1,6 @@
 # BFAL 2.1 integration architecture
 
-Status: BFA-owned review corrections are integrated with public BFAL release candidate `2.1.0-rc.1` at exact source reference `a05508043ea885fa611f559ab59cff73161b37d2`. BFAL PR #39 and release-preparation PR #40 are merged, and the reproducible prerelease is available from GitHub and Packagist. This branch is not ready to merge or release.
+Status: BFA-owned review corrections are integrated with public BFAL release candidate `2.1.0-rc.2` at exact source reference `b9b7da9c066572de10b18dcca9679ca8cc2a70c1`. BFAL PRs #39, #40, #43, and #44 are merged, and the reproducible prerelease is available from GitHub and Packagist. This branch is not ready to merge or release.
 
 ## Compatibility boundary
 
@@ -118,11 +118,19 @@ Rollback to BFAL 2.0.3 restores its known synchronous cache-miss HTTP, weaker TL
 
 ## Dependency handoff
 
-BFA requires the exact public Packagist version `2.1.0-rc.1`. The committed lock records source and distribution reference `a05508043ea885fa611f559ab59cff73161b37d2`. A clean Composer install therefore reproduces the reviewed candidate without a path repository, VCS override, branch alias, or development constraint. The published release ZIP has SHA-256 `695208a2ac6ab806095366fabccb6d28031d27b1601a2657adf663a28b84bfc1`.
+BFA requires the exact public Packagist version `2.1.0-rc.2`. The committed lock records source and distribution reference `b9b7da9c066572de10b18dcca9679ca8cc2a70c1`. A clean Composer install therefore reproduces the reviewed candidate without a path repository, VCS override, branch alias, or development constraint. The public GitHub prerelease tag points to that same reference and its verified release ZIP has SHA-256 `09de22221f72df93347c178bec83d2452a86a38e71be06776a832334795a5e4d`.
+
+BFAL PR #43 restores the normal priority-15 static parent-document enqueue and gives only BFAL's exact main and optional v4 shim stylesheet links anonymous CORS mode. BFAL PR #44 publishes that correction as rc.2. Changing the BFAL runtime version changes both WordPress stylesheet URLs from `?ver=2.1.0-rc.1` to `?ver=2.1.0-rc.2`, so a browser cannot reuse an incompatible cached rc.1 response without CORS headers. The metadata provider, transport, integrity, durable cache, bundled fallback, singleton ownership, and BFA request-path behavior are unchanged.
 
 Validation has two intentionally separate modes:
 
-- Candidate-required mode uses `phpunit.xml.dist` and `phpunit-multisite.xml.dist`. Bootstrap fails before loading tests unless Composer reports exact public version `2.1.0-rc.1`, exact reference `a05508043ea885fa611f559ab59cff73161b37d2`, and the validator, provider record, asynchronous request, and explicit worker APIs used by BFA. Candidate-only tests do not skip in this mode.
+- Candidate-required mode uses `phpunit.xml.dist` and `phpunit-multisite.xml.dist`. Bootstrap fails before loading tests unless Composer reports exact public version `2.1.0-rc.2`, exact reference `b9b7da9c066572de10b18dcca9679ca8cc2a70c1`, and the validator, provider record, asynchronous request, and explicit worker APIs used by BFA. Candidate-only tests do not skip in this mode.
 - Stable rollback mode uses `phpunit-rollback.xml.dist` and `phpunit-rollback-multisite.xml.dist`. Bootstrap requires exact version `2.0.3`, exact reference `c5ae75d273ff8a594f9fa58b43542d6dc1482fb0`, and requires candidate APIs to be absent. Candidate-only tests then report explicit expected skips, while rollback lifecycle coverage runs.
 
 Each mode prints its name, Composer version, and exact package reference in test output. Hosted candidate jobs install the committed public RC lock and run single-site and multisite suites across the supported WordPress and PHP matrix. Separate rollback jobs install BFAL 2.0.3 in an isolated temporary Composer project, leave committed dependency files unchanged, and run both rollback suites. The production-package audit requires the candidate validator, fallback checksum, runtime files, and licenses, then compares every packaged BFAL runtime file with the exact Composer-installed public RC.
+
+Local rc.2 validation used the public Packagist package and passed candidate single-site and multisite PHPUnit on WordPress 6.5 with PHP 7.4, WordPress 6.7 with PHP 8.1, and WordPress latest with PHP 8.3 and 8.4. The same matrix passed in the isolated stable BFAL 2.0.3 rollback mode. PHPCS, PHPStan, strict Composer validation, Composer audit, npm audit, Plugin Check, the canonical release-tree audit, packaged activation, and shortcode smoke also passed. Plugin Check reported only the established global-variable and `load_plugin_textdomain()` warnings.
+
+The production archive contains 27 files and has SHA-256 `70b0cfc38539c5579ee0859afe6315f43fa7d7285e2a139dfc0cab3f6f7037e1`. Its 16 packaged BFAL production files are byte-for-byte identical to the public Packagist install and the verified GitHub rc.2 release archive. No development files, tests, agent files, release tooling, `node_modules`, Composer development state, or unintended vendor packages are present.
+
+Browser transition validation used one persistent Chrome profile. The browser first loaded the published rc.1 main and v4 shim stylesheet URLs, retained its cache, and then loaded the generated BFA package with rc.2. Both rc.2 stylesheet links used `crossorigin="anonymous"`, returned `Access-Control-Allow-Origin: *`, and were CSSOM-readable under the new `?ver=2.1.0-rc.2` cache key. No rc.1 stylesheet response was reused and no Font Awesome console error occurred. WordPress 7.1 preserved the Shortcode blocks, rendered shortcode glyphs on the frontend, kept BFAL styles out of the block canvas, and supplied working picker search, insertion, and Font Awesome styling to a traditional `wp_editor()` meta box. WordPress 6.5 Classic Editor passed the same picker, insertion, TinyMCE, and frontend rendering checks with the v4 shim both enabled and disabled.
