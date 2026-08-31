@@ -36,10 +36,9 @@ class Better_Font_Awesome_Metadata_Store {
 			return;
 		}
 
-		$now             = time();
-		$record_snapshot = $this->get_record_snapshot();
-		$durable         = $this->validate_stored_record( $record_snapshot['value'] );
-		$transient       = get_transient( 'bfa-release-data' );
+		$now       = time();
+		$durable   = $this->get_valid_record();
+		$transient = get_transient( 'bfa-release-data' );
 
 		if ( empty( $durable ) && false !== $transient && class_exists( 'Better_Font_Awesome_Release_Data_Validator' ) ) {
 			$validation = Better_Font_Awesome_Release_Data_Validator::validate_release( $transient, 'transient' );
@@ -48,24 +47,11 @@ class Better_Font_Awesome_Metadata_Store {
 				$fresh_until = $now < $timeout ? $timeout : $now;
 				$fetched_at  = max( 1, $fresh_until - $fresh_interval );
 				$record      = $this->build_record( $validation['record'], $fetched_at, $fresh_until );
-				if ( $this->persist_migrated_record( $record_snapshot, $record ) ) {
-					$durable = $record;
-				} else {
-					$durable = $this->get_valid_record();
-					if ( empty( $durable ) ) {
-						return;
-					}
+				if ( ! $this->persist_record( $record ) ) {
+					return;
 				}
+				$durable = $record;
 			}
-		}
-
-		$resolved_snapshot = $this->get_record_snapshot();
-		if ( $resolved_snapshot['exists'] ) {
-			$resolved = $this->validate_stored_record( $resolved_snapshot['value'] );
-			if ( empty( $resolved ) ) {
-				return;
-			}
-			$durable = $resolved;
 		}
 
 		if ( ! empty( $durable ) && isset( $durable['source'] ) && 'transient' === $durable['source'] ) {
@@ -86,20 +72,11 @@ class Better_Font_Awesome_Metadata_Store {
 	 * @return array Valid record, or an empty array.
 	 */
 	public function get_valid_record() {
-		return $this->validate_stored_record( get_option( self::RECORD_OPTION, array() ) );
-	}
-
-	/**
-	 * Validate one stored record value through BFAL and its checksum.
-	 *
-	 * @param mixed $record Stored option value.
-	 * @return array Valid record, or an empty array.
-	 */
-	private function validate_stored_record( $record ) {
 		if ( ! class_exists( 'Better_Font_Awesome_Release_Data_Validator' ) ) {
 			return array();
 		}
 
+		$record = get_option( self::RECORD_OPTION, array() );
 		if (
 			! is_array( $record ) ||
 			! isset( $record['storage_schema_version'], $record['fetched_at'], $record['fresh_until'], $record['checksum'] ) ||
@@ -121,77 +98,6 @@ class Better_Font_Awesome_Metadata_Store {
 		}
 
 		return $record;
-	}
-
-	/**
-	 * Read the exact durable record value observed before migration validation.
-	 *
-	 * @return array{exists: bool, raw: string, value: mixed} Option snapshot.
-	 */
-	private function get_record_snapshot() {
-		global $wpdb;
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Migration compare-and-swap requires the exact stored value.
-		$raw = $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT option_value FROM {$wpdb->options} WHERE option_name = %s",
-				self::RECORD_OPTION
-			)
-		);
-
-		return array(
-			'exists' => null !== $raw,
-			'raw'    => null === $raw ? '' : (string) $raw,
-			'value'  => null === $raw ? null : maybe_unserialize( $raw ),
-		);
-	}
-
-	/**
-	 * Persist migration output only while the initially observed record is unchanged.
-	 *
-	 * @param array{exists: bool, raw: string, value: mixed} $snapshot Initial option snapshot.
-	 * @param array                                          $record   Validated transient record.
-	 * @return bool Whether this request conditionally stored the migrated record.
-	 */
-	private function persist_migrated_record( $snapshot, $record ) {
-		global $wpdb;
-
-		if ( ! $snapshot['exists'] ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- INSERT IGNORE is followed by complete option-cache invalidation.
-			$inserted = $wpdb->query(
-				$wpdb->prepare(
-					"INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %s, 'no')",
-					self::RECORD_OPTION,
-					maybe_serialize( $record )
-				)
-			);
-			$this->invalidate_option_caches( self::RECORD_OPTION );
-			return 1 === $inserted && get_option( self::RECORD_OPTION, array() ) === $record;
-		}
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Compare-and-swap is followed by complete option-cache invalidation.
-		$updated = $wpdb->query(
-			$wpdb->prepare(
-				"UPDATE {$wpdb->options} SET option_value = %s, autoload = 'no' WHERE option_name = %s AND option_value = %s",
-				maybe_serialize( $record ),
-				self::RECORD_OPTION,
-				$snapshot['raw']
-			)
-		);
-		$this->invalidate_option_caches( self::RECORD_OPTION );
-
-		return 1 === $updated && get_option( self::RECORD_OPTION, array() ) === $record;
-	}
-
-	/**
-	 * Invalidate every WordPress option-cache location affected by direct SQL.
-	 *
-	 * @param string $name Option name.
-	 */
-	private function invalidate_option_caches( $name ) {
-		wp_cache_delete( $name, 'options' );
-		wp_cache_delete( 'alloptions', 'options' );
-		wp_cache_delete( 'notoptions', 'options' );
 	}
 
 	/**
