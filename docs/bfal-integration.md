@@ -73,7 +73,7 @@ Scheduling uses an atomic non-autoloaded option claim plus an ownership token pa
 
 A claim without its matching event is recoverable after a 10 minute grace period measured from marker creation. This protects a newly claimed marker while another request may not yet see its cron event. The grace period never expires valid ownership while the exact cron event remains present. The 10 minute worker lease is intentionally much longer than BFAL's bounded 5 second HTTP timeout. A worker whose lease has expired is no longer eligible, even if its process has not exited.
 
-Workers acquire a separate option lock using atomic insert. The lock contains a random owner, acquisition time, and 10 minute expiry. Stale locks are removed with compare-and-delete. A worker releases only a lock whose current owner matches its token, preventing one worker from releasing another worker's lock.
+Workers acquire a separate option lock using atomic insert. The lock contains a random owner, acquisition time, and 10 minute expiry. Stale locks are removed with compare-and-delete. Before persisting every callback-derived failure, validated record, or success state, a worker atomically renews the exact complete lock value while retaining its owner identity. An already expired owner cannot renew, and compare-and-swap failure fences a resumed stale worker after replacement ownership. Ownership loss returns the stable internal `bfa_refresh_ownership_lost` result without changing durable data, freshness state, or retry scheduling. A worker releases only a lock whose current owner matches its token, preventing one worker from releasing another worker's lock.
 
 Retry bases are 1 hour, 6 hours, and 24 hours. Retry jitter is bounded from 0 through 15 minutes and the final delay is capped at 24 hours. A successful refresh clears the consecutive failure count, next retry, and sanitized error. A failed refresh schedules the next attempt without changing last-known-good data.
 
@@ -84,9 +84,10 @@ Migration is idempotent and versioned. On the first upgrade request BFA:
 1. Validates the existing `bfa-release-data` transient through BFAL.
 2. Promotes it only when no valid durable record exists.
 3. Infers fetch and freshness times from the transient timeout when available.
-4. Persists the complete durable replacement before serving it.
-5. Preserves the established transient for BFAL and third-party compatibility.
-6. Never deletes or overwrites an existing valid durable record during migration.
+4. When a persistent object cache supplies a valid transient without its database timeout, preserves the data as last-known-good but records it stale and immediately eligible for one duplicate-suppressed asynchronous refresh.
+5. Persists the complete durable replacement before serving it.
+6. Preserves the established transient for BFAL and third-party compatibility.
+7. Never deletes or overwrites an existing valid durable record during migration.
 
 The schema version is the final migration commit marker. A valid transient migration records completion only after the durable record and migrated state are both verified as stored. Any required write failure leaves the schema incomplete, preserves the transient, and allows a later request to retry. Once the schema is complete, ordinary requests perform no recurring migration writes.
 
@@ -135,9 +136,9 @@ Historical rc.2 validation used the public Packagist package and passed current 
 
 Stable 2.1.0 promotion validation passed focused and complete current single-site and multisite PHPUnit plus isolated BFAL 2.0.3 rollback suites. PHPCS, PHPStan, strict Composer validation, Composer audit, npm audit, generated-readme verification, Plugin Check, syntax checks, `git diff --check`, canonical release-tree audits, packaged activation, settings save, hybrid `wp_editor()` picker insertion, and shortcode smoke also passed. Plugin Check reported only the established global-variable and `load_plugin_textdomain()` warnings.
 
-Focused follow-up regressions model WordPress boot before overdue cron dispatch, repeated boot calls, missing and newly claimed markers, malformed ownership, site-only activation, network activation, new sites in two networks, and blog-context restoration. These tests prove that an exact overdue event is preserved while only a missing old event is recovered, and that inactive multisite sites receive no marker, event, lock, state, or metadata record.
+Focused follow-up regressions model WordPress boot before overdue cron dispatch, repeated boot calls, missing and newly claimed markers, malformed ownership, site-only activation, network activation, new sites in two networks, and blog-context restoration. They also model expired and replaced worker leases, stale success and failure callbacks, exact lock renewal, and external object-cache transients whose original expiration is unavailable. These tests prove that an exact overdue event is preserved while only a missing old event is recovered, inactive multisite sites receive no marker, event, lock, state, or metadata record, stale workers cannot overwrite replacement results, and unknown-age migration schedules exactly one background refresh without request-path metadata HTTP.
 
-The final independently reviewed BFA head before the two active findings was `02b0bb90931568bd7d43512875a848a9d4711948`. Two independent site upgrades covered official BFA 1.7.4 and 2.0.4 with settings and content preserved. Clean activation and deactivation, duplicate Font Awesome handling, the exact package browser smoke, and the background-only settings experience all passed. That evidence remains applicable, but does not substitute for focused review of the current scheduler and multisite corrections or complete the separate WordPress.org publication gates.
+The final independently reviewed BFA head before the subsequent focused corrections was `02b0bb90931568bd7d43512875a848a9d4711948`. Two independent site upgrades covered official BFA 1.7.4 and 2.0.4 with settings and content preserved. Clean activation and deactivation, duplicate Font Awesome handling, the exact package browser smoke, and the background-only settings experience all passed. That evidence remains applicable, but does not substitute for focused review of the current worker-fencing and persistent-cache corrections or complete the separate WordPress.org publication gates.
 
 Two independently regenerated production trees produced byte-identical ZIPs after the scheduler and multisite corrections. The corrected integration archive contains 27 files, is 145,824 bytes, and has SHA-256 `ea8c954fcdee015fb155fda0566be9b234e0c382a81458333efae069fa6492cc`. Its 16 packaged BFAL production files are byte-for-byte identical to the public Packagist install and the verified GitHub stable release archive. No development files, tests, agent files, release tooling, `node_modules`, Composer development state, or unintended vendor packages are present.
 

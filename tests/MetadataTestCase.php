@@ -11,6 +11,13 @@
 abstract class Better_Font_Awesome_Metadata_Test_Case extends WP_UnitTestCase {
 
 	/**
+	 * Object-cache mode inherited from the surrounding WordPress suite.
+	 *
+	 * @var bool
+	 */
+	private $previous_object_cache_mode;
+
+	/**
 	 * Number of intercepted Font Awesome HTTP calls.
 	 *
 	 * @var int
@@ -29,6 +36,8 @@ abstract class Better_Font_Awesome_Metadata_Test_Case extends WP_UnitTestCase {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->previous_object_cache_mode = wp_using_ext_object_cache();
+		wp_using_ext_object_cache( false );
 		if ( 'rollback' === getenv( 'BFA_BFAL_VALIDATION_MODE' ) ) {
 			$this->markTestSkipped( 'Expected current-only skip in the BFAL 2.0.3 rollback suite.' );
 		}
@@ -51,6 +60,7 @@ abstract class Better_Font_Awesome_Metadata_Test_Case extends WP_UnitTestCase {
 		wp_set_current_user( 0 );
 		$this->clear_metadata_state();
 		$this->reset_singletons();
+		wp_using_ext_object_cache( $this->previous_object_cache_mode );
 		parent::tearDown();
 	}
 
@@ -155,6 +165,23 @@ abstract class Better_Font_Awesome_Metadata_Test_Case extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Count all persisted metadata refresh events regardless of arguments.
+	 *
+	 * @return int Scheduled event count.
+	 */
+	protected function count_scheduled_refresh_events() {
+		$count = 0;
+		$cron  = _get_cron_array();
+		foreach ( $cron as $hooks ) {
+			if ( isset( $hooks[ Better_Font_Awesome_Metadata_Manager::CRON_HOOK ] ) ) {
+				$count += count( $hooks[ Better_Font_Awesome_Metadata_Manager::CRON_HOOK ] );
+			}
+		}
+
+		return $count;
+	}
+
+	/**
 	 * Build an HTTP response.
 	 *
 	 * @param int    $status HTTP status.
@@ -209,7 +236,7 @@ abstract class Better_Font_Awesome_Metadata_Test_Case extends WP_UnitTestCase {
 		wp_dequeue_style( 'bfa-font-awesome-v4-shim' );
 		wp_deregister_style( 'bfa-font-awesome' );
 		wp_deregister_style( 'bfa-font-awesome-v4-shim' );
-		wp_clear_scheduled_hook( Better_Font_Awesome_Metadata_Manager::CRON_HOOK );
+		wp_unschedule_hook( Better_Font_Awesome_Metadata_Manager::CRON_HOOK );
 		remove_all_actions( Better_Font_Awesome_Metadata_Manager::CRON_HOOK );
 		delete_transient( 'bfa-release-data' );
 		foreach (

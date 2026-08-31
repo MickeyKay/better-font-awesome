@@ -36,6 +36,7 @@ class Better_Font_Awesome_Metadata_Store {
 			return;
 		}
 
+		$now       = time();
 		$durable   = $this->get_valid_record();
 		$transient = get_transient( 'bfa-release-data' );
 
@@ -43,8 +44,8 @@ class Better_Font_Awesome_Metadata_Store {
 			$validation = Better_Font_Awesome_Release_Data_Validator::validate_release( $transient, 'transient' );
 			if ( ! empty( $validation['valid'] ) ) {
 				$timeout     = (int) get_option( '_transient_timeout_bfa-release-data', 0 );
-				$fetched_at  = time() < $timeout ? max( 1, $timeout - $fresh_interval ) : time();
-				$fresh_until = time() < $timeout ? $timeout : $fetched_at + $fresh_interval;
+				$fresh_until = $now < $timeout ? $timeout : $now;
+				$fetched_at  = max( 1, $fresh_until - $fresh_interval );
 				$record      = $this->build_record( $validation['record'], $fetched_at, $fresh_until );
 				if ( ! $this->persist_record( $record ) ) {
 					return;
@@ -56,7 +57,7 @@ class Better_Font_Awesome_Metadata_Store {
 		if ( ! empty( $durable ) && isset( $durable['source'] ) && 'transient' === $durable['source'] ) {
 			$state               = $this->get_state();
 			$state['fetched_at'] = (int) $durable['fetched_at'];
-			$state['status']     = (int) $durable['fresh_until'] <= time() ? 'stale' : 'fresh';
+			$state['status']     = (int) $durable['fresh_until'] <= $now ? 'stale' : 'fresh';
 			if ( ! $this->save_state( $state ) ) {
 				return;
 			}

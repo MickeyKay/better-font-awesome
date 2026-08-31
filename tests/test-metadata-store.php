@@ -50,6 +50,7 @@ class Better_Font_Awesome_Metadata_Store_Test extends Better_Font_Awesome_Metada
 	public function test_valid_transient_is_promoted_without_deletion() {
 		$release = $this->valid_release( '5.15.3' );
 		set_transient( 'bfa-release-data', $release, DAY_IN_SECONDS );
+		$timeout = (int) get_option( '_transient_timeout_bfa-release-data' );
 
 		$store = new Better_Font_Awesome_Metadata_Store();
 		$store->maybe_migrate_transient( DAY_IN_SECONDS );
@@ -57,8 +58,75 @@ class Better_Font_Awesome_Metadata_Store_Test extends Better_Font_Awesome_Metada
 
 		$this->assertSame( '5.15.3', $record['release']['version'] );
 		$this->assertSame( 'transient', $record['source'] );
+		$this->assertSame( $timeout - DAY_IN_SECONDS, $record['fetched_at'] );
+		$this->assertSame( $timeout, $record['fresh_until'] );
 		$this->assertSame( $release, get_transient( 'bfa-release-data' ) );
 		$this->assertSame( 1, get_option( Better_Font_Awesome_Metadata_Store::SCHEMA_OPTION ) );
+	}
+
+	/**
+	 * An object-cached transient with no database timeout remains usable but stale.
+	 */
+	public function test_unknown_age_object_cached_transient_is_promoted_stale_and_preserved() {
+		$previous_cache_mode = wp_using_ext_object_cache();
+		$release             = $this->valid_release( '5.15.3' );
+		wp_using_ext_object_cache( true );
+
+		try {
+			set_transient( 'bfa-release-data', $release, DAY_IN_SECONDS );
+			delete_option( '_transient_timeout_bfa-release-data' );
+			$before = time();
+
+			$store = new Better_Font_Awesome_Metadata_Store();
+			$store->maybe_migrate_transient( DAY_IN_SECONDS );
+			$after  = time();
+			$record = $store->get_valid_record();
+			$state  = $store->get_state();
+
+			$this->assertSame( 0, (int) get_option( '_transient_timeout_bfa-release-data', 0 ) );
+			$this->assertSame( '5.15.3', $record['release']['version'] );
+			$this->assertLessThanOrEqual( $after, $record['fresh_until'] );
+			$this->assertGreaterThanOrEqual( $before, $record['fresh_until'] );
+			$this->assertSame( $record['fresh_until'] - DAY_IN_SECONDS, $record['fetched_at'] );
+			$this->assertSame( 'stale', $state['status'] );
+			$this->assertSame( $release, get_transient( 'bfa-release-data' ) );
+			$this->assertSame( 1, get_option( Better_Font_Awesome_Metadata_Store::SCHEMA_OPTION ) );
+		} finally {
+			delete_transient( 'bfa-release-data' );
+			wp_using_ext_object_cache( $previous_cache_mode );
+		}
+	}
+
+	/**
+	 * Unknown-age migration boot schedules one event without synchronous HTTP.
+	 */
+	public function test_unknown_age_object_cached_transient_boot_schedules_once_without_http() {
+		$previous_cache_mode = wp_using_ext_object_cache();
+		$release             = $this->valid_release( '5.15.3' );
+		wp_using_ext_object_cache( true );
+
+		try {
+			set_transient( 'bfa-release-data', $release, DAY_IN_SECONDS );
+			delete_option( '_transient_timeout_bfa-release-data' );
+			$first = new Better_Font_Awesome_Metadata_Manager();
+			$first->boot();
+			$marker = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
+
+			$this->assertIsArray( $marker );
+			$this->assertSame( $marker['run_at'], wp_next_scheduled( Better_Font_Awesome_Metadata_Manager::CRON_HOOK, array( $marker['token'], false ) ) );
+			$this->assertSame( 1, $this->count_scheduled_refresh_events() );
+			$this->assertSame( 0, $this->font_awesome_http_calls );
+			$this->assertSame( $release, get_transient( 'bfa-release-data' ) );
+
+			$second = new Better_Font_Awesome_Metadata_Manager();
+			$second->boot();
+			$this->assertSame( $marker, get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+			$this->assertSame( 1, $this->count_scheduled_refresh_events() );
+			$this->assertSame( 0, $this->font_awesome_http_calls );
+		} finally {
+			delete_transient( 'bfa-release-data' );
+			wp_using_ext_object_cache( $previous_cache_mode );
+		}
 	}
 
 	/**

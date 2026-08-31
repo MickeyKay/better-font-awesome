@@ -301,36 +301,59 @@ class Better_Font_Awesome_Metadata_Manager {
 				return new WP_Error( 'bfa_refresh_locked', 'Another Font Awesome metadata refresh is already running.' );
 			}
 		}
+		if ( ! $this->renew_lock( $owner ) ) {
+			$this->release_lock( $owner );
+			return $this->ownership_lost_error();
+		}
 
 		$state['attempt_count']   = (int) $state['attempt_count'] + 1;
 		$state['last_attempt_at'] = $now;
 		$state['scheduled_for']   = 0;
 		$state['status']          = 'refreshing';
 		$this->store->save_state( $state );
+		$schedule_retry = false;
 
 		try {
 			$result = call_user_func( $refresh_callback );
 			if ( is_wp_error( $result ) ) {
+				if ( ! $this->renew_lock( $owner ) ) {
+					return $this->ownership_lost_error();
+				}
 				$this->record_failure( $result );
+				$schedule_retry = true;
 				return $result;
 			}
 
 			$validation = Better_Font_Awesome_Release_Data_Validator::validate_release( $result, 'api' );
 			if ( empty( $validation['valid'] ) ) {
 				$error = $this->validation_error( $validation );
+				if ( ! $this->renew_lock( $owner ) ) {
+					return $this->ownership_lost_error();
+				}
 				$this->record_failure( $error );
+				$schedule_retry = true;
 				return $error;
 			}
 
 			$fetched_at  = time();
 			$fresh_until = $fetched_at + self::FRESH_INTERVAL + $this->jitter( self::FRESH_JITTER_MAX, 'fresh' );
 			$record      = $this->store->build_record( $validation['record'], $fetched_at, $fresh_until );
+			if ( ! $this->renew_lock( $owner ) ) {
+				return $this->ownership_lost_error();
+			}
 			if ( ! $this->store->persist_record( $record ) ) {
 				$error = new WP_Error( 'bfa_durable_write_failed', 'Validated Font Awesome metadata could not be stored durably.' );
+				if ( ! $this->renew_lock( $owner ) ) {
+					return $this->ownership_lost_error();
+				}
 				$this->record_failure( $error );
+				$schedule_retry = true;
 				return $error;
 			}
 
+			if ( ! $this->renew_lock( $owner ) ) {
+				return $this->ownership_lost_error();
+			}
 			$state                    = $this->store->get_state();
 			$state['fetched_at']      = $fetched_at;
 			$state['failure_count']   = 0;
@@ -344,7 +367,7 @@ class Better_Font_Awesome_Metadata_Manager {
 			return $result;
 		} finally {
 			$this->release_lock( $owner );
-			if ( 'failed' === $this->store->get_state()['status'] ) {
+			if ( $schedule_retry ) {
 				$this->schedule_refresh();
 			}
 		}
@@ -574,6 +597,34 @@ class Better_Font_Awesome_Metadata_Manager {
 	}
 
 	/**
+	 * Atomically renew the exact current worker lease before persisting results.
+	 *
+	 * Expired owners cannot renew. A compare-and-swap against the complete lock
+	 * value prevents a stale worker from displacing a replacement owner.
+	 *
+	 * @param string $owner Ownership token.
+	 * @return bool Whether this worker retained and renewed ownership.
+	 *
+	 * @phpstan-impure
+	 */
+	protected function renew_lock( $owner ) {
+		$now  = time();
+		$lock = get_option( self::LOCK_OPTION, array() );
+		if (
+			! $this->lock_value_is_active( $lock, $now ) ||
+			! isset( $lock['owner'] ) ||
+			! hash_equals( (string) $lock['owner'], (string) $owner )
+		) {
+			return false;
+		}
+
+		$renewed               = $lock;
+		$renewed['expires_at'] = max( (int) $lock['expires_at'] + 1, $now + self::LOCK_TTL );
+
+		return $this->atomic_update_option( self::LOCK_OPTION, $lock, $renewed );
+	}
+
+	/**
 	 * Release only the lock owned by this worker.
 	 *
 	 * @param string $owner Ownership token.
@@ -609,6 +660,18 @@ class Better_Font_Awesome_Metadata_Manager {
 		$state['last_error_code'] = substr( $code, 0, 100 );
 		$state['last_error']      = substr( $message, 0, 200 );
 		$this->store->save_state( $state );
+	}
+
+	/**
+	 * Return the stable internal result for a worker that lost ownership.
+	 *
+	 * @return WP_Error Ownership-loss result.
+	 */
+	private function ownership_lost_error() {
+		return new WP_Error(
+			'bfa_refresh_ownership_lost',
+			'Font Awesome metadata refresh ownership was lost before its result could be stored.'
+		);
 	}
 
 	/**

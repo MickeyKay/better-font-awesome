@@ -34,6 +34,33 @@ class Better_Font_Awesome_Interleaving_Metadata_Manager extends Better_Font_Awes
 }
 
 /**
+ * Deterministic refresh callback collaborator for worker ownership tests.
+ */
+class Better_Font_Awesome_Callback_Metadata_Library {
+
+	/** @var callable */
+	private $callback;
+
+	/**
+	 * Store the callback used by the explicit worker.
+	 *
+	 * @param callable $callback Refresh callback.
+	 */
+	public function __construct( $callback ) {
+		$this->callback = $callback;
+	}
+
+	/**
+	 * Return one deterministic refresh result.
+	 *
+	 * @return array|WP_Error Refresh result.
+	 */
+	public function refresh_release_data() {
+		return call_user_func( $this->callback );
+	}
+}
+
+/**
  * Validate request behavior, scheduling, locks, and retry state.
  */
 class Better_Font_Awesome_Metadata_Manager_Test extends Better_Font_Awesome_Metadata_Test_Case {
@@ -416,6 +443,205 @@ class Better_Font_Awesome_Metadata_Manager_Test extends Better_Font_Awesome_Meta
 
 		$this->assertFalse( $this->invoke_method( $manager, 'release_lock', array( $owner ) ) );
 		$this->assertSame( $other, get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION ) );
+	}
+
+	/**
+	 * A replacement worker's newer record fences a resumed stale success.
+	 */
+	public function test_replacement_worker_success_fences_stale_worker_record_and_state() {
+		$previous_cache_mode = wp_using_ext_object_cache();
+		wp_using_ext_object_cache( true );
+		try {
+			set_transient( 'bfa-release-data', $this->valid_release( '5.15.3' ), DAY_IN_SECONDS );
+			delete_option( '_transient_timeout_bfa-release-data' );
+			$store = new Better_Font_Awesome_Metadata_Store();
+			$store->maybe_migrate_transient( DAY_IN_SECONDS );
+			$this->assertSame( 'stale', $store->get_state()['status'] );
+		} finally {
+			delete_transient( 'bfa-release-data' );
+			wp_using_ext_object_cache( $previous_cache_mode );
+		}
+
+		$worker_a     = new Better_Font_Awesome_Metadata_Manager();
+		$worker_b     = new Better_Font_Awesome_Metadata_Manager();
+		$worker_b_lib = new Better_Font_Awesome_Callback_Metadata_Library(
+			function () {
+				return $this->valid_release( '5.15.5' );
+			}
+		);
+		$worker_b->set_library( $worker_b_lib );
+		$worker_a_lib = new Better_Font_Awesome_Callback_Metadata_Library(
+			function () use ( $worker_b ) {
+				$expired               = get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION );
+				$expired['expires_at'] = time() - 1;
+				update_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION, $expired, false );
+
+				$replacement = $worker_b->run_refresh( true );
+				$this->assertSame( '5.15.5', $replacement['version'] );
+
+				return $this->valid_release( '5.15.4' );
+			}
+		);
+		$worker_a->set_library( $worker_a_lib );
+
+		$result = $worker_a->run_refresh( true );
+		$state  = $store->get_state();
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'bfa_refresh_ownership_lost', $result->get_error_code() );
+		$this->assertSame( '5.15.5', $store->get_valid_record()['release']['version'] );
+		$this->assertSame( 'fresh', $state['status'] );
+		$this->assertSame( 0, $state['failure_count'] );
+		$this->assertSame( 0, $state['next_retry_at'] );
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+	}
+
+	/**
+	 * A stale callback failure cannot replace a newer successful state.
+	 *
+	 * @dataProvider stale_callback_failure_provider
+	 * @param string $failure_type Callback failure type.
+	 */
+	public function test_replacement_worker_success_fences_stale_worker_failure( $failure_type ) {
+		$this->persist_release( '5.15.3', time() - HOUR_IN_SECONDS );
+		$store        = new Better_Font_Awesome_Metadata_Store();
+		$worker_a     = new Better_Font_Awesome_Metadata_Manager();
+		$worker_b     = new Better_Font_Awesome_Metadata_Manager();
+		$worker_b_lib = new Better_Font_Awesome_Callback_Metadata_Library(
+			function () {
+				return $this->valid_release( '5.15.5' );
+			}
+		);
+		$worker_b->set_library( $worker_b_lib );
+		$worker_a_lib = new Better_Font_Awesome_Callback_Metadata_Library(
+			function () use ( $failure_type, $worker_b ) {
+				$expired               = get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION );
+				$expired['expires_at'] = time() - 1;
+				update_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION, $expired, false );
+
+				$replacement = $worker_b->run_refresh( true );
+				$this->assertSame( '5.15.5', $replacement['version'] );
+
+				if ( 'transport' === $failure_type ) {
+					return new WP_Error( 'stale_transport_failure', 'Stale worker failure.' );
+				}
+
+				return array( 'version' => 'invalid' );
+			}
+		);
+		$worker_a->set_library( $worker_a_lib );
+
+		$result = $worker_a->run_refresh( true );
+		$state  = $store->get_state();
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'bfa_refresh_ownership_lost', $result->get_error_code() );
+		$this->assertSame( '5.15.5', $store->get_valid_record()['release']['version'] );
+		$this->assertSame( 'fresh', $state['status'] );
+		$this->assertSame( 0, $state['failure_count'] );
+		$this->assertSame( 0, $state['next_retry_at'] );
+		$this->assertSame( '', $state['last_error_code'] );
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+	}
+
+	/**
+	 * Return callback-derived failures that would previously persist stale state.
+	 *
+	 * @return array Failure types.
+	 */
+	public function stale_callback_failure_provider() {
+		return array(
+			'upstream WP_Error' => array( 'transport' ),
+			'validation error'  => array( 'validation' ),
+		);
+	}
+
+	/**
+	 * An expired unreplaced lease cannot commit callback-derived data.
+	 */
+	public function test_expired_unreplaced_worker_cannot_commit_and_boot_recovers_work() {
+		$this->persist_release( '5.15.3', time() - HOUR_IN_SECONDS );
+		$store    = new Better_Font_Awesome_Metadata_Store();
+		$worker_a = new Better_Font_Awesome_Metadata_Manager();
+		$library  = new Better_Font_Awesome_Callback_Metadata_Library(
+			function () {
+				$expired               = get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION );
+				$expired['expires_at'] = time() - 1;
+				update_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION, $expired, false );
+
+				return $this->valid_release( '5.15.4' );
+			}
+		);
+		$worker_a->set_library( $library );
+
+		$result = $worker_a->run_refresh( true );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'bfa_refresh_ownership_lost', $result->get_error_code() );
+		$this->assertSame( '5.15.3', $store->get_valid_record()['release']['version'] );
+
+		$recovery = new Better_Font_Awesome_Metadata_Manager();
+		$recovery->boot();
+		$marker = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
+		$this->assertIsArray( $marker );
+		$this->assertSame( $marker['run_at'], wp_next_scheduled( Better_Font_Awesome_Metadata_Manager::CRON_HOOK, array( $marker['token'], false ) ) );
+		$this->assertSame( 0, $this->font_awesome_http_calls );
+	}
+
+	/**
+	 * Exact compare-and-swap renewal retains only a current unexpired owner.
+	 */
+	public function test_lock_renewal_is_atomic_owner_preserving_and_expiry_aware() {
+		$manager = new Better_Font_Awesome_Metadata_Manager();
+		$owner   = $this->invoke_method( $manager, 'acquire_lock' );
+		$before  = get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION );
+
+		$this->assertTrue( $this->invoke_method( $manager, 'renew_lock', array( $owner ) ) );
+		$renewed = get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION );
+		$this->assertSame( $owner, $renewed['owner'] );
+		$this->assertGreaterThan( $before['expires_at'], $renewed['expires_at'] );
+
+		$expired               = $renewed;
+		$expired['expires_at'] = time() - 1;
+		update_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION, $expired, false );
+		$this->assertFalse( $this->invoke_method( $manager, 'renew_lock', array( $owner ) ) );
+		$this->assertSame( $expired, get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION ) );
+
+		$replacement          = $expired;
+		$replacement['owner'] = wp_generate_uuid4();
+		$replacement['expires_at'] = time() + Better_Font_Awesome_Metadata_Manager::LOCK_TTL;
+		update_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION, $replacement, false );
+		$this->assertFalse( $this->invoke_method( $manager, 'renew_lock', array( $owner ) ) );
+		$this->assertSame( $replacement, get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION ) );
+	}
+
+	/**
+	 * A stale failed worker neither displaces replacement ownership nor retries.
+	 */
+	public function test_stale_failure_does_not_schedule_retry_while_replacement_is_owned() {
+		$this->persist_release( '5.15.3', time() - HOUR_IN_SECONDS );
+		$worker_a = new Better_Font_Awesome_Metadata_Manager();
+		$replacement = null;
+		$library = new Better_Font_Awesome_Callback_Metadata_Library(
+			function () use ( &$replacement ) {
+				$replacement = get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION );
+				$replacement['owner'] = wp_generate_uuid4();
+				$replacement['acquired_at'] = time();
+				$replacement['expires_at'] = time() + Better_Font_Awesome_Metadata_Manager::LOCK_TTL;
+				update_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION, $replacement, false );
+
+				return new WP_Error( 'stale_transport_failure', 'Stale worker failure.' );
+			}
+		);
+		$worker_a->set_library( $library );
+
+		$result = $worker_a->run_refresh( true );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'bfa_refresh_ownership_lost', $result->get_error_code() );
+		$this->assertSame( $replacement, get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION ) );
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+		$this->assertSame( 0, $this->count_scheduled_refresh_events() );
 	}
 
 	/**
