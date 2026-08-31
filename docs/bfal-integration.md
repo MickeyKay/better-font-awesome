@@ -96,13 +96,11 @@ Activation schedules background work only when the installed BFAL exposes the as
 
 Multisite uses per-site options, state, locks, and cron events. Network activation and deactivation iterate only sites belonging to `get_current_network_id()` and always restore the original blog context through `try`/`finally`. Newly initialized sites receive work only when they belong to that same relevant network. Lifecycle work on one network does not schedule or clear another network. No network-global release record is shared between sites.
 
-## Administrator refresh
+## Background-only update experience
 
-Settings includes a minimal metadata status panel and refresh button. The AJAX action requires `manage_options` and the dedicated nonce. It performs no Font Awesome HTTP.
+Font Awesome metadata updates are automatic and background-only. The normal settings page contains only the established plugin settings. It does not expose metadata status, timestamps, errors, diagnostics, or a manual refresh control, and BFA registers no browser-facing metadata-refresh AJAX action.
 
-The administrator override ignores `next_retry_at` and may replace a later pending event with an immediate event. It never bypasses an active worker lock. Repeated clicks remain duplicate-suppressed. The response and status panel expose only stable status labels, fetched time, and sanitized error code and summary.
-
-The scheduling result distinguishes a newly created event, valid existing scheduled or in-flight work, and an enqueue failure with no owner. The administrator endpoint returns a sanitized HTTP 503 JSON error for the unowned failure case and never reports that nonexistent work is scheduled.
+Activation, provider freshness checks, and stale-work recovery schedule the existing WP-Cron worker automatically. No normal browser request waits on or directly contacts the Font Awesome metadata service. Internal status, scheduling, worker, and diagnostic APIs remain available to the automatic orchestration and are not part of the administrator interface.
 
 ## External services
 

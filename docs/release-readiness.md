@@ -27,7 +27,7 @@ This is the release gate for the first conservative maintenance release. It inte
 - [x] Run Plugin Check against the exact WordPress.org SVN release tree
 - [x] Review admin notices and logs for sensitive upstream data
 
-The notice review found that BFAL 2.0.3 can print raw upstream error details without escaping. Public BFAL `2.1.0-rc.2` sanitizes those failures, and BFA stores and displays only sanitized codes and summaries. BFAL 2.0.3 remains an emergency rollback path with its documented weaker security and request-path behavior.
+The notice review found that BFAL 2.0.3 can print raw upstream error details without escaping. Public BFAL `2.1.0-rc.2` sanitizes those failures, and BFA stores only sanitized codes and summaries for internal diagnostics. The normal settings page exposes no metadata diagnostics. BFAL 2.0.3 remains an emergency rollback path with its documented weaker security and request-path behavior.
 
 ## Compatibility gates
 
@@ -46,6 +46,7 @@ Automated initialization coverage now preserves current 2.0.4 options and normal
 
 - [x] BFAL live-update contract is implemented and available as public release candidate `2.1.0-rc.2`
 - [x] Deterministic tests prove ordinary request paths perform no blocking Font Awesome metadata API call
+- [x] Metadata refresh is automatic and background-only, with no metadata status, diagnostics, nonce, or refresh control on the normal settings page
 - [x] Last-known-good data survives transient expiry and upstream outages
 - [x] 403, 429, timeout, invalid JSON, and invalid schema paths are tested
 - [x] Font Awesome metadata and asset delivery versions cannot diverge
@@ -58,7 +59,7 @@ Automated initialization coverage now preserves current 2.0.4 options and normal
 - [x] Public reproducible BFAL `2.1.0-rc.2` is available from GitHub and Packagist at `b9b7da9c066572de10b18dcca9679ca8cc2a70c1`
 - [x] BFAL rc.2 restores the static parent-document enqueue, adds anonymous CORS mode to the exact BFAL stylesheet handles, and changes the cache key so rc.1 responses cannot be reused
 - [x] BFAL's intentional first-caller precedence and safe earlier-owner behavior are documented and covered by a WordPress-backed regression
-- [x] Versioned non-autoloaded durable storage, transient migration, scheduler-worker ownership invariants, stale lock and crashed-worker recovery, backoff, jitter, lifecycle, and manual refresh implemented
+- [x] Versioned non-autoloaded durable storage, transient migration, scheduler-worker ownership invariants, stale lock and crashed-worker recovery, backoff, jitter, and automatic lifecycle refresh implemented
 - [x] Single-site and multisite candidate suites cover stale data, failures, deterministic scheduler-worker interleavings, two-network isolation, zero-HTTP request paths, and synthetic Font Awesome 5.15.5 adoption
 - [x] Candidate-required bootstrap fails closed on the wrong BFAL version, wrong reference, or missing API
 - [x] Stable BFAL 2.0.3 rollback activation creates no asynchronous cron event or orphaned marker

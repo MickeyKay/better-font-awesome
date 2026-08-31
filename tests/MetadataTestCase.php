@@ -6,30 +6,6 @@
  */
 
 /**
- * Exception used to inspect wp_die responses.
- */
-class Better_Font_Awesome_Metadata_WP_Die_Exception extends Exception {
-
-	/**
-	 * wp_die arguments.
-	 *
-	 * @var array
-	 */
-	public $args;
-
-	/**
-	 * Build the exception.
-	 *
-	 * @param string $message Error message.
-	 * @param array  $args    wp_die arguments.
-	 */
-	public function __construct( $message, $args ) {
-		parent::__construct( $message );
-		$this->args = $args;
-	}
-}
-
-/**
  * WordPress-backed metadata integration test base.
  */
 abstract class Better_Font_Awesome_Metadata_Test_Case extends WP_UnitTestCase {
@@ -70,9 +46,6 @@ abstract class Better_Font_Awesome_Metadata_Test_Case extends WP_UnitTestCase {
 	public function tearDown(): void {
 		remove_filter( 'pre_http_request', array( $this, 'intercept_font_awesome_http' ), 5 );
 		remove_filter( 'better_font_awesome_metadata_jitter', '__return_zero', 10 );
-		remove_filter( 'wp_die_handler', array( $this, 'filter_wp_die_handler' ) );
-		remove_filter( 'wp_die_ajax_handler', array( $this, 'filter_wp_die_handler' ) );
-		remove_filter( 'wp_die_json_handler', array( $this, 'filter_wp_die_handler' ) );
 		$_POST    = array();
 		$_REQUEST = array();
 		wp_set_current_user( 0 );
@@ -226,28 +199,6 @@ abstract class Better_Font_Awesome_Metadata_Test_Case extends WP_UnitTestCase {
 		$reflection = new ReflectionMethod( $object, $method );
 		$reflection->setAccessible( true );
 		return $reflection->invokeArgs( $object, $args );
-	}
-
-	/**
-	 * Return a throwing wp_die handler.
-	 *
-	 * @return callable wp_die handler.
-	 */
-	public function filter_wp_die_handler() {
-		return array( $this, 'handle_wp_die' );
-	}
-
-	/**
-	 * Throw on wp_die.
-	 *
-	 * @param string $message Error message.
-	 * @param string $title   Error title.
-	 * @param array  $args    wp_die arguments.
-	 * @throws Better_Font_Awesome_Metadata_WP_Die_Exception Always.
-	 */
-	public function handle_wp_die( $message, $title, $args ) {
-		unset( $title );
-		throw new Better_Font_Awesome_Metadata_WP_Die_Exception( $message, $args );
 	}
 
 	/**
