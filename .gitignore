@@ -43,3 +43,9 @@ svn
 .wp-env.override.json
 .wp-env-home/
 .phpunit.result.cache
+
+# Generated block assets are committed even when a global ignore excludes build.
+!/build/
+!/build/**
+playwright-report/
+test-results/

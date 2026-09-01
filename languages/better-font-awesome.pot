@@ -9,34 +9,34 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-29T20:49:04+00:00\n"
+"POT-Creation-Date: 2026-09-01T16:21:27+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: better-font-awesome\n"
 
-#: better-font-awesome-library.php:928
+#: better-font-awesome-library.php:1175
 msgid "Insert Icon"
 msgstr ""
 
 #. Plugin Name of the plugin
-#: better-font-awesome-library.php:948
+#: better-font-awesome-library.php:1196
 #: better-font-awesome.php
-#: better-font-awesome.php:201
-#: better-font-awesome.php:258
+#: better-font-awesome.php:268
+#: better-font-awesome.php:325
 msgid "Better Font Awesome"
 msgstr ""
 
-#: better-font-awesome-library.php:955
-msgid "It looks like something went wrong when trying to fetch data from the Font Awesome API:"
+#: better-font-awesome-library.php:1199
+msgid "Font Awesome metadata could not be refreshed or validated:"
 msgstr ""
 
-#: better-font-awesome-library.php:966
-msgid "Don't worry! Better Font Awesome will still render using the included fallback version:</b> "
+#: better-font-awesome-library.php:1214
+msgid "Better Font Awesome will use its validated local metadata when available: "
 msgstr ""
 
-#: better-font-awesome-library.php:967
+#: better-font-awesome-library.php:1218
 #, php-format
-msgid "This may be the result of a temporary server or connectivity issue which will resolve shortly. However if the problem persists please file a support ticket on the %splugin forum%s, citing the errors listed above. "
+msgid "This may be the result of a temporary server or connectivity issue which will resolve shortly. However if the problem persists please file a support ticket on the %1$splugin forum%2$s, citing the errors listed above. "
 msgstr ""
 
 #. Plugin URI of the plugin
@@ -59,64 +59,118 @@ msgstr ""
 msgid "https://mickeykay.me/"
 msgstr ""
 
-#: better-font-awesome.php:259
+#: better-font-awesome.php:326
 msgid "It appears that Better Font Awesome is missing it's <a href=\"https://github.com/MickeyKay/better-font-awesome-library\" target=\"_blank\">core library</a>, which typically occurs when cloning the Git repository and failing to run <code>composer install</code>. Please refer to the plugin's <a href=\"https://github.com/MickeyKay/better-font-awesome\" target=\"_blank\">installation instructions</a> for details on how to properly install Better Font Awesome via Git. If you installed from within WordPress, or via the wordpress.org repo, then chances are the install failed and you can try again. If the issue persists, please create a new topic on the plugin's <a href=\"http://wordpress.org/support/plugin/better-font-awesome\" target=\"_blank\">support forum</a> or file an issue on the <a href=\"https://github.com/MickeyKay/better-font-awesome/issues\" target=\"_blank\">Github repo</a>."
 msgstr ""
 
-#: better-font-awesome.php:260
+#: better-font-awesome.php:327
 msgid "Back to the plugins page &rarr;"
 msgstr ""
 
-#: better-font-awesome.php:375
+#: better-font-awesome.php:497
 msgid "Save Settings"
 msgstr ""
 
-#: better-font-awesome.php:404
+#: better-font-awesome.php:526
 msgid "Font Awesome version"
 msgstr ""
 
-#: better-font-awesome.php:412
+#: better-font-awesome.php:534
 msgid "Version check frequency"
 msgstr ""
 
-#: better-font-awesome.php:420
+#: better-font-awesome.php:542
 msgid "Include v4 CSS shim"
 msgstr ""
 
-#: better-font-awesome.php:426
+#: better-font-awesome.php:548
 msgid "Include the Font Awesome v4 CSS shim to support legacy icons (<a href=\"https://fontawesome.com/how-to-use/on-the-web/setup/upgrading-from-version-4#name-changes\" target=\"_blank\">more details</a>)."
 msgstr ""
 
-#: better-font-awesome.php:432
+#: better-font-awesome.php:554
 msgid "Remove existing Font Awesome"
 msgstr ""
 
-#: better-font-awesome.php:438
+#: better-font-awesome.php:560
 msgid "Attempt to remove Font Awesome CSS and shortcodes added by other plugins and themes."
 msgstr ""
 
-#: better-font-awesome.php:444
+#: better-font-awesome.php:566
 msgid "Hide admin notices"
 msgstr ""
 
-#: better-font-awesome.php:450
+#: better-font-awesome.php:572
 msgid "Hide the default admin warnings that are shown when API and CDN errors occur."
 msgstr ""
 
-#: better-font-awesome.php:499
+#: better-font-awesome.php:621
 msgid "You are not allowed to change these settings."
 msgstr ""
 
-#: better-font-awesome.php:507
+#: better-font-awesome.php:629
 msgid "Settings were not saved due to a missing nonce. Refresh the page and try again."
 msgstr ""
 
-#: better-font-awesome.php:523
+#: better-font-awesome.php:645
 msgid "Settings saved."
 msgstr ""
 
 #. translators: placeholder is the numeric current version number.
-#: better-font-awesome.php:547
+#: better-font-awesome.php:691
 #, php-format
 msgid "%s (The plugin automatically uses the latest version of Font Awesome, and checks for updates at this frequency)"
+msgstr ""
+
+#: includes/class-better-font-awesome-metadata-manager.php:203
+msgid "Font Awesome metadata refresh could not be scheduled."
+msgstr ""
+
+#: src/edit.js:52
+msgid "Icon settings"
+msgstr ""
+
+#: src/edit.js:54
+msgid "Icon"
+msgstr ""
+
+#: src/edit.js:59
+msgid "Search the current Font Awesome Free catalog."
+msgstr ""
+
+#: src/edit.js:65
+msgid "Accessible label"
+msgstr ""
+
+#: src/edit.js:68
+msgid "Leave empty when the icon is decorative."
+msgstr ""
+
+#. translators: %s is the selected icon label.
+#: src/edit.js:83
+#, js-format
+msgid "Font Awesome icon: %s"
+msgstr ""
+
+#: build/block.json
+#: src/block.json
+msgctxt "block title"
+msgid "Font Awesome Icon"
+msgstr ""
+
+#: build/block.json
+#: src/block.json
+msgctxt "block description"
+msgid "Add a Font Awesome Free icon that stays current with Better Font Awesome."
+msgstr ""
+
+#: build/block.json
+#: src/block.json
+msgctxt "block keyword"
+msgid "icon"
+msgstr ""
+
+#: build/block.json
+#: src/block.json
+msgctxt "block keyword"
+msgid "font awesome"
 msgstr ""

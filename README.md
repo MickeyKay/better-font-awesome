@@ -2,7 +2,7 @@
 
 # Better Font Awesome #
 **Contributors:** [mcguive7](https://profiles.wordpress.org/mcguive7/), [aaronbmm](https://profiles.wordpress.org/aaronbmm/), [mightyminnow](https://profiles.wordpress.org/mightyminnow/)<br>
-**Tags:** font awesome, icons, icon font, shortcode, classic editor<br>
+**Tags:** font awesome, icons, icon font, shortcode, block editor<br>
 **Donate link:** https://mickeykay.me<br>
 **Requires at least:** 6.5<br>
 **Tested up to:** 7.1<br>
@@ -11,7 +11,7 @@
 **License:** GPLv2+<br>
 **License URI:** https://www.gnu.org/licenses/gpl-2.0.html<br>
 
-Font Awesome 5 Free icons for WordPress with shortcodes, HTML, TinyMCE, automatic metadata updates, backwards compatibility, and CDN delivery.
+Font Awesome 5 Free icons for WordPress with a native block, shortcodes, HTML, TinyMCE, automatic metadata updates, backwards compatibility, and CDN delivery.
 
 ## Description ##
 
@@ -28,6 +28,8 @@ Better Font Awesome integrates the latest available release in the supported [Fo
 
 * **Backwards compatible** - established Font Awesome 4 and 5 shortcode prefixes remain compatible, including the optional Font Awesome 4 shim for upgraded sites.
 
+* **Native icon block** - search the current Font Awesome Free catalog in the Block Editor, add an optional accessible label, and keep icon rendering dynamic.
+
 * **Compatible with other plugins** - designed to work with shortcodes generated with plugins like [Font Awesome Icons](http://wordpress.org/plugins/font-awesome/ "Font Awesome Icons"), [Font Awesome More Icons](https://wordpress.org/plugins/font-awesome-more-icons/ "Font Awesome More Icons"), and [Font Awesome Shortcodes](https://wordpress.org/plugins/font-awesome-shortcodes/), so you can switch to Better Font Awesome and your existing shortcodes will still work.
 
 * **CDN speeds** - Font Awesome CSS is loaded from a versioned public CDN URL.
@@ -38,9 +40,14 @@ Better Font Awesome integrates the latest available release in the supported [Fo
 All settings can be adjusted via **Settings &rarr; Better Font Awesome**.
 
 ### Usage ###
-Better Font Awesome can be used in 3 different ways: shortcode, HTML, and TinyMCE
+Better Font Awesome can be used in 4 different ways: Block Editor, shortcode, TinyMCE, and HTML.
 
-### 1. Shortcode ###
+### 1. Block Editor ###
+Insert the **Font Awesome Icon** block, then use its block settings to search the current Font Awesome Free catalog. Add an accessible label when the icon communicates meaning, or leave the label empty when the icon is decorative.
+
+The block is rendered dynamically through the same established server-side icon contract as the shortcode. Saved posts store the semantic icon name and style rather than fixed icon markup.
+
+### 2. Shortcode ###
 `[icon name="flag" class="2x spin border" unprefixed_class="my-custom-class"]`
 Note that prefixes (`fa-` and `icon-`) are not required, but if you do include them things will still work just fine. Better Font Awesome normalizes established shortcode prefixes for the supported Font Awesome 5 Free channel.
 
@@ -52,10 +59,10 @@ That means that all of the following established shortcode forms continue to wor
 
 You can read more about shortcode usage on [Github](https://github.com/MickeyKay/better-font-awesome-library#shortcode)
 
-### 2. TinyMCE ###
+### 3. TinyMCE ###
 Better Font Awesome also provides you with an easy-to-use drop down menu when editing in TinyMCE's visual mode. Check out our [Screenshots](https://wordpress.org/plugins/better-font-awesome/screenshots/ "Screenshots") to see what it looks like.
 
-### 3. HTML ###
+### 4. HTML ###
 Note that prefixes are required for HTML usage, and are version-specific. For this reason, shortcode usage is encouraged over HTML. If you do want to use HTML, however, you can read more on the [Font Awesome site](http://fortawesome.github.io/Font-Awesome/examples/).
 
 ### Advanced / Integration ###
@@ -97,7 +104,7 @@ This section describes how to install the plugin and get it working.
 
 1. Upload Better Font Awesome to the /wp-content/plugins/ directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
-1. That's it! Now you can use 3 different methods (shortcode, HTML, TinyMCE) to insert Font Awesome icons, all outlined in the [Description](https://wordpress.org/plugins/better-font-awesome "Description") section.
+1. That's it! You can now use the native block, shortcode, TinyMCE, or HTML methods outlined in the [Description](https://wordpress.org/plugins/better-font-awesome "Description") section.
 
 
 ## Frequently Asked Questions ##

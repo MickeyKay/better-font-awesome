@@ -1,0 +1,117 @@
+<?php
+/**
+ * Native icon block tests.
+ *
+ * @package Better_Font_Awesome
+ */
+
+class Better_Font_Awesome_Icon_Block_Test extends WP_UnitTestCase {
+
+	/**
+	 * Plugin instance.
+	 *
+	 * @var Better_Font_Awesome_Plugin
+	 */
+	private $plugin;
+
+	/**
+	 * Block controller.
+	 *
+	 * @var Better_Font_Awesome_Icon_Block
+	 */
+	private $block;
+
+	public function setUp(): void {
+		parent::setUp();
+
+		$this->plugin = Better_Font_Awesome_Plugin::get_instance();
+		$this->block  = $this->plugin->get( 'icon_block' );
+		$this->block->register();
+	}
+
+	public function tearDown(): void {
+		unregister_block_type( Better_Font_Awesome_Icon_Block::NAME );
+		remove_all_filters( 'bfa_icon' );
+		parent::tearDown();
+	}
+
+	public function test_registers_api_version_three_dynamic_block_from_metadata() {
+		$registered = WP_Block_Type_Registry::get_instance()->get_registered( Better_Font_Awesome_Icon_Block::NAME );
+
+		$this->assertInstanceOf( WP_Block_Type::class, $registered );
+		$this->assertSame( 3, $registered->api_version );
+		$this->assertSame( 'flag', $registered->attributes['iconName']['default'] );
+		$this->assertSame( 'solid', $registered->attributes['iconStyle']['default'] );
+		$this->assertSame( '', $registered->attributes['label']['default'] );
+		$this->assertTrue( is_callable( $registered->render_callback ) );
+	}
+
+	public function test_decorative_icon_uses_existing_renderer_and_is_hidden_from_assistive_technology() {
+		$output = $this->block->render(
+			array(
+				'iconName'  => 'heart',
+				'iconStyle' => 'regular',
+				'label'     => '',
+			)
+		);
+
+		$this->assertStringContainsString( 'class="wp-block-better-font-awesome-icon"', $output );
+		$this->assertStringContainsString( 'aria-hidden="true"', $output );
+		$this->assertStringContainsString( '<i class="far fa-heart " ></i>', $output );
+	}
+
+	public function test_labelled_icon_exposes_sanitized_accessible_name() {
+		$output = $this->block->render(
+			array(
+				'iconName'  => 'coffee',
+				'iconStyle' => 'solid',
+				'label'     => 'Coffee <strong>time</strong>',
+			)
+		);
+
+		$this->assertStringContainsString( 'role="img"', $output );
+		$this->assertStringContainsString( 'aria-label="Coffee time"', $output );
+		$this->assertStringNotContainsString( '<strong>', $output );
+		$this->assertStringContainsString( '<i class="fas fa-coffee " ></i>', $output );
+	}
+
+	public function test_render_preserves_existing_icon_output_filter() {
+		add_filter(
+			'bfa_icon',
+			static function ( $html ) {
+				return '<span data-filtered="true">' . $html . '</span>';
+			}
+		);
+
+		$output = $this->block->render(
+			array(
+				'iconName'  => 'star',
+				'iconStyle' => 'solid',
+			)
+		);
+
+		$this->assertStringContainsString( '<span data-filtered="true"><i class="fas fa-star " ></i></span>', $output );
+	}
+
+	public function test_invalid_attribute_shapes_fail_closed_to_safe_defaults() {
+		$output = $this->block->render(
+			array(
+				'iconName'  => array( 'not-a-string' ),
+				'iconStyle' => 'unsupported-style',
+				'label'     => array( 'not-a-string' ),
+			)
+		);
+
+		$this->assertStringContainsString( 'aria-hidden="true"', $output );
+		$this->assertStringContainsString( '<i class="fas fa-flag " ></i>', $output );
+	}
+
+	public function test_editor_catalog_contains_only_safe_free_icon_fields() {
+		$catalog = $this->block->get_editor_catalog();
+
+		$this->assertNotEmpty( $catalog );
+		$this->assertSame( array( 'label', 'name', 'style' ), array_keys( $catalog[0] ) );
+		$this->assertMatchesRegularExpression( '/^[a-z0-9-]+$/', $catalog[0]['name'] );
+		$this->assertContains( $catalog[0]['style'], array( 'brands', 'regular', 'solid' ) );
+	}
+}

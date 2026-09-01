@@ -10,6 +10,7 @@
     <exclude-pattern>/tests/</exclude-pattern>
     <exclude-pattern>/.codex/</exclude-pattern>
     <exclude-pattern>/.context/</exclude-pattern>
+	<exclude-pattern>/build/*.asset.php</exclude-pattern>
 
     <!-- How to scan -->
     <!-- Usage instructions: https://github.com/squizlabs/PHP_CodeSniffer/wiki/Usage -->

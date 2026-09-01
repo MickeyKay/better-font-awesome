@@ -21,6 +21,7 @@ composer.lock
 css/src
 design
 docs
+eslint.config.mjs
 img/src
 js/src
 node_modules
@@ -28,6 +29,8 @@ package-lock.json
 package.json
 phpcs.xml.dist
 phpstan.neon.dist
+playwright.config.mjs
 phpunit*.xml*
 svn
+src
 tests

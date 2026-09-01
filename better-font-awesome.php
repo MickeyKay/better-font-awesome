@@ -98,6 +98,15 @@ class Better_Font_Awesome_Plugin {
 	private $metadata_manager;
 
 	/**
+	 * Native icon block controller.
+	 *
+	 * @since 2.2.0
+	 *
+	 * @var Better_Font_Awesome_Icon_Block|null
+	 */
+	private $icon_block;
+
+	/**
 	 * Plugin display name.
 	 *
 	 * @since  0.9.0
@@ -197,6 +206,10 @@ class Better_Font_Awesome_Plugin {
 		if ( $this->metadata_manager ) {
 			$this->metadata_manager->set_library( $this->bfa_lib );
 		}
+
+		// Register the native dynamic icon block without changing shortcodes.
+		$this->icon_block = new Better_Font_Awesome_Icon_Block( $this->bfa_lib );
+		$this->icon_block->boot();
 
 		// Load the plugin text domain.
 		$this->load_text_domain();
@@ -325,6 +338,9 @@ class Better_Font_Awesome_Plugin {
 
 		// Better Font Awesome Library.
 		require_once $this->bfa_lib_file_path;
+
+		// Better Font Awesome native icon block.
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-better-font-awesome-icon-block.php';
 	}
 
 	/**
