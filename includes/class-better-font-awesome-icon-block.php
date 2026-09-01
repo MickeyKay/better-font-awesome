@@ -106,11 +106,9 @@ class Better_Font_Awesome_Icon_Block {
 		$accessibility = '' === $label
 			? array(
 				'aria-hidden' => 'true',
-				'class'       => 'wp-block-better-font-awesome-icon',
 			)
 			: array(
 				'aria-label' => $label,
-				'class'      => 'wp-block-better-font-awesome-icon',
 				'role'       => 'img',
 			);
 
