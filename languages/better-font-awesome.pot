@@ -2,7 +2,7 @@
 # This file is distributed under the GPLv2+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Better Font Awesome 2.0.4\n"
+"Project-Id-Version: Better Font Awesome 2.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/better-font-awesome/\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"

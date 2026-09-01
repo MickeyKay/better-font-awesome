@@ -5,11 +5,11 @@ Donate link: https://mickeykay.me
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.0.4
+Stable tag: 2.1.0
 License: GPLv2+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-The Better Font Awesome plugin for WordPress. Shortcodes, HTML, TinyMCE, various Font Awesome versions, backwards compatibility, CDN speeds, and more.
+Font Awesome 5 Free icons for WordPress with shortcodes, HTML, TinyMCE, automatic metadata updates, backwards compatibility, and CDN delivery.
 
 == Description ==
 
@@ -17,14 +17,14 @@ The Better Font Awesome plugin for WordPress. Shortcodes, HTML, TinyMCE, various
 
 **Do you find this plugin helpful? Please consider [leaving a 5-star review](https://wordpress.org/support/view/plugin-reviews/better-font-awesome).**
 
-Better Font Awesome allows you to automatically integrate the latest available version of [Font Awesome](http://fontawesome.io/) into your WordPress project, along with accompanying CSS, shortcodes, and TinyMCE icon shortcode generator.
+Better Font Awesome integrates the latest available release in the supported [Font Awesome 5 Free](https://fontawesome.com/v5/search?o=r&m=free) channel into your WordPress project, along with accompanying CSS, shortcodes, and a TinyMCE icon shortcode generator.
 
 
 = Features =
 
-* **Always up-to-date** - automatically fetches the most recent available version of Font Awesome, meaning you no longer need to manually update the version included in your theme/plugin.
+* **Automatically updated** - refreshes validated metadata in the background for the most recent available Font Awesome 5 Free release, so normal requests never wait for the metadata service.
 
-* **Backwards compatible** - shortcode output is automatically updated depending on which version of Font Awesome you choose, meaning that you can switch versions without having to modify your shortcodes.
+* **Backwards compatible** - established Font Awesome 4 and 5 shortcode prefixes remain compatible, including the optional Font Awesome 4 shim for upgraded sites.
 
 * **Compatible with other plugins** - designed to work with shortcodes generated with plugins like [Font Awesome Icons](http://wordpress.org/plugins/font-awesome/ "Font Awesome Icons"), [Font Awesome More Icons](https://wordpress.org/plugins/font-awesome-more-icons/ "Font Awesome More Icons"), and [Font Awesome Shortcodes](https://wordpress.org/plugins/font-awesome-shortcodes/), so you can switch to Better Font Awesome and your existing shortcodes will still work.
 
@@ -40,9 +40,9 @@ Better Font Awesome can be used in 3 different ways: shortcode, HTML, and TinyMC
 
 = 1. Shortcode =
 `[icon name="flag" class="2x spin border" unprefixed_class="my-custom-class"]`
-Note that prefixes (`fa-` and `icon-`) are not required, but if you do include them things will still work just fine! Better Font Awesome is smart enough to know what version of Font Awesome you're using and correct of the appropriate prefix.
+Note that prefixes (`fa-` and `icon-`) are not required, but if you do include them things will still work just fine. Better Font Awesome normalizes established shortcode prefixes for the supported Font Awesome 5 Free channel.
 
-That means that all of the following shortcodes will work, regardless of what version of Font Awesome you choose:
+That means that all of the following established shortcode forms continue to work with the supported Font Awesome 5 Free channel:
 `[icon name="flag" class="2x spin border"]`
 `[icon name="icon-flag" class="icon-2x icon-spin icon-border"]`
 `[icon name="fa-flag" class="fa-2x fa-spin fa-border"]`
@@ -102,7 +102,13 @@ This section describes how to install the plugin and get it working.
 
 = How is this plugin different from other Font Awesome plugins? =
 
-This plugin is unique in that it automatically pulls in *all* available versions of Font Awesome, meaning you never have to wait for the plugin developer to add the latest version. Furthermore, Better Font Awesome is designed to work with a wide variety of shortcode formats used by other Font Awesome plugins - this means that you can easily switch to Better Font Awesome (if, for example, you need to include icons from the most recent version of Font Awesome, which isn't always available with other plugins), and they will still work.
+This plugin automatically refreshes validated metadata for the latest release in its supported Font Awesome 5 Free channel. Better Font Awesome is also designed to work with a wide variety of established shortcode formats used by other Font Awesome plugins, so existing compatible shortcodes can continue to work. Font Awesome 6 and 7 are not currently supported.
+
+= How does automatic metadata refresh work? =
+
+Automatic metadata refresh depends on functioning WordPress cron. Default WP-Cron is request-driven, so refresh can be delayed on low-traffic sites. Sites using `DISABLE_WP_CRON` should invoke `wp-cron.php` through a real scheduler or an equivalent hosting mechanism. `wp cron test` is available as a WP-CLI diagnostic.
+
+If scheduled refresh does not run, Better Font Awesome continues serving validated last-known-good metadata or its bundled fallback. Normal page requests do not wait on the Font Awesome metadata service.
 
 = Do I have to install any font files? =
 
@@ -119,6 +125,13 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 
 == Changelog ==
+
+= 2.1.0 =
+* Integrates the public stable Better Font Awesome Library 2.1.0 while preserving existing settings and shortcode content.
+* Refreshes Font Awesome 5 Free metadata asynchronously through WP-Cron, with no metadata API wait on normal frontend, admin, editor, REST, or shortcode requests.
+* Adds validated durable last-known-good metadata, bundled fallback behavior, failure backoff, and recovery.
+* Hardens multisite lifecycle handling and settings persistence while retaining Classic Editor, shortcode, frontend, and hybrid `wp_editor()` compatibility.
+* Requires WordPress 6.5 or newer and PHP 7.4 or newer, and is tested with WordPress through 7.1.
 
 = 2.0.4 =
 * Bump BFAL to properly esc attributes
@@ -172,6 +185,9 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 * Switch from using git submodules to composer dependency management for core library inclusion.
 
 == Upgrade Notice ==
+
+= 2.1.0 =
+Reliability and compatibility release for Font Awesome 5 Free. Requires WordPress 6.5 or newer and PHP 7.4 or newer. Existing settings and shortcodes are preserved.
 
 = 2.0.4 =
 * Bump BFAL to properly esc attributes
