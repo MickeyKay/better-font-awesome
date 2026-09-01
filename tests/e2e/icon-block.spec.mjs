@@ -25,8 +25,8 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 			content: 'Reference paragraph',
 		} );
 		const block = window.wp.blocks.createBlock( 'better-font-awesome/icon', {
-			iconName: 'heart',
-			iconStyle: 'regular',
+			iconName: 'flag',
+			iconStyle: 'solid',
 			label: 'Favorite',
 		} );
 		const centeredBlock = window.wp.blocks.createBlock(
@@ -76,16 +76,22 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 
 	const editor = page.frameLocator( 'iframe[name="editor-canvas"]' );
 	const editorIcon = editor.locator(
-		'.wp-block-better-font-awesome-icon .far.fa-heart'
+		'.wp-block-better-font-awesome-icon .fas.fa-flag'
 	);
 	await expect( editorIcon ).toBeVisible();
-	await expect( page.getByLabel( 'Icon', { exact: true } ) ).toBeVisible();
+	const iconControl = page.getByLabel( 'Icon', { exact: true } );
+	const selectedLabel = await page.evaluate( () => {
+		return window.bfaBlockEditor.icons.find(
+			( icon ) => 'flag' === icon.name && 'solid' === icon.style
+		).label;
+	} );
+	await expect( iconControl ).toHaveValue( selectedLabel );
 
 	const referenceParagraph = editor.getByText( 'Reference paragraph', {
 		exact: true,
 	} );
 	const defaultBlock = editor.locator(
-		'.wp-block-better-font-awesome-icon:has(.far.fa-heart)'
+		'.wp-block-better-font-awesome-icon:has(.fas.fa-flag)'
 	);
 	const centeredBlock = editor.locator(
 		'.wp-block-better-font-awesome-icon:has(.fas.fa-star)'
@@ -152,8 +158,8 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 		};
 	} );
 	expect( attributes.default ).toMatchObject( {
-		iconName: 'heart',
-		iconStyle: 'regular',
+		iconName: 'flag',
+		iconStyle: 'solid',
 		label: 'Favorite',
 	} );
 	expect( attributes.centered ).toMatchObject( {
@@ -169,7 +175,7 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 	await page.goto( post.link );
 	const frontendBlock = page.locator( '.wp-block-better-font-awesome-icon[role="img"]' );
 	await expect( frontendBlock ).toHaveAttribute( 'aria-label', 'Favorite' );
-	await expect( frontendBlock.locator( '.far.fa-heart' ) ).toBeVisible();
+	await expect( frontendBlock.locator( '.fas.fa-flag' ) ).toBeVisible();
 	const frontendCenteredBlock = page.locator(
 		'.wp-block-better-font-awesome-icon.aligncenter:has(.fas.fa-star)'
 	);

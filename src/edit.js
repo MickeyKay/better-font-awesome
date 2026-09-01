@@ -1,4 +1,4 @@
-import { filterCatalog, parseSelection, styleClass } from './icon-utils.mjs';
+import { buildCatalogOptions, parseSelection, styleClass } from './icon-utils.mjs';
 
 const { __, sprintf } = wp.i18n;
 const { InspectorControls, useBlockProps } = wp.blockEditor;
@@ -11,17 +11,10 @@ export default function Edit( { attributes, setAttributes } ) {
 	const { iconName, iconStyle, label } = attributes;
 	const [ filterValue, setFilterValue ] = useState( '' );
 	const catalog = getCatalog();
-	const options = useMemo( () => {
-		const needle = filterValue.trim().toLowerCase();
-
-		return filterCatalog( catalog, needle )
-			.slice( 0, 100 )
-			.map( ( icon ) => ( {
-				label: icon.label,
-				value: `${ icon.style }:${ icon.name }`,
-			} ) );
-	}, [ catalog, filterValue ] );
 	const selectedValue = `${ iconStyle }:${ iconName }`;
+	const options = useMemo( () => {
+		return buildCatalogOptions( catalog, filterValue, selectedValue );
+	}, [ catalog, filterValue, selectedValue ] );
 	const selectedIcon = catalog.find(
 		( icon ) => `${ icon.style }:${ icon.name }` === selectedValue
 	);

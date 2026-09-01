@@ -16,6 +16,25 @@ export function filterCatalog( catalog, filterValue ) {
 	} );
 }
 
+export function buildCatalogOptions( catalog, filterValue, selectedValue, limit = 100 ) {
+	const icons = filterCatalog( catalog, filterValue ).slice( 0, limit );
+	const selectedIcon = catalog.find( ( icon ) => {
+		return `${ icon.style }:${ icon.name }` === selectedValue;
+	} );
+	const includesSelectedIcon = icons.some( ( icon ) => {
+		return `${ icon.style }:${ icon.name }` === selectedValue;
+	} );
+
+	if ( selectedIcon && ! includesSelectedIcon ) {
+		icons.push( selectedIcon );
+	}
+
+	return icons.map( ( icon ) => ( {
+		label: icon.label,
+		value: `${ icon.style }:${ icon.name }`,
+	} ) );
+}
+
 export function parseSelection( value ) {
 	if ( ! value || ! value.includes( ':' ) ) {
 		return null;
