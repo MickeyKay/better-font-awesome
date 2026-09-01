@@ -1,48 +1,19 @@
-import { buildCatalogOptions, parseSelection, styleClass } from './icon-utils.mjs';
+import IconSelector, { getCatalog } from './icon-selector';
+import { findCatalogIcon, styleClass } from './icon-utils.mjs';
 
 const { __, sprintf } = wp.i18n;
 const { InspectorControls, useBlockProps } = wp.blockEditor;
 const {
-	ComboboxControl,
 	PanelBody,
 	TextControl,
 	__experimentalVStack: VStack,
 } = wp.components;
-const { useMemo, useState } = wp.element;
-
-const getCatalog = () => window.bfaBlockEditor?.icons ?? [];
-
-const renderIconOption = ( { item } ) => (
-	<span
-		style={ {
-			alignItems: 'center',
-			display: 'inline-flex',
-			gap: '8px',
-		} }
-	>
-		<i
-			className={ `${ styleClass( item.style ) } fa-${ item.name }` }
-			aria-hidden="true"
-			style={ {
-				textAlign: 'center',
-				width: '1.25em',
-			} }
-		/>
-		<span>{ item.label }</span>
-	</span>
-);
 
 export default function Edit( { attributes, setAttributes } ) {
 	const { iconName, iconStyle, label } = attributes;
-	const [ filterValue, setFilterValue ] = useState( '' );
 	const catalog = getCatalog();
 	const selectedValue = `${ iconStyle }:${ iconName }`;
-	const options = useMemo( () => {
-		return buildCatalogOptions( catalog, filterValue, selectedValue );
-	}, [ catalog, filterValue, selectedValue ] );
-	const selectedIcon = catalog.find(
-		( icon ) => `${ icon.style }:${ icon.name }` === selectedValue
-	);
+	const selectedIcon = findCatalogIcon( catalog, selectedValue );
 	const iconLabel = selectedIcon?.label ?? iconName;
 	const blockProps = useBlockProps( {
 		className: 'bfa-icon-block-editor',
@@ -53,7 +24,7 @@ export default function Edit( { attributes, setAttributes } ) {
 			return;
 		}
 
-		const selection = parseSelection( value );
+		const selection = findCatalogIcon( catalog, value );
 		if ( ! selection ) {
 			return;
 		}
@@ -69,22 +40,7 @@ export default function Edit( { attributes, setAttributes } ) {
 			<InspectorControls>
 				<PanelBody title={ __( 'Icon settings', 'better-font-awesome' ) }>
 					<VStack spacing={ 4 }>
-						<ComboboxControl
-							label={ __( 'Icon', 'better-font-awesome' ) }
-							value={ selectedValue }
-							options={ options }
-							onChange={ onSelectIcon }
-							onFilterValueChange={ setFilterValue }
-							__experimentalRenderItem={ renderIconOption }
-							help={ sprintf(
-								/* translators: %d is the number of available icon and style options. */
-								__(
-									'Search all %d available Font Awesome Free icon and style options.',
-									'better-font-awesome'
-								),
-								catalog.length
-							) }
-						/>
+						<IconSelector value={ selectedValue } onChange={ onSelectIcon } />
 						<TextControl
 							label={ __( 'Accessible label', 'better-font-awesome' ) }
 							value={ label }

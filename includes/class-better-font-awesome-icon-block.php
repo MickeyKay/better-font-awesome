@@ -129,7 +129,7 @@ class Better_Font_Awesome_Icon_Block {
 	/**
 	 * Return safe Font Awesome Free fields for the editor selector.
 	 *
-	 * @return array<int, array{label: string, name: string, style: string}> Editor catalog.
+	 * @return array<int, array{label: string, name: string, style: string, searchTerms: string[]}> Editor catalog.
 	 */
 	public function get_editor_catalog() {
 		$catalog = array();
@@ -142,14 +142,27 @@ class Better_Font_Awesome_Icon_Block {
 			$name  = is_string( $icon['slug'] ) ? sanitize_key( $icon['slug'] ) : '';
 			$style = is_string( $icon['style'] ) ? sanitize_key( $icon['style'] ) : '';
 			$label = is_string( $icon['title'] ) ? sanitize_text_field( $icon['title'] ) : '';
+			$terms = isset( $icon['searchTerms'] ) ? $icon['searchTerms'] : array();
+			$terms = is_array( $terms ) ? $terms : array( $terms );
+			$terms = array_values(
+				array_filter(
+					array_map(
+						static function ( $term ) {
+							return is_string( $term ) ? sanitize_text_field( $term ) : '';
+						},
+						$terms
+					)
+				)
+			);
 			if ( '' === $name || '' === $label || ! in_array( $style, self::STYLES, true ) ) {
 				continue;
 			}
 
 			$catalog[] = array(
-				'label' => $label,
-				'name'  => $name,
-				'style' => $style,
+				'label'       => $label,
+				'name'        => $name,
+				'style'       => $style,
+				'searchTerms' => $terms,
 			);
 		}
 

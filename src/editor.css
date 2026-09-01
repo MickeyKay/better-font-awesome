@@ -7,3 +7,30 @@
 	display: flex;
 	justify-content: center;
 }
+
+.bfa-inline-icon {
+	color: inherit;
+	font-size: inherit;
+}
+
+.bfa-inline-icon-popover .components-popover__content {
+	min-width: 320px;
+	padding: 16px;
+}
+
+.bfa-icon-selector__option,
+.bfa-icon-selector__selected {
+	align-items: center;
+	display: inline-flex;
+	gap: 8px;
+}
+
+.bfa-icon-selector__option i,
+.bfa-icon-selector__selected i {
+	text-align: center;
+	width: 1.25em;
+}
+
+.bfa-icon-selector__selected {
+	margin-top: 8px;
+}
