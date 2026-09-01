@@ -43,13 +43,16 @@ jobs:
       - name: Check PHP coding standards
         run: npm run lint
 
+      - name: Check block source
+        run: npm run lint:js && npm run test:unit:js
+
       - name: Run static analysis
         run: npm run analyze
 
       - name: Verify generated readme
         run: |
           npm run build
-          git diff --exit-code -- README.md
+          git diff --exit-code -- README.md build
           test -z "$(git ls-files --others --exclude-standard -- readme.md)"
 
       - name: Audit PHP dependencies
@@ -57,6 +60,42 @@ jobs:
 
       - name: Audit Node.js dependencies
         run: npm audit --audit-level=high
+
+  block-e2e:
+    name: Native icon block browser test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer:v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          composer install --prefer-dist --no-interaction
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Start WordPress
+        run: WP_ENV_PORT=8888 WP_ENV_TESTS_PORT=8889 npm run env:start
+
+      - name: Run block browser test
+        run: WP_ENV_PORT=8888 npm run test:e2e
+
+      - name: Stop WordPress
+        if: always()
+        run: WP_ENV_PORT=8888 WP_ENV_TESTS_PORT=8889 npm run env:stop
 
   current-phpunit:
     name: Public BFAL 2.1.0 stable - WordPress ${{ matrix.wordpress }} on PHP ${{ matrix.php }}

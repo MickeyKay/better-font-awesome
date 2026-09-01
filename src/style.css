@@ -1,0 +1,9 @@
+.wp-block-better-font-awesome-icon {
+	color: inherit;
+	font-size: inherit;
+}
+
+.wp-block-better-font-awesome-icon.aligncenter {
+	display: flex;
+	justify-content: center;
+}

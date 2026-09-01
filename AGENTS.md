@@ -23,7 +23,7 @@ BFAL first-caller ownership is intentional. BFA passes its provider and asynchro
 
 ## Local workflow
 
-Prerequisites are Docker, Node.js 20 or newer, and npm.
+Prerequisites are Docker, npm, and a supported Node.js LTS release: 20.19 or newer, 22.13 or newer, or 24 or newer.
 
 ```sh
 npm ci

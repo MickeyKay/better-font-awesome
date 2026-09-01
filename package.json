@@ -5,9 +5,9 @@
   "homepage": "https://wordpress.org/plugins/better-font-awesome/",
   "private": true,
   "scripts": {
-    "analyze": "sh bin/composer.sh exec phpstan -- analyse --configuration=phpstan.neon.dist",
-    "build": "grunt build",
-    "check": "npm run lint && npm run analyze && npm test",
+    "analyze": "sh bin/composer.sh exec phpstan -- analyse --configuration=phpstan.neon.dist --memory-limit=1G",
+    "build": "node bin/build-block.mjs && grunt build",
+    "check": "npm run lint && npm run lint:js && npm run analyze && npm run test:unit:js && npm test",
     "checkout-svn": "svn co https://plugins.svn.wordpress.org/better-font-awesome svn",
     "composer": "npm run composer:install",
     "composer:install": "sh bin/composer.sh install --prefer-dist --no-interaction",
@@ -20,13 +20,16 @@
     "i18n": "sh bin/make-pot.sh",
     "lint": "sh bin/composer.sh exec phpcs --",
     "lint:fix": "sh bin/composer.sh exec phpcbf --",
+    "lint:js": "eslint src bin/build-block.mjs tests/js tests/e2e playwright.config.mjs eslint.config.mjs",
     "release": "npm run i18n && grunt release",
     "test": "npm run test:current",
     "test:current": "npm run env:run -- vendor/bin/phpunit -- -c phpunit.xml.dist",
     "test:current:multisite": "npm run env:run -- vendor/bin/phpunit -- -c phpunit-multisite.xml.dist",
+    "test:e2e": "sh bin/activate-wp-env-plugin.sh && playwright test",
     "test:multisite": "npm run test:current:multisite",
     "test:rollback": "npm run env:run -- vendor/bin/phpunit -- -c phpunit-rollback.xml.dist",
     "test:rollback:multisite": "npm run env:run -- vendor/bin/phpunit -- -c phpunit-rollback-multisite.xml.dist",
+    "test:unit:js": "node --test tests/js/*.test.mjs",
     "test-setup": "export TMPDIR=/tmp && bash bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1"
   },
   "author": {
@@ -34,8 +37,16 @@
     "email": "mickeyskay@gmail.com",
     "url": "https://mickeykay.me/"
   },
+  "engines": {
+    "node": "^20.19.0 || ^22.13.0 || >=24"
+  },
   "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.62.1",
     "@wordpress/env": "11.14.0",
+    "esbuild": "0.28.2",
+    "eslint": "10.9.1",
+    "globals": "17.12.0",
     "grunt": "1.6.3",
     "grunt-contrib-copy": "1.0.0",
     "grunt-text-replace": "0.4.0",

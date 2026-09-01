@@ -1,6 +1,6 @@
 # How to contribute
 
-First of all, thanks for your interest in contributing 🎉👍. You will need Docker, Node.js 20 or newer, and npm.
+First of all, thanks for your interest in contributing 🎉👍. You will need Docker, npm, and a supported Node.js LTS release: 20.19 or newer, 22.13 or newer, or 24 or newer.
 
 ```sh
 # Clone the repo locally.

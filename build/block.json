@@ -1,0 +1,44 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "better-font-awesome/icon",
+	"title": "Font Awesome Icon",
+	"category": "design",
+	"icon": "flag",
+	"description": "Add a Font Awesome Free icon that stays current with Better Font Awesome.",
+	"keywords": [ "icon", "font awesome" ],
+	"textdomain": "better-font-awesome",
+	"attributes": {
+		"iconName": {
+			"type": "string",
+			"default": "flag"
+		},
+		"iconStyle": {
+			"type": "string",
+			"default": "solid"
+		},
+		"label": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"align": [ "left", "center", "right" ],
+		"anchor": true,
+		"color": {
+			"background": false,
+			"text": true
+		},
+		"html": false,
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"typography": {
+			"fontSize": true
+		}
+	},
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css"
+}
