@@ -72,7 +72,7 @@ export default function Edit( { attributes, setAttributes } ) {
 					/>
 				</PanelBody>
 			</InspectorControls>
-			<span { ...blockProps }>
+			<div { ...blockProps }>
 				<i
 					className={ `${ styleClass( iconStyle ) } fa-${ iconName }` }
 					aria-hidden="true"
@@ -84,7 +84,7 @@ export default function Edit( { attributes, setAttributes } ) {
 						iconLabel
 					) }
 				</span>
-			</span>
+			</div>
 		</>
 	);
 }

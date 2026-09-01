@@ -1,6 +1,9 @@
 .wp-block-better-font-awesome-icon.bfa-icon-block-editor {
-	display: inline-block;
 	min-width: 1.5em;
 	min-height: 1.5em;
-	text-align: center;
+}
+
+.wp-block[data-align="center"] > .wp-block-better-font-awesome-icon {
+	display: flex;
+	justify-content: center;
 }

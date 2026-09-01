@@ -120,7 +120,7 @@ class Better_Font_Awesome_Icon_Block {
 		);
 
 		return sprintf(
-			'<span %1$s>%2$s</span>',
+			'<div %1$s>%2$s</div>',
 			get_block_wrapper_attributes( $accessibility ),
 			$icon
 		);

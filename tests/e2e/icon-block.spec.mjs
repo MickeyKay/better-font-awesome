@@ -21,12 +21,43 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 	} );
 
 	const post = await page.evaluate( async () => {
+		const paragraph = window.wp.blocks.createBlock( 'core/paragraph', {
+			content: 'Reference paragraph',
+		} );
 		const block = window.wp.blocks.createBlock( 'better-font-awesome/icon', {
 			iconName: 'heart',
 			iconStyle: 'regular',
 			label: 'Favorite',
 		} );
-		window.wp.data.dispatch( 'core/block-editor' ).insertBlocks( block );
+		const centeredBlock = window.wp.blocks.createBlock(
+			'better-font-awesome/icon',
+			{
+				align: 'center',
+				iconName: 'star',
+				iconStyle: 'solid',
+			}
+		);
+		const row = window.wp.blocks.createBlock(
+			'core/group',
+			{
+				layout: {
+					flexWrap: 'nowrap',
+					type: 'flex',
+				},
+			},
+			[
+				window.wp.blocks.createBlock( 'better-font-awesome/icon', {
+					iconName: 'coffee',
+					iconStyle: 'solid',
+				} ),
+				window.wp.blocks.createBlock( 'core/paragraph', {
+					content: 'Row icon text',
+				} ),
+			]
+		);
+		window.wp.data
+			.dispatch( 'core/block-editor' )
+			.insertBlocks( [ paragraph, block, centeredBlock, row ] );
 		window.wp.data.dispatch( 'core/editor' ).editPost( {
 			status: 'publish',
 			title: 'Better Font Awesome block acceptance',
@@ -35,15 +66,62 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 
 		return {
 			id: window.wp.data.select( 'core/editor' ).getCurrentPostId(),
+			iconClientId: block.clientId,
 			link: window.wp.data.select( 'core/editor' ).getPermalink(),
 		};
 	} );
+	await page.evaluate( ( clientId ) => {
+		window.wp.data.dispatch( 'core/block-editor' ).selectBlock( clientId );
+	}, post.iconClientId );
 
-	const editorIcon = page
-		.frameLocator( 'iframe[name="editor-canvas"]' )
-		.locator( '.wp-block-better-font-awesome-icon .far.fa-heart' );
+	const editor = page.frameLocator( 'iframe[name="editor-canvas"]' );
+	const editorIcon = editor.locator(
+		'.wp-block-better-font-awesome-icon .far.fa-heart'
+	);
 	await expect( editorIcon ).toBeVisible();
 	await expect( page.getByLabel( 'Icon', { exact: true } ) ).toBeVisible();
+
+	const referenceParagraph = editor.getByText( 'Reference paragraph', {
+		exact: true,
+	} );
+	const defaultBlock = editor.locator(
+		'.wp-block-better-font-awesome-icon:has(.far.fa-heart)'
+	);
+	const centeredBlock = editor.locator(
+		'.wp-block-better-font-awesome-icon:has(.fas.fa-star)'
+	);
+	const centeredIcon = centeredBlock.locator( '.fas.fa-star' );
+	const row = editor.locator( '.wp-block-group:has-text("Row icon text")' );
+	await expect( referenceParagraph ).toBeVisible();
+	await expect( centeredIcon ).toBeVisible();
+	await expect( row.locator( '.fas.fa-coffee' ) ).toBeVisible();
+
+	const [ paragraphBox, defaultBlockBox, defaultIconBox ] = await Promise.all( [
+		referenceParagraph.boundingBox(),
+		defaultBlock.boundingBox(),
+		editorIcon.boundingBox(),
+	] );
+	expect( paragraphBox ).not.toBeNull();
+	expect( defaultBlockBox ).not.toBeNull();
+	expect( defaultIconBox ).not.toBeNull();
+	expect( Math.abs( paragraphBox.x - defaultBlockBox.x ) ).toBeLessThan( 2 );
+	expect( defaultBlockBox.width ).toBeGreaterThan( defaultIconBox.width * 2 );
+
+	const [ centeredBlockBox, centeredIconBox ] = await Promise.all( [
+		centeredBlock.boundingBox(),
+		centeredIcon.boundingBox(),
+	] );
+	expect( centeredBlockBox ).not.toBeNull();
+	expect( centeredIconBox ).not.toBeNull();
+	expect(
+		Math.abs(
+			centeredBlockBox.x + centeredBlockBox.width / 2 -
+				( centeredIconBox.x + centeredIconBox.width / 2 )
+		)
+	).toBeLessThan( 2 );
+	expect( await row.evaluate( ( element ) => getComputedStyle( element ).display ) ).toBe(
+		'flex'
+	);
 
 	const editorGlyph = await editorIcon.evaluate( ( element ) => {
 		const style = window.getComputedStyle( element, '::before' );
@@ -61,17 +139,43 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 		return Boolean( window.wp?.data?.select( 'core/block-editor' ).getBlocks().length );
 	} );
 	const attributes = await page.evaluate( () => {
-		return window.wp.data.select( 'core/block-editor' ).getBlocks()[ 0 ].attributes;
+		const blocks = window.wp.data.select( 'core/block-editor' ).getBlocks();
+		const iconBlocks = blocks.filter(
+			( item ) => 'better-font-awesome/icon' === item.name
+		);
+		const rowBlock = blocks.find( ( item ) => 'core/group' === item.name );
+
+		return {
+			centered: iconBlocks[ 1 ].attributes,
+			default: iconBlocks[ 0 ].attributes,
+			rowChildren: rowBlock.innerBlocks.map( ( item ) => item.name ),
+		};
 	} );
-	expect( attributes ).toMatchObject( {
+	expect( attributes.default ).toMatchObject( {
 		iconName: 'heart',
 		iconStyle: 'regular',
 		label: 'Favorite',
 	} );
+	expect( attributes.centered ).toMatchObject( {
+		align: 'center',
+		iconName: 'star',
+		iconStyle: 'solid',
+	} );
+	expect( attributes.rowChildren ).toEqual( [
+		'better-font-awesome/icon',
+		'core/paragraph',
+	] );
 
 	await page.goto( post.link );
 	const frontendBlock = page.locator( '.wp-block-better-font-awesome-icon[role="img"]' );
 	await expect( frontendBlock ).toHaveAttribute( 'aria-label', 'Favorite' );
 	await expect( frontendBlock.locator( '.far.fa-heart' ) ).toBeVisible();
+	const frontendCenteredBlock = page.locator(
+		'.wp-block-better-font-awesome-icon.aligncenter:has(.fas.fa-star)'
+	);
+	await expect( frontendCenteredBlock ).toHaveCSS( 'display', 'flex' );
+	await expect(
+		page.locator( '.wp-block-group.is-layout-flex:has-text("Row icon text") .fas.fa-coffee' )
+	).toBeVisible();
 	expect( fontAwesomeErrors ).toEqual( [] );
 } );
