@@ -2,7 +2,12 @@ import { buildCatalogOptions, parseSelection, styleClass } from './icon-utils.mj
 
 const { __, sprintf } = wp.i18n;
 const { InspectorControls, useBlockProps } = wp.blockEditor;
-const { ComboboxControl, PanelBody, TextControl } = wp.components;
+const {
+	ComboboxControl,
+	PanelBody,
+	TextControl,
+	__experimentalVStack: VStack,
+} = wp.components;
 const { useMemo, useState } = wp.element;
 
 const getCatalog = () => window.bfaBlockEditor?.icons ?? [];
@@ -63,31 +68,33 @@ export default function Edit( { attributes, setAttributes } ) {
 		<>
 			<InspectorControls>
 				<PanelBody title={ __( 'Icon settings', 'better-font-awesome' ) }>
-					<ComboboxControl
-						label={ __( 'Icon', 'better-font-awesome' ) }
-						value={ selectedValue }
-						options={ options }
-						onChange={ onSelectIcon }
-						onFilterValueChange={ setFilterValue }
-						__experimentalRenderItem={ renderIconOption }
-						help={ sprintf(
-							/* translators: %d is the number of available icon and style options. */
-							__(
-								'Search all %d available Font Awesome Free icon and style options.',
+					<VStack spacing={ 4 }>
+						<ComboboxControl
+							label={ __( 'Icon', 'better-font-awesome' ) }
+							value={ selectedValue }
+							options={ options }
+							onChange={ onSelectIcon }
+							onFilterValueChange={ setFilterValue }
+							__experimentalRenderItem={ renderIconOption }
+							help={ sprintf(
+								/* translators: %d is the number of available icon and style options. */
+								__(
+									'Search all %d available Font Awesome Free icon and style options.',
+									'better-font-awesome'
+								),
+								catalog.length
+							) }
+						/>
+						<TextControl
+							label={ __( 'Accessible label', 'better-font-awesome' ) }
+							value={ label }
+							onChange={ ( value ) => setAttributes( { label: value } ) }
+							help={ __(
+								'Leave empty when the icon is decorative.',
 								'better-font-awesome'
-							),
-							catalog.length
-						) }
-					/>
-					<TextControl
-						label={ __( 'Accessible label', 'better-font-awesome' ) }
-						value={ label }
-						onChange={ ( value ) => setAttributes( { label: value } ) }
-						help={ __(
-							'Leave empty when the icon is decorative.',
-							'better-font-awesome'
-						) }
-					/>
+							) }
+						/>
+					</VStack>
 				</PanelBody>
 			</InspectorControls>
 			<div { ...blockProps }>

@@ -92,7 +92,21 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 		).label;
 	} );
 	await expect( iconControl ).toHaveValue( selectedLabel );
-	await expect( page.getByText( /Search all [\d,]+ available Font Awesome Free/ ) ).toBeVisible();
+	const catalogHelp = page.getByText(
+		/Search all [\d,]+ available Font Awesome Free/
+	);
+	const accessibleLabel = page.getByText( 'Accessible label', { exact: true } );
+	await expect( catalogHelp ).toBeVisible();
+	await expect( accessibleLabel ).toBeVisible();
+	const [ catalogHelpBox, accessibleLabelBox ] = await Promise.all( [
+		catalogHelp.boundingBox(),
+		accessibleLabel.boundingBox(),
+	] );
+	expect( catalogHelpBox ).not.toBeNull();
+	expect( accessibleLabelBox ).not.toBeNull();
+	expect(
+		accessibleLabelBox.y - ( catalogHelpBox.y + catalogHelpBox.height )
+	).toBeGreaterThanOrEqual( 12 );
 	await iconControl.click();
 	const selectedOption = page.getByRole( 'listbox' ).getByRole( 'option' ).first();
 	await expect( selectedOption ).toContainText( selectedLabel );
