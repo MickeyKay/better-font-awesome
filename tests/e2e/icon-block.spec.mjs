@@ -19,6 +19,44 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 	await page.waitForFunction( () => {
 		return Boolean( window.wp?.blocks?.getBlockType( 'better-font-awesome/icon' ) );
 	} );
+	const localizedMetadata = await page.evaluate( async () => {
+		const blockName = 'better-font-awesome/icon';
+		const registered = window.wp.blocks.getBlockType( blockName );
+		const scriptElement = document.querySelector( 'script[src*="/build/index.js"]' );
+		const scriptSource = await fetch( scriptElement.src ).then( ( response ) =>
+			response.text()
+		);
+		const expected = {
+			description: 'Localized icon block description.',
+			keywords: [ 'localized-icon-keyword' ],
+			title: 'Localized Font Awesome Icon',
+		};
+
+		window.wp.blocks.unregisterBlockType( blockName );
+		window.wp.blocks.unstable__bootstrapServerSideBlockDefinitions( {
+			[ blockName ]: {
+				...registered,
+				...expected,
+			},
+		} );
+
+		const replacementScript = document.createElement( 'script' );
+		replacementScript.textContent = scriptSource;
+		document.head.appendChild( replacementScript );
+		replacementScript.remove();
+
+		const reRegistered = window.wp.blocks.getBlockType( blockName );
+		return {
+			description: reRegistered.description,
+			keywords: reRegistered.keywords,
+			title: reRegistered.title,
+		};
+	} );
+	expect( localizedMetadata ).toEqual( {
+		description: 'Localized icon block description.',
+		keywords: [ 'localized-icon-keyword' ],
+		title: 'Localized Font Awesome Icon',
+	} );
 
 	const post = await page.evaluate( async () => {
 		const paragraph = window.wp.blocks.createBlock( 'core/paragraph', {
