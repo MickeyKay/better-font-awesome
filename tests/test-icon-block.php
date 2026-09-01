@@ -47,7 +47,7 @@ class Better_Font_Awesome_Icon_Block_Test extends WP_UnitTestCase {
 	}
 
 	public function test_decorative_icon_uses_existing_renderer_and_is_hidden_from_assistive_technology() {
-		$output = $this->block->render(
+		$output = $this->render_block(
 			array(
 				'iconName'  => 'heart',
 				'iconStyle' => 'regular',
@@ -61,7 +61,7 @@ class Better_Font_Awesome_Icon_Block_Test extends WP_UnitTestCase {
 	}
 
 	public function test_labelled_icon_exposes_sanitized_accessible_name() {
-		$output = $this->block->render(
+		$output = $this->render_block(
 			array(
 				'iconName'  => 'coffee',
 				'iconStyle' => 'solid',
@@ -83,7 +83,7 @@ class Better_Font_Awesome_Icon_Block_Test extends WP_UnitTestCase {
 			}
 		);
 
-		$output = $this->block->render(
+		$output = $this->render_block(
 			array(
 				'iconName'  => 'star',
 				'iconStyle' => 'solid',
@@ -94,7 +94,7 @@ class Better_Font_Awesome_Icon_Block_Test extends WP_UnitTestCase {
 	}
 
 	public function test_invalid_attribute_shapes_fail_closed_to_safe_defaults() {
-		$output = $this->block->render(
+		$output = $this->render_block(
 			array(
 				'iconName'  => array( 'not-a-string' ),
 				'iconStyle' => 'unsupported-style',
@@ -113,5 +113,23 @@ class Better_Font_Awesome_Icon_Block_Test extends WP_UnitTestCase {
 		$this->assertSame( array( 'label', 'name', 'style' ), array_keys( $catalog[0] ) );
 		$this->assertMatchesRegularExpression( '/^[a-z0-9-]+$/', $catalog[0]['name'] );
 		$this->assertContains( $catalog[0]['style'], array( 'brands', 'regular', 'solid' ) );
+	}
+
+	/**
+	 * Render the registered dynamic block through WordPress's public API.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @return string Rendered block markup.
+	 */
+	private function render_block( $attributes ) {
+		return render_block(
+			array(
+				'blockName'    => Better_Font_Awesome_Icon_Block::NAME,
+				'attrs'        => $attributes,
+				'innerBlocks'  => array(),
+				'innerHTML'    => '',
+				'innerContent' => array(),
+			)
+		);
 	}
 }
