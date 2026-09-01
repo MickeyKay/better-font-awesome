@@ -1,7 +1,33 @@
 import { expect, test } from '@playwright/test';
 
+const fontAwesomeStylesheetPattern =
+	/^https:\/\/use\.fontawesome\.com\/releases\/[^/]+\/css\/[^?]+\.css(?:\?.*)?$/;
+const syntheticFontAwesomeCss = `
+.fab, .far, .fas {
+	display: inline-block;
+	font-family: "Font Awesome 5 Free";
+	font-style: normal;
+}
+.fa-coffee::before, .fa-flag::before, .fa-star::before {
+	content: "*";
+}
+`;
+
 test( 'inserts, persists, and renders a native icon block', async ( { page } ) => {
 	const fontAwesomeErrors = [];
+	const fontAwesomeStylesheetRequests = [];
+	await page.route( fontAwesomeStylesheetPattern, async ( route ) => {
+		fontAwesomeStylesheetRequests.push( route.request().url() );
+		await route.fulfill( {
+			body: syntheticFontAwesomeCss,
+			contentType: 'text/css',
+			headers: {
+				'access-control-allow-origin': '*',
+				'cache-control': 'no-store',
+			},
+			status: 200,
+		} );
+	} );
 	page.on( 'console', ( message ) => {
 		const text = message.text();
 		if ( /font awesome|fontawesome|cors/i.test( text ) && 'error' === message.type() ) {
@@ -19,6 +45,17 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 	await page.waitForFunction( () => {
 		return Boolean( window.wp?.blocks?.getBlockType( 'better-font-awesome/icon' ) );
 	} );
+	const parentFontAwesomeStylesheet = page.locator(
+		'link#bfa-font-awesome-css[rel="stylesheet"]'
+	);
+	await expect( parentFontAwesomeStylesheet ).toHaveAttribute(
+		'href',
+		/^https:\/\/use\.fontawesome\.com\/releases\/[^/]+\/css\/all\.css\?ver=/
+	);
+	await expect( parentFontAwesomeStylesheet ).toHaveAttribute(
+		'crossorigin',
+		'anonymous'
+	);
 	const localizedMetadata = await page.evaluate( async () => {
 		const blockName = 'better-font-awesome/icon';
 		const registered = window.wp.blocks.getBlockType( blockName );
@@ -119,6 +156,17 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 	}
 
 	const editor = page.frameLocator( 'iframe[name="editor-canvas"]' );
+	const canvasFontAwesomeStylesheet = editor.locator(
+		'link#bfa-font-awesome-css[rel="stylesheet"]'
+	);
+	await expect( canvasFontAwesomeStylesheet ).toHaveAttribute(
+		'href',
+		/^https:\/\/use\.fontawesome\.com\/releases\/[^/]+\/css\/all\.css\?ver=/
+	);
+	await expect( canvasFontAwesomeStylesheet ).toHaveAttribute(
+		'crossorigin',
+		'anonymous'
+	);
 	const editorIcon = editor.locator(
 		'.wp-block-better-font-awesome-icon .fas.fa-flag'
 	);
@@ -258,5 +306,13 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 	await expect(
 		page.locator( '.wp-block-group.is-layout-flex:has-text("Row icon text") .fas.fa-coffee' )
 	).toBeVisible();
+	expect( fontAwesomeStylesheetRequests ).not.toHaveLength( 0 );
+	expect( fontAwesomeStylesheetRequests ).toEqual(
+		expect.arrayContaining( [
+			expect.stringMatching(
+				/^https:\/\/use\.fontawesome\.com\/releases\/[^/]+\/css\/all\.css\?ver=/
+			),
+		] )
+	);
 	expect( fontAwesomeErrors ).toEqual( [] );
 } );
