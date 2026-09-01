@@ -86,6 +86,23 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 		).label;
 	} );
 	await expect( iconControl ).toHaveValue( selectedLabel );
+	await expect( page.getByText( /Search all [\d,]+ available Font Awesome Free/ ) ).toBeVisible();
+	await iconControl.click();
+	const selectedOption = page.getByRole( 'listbox' ).getByRole( 'option' ).first();
+	await expect( selectedOption ).toContainText( selectedLabel );
+	const selectedOptionIcon = selectedOption.locator( '.fas.fa-flag' );
+	await expect( selectedOptionIcon ).toBeVisible();
+	const selectedOptionGlyph = await selectedOptionIcon.evaluate( ( element ) => {
+		const style = window.getComputedStyle( element, '::before' );
+		return {
+			content: style.content,
+			fontFamily: style.fontFamily,
+		};
+	} );
+	expect( selectedOptionGlyph.content ).not.toBe( 'none' );
+	expect( selectedOptionGlyph.content ).not.toBe( 'normal' );
+	expect( selectedOptionGlyph.fontFamily ).toContain( 'Font Awesome' );
+	await iconControl.press( 'Escape' );
 
 	const referenceParagraph = editor.getByText( 'Reference paragraph', {
 		exact: true,

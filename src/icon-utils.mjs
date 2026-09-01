@@ -26,11 +26,13 @@ export function buildCatalogOptions( catalog, filterValue, selectedValue, limit 
 	} );
 
 	if ( selectedIcon && ! includesSelectedIcon ) {
-		icons.push( selectedIcon );
+		icons.unshift( selectedIcon );
 	}
 
 	return icons.map( ( icon ) => ( {
 		label: icon.label,
+		name: icon.name,
+		style: icon.style,
 		value: `${ icon.style }:${ icon.name }`,
 	} ) );
 }

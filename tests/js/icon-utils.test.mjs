@@ -28,8 +28,10 @@ test( 'keeps the selected icon available beyond the result limit', () => {
 	const options = buildCatalogOptions( largeCatalog, '', 'solid:icon-101' );
 
 	assert.equal( options.length, 101 );
-	assert.deepEqual( options.at( -1 ), {
+	assert.deepEqual( options[ 0 ], {
 		label: 'Icon 101',
+		name: 'icon-101',
+		style: 'solid',
 		value: 'solid:icon-101',
 	} );
 	assert.equal(
@@ -42,8 +44,18 @@ test( 'does not duplicate a selected icon already in the results', () => {
 	const options = buildCatalogOptions( catalog, '', 'regular:address-book' );
 
 	assert.deepEqual( options, [
-		{ label: catalog[ 0 ].label, value: 'regular:address-book' },
-		{ label: catalog[ 1 ].label, value: 'solid:coffee' },
+		{
+			label: catalog[ 0 ].label,
+			name: 'address-book',
+			style: 'regular',
+			value: 'regular:address-book',
+		},
+		{
+			label: catalog[ 1 ].label,
+			name: 'coffee',
+			style: 'solid',
+			value: 'solid:coffee',
+		},
 	] );
 } );
 
