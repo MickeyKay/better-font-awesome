@@ -234,7 +234,7 @@ done
 
 verify_versioned_tree() {
     versioned_tree=$1
-    svn_unreconciled=$(LC_ALL=C svn status --no-ignore --depth infinity "$versioned_tree" | awk 'substr($0, 1, 1) ~ /[?!I~C]/ || substr($0, 2, 1) == "C"')
+    svn_unreconciled=$(LC_ALL=C svn status --no-ignore --depth infinity "$versioned_tree" | awk 'substr($0, 1, 1) ~ /[?!I~C]/ || substr($0, 2, 1) == "C" || substr($0, 7, 1) == "C"')
     if test -n "$svn_unreconciled"; then
         printf '%s\n' "$svn_unreconciled" >&2
         return 1
