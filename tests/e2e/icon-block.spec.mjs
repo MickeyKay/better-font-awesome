@@ -73,6 +73,12 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 	await page.evaluate( ( clientId ) => {
 		window.wp.data.dispatch( 'core/block-editor' ).selectBlock( clientId );
 	}, post.iconClientId );
+	const welcomeModal = page
+		.locator( '.components-modal__screen-overlay' )
+		.filter( { hasText: 'Welcome to the editor' } );
+	if ( await welcomeModal.isVisible() ) {
+		await welcomeModal.getByRole( 'button', { name: 'Close' } ).click();
+	}
 
 	const editor = page.frameLocator( 'iframe[name="editor-canvas"]' );
 	const editorIcon = editor.locator(
