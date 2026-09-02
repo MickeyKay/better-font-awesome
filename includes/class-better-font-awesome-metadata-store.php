@@ -29,19 +29,20 @@ class Better_Font_Awesome_Metadata_Store {
 	/**
 	 * Migrate the established BFAL transient once without replacing valid data.
 	 *
-	 * @param int $fresh_interval Normal freshness interval in seconds.
+	 * @param int    $fresh_interval Normal freshness interval in seconds.
+	 * @param string $channel        Selected Font Awesome release channel.
 	 */
-	public function maybe_migrate_transient( $fresh_interval ) {
+	public function maybe_migrate_transient( $fresh_interval, $channel = '5.x' ) {
 		if ( (int) get_option( self::SCHEMA_OPTION, 0 ) >= self::SCHEMA_VERSION ) {
 			return;
 		}
 
 		$now       = time();
-		$durable   = $this->get_valid_record();
+		$durable   = $this->get_valid_record( $channel );
 		$transient = get_transient( 'bfa-release-data' );
 
-		if ( empty( $durable ) && false !== $transient && class_exists( 'Better_Font_Awesome_Release_Data_Validator' ) ) {
-			$validation = Better_Font_Awesome_Release_Data_Validator::validate_release( $transient, 'transient' );
+		if ( empty( $durable ) && false !== $transient ) {
+			$validation = $this->validate_transient( $transient, $channel );
 			if ( ! empty( $validation['valid'] ) ) {
 				$timeout     = wp_using_ext_object_cache() ? 0 : (int) get_option( '_transient_timeout_bfa-release-data', 0 );
 				$fresh_until = $now < $timeout ? $timeout : $now;
@@ -69,13 +70,10 @@ class Better_Font_Awesome_Metadata_Store {
 	/**
 	 * Return the durable record after BFAL validation and checksum verification.
 	 *
+	 * @param string $channel Selected Font Awesome release channel. An empty value uses the record's declared channel.
 	 * @return array Valid record, or an empty array.
 	 */
-	public function get_valid_record() {
-		if ( ! class_exists( 'Better_Font_Awesome_Release_Data_Validator' ) ) {
-			return array();
-		}
-
+	public function get_valid_record( $channel = '' ) {
 		$record = get_option( self::RECORD_OPTION, array() );
 		if (
 			! is_array( $record ) ||
@@ -88,7 +86,11 @@ class Better_Font_Awesome_Metadata_Store {
 			return array();
 		}
 
-		$validation = Better_Font_Awesome_Release_Data_Validator::validate_record( $record );
+		if ( '' === $channel && isset( $record['channel'] ) && is_string( $record['channel'] ) ) {
+			$channel = $record['channel'];
+		}
+
+		$validation = $this->validate_record( $record, $channel );
 		if ( empty( $validation['valid'] ) ) {
 			return array();
 		}
@@ -194,5 +196,49 @@ class Better_Font_Awesome_Metadata_Store {
 	 */
 	private function release_checksum( $release ) {
 		return hash( 'sha256', maybe_serialize( $release ) );
+	}
+
+	/**
+	 * Validate a durable record for one selected BFAL channel.
+	 *
+	 * @param mixed  $record  Candidate record.
+	 * @param string $channel Selected Font Awesome release channel.
+	 * @return array Validation result.
+	 */
+	private function validate_record( $record, $channel ) {
+		if ( '7.x' === $channel && class_exists( 'Better_Font_Awesome_Release_Data_V2_Validator' ) ) {
+			return Better_Font_Awesome_Release_Data_V2_Validator::validate_record( $record );
+		}
+
+		if ( '5.x' === $channel && class_exists( 'Better_Font_Awesome_Release_Data_Validator' ) ) {
+			return Better_Font_Awesome_Release_Data_Validator::validate_record( $record );
+		}
+
+		return array( 'valid' => false );
+	}
+
+	/**
+	 * Validate compatibility transient data for one selected BFAL channel.
+	 *
+	 * @param mixed  $transient Candidate transient value.
+	 * @param string $channel   Selected Font Awesome release channel.
+	 * @return array Validation result.
+	 */
+	private function validate_transient( $transient, $channel ) {
+		$is_record = is_array( $transient ) && isset( $transient['schema_version'], $transient['channel'], $transient['release'] );
+
+		if ( '7.x' === $channel && class_exists( 'Better_Font_Awesome_Release_Data_V2_Validator' ) ) {
+			return $is_record
+				? Better_Font_Awesome_Release_Data_V2_Validator::validate_record( $transient )
+				: Better_Font_Awesome_Release_Data_V2_Validator::validate_release( $transient, 'transient' );
+		}
+
+		if ( '5.x' === $channel && class_exists( 'Better_Font_Awesome_Release_Data_Validator' ) ) {
+			return $is_record
+				? Better_Font_Awesome_Release_Data_Validator::validate_record( $transient )
+				: Better_Font_Awesome_Release_Data_Validator::validate_release( $transient, 'transient' );
+		}
+
+		return array( 'valid' => false );
 	}
 }

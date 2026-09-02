@@ -98,7 +98,7 @@ jobs:
         run: WP_ENV_PORT=8888 WP_ENV_TESTS_PORT=8889 npm run env:stop
 
   current-phpunit:
-    name: Public BFAL 2.1.0 stable - WordPress ${{ matrix.wordpress }} on PHP ${{ matrix.php }}
+    name: Public BFAL 3.0.0-rc.1 - WordPress ${{ matrix.wordpress }} on PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -142,10 +142,10 @@ jobs:
       - name: Install PHP dependencies
         run: composer install --prefer-dist --no-interaction
 
-      - name: Report exact stable dependency
+      - name: Report exact primary dependency
         run: |
           php -r 'require "vendor/autoload.php"; $package = "mickey-kay/better-font-awesome-library"; printf("BFAL version: %s\nBFAL reference: %s\n", Composer\InstalledVersions::getPrettyVersion($package), Composer\InstalledVersions::getReference($package));'
-          node -e 'const lock = JSON.parse(require("fs").readFileSync("composer.lock", "utf8")); const item = lock.packages.find((entry) => entry.name === "mickey-kay/better-font-awesome-library"); process.exit(item && item.version === "2.1.0" && item.source.reference === "b845f8d2c105c34a9afe62e8470d67d0e3978164" && item.dist.reference === "b845f8d2c105c34a9afe62e8470d67d0e3978164" ? 0 : 1);'
+          node -e 'const lock = JSON.parse(require("fs").readFileSync("composer.lock", "utf8")); const item = lock.packages.find((entry) => entry.name === "mickey-kay/better-font-awesome-library"); process.exit(item && item.version === "3.0.0-rc.1" && item.source.reference === "1ec60a55c312ffed689f9fc1c3046b3982daee61" && item.dist.reference === "1ec60a55c312ffed689f9fc1c3046b3982daee61" ? 0 : 1);'
 
       - name: Install WordPress test suite
         run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1:3306 "${{ matrix.wordpress }}" true
@@ -157,7 +157,7 @@ jobs:
         run: vendor/bin/phpunit --configuration phpunit-multisite.xml.dist
 
   rollback-phpunit:
-    name: Stable BFAL 2.0.3 rollback - WordPress ${{ matrix.wordpress }} on PHP ${{ matrix.php }}
+    name: Stable BFAL 2.1.0 rollback - WordPress ${{ matrix.wordpress }} on PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -165,10 +165,6 @@ jobs:
         include:
           - php: '7.4'
             wordpress: '6.5'
-          - php: '8.1'
-            wordpress: '6.7'
-          - php: '8.3'
-            wordpress: latest
           - php: '8.4'
             wordpress: latest
     services:
@@ -202,13 +198,13 @@ jobs:
         run: |
           rollback_dir="$(mktemp -d)"
           cp composer.json composer.lock "$rollback_dir/"
-          composer require --working-dir="$rollback_dir" mickey-kay/better-font-awesome-library:2.0.3 --with-dependencies --minimal-changes --no-interaction --no-progress
+          composer require --working-dir="$rollback_dir" mickey-kay/better-font-awesome-library:2.1.0 --with-dependencies --minimal-changes --no-interaction --no-progress
           mv "$rollback_dir/vendor" vendor
           git diff --exit-code -- composer.json composer.lock
 
       - name: Report exact rollback dependency
         run: |
-          php -r 'require "vendor/autoload.php"; $package = "mickey-kay/better-font-awesome-library"; $version = Composer\InstalledVersions::getPrettyVersion($package); $reference = Composer\InstalledVersions::getReference($package); printf("BFAL version: %s\nBFAL reference: %s\n", $version, $reference); exit("2.0.3" === $version && "c5ae75d273ff8a594f9fa58b43542d6dc1482fb0" === $reference ? 0 : 1);'
+          php -r 'require "vendor/autoload.php"; $package = "mickey-kay/better-font-awesome-library"; $version = Composer\InstalledVersions::getPrettyVersion($package); $reference = Composer\InstalledVersions::getReference($package); printf("BFAL version: %s\nBFAL reference: %s\n", $version, $reference); exit("2.1.0" === $version && "b845f8d2c105c34a9afe62e8470d67d0e3978164" === $reference ? 0 : 1);'
 
       - name: Install WordPress test suite
         run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1:3306 "${{ matrix.wordpress }}" true

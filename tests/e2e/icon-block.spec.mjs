@@ -1,32 +1,15 @@
 import { expect, test } from '@playwright/test';
 
 const fontAwesomeStylesheetPattern =
-	/^https:\/\/use\.fontawesome\.com\/releases\/[^/]+\/css\/[^?]+\.css(?:\?.*)?$/;
-const syntheticFontAwesomeCss = `
-.fab, .far, .fas {
-	display: inline-block;
-	font-family: "Font Awesome 5 Free";
-	font-style: normal;
-}
-.fa-coffee::before, .fa-flag::before, .fa-star::before {
-	content: "*";
-}
-`;
+	/\/vendor\/mickey-kay\/better-font-awesome-library\/inc\/font-awesome-7-fallback\/css\/all\.min\.css(?:\?.*)?$/;
 
 test( 'inserts, persists, and renders a native icon block', async ( { page } ) => {
 	const fontAwesomeErrors = [];
 	const fontAwesomeStylesheetRequests = [];
-	await page.route( fontAwesomeStylesheetPattern, async ( route ) => {
-		fontAwesomeStylesheetRequests.push( route.request().url() );
-		await route.fulfill( {
-			body: syntheticFontAwesomeCss,
-			contentType: 'text/css',
-			headers: {
-				'access-control-allow-origin': '*',
-				'cache-control': 'no-store',
-			},
-			status: 200,
-		} );
+	page.on( 'request', ( request ) => {
+		if ( fontAwesomeStylesheetPattern.test( request.url() ) ) {
+			fontAwesomeStylesheetRequests.push( request.url() );
+		}
 	} );
 	page.on( 'console', ( message ) => {
 		const text = message.text();
@@ -50,7 +33,7 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 	);
 	await expect( parentFontAwesomeStylesheet ).toHaveAttribute(
 		'href',
-		/^https:\/\/use\.fontawesome\.com\/releases\/[^/]+\/css\/all\.css\?ver=/
+		fontAwesomeStylesheetPattern
 	);
 	await expect( parentFontAwesomeStylesheet ).toHaveAttribute(
 		'crossorigin',
@@ -161,7 +144,7 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 	);
 	await expect( canvasFontAwesomeStylesheet ).toHaveAttribute(
 		'href',
-		/^https:\/\/use\.fontawesome\.com\/releases\/[^/]+\/css\/all\.css\?ver=/
+		fontAwesomeStylesheetPattern
 	);
 	await expect( canvasFontAwesomeStylesheet ).toHaveAttribute(
 		'crossorigin',
@@ -304,14 +287,12 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 	);
 	await expect( frontendCenteredBlock ).toHaveCSS( 'display', 'flex' );
 	await expect(
-		page.locator( '.wp-block-group.is-layout-flex:has-text("Row icon text") .fas.fa-coffee' )
+		page.locator( '.wp-block-group.is-layout-flex:has-text("Row icon text") .fas.fa-mug-saucer' )
 	).toBeVisible();
 	expect( fontAwesomeStylesheetRequests ).not.toHaveLength( 0 );
 	expect( fontAwesomeStylesheetRequests ).toEqual(
 		expect.arrayContaining( [
-			expect.stringMatching(
-				/^https:\/\/use\.fontawesome\.com\/releases\/[^/]+\/css\/all\.css\?ver=/
-			),
+			expect.stringMatching( fontAwesomeStylesheetPattern ),
 		] )
 	);
 	expect( fontAwesomeErrors ).toEqual( [] );

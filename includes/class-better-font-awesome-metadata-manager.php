@@ -73,10 +73,18 @@ class Better_Font_Awesome_Metadata_Manager {
 	private $store;
 
 	/**
+	 * Font Awesome release channel owned by the BFAL singleton.
+	 *
+	 * @var string
+	 */
+	private $release_channel;
+
+	/**
 	 * Register the worker hook.
 	 */
 	public function __construct() {
-		$this->store = new Better_Font_Awesome_Metadata_Store();
+		$this->store           = new Better_Font_Awesome_Metadata_Store();
+		$this->release_channel = $this->default_release_channel();
 		add_action( self::CRON_HOOK, array( $this, 'handle_cron_refresh' ), 10, 2 );
 	}
 
@@ -87,15 +95,19 @@ class Better_Font_Awesome_Metadata_Manager {
 	 */
 	public function set_library( $library ) {
 		$this->library = $library;
+		$channel       = $this->library_release_channel( $library );
+		if ( $this->is_supported_channel( $channel ) ) {
+			$this->release_channel = $channel;
+		}
 	}
 
 	/**
 	 * Run storage migration and recover missing refresh schedules.
 	 */
 	public function boot() {
-		$this->store->maybe_migrate_transient( self::FRESH_INTERVAL );
+		$this->store->maybe_migrate_transient( self::FRESH_INTERVAL, $this->release_channel );
 
-		$record = $this->store->get_valid_record();
+		$record = $this->store->get_valid_record( $this->release_channel );
 		if ( empty( $record ) || $this->store->record_needs_refresh( $record, self::REFRESH_LEAD_TIME ) ) {
 			$this->schedule_refresh();
 		}
@@ -109,7 +121,7 @@ class Better_Font_Awesome_Metadata_Manager {
 	 * @return array BFAL-valid record, or an empty array.
 	 */
 	public function provide_release_data() {
-		$record = $this->store->get_valid_record();
+		$record = $this->store->get_valid_record( $this->release_channel );
 		return empty( $record ) ? array() : $record;
 	}
 
@@ -121,13 +133,10 @@ class Better_Font_Awesome_Metadata_Manager {
 	 */
 	public function request_release_data_refresh( $channel = '', $library = null ) {
 		if ( $library instanceof Better_Font_Awesome_Library ) {
-			$this->library = $library;
+			$this->set_library( $library );
 		}
 
-		if (
-			class_exists( 'Better_Font_Awesome_Release_Data_Validator' ) &&
-			Better_Font_Awesome_Release_Data_Validator::RELEASE_CHANNEL !== $channel
-		) {
+		if ( ! $this->is_supported_channel( $channel ) || $this->release_channel !== $channel ) {
 			return;
 		}
 
@@ -323,7 +332,7 @@ class Better_Font_Awesome_Metadata_Manager {
 				return $result;
 			}
 
-			$validation = Better_Font_Awesome_Release_Data_Validator::validate_release( $result, 'api' );
+			$validation = $this->validate_refresh_result( $result );
 			if ( empty( $validation['valid'] ) ) {
 				$error = $this->validation_error( $validation );
 				if ( ! $this->renew_lock( $owner ) ) {
@@ -374,7 +383,7 @@ class Better_Font_Awesome_Metadata_Manager {
 	 * Get the reviewed BFAL refresh callback when the installed version supports it.
 	 *
 	 * The method name remains dynamic so static analysis can also run against the
-	 * supported emergency rollback dependency, BFAL 2.0.3.
+	 * supported rollback dependency, BFAL 2.1.0.
 	 *
 	 * @return callable|false BFAL refresh callback, or false when unavailable.
 	 */
@@ -399,13 +408,90 @@ class Better_Font_Awesome_Metadata_Manager {
 	}
 
 	/**
+	 * Infer the dependency's default channel before BFA makes the first call.
+	 *
+	 * BFAL remains responsible for the actual immutable selection. This value is
+	 * replaced from the singleton immediately after construction.
+	 *
+	 * @return string Dependency default release channel.
+	 */
+	private function default_release_channel() {
+		if (
+			class_exists( 'Better_Font_Awesome_Release_Data_V2_Validator' ) &&
+			defined( 'Better_Font_Awesome_Release_Data_V2_Validator::RELEASE_CHANNEL' )
+		) {
+			$channel = Better_Font_Awesome_Release_Data_V2_Validator::RELEASE_CHANNEL;
+		} else {
+			$channel = Better_Font_Awesome_Release_Data_Validator::RELEASE_CHANNEL;
+		}
+
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- This is BFAL's public channel-selection filter.
+		$channel = apply_filters( 'bfa_font_awesome_release_channel', $channel );
+		return $this->is_supported_channel( $channel ) ? $channel : '';
+	}
+
+	/**
+	 * Read the immutable channel from a BFAL-compatible library object.
+	 *
+	 * @param mixed $library Library object.
+	 * @return string Selected channel, or an empty string when unavailable.
+	 */
+	private function library_release_channel( $library ) {
+		$method = 'get_release_channel';
+		if ( ! is_object( $library ) || ! is_callable( array( $library, $method ) ) ) {
+			return '';
+		}
+
+		$channel = call_user_func( array( $library, $method ) );
+		return is_string( $channel ) ? $channel : '';
+	}
+
+	/**
+	 * Check whether the installed BFAL dependency supports a channel.
+	 *
+	 * @param mixed $channel Candidate release channel.
+	 * @return bool Whether the channel has an available validator.
+	 */
+	private function is_supported_channel( $channel ) {
+		return (
+			'5.x' === $channel && class_exists( 'Better_Font_Awesome_Release_Data_Validator' )
+		) || (
+			'7.x' === $channel && class_exists( 'Better_Font_Awesome_Release_Data_V2_Validator' )
+		);
+	}
+
+	/**
+	 * Validate a worker result for the singleton's selected channel.
+	 *
+	 * @param mixed $result BFAL worker result.
+	 * @return array Validation result.
+	 */
+	private function validate_refresh_result( $result ) {
+		if ( '7.x' === $this->release_channel && class_exists( 'Better_Font_Awesome_Release_Data_V2_Validator' ) ) {
+			return Better_Font_Awesome_Release_Data_V2_Validator::validate_record( $result );
+		}
+
+		if ( '5.x' === $this->release_channel && class_exists( 'Better_Font_Awesome_Release_Data_Validator' ) ) {
+			return Better_Font_Awesome_Release_Data_Validator::validate_release( $result, 'api' );
+		}
+
+		return array(
+			'valid' => false,
+			'error' => array(
+				'code'    => 'bfa_channel_unsupported',
+				'message' => 'The selected Font Awesome release channel is unsupported.',
+			),
+		);
+	}
+
+	/**
 	 * Return sanitized refresh state with current freshness applied.
 	 *
 	 * @return array Refresh state.
 	 */
 	public function get_status() {
 		$state  = $this->store->get_state();
-		$record = $this->store->get_valid_record();
+		$record = $this->store->get_valid_record( $this->release_channel );
 
 		if ( ! empty( $record ) && $this->store->record_needs_refresh( $record, self::REFRESH_LEAD_TIME ) && 'failed' !== $state['status'] ) {
 			$state['status'] = 'stale';
