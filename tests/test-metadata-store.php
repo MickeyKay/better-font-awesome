@@ -108,7 +108,9 @@ class Better_Font_Awesome_Metadata_Store_Test extends Better_Font_Awesome_Metada
 		try {
 			set_transient( 'bfa-release-data', $release, DAY_IN_SECONDS );
 			delete_option( '_transient_timeout_bfa-release-data' );
-			$first = new Better_Font_Awesome_Metadata_Manager();
+			$library = Better_Font_Awesome_Library::get_instance();
+			$first   = new Better_Font_Awesome_Metadata_Manager();
+			$first->set_library( $library );
 			$first->boot();
 			$marker = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
 
@@ -119,6 +121,7 @@ class Better_Font_Awesome_Metadata_Store_Test extends Better_Font_Awesome_Metada
 			$this->assertSame( $release, get_transient( 'bfa-release-data' ) );
 
 			$second = new Better_Font_Awesome_Metadata_Manager();
+			$second->set_library( $library );
 			$second->boot();
 			$this->assertSame( $marker, get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
 			$this->assertSame( 1, $this->count_scheduled_refresh_events() );
@@ -143,6 +146,7 @@ class Better_Font_Awesome_Metadata_Store_Test extends Better_Font_Awesome_Metada
 			$before = time();
 
 			$manager = new Better_Font_Awesome_Metadata_Manager();
+			$manager->set_library( Better_Font_Awesome_Library::get_instance() );
 			$manager->boot();
 			$after  = time();
 			$store  = new Better_Font_Awesome_Metadata_Store();

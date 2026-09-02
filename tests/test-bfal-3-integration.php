@@ -13,6 +13,54 @@ require_once __DIR__ . '/MetadataTestCase.php';
 class Better_Font_Awesome_BFAL_3_Integration_Test extends Better_Font_Awesome_Metadata_Test_Case {
 
 	/**
+	 * BFAL alone consumes a one-shot channel selector's first result.
+	 */
+	public function test_one_shot_channel_selector_is_invoked_once_by_bfal() {
+		$this->use_default_release_channel();
+		$filter_calls = 0;
+		$selector     = function () use ( &$filter_calls ) {
+			++$filter_calls;
+			return 1 === $filter_calls ? '5.x' : '7.x';
+		};
+		add_filter( 'bfa_font_awesome_release_channel', $selector );
+
+		try {
+			$library = $this->initialize_plugin()->get_bfa_lib_instance();
+
+			$this->assertSame( 1, $filter_calls );
+			$this->assertSame( '5.x', $library->get_release_channel() );
+			$this->assertSame( '5.14.0', $library->get_version() );
+			$this->assertSame( 0, $this->font_awesome_http_calls );
+		} finally {
+			remove_filter( 'bfa_font_awesome_release_channel', $selector );
+		}
+	}
+
+	/**
+	 * A bfa_init_args FA5 selection can consume the durable FA5 provider record.
+	 */
+	public function test_init_args_fa5_selection_uses_durable_fa5_record() {
+		$this->use_default_release_channel();
+		$durable = $this->persist_release( '5.15.4', time() + DAY_IN_SECONDS );
+		$selector = function ( $args ) {
+			$args['release_channel'] = '5.x';
+			return $args;
+		};
+		add_filter( 'bfa_init_args', $selector );
+
+		try {
+			$library = $this->initialize_plugin()->get_bfa_lib_instance();
+
+			$this->assertSame( '5.x', $library->get_release_channel() );
+			$this->assertSame( '5.15.4', $library->get_version() );
+			$this->assertSame( $durable, ( new Better_Font_Awesome_Metadata_Store() )->get_valid_record( '5.x' ) );
+			$this->assertSame( 0, $this->font_awesome_http_calls );
+		} finally {
+			remove_filter( 'bfa_init_args', $selector );
+		}
+	}
+
+	/**
 	 * A clean installation uses BFAL's packaged FA7 fallback without HTTP.
 	 */
 	public function test_clean_install_uses_default_fa7_fallback_immediately_without_http() {
@@ -49,6 +97,14 @@ class Better_Font_Awesome_BFAL_3_Integration_Test extends Better_Font_Awesome_Me
 		$this->assertSame( $legacy_record, $store->get_valid_record( '5.x' ) );
 		$this->assertSame( $legacy_release, get_transient( 'bfa-release-data' ) );
 		$this->assertSame( 0, $this->font_awesome_http_calls );
+
+		add_filter( 'bfa_font_awesome_release_channel', array( $this, 'select_legacy_release_channel' ) );
+		$legacy_library = $this->initialize_plugin()->get_bfa_lib_instance();
+
+		$this->assertSame( '5.x', $legacy_library->get_release_channel() );
+		$this->assertSame( '5.15.4', $legacy_library->get_version() );
+		$this->assertSame( $legacy_record, $store->get_valid_record( '5.x' ) );
+		$this->assertSame( 0, $this->font_awesome_http_calls );
 	}
 
 	/**
@@ -70,7 +126,7 @@ class Better_Font_Awesome_BFAL_3_Integration_Test extends Better_Font_Awesome_Me
 		$this->assertSame( $schema_2, $manager->provide_release_data() );
 
 		update_option( Better_Font_Awesome_Metadata_Store::RECORD_OPTION, $schema_1, false );
-		$this->assertSame( array(), $manager->provide_release_data() );
+		$this->assertSame( $schema_1, $manager->provide_release_data() );
 	}
 
 	/**

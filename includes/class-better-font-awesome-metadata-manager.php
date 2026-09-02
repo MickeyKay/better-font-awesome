@@ -84,7 +84,7 @@ class Better_Font_Awesome_Metadata_Manager {
 	 */
 	public function __construct() {
 		$this->store           = new Better_Font_Awesome_Metadata_Store();
-		$this->release_channel = $this->default_release_channel();
+		$this->release_channel = '';
 		add_action( self::CRON_HOOK, array( $this, 'handle_cron_refresh' ), 10, 2 );
 	}
 
@@ -405,29 +405,6 @@ class Better_Font_Awesome_Metadata_Manager {
 	 */
 	private function refresh_method_name(): string {
 		return 'refresh_release_data';
-	}
-
-	/**
-	 * Infer the dependency's default channel before BFA makes the first call.
-	 *
-	 * BFAL remains responsible for the actual immutable selection. This value is
-	 * replaced from the singleton immediately after construction.
-	 *
-	 * @return string Dependency default release channel.
-	 */
-	private function default_release_channel() {
-		if (
-			class_exists( 'Better_Font_Awesome_Release_Data_V2_Validator' ) &&
-			defined( 'Better_Font_Awesome_Release_Data_V2_Validator::RELEASE_CHANNEL' )
-		) {
-			$channel = Better_Font_Awesome_Release_Data_V2_Validator::RELEASE_CHANNEL;
-		} else {
-			$channel = Better_Font_Awesome_Release_Data_Validator::RELEASE_CHANNEL;
-		}
-
-		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- This is BFAL's public channel-selection filter.
-		$channel = apply_filters( 'bfa_font_awesome_release_channel', $channel );
-		return $this->is_supported_channel( $channel ) ? $channel : '';
 	}
 
 	/**

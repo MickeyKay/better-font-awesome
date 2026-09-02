@@ -58,6 +58,15 @@ class Better_Font_Awesome_Callback_Metadata_Library {
 	public function refresh_release_data() {
 		return call_user_func( $this->callback );
 	}
+
+	/**
+	 * Return the selected legacy channel used by these worker fixtures.
+	 *
+	 * @return string Selected release channel.
+	 */
+	public function get_release_channel() {
+		return '5.x';
+	}
 }
 
 /**
@@ -581,6 +590,7 @@ class Better_Font_Awesome_Metadata_Manager_Test extends Better_Font_Awesome_Meta
 		$this->assertSame( '5.15.3', $store->get_valid_record()['release']['version'] );
 
 		$recovery = new Better_Font_Awesome_Metadata_Manager();
+		$recovery->set_library( $library );
 		$recovery->boot();
 		$marker = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
 		$this->assertIsArray( $marker );
@@ -833,12 +843,15 @@ class Better_Font_Awesome_Metadata_Manager_Test extends Better_Font_Awesome_Meta
 		$this->persist_release( '5.15.4', time() - HOUR_IN_SECONDS );
 		$run_at = time() - Better_Font_Awesome_Metadata_Manager::SCHEDULE_GRACE - MINUTE_IN_SECONDS;
 		$marker = $this->create_schedule_marker( $run_at, $run_at - MINUTE_IN_SECONDS, false, true );
+		$library = Better_Font_Awesome_Library::get_instance();
 
 		$first_request = new Better_Font_Awesome_Metadata_Manager();
+		$first_request->set_library( $library );
 		$first_request->boot();
 		$this->assertSame( $marker, get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
 
 		$second_request = new Better_Font_Awesome_Metadata_Manager();
+		$second_request->set_library( $library );
 		$second_request->boot();
 		$this->assertSame( $marker, get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
 		$this->assertSame(
