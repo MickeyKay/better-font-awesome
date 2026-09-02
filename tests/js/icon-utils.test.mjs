@@ -4,6 +4,7 @@ import test from 'node:test';
 import {
 	buildCatalogOptions,
 	filterCatalog,
+	findCatalogIcon,
 	parseSelection,
 	styleClass,
 } from '../../src/icon-utils.mjs';
@@ -17,6 +18,22 @@ test( 'filters the icon catalog by label or slug', () => {
 	assert.deepEqual( filterCatalog( catalog, 'REGULAR' ), [ catalog[ 0 ] ] );
 	assert.deepEqual( filterCatalog( catalog, 'coffee' ), [ catalog[ 1 ] ] );
 	assert.deepEqual( filterCatalog( catalog, '' ), catalog );
+} );
+
+test( 'filters the icon catalog by normalized search terms', () => {
+	const searchableCatalog = [
+		...catalog,
+		{
+			label: 'Address Card (solid)',
+			name: 'address-card',
+			searchTerms: [ 'contact', 'profile' ],
+			style: 'solid',
+		},
+	];
+
+	assert.deepEqual( filterCatalog( searchableCatalog, 'PROFILE' ), [
+		searchableCatalog[ 2 ],
+	] );
 } );
 
 test( 'keeps the selected icon available beyond the result limit', () => {
@@ -67,6 +84,12 @@ test( 'parses only supported complete selections', () => {
 	assert.equal( parseSelection( 'unsupported:address-book' ), null );
 	assert.equal( parseSelection( 'regular:' ), null );
 	assert.equal( parseSelection( '' ), null );
+} );
+
+test( 'finds only exact catalog selections', () => {
+	assert.equal( findCatalogIcon( catalog, 'solid:coffee' ), catalog[ 1 ] );
+	assert.equal( findCatalogIcon( catalog, 'regular:coffee' ), null );
+	assert.equal( findCatalogIcon( catalog, 'solid:not-in-catalog' ), null );
 } );
 
 test( 'maps supported styles and defaults safely', () => {

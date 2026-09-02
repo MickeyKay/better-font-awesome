@@ -34,5 +34,5 @@ await Promise.all( [
 
 const script = await readFile( new URL( 'index.js', outputDirectory ) );
 const version = createHash( 'sha256' ).update( script ).digest( 'hex' ).slice( 0, 20 );
-const asset = `<?php return array('dependencies' => array('wp-block-editor', 'wp-blocks', 'wp-components', 'wp-element', 'wp-i18n'), 'version' => '${ version }');\n`;
+const asset = `<?php return array('dependencies' => array('wp-block-editor', 'wp-blocks', 'wp-components', 'wp-data', 'wp-element', 'wp-i18n', 'wp-rich-text'), 'version' => '${ version }');\n`;
 await writeFile( new URL( 'index.asset.php', outputDirectory ), asset );

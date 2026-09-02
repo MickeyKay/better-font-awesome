@@ -7,3 +7,8 @@
 	display: flex;
 	justify-content: center;
 }
+
+.bfa-inline-icon {
+	color: inherit;
+	font-size: inherit;
+}

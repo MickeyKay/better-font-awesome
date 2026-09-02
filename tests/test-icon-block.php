@@ -128,9 +128,13 @@ class Better_Font_Awesome_Icon_Block_Test extends WP_UnitTestCase {
 		$catalog = $this->block->get_editor_catalog();
 
 		$this->assertNotEmpty( $catalog );
-		$this->assertSame( array( 'label', 'name', 'style' ), array_keys( $catalog[0] ) );
+		$this->assertSame( array( 'label', 'name', 'style', 'searchTerms' ), array_keys( $catalog[0] ) );
 		$this->assertMatchesRegularExpression( '/^[a-z0-9-]+$/', $catalog[0]['name'] );
 		$this->assertContains( $catalog[0]['style'], array( 'brands', 'regular', 'solid' ) );
+		$this->assertIsArray( $catalog[0]['searchTerms'] );
+		foreach ( $catalog[0]['searchTerms'] as $term ) {
+			$this->assertIsString( $term );
+		}
 	}
 
 	/**

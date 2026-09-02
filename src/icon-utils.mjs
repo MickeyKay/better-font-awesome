@@ -8,10 +8,17 @@ export function filterCatalog( catalog, filterValue ) {
 	const needle = filterValue.trim().toLowerCase();
 
 	return catalog.filter( ( icon ) => {
+		const searchTerms = Array.isArray( icon.searchTerms )
+			? icon.searchTerms
+			: [ icon.searchTerms ];
+
 		return (
 			! needle ||
 			icon.label.toLowerCase().includes( needle ) ||
-			icon.name.includes( needle )
+			icon.name.includes( needle ) ||
+			searchTerms.some( ( term ) => {
+				return 'string' === typeof term && term.toLowerCase().includes( needle );
+			} )
 		);
 	} );
 }
@@ -49,6 +56,19 @@ export function parseSelection( value ) {
 	}
 
 	return { name, style };
+}
+
+export function findCatalogIcon( catalog, value ) {
+	const selection = parseSelection( value );
+	if ( ! selection ) {
+		return null;
+	}
+
+	return (
+		catalog.find( ( icon ) => {
+			return icon.name === selection.name && icon.style === selection.style;
+		} ) ?? null
+	);
 }
 
 export function styleClass( style ) {
