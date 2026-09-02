@@ -1,7 +1,12 @@
 import { buildCatalogOptions, parseSelection, styleClass } from './icon-utils.mjs';
 
 const { __, sprintf } = wp.i18n;
-const { InspectorControls, useBlockProps } = wp.blockEditor;
+const {
+	BlockControls,
+	InspectorControls,
+	JustifyContentControl,
+	useBlockProps,
+} = wp.blockEditor;
 const {
 	ComboboxControl,
 	PanelBody,
@@ -33,7 +38,10 @@ const renderIconOption = ( { item } ) => (
 );
 
 export default function Edit( { attributes, setAttributes } ) {
-	const { iconName, iconStyle, label } = attributes;
+	const { iconJustification, iconName, iconStyle, label } = attributes;
+	const justification = [ 'center', 'right' ].includes( iconJustification )
+		? iconJustification
+		: 'left';
 	const [ filterValue, setFilterValue ] = useState( '' );
 	const catalog = getCatalog();
 	const selectedValue = `${ iconStyle }:${ iconName }`;
@@ -45,7 +53,7 @@ export default function Edit( { attributes, setAttributes } ) {
 	);
 	const iconLabel = selectedIcon?.label ?? iconName;
 	const blockProps = useBlockProps( {
-		className: 'bfa-icon-block-editor',
+		className: `bfa-icon-block-editor items-justified-${ justification }`,
 	} );
 
 	const onSelectIcon = ( value ) => {
@@ -66,6 +74,17 @@ export default function Edit( { attributes, setAttributes } ) {
 
 	return (
 		<>
+			<BlockControls group="block">
+				<JustifyContentControl
+					allowedControls={ [ 'left', 'center', 'right' ] }
+					value={ justification }
+					onChange={ ( value ) =>
+						setAttributes( {
+							iconJustification: value ?? 'left',
+						} )
+					}
+				/>
+			</BlockControls>
 			<InspectorControls>
 				<PanelBody title={ __( 'Icon settings', 'better-font-awesome' ) }>
 					<VStack spacing={ 4 }>

@@ -42,8 +42,10 @@ class Better_Font_Awesome_Icon_Block_Test extends WP_UnitTestCase {
 		$this->assertSame( 3, $registered->api_version );
 		$this->assertSame( 'flag', $registered->attributes['iconName']['default'] );
 		$this->assertSame( 'solid', $registered->attributes['iconStyle']['default'] );
+		$this->assertSame( 'left', $registered->attributes['iconJustification']['default'] );
+		$this->assertSame( array( 'left', 'center', 'right' ), $registered->attributes['iconJustification']['enum'] );
 		$this->assertSame( '', $registered->attributes['label']['default'] );
-		$this->assertSame( array( 'left', 'center', 'right' ), $registered->supports['align'] );
+		$this->assertArrayNotHasKey( 'align', $registered->supports );
 		$this->assertTrue( is_callable( $registered->render_callback ) );
 	}
 
@@ -57,24 +59,27 @@ class Better_Font_Awesome_Icon_Block_Test extends WP_UnitTestCase {
 		);
 
 		$this->assertStringStartsWith( '<div ', $output );
-		$this->assertStringContainsString( 'class="wp-block-better-font-awesome-icon"', $output );
+		$this->assertStringContainsString( 'class="items-justified-left wp-block-better-font-awesome-icon"', $output );
 		$this->assertStringContainsString( 'aria-hidden="true"', $output );
 		$this->assertStringContainsString( '<i class="far fa-heart " ></i>', $output );
 		$this->assertStringEndsWith( '</div>', $output );
 	}
 
-	public function test_center_alignment_uses_standard_block_support_class() {
-		$output = $this->render_block(
-			array(
-				'align'      => 'center',
-				'iconName'   => 'star',
-				'iconStyle'  => 'solid',
-			)
-		);
+	public function test_internal_justification_uses_wrapper_classes_without_core_alignment() {
+		foreach ( array( 'left', 'center', 'right' ) as $justification ) {
+			$output = $this->render_block(
+				array(
+					'iconJustification' => $justification,
+					'iconName'          => 'star',
+					'iconStyle'         => 'solid',
+				)
+			);
 
-		$this->assertStringStartsWith( '<div ', $output );
-		$this->assertStringContainsString( 'class="aligncenter wp-block-better-font-awesome-icon"', $output );
-		$this->assertStringContainsString( '<i class="fas fa-star " ></i>', $output );
+			$this->assertStringStartsWith( '<div ', $output );
+			$this->assertStringContainsString( 'class="items-justified-' . $justification . ' wp-block-better-font-awesome-icon"', $output );
+			$this->assertStringNotContainsString( 'align' . $justification, $output );
+			$this->assertStringContainsString( '<i class="fas fa-star " ></i>', $output );
+		}
 	}
 
 	public function test_labelled_icon_exposes_sanitized_accessible_name() {
@@ -114,13 +119,15 @@ class Better_Font_Awesome_Icon_Block_Test extends WP_UnitTestCase {
 	public function test_invalid_attribute_shapes_fail_closed_to_safe_defaults() {
 		$output = $this->render_block(
 			array(
-				'iconName'  => array( 'not-a-string' ),
-				'iconStyle' => 'unsupported-style',
-				'label'     => array( 'not-a-string' ),
+				'iconJustification' => 'unsupported-justification',
+				'iconName'          => array( 'not-a-string' ),
+				'iconStyle'         => 'unsupported-style',
+				'label'             => array( 'not-a-string' ),
 			)
 		);
 
 		$this->assertStringContainsString( 'aria-hidden="true"', $output );
+		$this->assertStringContainsString( 'class="items-justified-left wp-block-better-font-awesome-icon"', $output );
 		$this->assertStringContainsString( '<i class="fas fa-flag " ></i>', $output );
 	}
 

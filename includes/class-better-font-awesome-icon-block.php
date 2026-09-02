@@ -29,6 +29,13 @@ class Better_Font_Awesome_Icon_Block {
 	private const STYLES = array( 'brands', 'regular', 'solid' );
 
 	/**
+	 * Supported icon positions within the block wrapper.
+	 *
+	 * @var string[]
+	 */
+	private const JUSTIFICATIONS = array( 'left', 'center', 'right' );
+
+	/**
 	 * Better Font Awesome Library instance.
 	 *
 	 * @var Better_Font_Awesome_Library
@@ -92,15 +99,19 @@ class Better_Font_Awesome_Icon_Block {
 	 * @return string Rendered block markup.
 	 */
 	public function render( $attributes ) {
-		$name  = isset( $attributes['iconName'] ) && is_string( $attributes['iconName'] ) ? sanitize_key( $attributes['iconName'] ) : 'flag';
-		$style = isset( $attributes['iconStyle'] ) && is_string( $attributes['iconStyle'] ) ? sanitize_key( $attributes['iconStyle'] ) : 'solid';
-		$label = isset( $attributes['label'] ) && is_string( $attributes['label'] ) ? sanitize_text_field( $attributes['label'] ) : '';
+		$name          = isset( $attributes['iconName'] ) && is_string( $attributes['iconName'] ) ? sanitize_key( $attributes['iconName'] ) : 'flag';
+		$style         = isset( $attributes['iconStyle'] ) && is_string( $attributes['iconStyle'] ) ? sanitize_key( $attributes['iconStyle'] ) : 'solid';
+		$justification = isset( $attributes['iconJustification'] ) && is_string( $attributes['iconJustification'] ) ? sanitize_key( $attributes['iconJustification'] ) : 'left';
+		$label         = isset( $attributes['label'] ) && is_string( $attributes['label'] ) ? sanitize_text_field( $attributes['label'] ) : '';
 
 		if ( '' === $name ) {
 			$name = 'flag';
 		}
 		if ( ! in_array( $style, self::STYLES, true ) ) {
 			$style = 'solid';
+		}
+		if ( ! in_array( $justification, self::JUSTIFICATIONS, true ) ) {
+			$justification = 'left';
 		}
 
 		$accessibility = '' === $label
@@ -119,9 +130,12 @@ class Better_Font_Awesome_Icon_Block {
 			)
 		);
 
+		$wrapper_attributes          = $accessibility;
+		$wrapper_attributes['class'] = 'items-justified-' . $justification;
+
 		return sprintf(
 			'<div %1$s>%2$s</div>',
-			get_block_wrapper_attributes( $accessibility ),
+			get_block_wrapper_attributes( $wrapper_attributes ),
 			$icon
 		);
 	}
