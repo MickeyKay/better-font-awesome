@@ -9,8 +9,8 @@ The plugin delegates Font Awesome version and icon data to `mickey-kay/better-fo
 ## Current priorities
 
 1. Stabilize the existing plugin and its live-update architecture.
-2. Restore reliable Font Awesome Free metadata updates with validated cached and bundled fallbacks.
-3. Add modern editor support with a dynamic block while keeping the shortcode canonical and backward compatible.
+2. Maintain reliable, channel-aware Font Awesome Free metadata updates with validated cached and bundled fallbacks.
+3. Refine the native dynamic block while keeping the shortcode canonical and backward compatible.
 4. Consider Font Awesome Pro only after the Free experience is stable.
 
 Do not make a production request wait on Font Awesome metadata. Remote refreshes should use the WordPress HTTP API, TLS verification, timeouts, validation, persistent last-known-good data, locking, backoff, and asynchronous scheduling.
@@ -40,7 +40,7 @@ The development site is available on the port selected by `WP_ENV_PORT`, default
 
 - Keep runtime support at PHP 7.4 or newer and WordPress 6.5 or newer unless a release decision changes those floors.
 - Add focused PHPUnit coverage for every PHP behavior change.
-- Add Playwright coverage for editor workflows when block development begins.
+- Add Playwright coverage for approved editor workflow changes.
 - Do not make tests depend on the live Font Awesome service. Mock HTTP responses and test fresh, stale, failed, and malformed response paths.
 - Run PHPCS and PHPStan on first-party code. Keep legacy baselines narrow and do not grow them for new code.
 - Escape output late, sanitize and validate explicit input fields, and pair nonces with capability checks.

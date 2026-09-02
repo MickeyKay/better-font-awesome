@@ -11,7 +11,7 @@
 **License:** GPLv2+<br>
 **License URI:** https://www.gnu.org/licenses/gpl-2.0.html<br>
 
-Font Awesome 5 Free icons for WordPress with a native block, shortcodes, HTML, TinyMCE, automatic metadata updates, backwards compatibility, and CDN delivery.
+Font Awesome 7 Free icons for WordPress with a native block, shortcodes, HTML, TinyMCE, automatic metadata updates, and Font Awesome 4 and 5 compatibility.
 
 ## Description ##
 
@@ -19,20 +19,22 @@ Font Awesome 5 Free icons for WordPress with a native block, shortcodes, HTML, T
 
 **Do you find this plugin helpful? Please consider [leaving a 5-star review](https://wordpress.org/support/view/plugin-reviews/better-font-awesome).**
 
-Better Font Awesome integrates the latest available release in the supported [Font Awesome 5 Free](https://fontawesome.com/v5/search?o=r&m=free) channel into your WordPress project, along with accompanying CSS, shortcodes, and a TinyMCE icon shortcode generator.
+Better Font Awesome integrates the current [Font Awesome 7 Free](https://fontawesome.com/search?o=r&m=free) channel into your WordPress project through Better Font Awesome Library 3, along with accompanying CSS, shortcodes, and a TinyMCE icon shortcode generator. A packaged Font Awesome 7 fallback works immediately, without waiting for WordPress cron or a remote metadata request.
 
 
 ### Features ###
 
-* **Automatically updated** - refreshes validated metadata in the background for the most recent available Font Awesome 5 Free release, so normal requests never wait for the metadata service.
+* **Automatically updated** - refreshes validated metadata in the background for newer compatible Font Awesome 7 Free releases, so normal requests never wait for metadata discovery or asset validation.
 
-* **Backwards compatible** - established Font Awesome 4 and 5 shortcode prefixes remain compatible, including the optional Font Awesome 4 shim for upgraded sites.
+* **Backwards compatible** - established Font Awesome 4 and 5 shortcode names and classes remain compatible through validated aliases, Font Awesome 5 font-face compatibility CSS, and the optional Font Awesome 4 shim.
+
+* **Immediate packaged fallback** - includes validated Font Awesome 7 Free CSS, fonts, and metadata so icons work even when cron or external services are unavailable.
 
 * **Native icon block** - search the current Font Awesome Free catalog in the Block Editor, add an optional accessible label, and keep icon rendering dynamic.
 
 * **Compatible with other plugins** - designed to work with shortcodes generated with plugins like [Font Awesome Icons](http://wordpress.org/plugins/font-awesome/ "Font Awesome Icons"), [Font Awesome More Icons](https://wordpress.org/plugins/font-awesome-more-icons/ "Font Awesome More Icons"), and [Font Awesome Shortcodes](https://wordpress.org/plugins/font-awesome-shortcodes/), so you can switch to Better Font Awesome and your existing shortcodes will still work.
 
-* **CDN speeds** - Font Awesome CSS is loaded from a versioned public CDN URL.
+* **Validated CDN delivery** - a newer background-validated release uses exact-version cdnjs CSS and font assets with integrity metadata.
 
 * **Shortcode generator** - includes an easy-to-use TinyMCE dropdown shortcode generator.
 
@@ -49,9 +51,9 @@ The block is rendered dynamically through the same established server-side icon 
 
 ### 2. Shortcode ###
 `[icon name="flag" class="2x spin border" unprefixed_class="my-custom-class"]`
-Note that prefixes (`fa-` and `icon-`) are not required, but if you do include them things will still work just fine. Better Font Awesome normalizes established shortcode prefixes for the supported Font Awesome 5 Free channel.
+Note that prefixes (`fa-` and `icon-`) are not required, but if you do include them things will still work just fine. Better Font Awesome normalizes established shortcode prefixes and resolves validated legacy icon-name aliases for the current Font Awesome 7 Free channel.
 
-That means that all of the following established shortcode forms continue to work with the supported Font Awesome 5 Free channel:
+That means that all of the following established shortcode forms continue to work with the current Font Awesome 7 Free channel:
 `[icon name="flag" class="2x spin border"]`
 `[icon name="icon-flag" class="icon-2x icon-spin icon-border"]`
 `[icon name="fa-flag" class="fa-2x fa-spin fa-border"]`
@@ -69,12 +71,17 @@ Note that prefixes are required for HTML usage, and are version-specific. For th
 Better Font Awesome is built around the [Better Font Awesome Library](https://github.com/MickeyKay/better-font-awesome-library). This library allows you to integrate Better Font Awesome into any custom project you want to create (perhaps a theme or plugin with a constantly up-to-date icon list), and includes all the [filters](https://github.com/MickeyKay/better-font-awesome-library#filters) you might need.
 
 ### External services ###
-Better Font Awesome uses two Font Awesome services to provide current Free icon metadata and browser assets. No Font Awesome account or API token is required.
+Better Font Awesome works immediately from its packaged Font Awesome 7 Free fallback. It uses the following external services only for background updates or for assets from a newer validated release. No Font Awesome account or API token is required for the Free channel.
 
-* **Font Awesome GraphQL API** (`https://api.fontawesome.com`) - the site server requests public Font Awesome 5 Free release and icon metadata in an asynchronous WP-Cron worker, normally about once per day. Browser, frontend, REST, editor, settings, and shortcode requests only read validated local data and never wait for this API. The plugin does not intentionally send site, user, or content data in the request. Failed requests retain the last validated metadata and use capped retry backoff.
-* **Font Awesome Free CDN** (`https://use.fontawesome.com`) - visitors' browsers request the versioned CSS and font files needed to display icons. Font Awesome receives normal web request data such as the visitor's IP address and user agent.
+* **Font Awesome GraphQL API** (`https://api.fontawesome.com`) - an asynchronous server-side WP-Cron worker requests the latest public `7.x` Free release version, icon names, aliases, families, and styles. Review the [Font Awesome terms of service](https://fontawesome.com/tos) and [privacy policy](https://fontawesome.com/privacy).
+* **npm registry** (`https://registry.npmjs.org/%40fortawesome%2Ffontawesome-free/{version}`) - when Font Awesome reports a newer candidate, the same background worker confirms that exact official Free package version, name, and license. Review the [npm terms](https://docs.npmjs.com/policies/terms) and [privacy notice](https://docs.npmjs.com/policies/privacy).
+* **cdnjs asset service** (`https://cdnjs.cloudflare.com/ajax/libs/font-awesome/{version}/`) - the background worker downloads an allowlisted set of exact-version CSS and WOFF2 files for validation. BFAL does not call a separate cdnjs catalog API. After a newer release passes every check, visitors' browsers may request its selected CSS and referenced font files from this host. Review the [cdnjs terms](https://cdnjs.com/terms) and [Cloudflare privacy policy](https://www.cloudflare.com/privacypolicy/).
+* **jsDelivr asset service** (`https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@{version}/`) - the background worker independently downloads the same allowlisted files and requires their bytes to match cdnjs. BFA does not select jsDelivr as the browser runtime host. Review the [jsDelivr terms and policies](https://www.jsdelivr.com/terms).
+* **Legacy Font Awesome 5 CDN** (`https://use.fontawesome.com/releases/`) - if another plugin or theme deliberately initializes BFAL first and selects the legacy `5.x` channel, visitors' browsers may request that selected version's CSS and fonts from this host.
 
-These services are provided by Fonticons, Inc. Review the [Font Awesome terms of service](https://fontawesome.com/tos) and [privacy policy](https://fontawesome.com/privacy) for details.
+Normal frontend, administrator, REST, editor, settings, shortcode, picker, and getter requests do not perform BFA or BFAL metadata discovery or candidate asset-validation HTTP. Separately, WordPress core may fetch a registered external editor stylesheet while constructing Block Editor assets; that core behavior is not a BFA or BFAL metadata-validation request.
+
+Server-side provider requests expose ordinary connection data such as the server IP address, requested URL and version, timing, and HTTP headers. WordPress's default HTTP user agent may include the WordPress version and site URL. Browser asset requests can expose ordinary connection data such as the visitor's IP address, user agent, referring page, and requested asset. BFA does not add post content, user content, Font Awesome credentials, or an API token to these requests. If discovery, publication, transport, or validation fails, BFA continues using the packaged fallback or validated last-known-good release.
 
 ### Languages / Translations ###
 * English
@@ -111,7 +118,7 @@ This section describes how to install the plugin and get it working.
 
 ### How is this plugin different from other Font Awesome plugins? ###
 
-This plugin automatically refreshes validated metadata for the latest release in its supported Font Awesome 5 Free channel. Better Font Awesome is also designed to work with a wide variety of established shortcode formats used by other Font Awesome plugins, so existing compatible shortcodes can continue to work. Font Awesome 6 and 7 are not currently supported.
+This plugin defaults to the current Font Awesome 7 Free channel and refreshes validated metadata for compatible 7.x releases in the background. It also supports established Font Awesome 4 and 5 shortcode names and classes through compatibility assets and aliases, so existing compatible content can continue to work. It does not provide a separate Font Awesome 6 channel or claim comprehensive native support for every Font Awesome 6 name or markup pattern.
 
 ### How does automatic metadata refresh work? ###
 
@@ -121,7 +128,7 @@ If scheduled refresh does not run, Better Font Awesome continues serving validat
 
 ### Do I have to install any font files? ###
 
-Nope. Better Font Awesome automatically loads the required CSS and font files from the Font Awesome Free CDN.
+Nope. The packaged Font Awesome 7 fallback loads CSS and fonts from your own site. If a newer release is validated and adopted, the browser loads that exact release's selected CSS and font files from cdnjs.
 
 ### What happens if I have another plugin/theme that uses Font Awesome? ###
 

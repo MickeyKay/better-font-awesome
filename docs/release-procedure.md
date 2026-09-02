@@ -153,7 +153,7 @@ Install and activate the exact ZIP on a clean supported WordPress site. Repeat t
 
 All metadata values and cron events are site-scoped. Network activation does not create network-global metadata. It iterates sites in the current network, schedules each site independently, restores the original blog context, and schedules newly created sites only while BFA is network-active for that network.
 
-- `better_font_awesome_release_record` is the durable, validated last-known-good Font Awesome 5 Free metadata record.
+- `better_font_awesome_release_record` is the durable, validated, channel-aware last-known-good Font Awesome Free metadata record.
 - `better_font_awesome_release_state` is durable refresh and failure state.
 - `better_font_awesome_metadata_schema` is the durable migration schema marker.
 - `better_font_awesome_refresh_schedule` is the temporary schedule ownership marker.

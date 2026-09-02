@@ -1,96 +1,105 @@
 # BFAL live-update contract
 
-Status: proposed contract for the next BFAL release
+Status: current evergreen contract
 
-## Why the current implementation is stuck
+Better Font Awesome (BFA) and Better Font Awesome Library (BFAL) keep Font Awesome Free metadata current without making ordinary WordPress requests depend on remote discovery. The plugin ships a validated local fallback, serves validated local data immediately, and performs remote refresh work only in an explicit background worker.
 
-BFAL 2.0.3 queries GraphQL with `release(version: "latest")`. Font Awesome documents that `latest` resolves to the latest full v5 release and is deprecated for v6 and newer. BFAL also constructs asset URLs under `use.fontawesome.com/releases`, while Font Awesome documents that v5 is the last version available from that CDN.
+## Channel and ownership contract
 
-This means metadata selection and asset delivery must be upgraded together. Changing only the GraphQL query to `7.x` would generate invalid legacy CDN URLs.
+BFAL 3 supports two immutable channels:
 
-The current implementation also:
+- `7.x` uses schema-2 family-aware Font Awesome 7 Free records and is BFAL's default.
+- `5.x` uses schema-1 Font Awesome 5 Free records for deliberate legacy ownership and rollback compatibility.
 
-- performs a synchronous remote POST when the transient is absent
-- disables TLS certificate verification
-- uses one expiring transient rather than a durable last-known-good value
-- has no request lock, retry backoff, or response schema validation
-- falls directly back to bundled v5.14.0 data after remote failure
-- can display repeated admin notices for upstream failures
+There is no separate Font Awesome 6 channel or claim of comprehensive native Font Awesome 6 support. Major-channel changes are compatibility decisions and cannot occur as a routine metadata refresh.
 
-## Product contract
+BFAL resolves its channel once through its public initialization process. The first singleton caller remains authoritative. BFA supplies its local provider and asynchronous refresh callback when BFA owns that first call, but it does not instantiate BFAL early or override a deliberate earlier owner.
 
-The architecture remains live-first. The plugin may ship emergency fallback metadata, but a plugin release is not required for routine Font Awesome Free patch and minor updates within the selected compatible major.
+Before BFA receives the singleton, its provider validates the one durable record using the channel declared by that record and returns it as a candidate. BFAL accepts the candidate only when its schema and channel match BFAL's already-selected immutable channel. BFA preserves rejected wrong-channel records. After BFA receives the singleton, provider, migration, refresh, and persistence behavior use BFAL's actual channel.
 
-Major Font Awesome upgrades are compatibility decisions, not silent data refreshes. BFAL must resolve a named channel such as `7.x`, not the ambiguous `latest`. The selected major must be filterable and observable.
+## Request and cache behavior
 
-Metadata resolution and browser asset delivery are separate adapters:
-
-1. Resolve the latest concrete version for the supported channel from Font Awesome's public API.
-2. Fetch and validate Free icon metadata for that concrete version.
-3. Build CSS URLs from an explicitly supported provider for the same concrete version.
-
-The leading Free delivery candidate is the versioned `@fortawesome/fontawesome-free` package on jsDelivr. A probe for `7.2.0/css/all.min.css` currently returns an immutable HTTP 200 response. This provider choice still needs license, uptime, privacy disclosure, relative webfont URL, and WordPress directory review before implementation.
-
-## Request and cache state machine
-
-Normal frontend and editor requests must never wait for Font Awesome's API.
-
-| State | Request behavior | Background behavior |
+| State | Ordinary request behavior | Background behavior |
 | --- | --- | --- |
-| Fresh last-known-good data | Return it immediately | None |
-| Stale last-known-good data | Return it immediately | Schedule one refresh if no lock exists |
-| No last-known-good data | Return the bundled fallback immediately | Schedule one refresh if no lock exists |
-| Refresh succeeds | Keep serving current data for that request | Validate, atomically replace last-known-good data, record success, clear backoff |
-| Refresh fails | Keep serving last-known-good or fallback | Record a sanitized error, increase backoff, retain existing data |
+| Fresh last-known-good data | Return it immediately | No refresh required |
+| Stale last-known-good data | Return it immediately | Schedule one refresh when work is not already owned |
+| No compatible durable data | Return BFAL's validated bundled fallback immediately | Schedule one refresh when work is not already owned |
+| Refresh succeeds | Keep serving current request data | Validate and durably replace compatible last-known-good data, then clear backoff |
+| Refresh fails | Keep serving last-known-good data or fallback | Record a sanitized failure and capped retry without replacing valid data |
 
-Required storage:
+Normal frontend, administrator, REST, editor, settings, shortcode, picker, getter, and ordinary cron-triggering requests perform no BFA or BFAL metadata discovery or candidate asset-validation HTTP. They may schedule work and return promptly. WordPress core may separately fetch a registered external editor stylesheet while constructing Block Editor assets; that is not BFA or BFAL metadata validation.
 
-- a non-expiring option containing validated last-known-good release data
-- metadata containing source version, fetched time, schema version, and checksum
-- a short-lived refresh lock
-- failure count, next retry time, and last sanitized error
-- a fresh-until timestamp with small random jitter to avoid fleet-wide refresh bursts
+## Durable state
 
-Recommended retry progression is roughly 1 hour, 6 hours, then 24 hours, with jitter and a cap. A successful refresh resets it. Cron callbacks must be idempotent. Metadata updates are automatic and background-only, and the normal settings page must not expose status, diagnostics, or a manual refresh control.
+The site-scoped, non-autoloaded `better_font_awesome_release_record` option contains one completely validated release record plus BFA storage metadata:
 
-## Transport and validation rules
+- BFAL schema version `1` with channel `5.x`, or schema version `2` with channel `7.x`
+- Free edition and validated source
+- complete channel-specific release data
+- BFA storage schema version
+- fetch and freshness timestamps
+- checksum of the validated release data
 
-- Use the WordPress HTTP API with TLS verification enabled.
-- Use bounded connect and response timeouts.
-- Handle `WP_Error` before reading an HTTP status or body.
-- Treat non-2xx responses and GraphQL `errors` as failures.
-- Reject empty, malformed, unexpectedly large, or structurally incomplete responses.
-- Require a valid semantic version, a non-empty Free icon list, known style names, and required asset metadata.
-- Never replace last-known-good data until the complete response validates.
-- Do not expose raw upstream bodies, tokens, headers, or stack traces in admin notices.
-- Provide filters around the channel and request arguments, but do not permit callers to disable TLS by default.
+Separate non-autoloaded options hold refresh status, the migration marker, one short-lived schedule claim, and one short-lived worker lease. A valid record has no maximum stale age. Failed refreshes and wrong-channel selection never delete it.
 
-## Backward compatibility
+## Scheduling, locking, and retries
 
-Existing BFAL consumers must retain these public behaviors unless a major library release explicitly changes them:
+BFA owns freshness, scheduling, locking, backoff, durable persistence, and migration when it owns BFAL's first singleton call.
 
-- the `Better_Font_Awesome_Library` class and singleton entry point
-- the `[icon]` shortcode and existing attributes
-- current filters such as `bfa_icon`, `bfa_icon_array`, and `bfa_icon_class`
-- existing settings for the v4 shim and conflict removal
-- semantic icon output that remains renderable for saved content
+- Normal freshness is 24 hours plus bounded jitter of up to 1 hour.
+- Records enter the scheduling window 1 hour before their freshness deadline.
+- One atomic schedule claim suppresses duplicate WP-Cron events.
+- One atomic, renewable worker lease protects callback-derived record and state writes.
+- Exact ownership checks prevent one request or worker from releasing another's work.
+- Retry bases are 1 hour, 6 hours, and 24 hours, with bounded jitter and a 24 hour cap.
+- A successful refresh resets failure state. A failed refresh schedules a retry only after its failure state is stored successfully.
 
-Add new provider, cache, and refresh collaborators behind the public class. Avoid making the plugin repository the only environment in which BFAL can be tested.
+Cron callbacks are idempotent. The normal settings page exposes no metadata status, diagnostics, or manual refresh control.
 
-## Required BFAL tests
+## Font Awesome 7 providers and validation
 
-- fresh cache returns without an HTTP request
-- stale cache returns immediately and schedules one refresh
-- cache miss returns bundled fallback and schedules one refresh
-- concurrent stale requests create only one scheduled refresh
-- valid response atomically replaces last-known-good data
-- timeout, DNS, TLS, 403, 429, 500, GraphQL error, malformed JSON, and invalid schema retain old data
-- backoff and jitter cap request frequency
-- selected metadata version and CSS package version always match
-- relative CSS webfont URLs resolve through the chosen provider
-- v4-compatible shortcode markup still renders after the major upgrade
-- filters and public method signatures remain compatible
+The default `7.x` background worker uses these services in order:
 
-## Repository coordination
+1. It posts a fixed GraphQL query to `https://api.fontawesome.com` for the latest `7.x` Free version, icons, aliases, families, and styles.
+2. If the candidate is newer, it requests `https://registry.npmjs.org/%40fortawesome%2Ffontawesome-free/{version}` and verifies the exact official package name, version, and Free package license expression.
+3. It downloads an allowlisted set of exact-version CSS and WOFF2 assets from `https://cdnjs.cloudflare.com/ajax/libs/font-awesome/{version}/`.
+4. It downloads the same files independently from `https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@{version}/` and requires byte-for-byte agreement with cdnjs.
+5. It validates CSS-to-font references, required styles and fonts, SRI values, semantic version, Free-only metadata, families, styles, icon identifiers, and aliases before returning a complete schema-2 record.
 
-Implement and release this contract in `MickeyKay/better-font-awesome-library` first. Run its standalone unit suite across supported PHP and WordPress versions, tag a prerelease, then point this plugin at the exact prerelease for integration testing. Merge and tag the stable BFAL release before updating this plugin's production lockfile.
+BFAL does not call a separate cdnjs catalog API. cdnjs is both a background asset-validation source and the browser runtime host after a newer release is adopted. jsDelivr is an independent background validation source, not the selected browser runtime host.
+
+The worker uses the WordPress HTTP API with TLS verification, unsafe-URL rejection, no redirects, bounded per-request and aggregate response sizes, bounded request count, and bounded time. It handles transport, HTTP, JSON, GraphQL, publication, provider disagreement, and schema failures without replacing valid data.
+
+## Browser asset delivery
+
+The packaged Font Awesome 7 fallback serves its CSS and fonts from the plugin on the site's own origin. A newer completely validated `7.x` record uses exact-version cdnjs URLs for the main stylesheet, Font Awesome 5 font-face compatibility stylesheet, optional Font Awesome 4 compatibility stylesheets, and the WOFF2 fonts those styles reference.
+
+A deliberate earlier `5.x` singleton owner uses the legacy channel's versioned `use.fontawesome.com/releases/` CSS and font paths. BFA does not silently convert a selected `5.x` owner to `7.x`.
+
+## External request data
+
+No Font Awesome account or API token is required for the Free channels. BFA does not add post content, user content, or Font Awesome credentials to provider requests.
+
+External providers receive ordinary connection data. Server-side background requests may expose the server IP address, requested URL and candidate version, timing, and HTTP headers. WordPress's default HTTP user agent may include the WordPress version and site URL. Browser asset requests may expose the visitor IP address, user agent, referring page, and requested asset.
+
+## Compatibility and rollback
+
+The `[icon]` shortcode, its established attributes, BFAL public singleton, existing filters, Classic Editor picker, and conflict settings remain compatibility boundaries. Font Awesome 4 and 5 shortcode names and classes remain supported on the default channel through validated aliases and compatibility CSS where the selected Font Awesome 7 Free package provides them.
+
+An emergency rollback to an older BFAL may restore legacy request, cache, and asset behavior. Newer durable options remain preserved for later forward recovery. Rollback compatibility does not redefine the current background-only contract.
+
+## Verification contract
+
+Automated tests use deterministic fixtures and intercept every Font Awesome, npm, cdnjs, and jsDelivr request. Required coverage includes:
+
+- immediate packaged fallback with zero ordinary-request provider HTTP
+- fresh, stale, missing, malformed, and wrong-channel durable records
+- schema-1 and schema-2 validation and preservation
+- one-shot immutable channel selection and deliberate first-caller ownership
+- successful candidate adoption and last-known-good retention on every failure class
+- schedule, lock, lease-expiry, retry, object-cache, persistence-failure, and multisite interleavings
+- selected metadata and asset versions remaining identical
+- relative CSS font references, provider byte agreement, and required compatibility assets
+- current and supported rollback dependency modes
+
+Exact dependency references, test counts, archive checksums, and release-specific evidence belong in a release pull request or release record, not in this evergreen contract.
