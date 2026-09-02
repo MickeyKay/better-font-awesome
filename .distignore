@@ -31,7 +31,9 @@ package.json
 phpcs.xml.dist
 phpstan.neon.dist
 playwright.config.mjs
+playwright-report/
 phpunit*.xml*
 svn
 src
+test-results/
 tests

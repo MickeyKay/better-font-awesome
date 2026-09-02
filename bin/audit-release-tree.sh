@@ -101,6 +101,8 @@ test ! -e "$release_root/README.md"
 test ! -e "$release_root/package-lock.json"
 test ! -e "$release_root/phpcs.xml.dist"
 test ! -e "$release_root/phpstan.neon.dist"
+test ! -e "$release_root/playwright-report"
+test ! -e "$release_root/test-results"
 test -z "$(find "$release_root" -type f -name 'phpunit*.xml*' -print -quit)"
 
 printf 'Packaged BFAL %s at %s passed the production release-tree audit.\n' "$expected_version" "$expected_reference"
