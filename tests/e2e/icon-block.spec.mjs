@@ -3,45 +3,133 @@ import { expect, test } from '@playwright/test';
 const fontAwesomeStylesheetPattern =
 	/\/vendor\/mickey-kay\/better-font-awesome-library\/inc\/font-awesome-7-fallback\/css\/all\.min\.css(?:\?.*)?$/;
 
-const positionTolerance = 3;
+const controlledBoundaryClass = 'bfa-e2e-justification-boundary';
+const controlledBoundaryCss = `
+.${ controlledBoundaryClass } {
+	border: 4px solid transparent !important;
+	box-sizing: border-box !important;
+	inline-size: 640px !important;
+	margin-inline: 0 !important;
+	max-inline-size: 640px !important;
+	padding-inline: 40px 56px !important;
+}
+
+.${ controlledBoundaryClass } .wp-block-better-font-awesome-icon {
+	margin-inline: 0 !important;
+	max-inline-size: none !important;
+}
+`;
+
+async function getElementGeometry( locator ) {
+	return locator.evaluate( ( element ) => {
+		const rect = element.getBoundingClientRect();
+		const style = window.getComputedStyle( element );
+		const pixels = ( value ) => Number.parseFloat( value ) || 0;
+		const borderLeft = pixels( style.borderLeftWidth );
+		const borderRight = pixels( style.borderRightWidth );
+		const paddingLeft = pixels( style.paddingLeft );
+		const paddingRight = pixels( style.paddingRight );
+
+		return {
+			borderLeft: rect.left,
+			borderRight: rect.right,
+			borderWidth: rect.width,
+			contentLeft: rect.left + borderLeft + paddingLeft,
+			contentRight: rect.right - borderRight - paddingRight,
+			contentWidth:
+				rect.width -
+				borderLeft -
+				borderRight -
+				paddingLeft -
+				paddingRight,
+			tolerance: 1 / window.devicePixelRatio,
+		};
+	} );
+}
+
+async function expectControlledBoundary( boundary ) {
+	const geometry = await getElementGeometry( boundary );
+
+	expect( Math.abs( geometry.borderWidth - 640 ) ).toBeLessThanOrEqual(
+		geometry.tolerance
+	);
+	expect( Math.abs( geometry.contentWidth - 536 ) ).toBeLessThanOrEqual(
+		geometry.tolerance
+	);
+}
+
+async function expectWrapperFillsBoundary( block, boundary ) {
+	const [ blockGeometry, boundaryGeometry ] = await Promise.all( [
+		getElementGeometry( block ),
+		getElementGeometry( boundary ),
+	] );
+	const tolerance = Math.max(
+		blockGeometry.tolerance,
+		boundaryGeometry.tolerance
+	);
+
+	expect(
+		Math.abs( blockGeometry.borderLeft - boundaryGeometry.contentLeft ),
+		'wrapper left edge should match the controlled boundary content edge'
+	).toBeLessThanOrEqual( tolerance );
+	expect(
+		Math.abs( blockGeometry.borderRight - boundaryGeometry.contentRight ),
+		'wrapper right edge should match the controlled boundary content edge'
+	).toBeLessThanOrEqual( tolerance );
+	expect(
+		Math.abs( blockGeometry.borderWidth - boundaryGeometry.contentWidth ),
+		'wrapper should occupy the controlled boundary content width'
+	).toBeLessThanOrEqual( tolerance );
+}
 
 async function expectIconPosition( block, icon, justification ) {
-	const [ blockBox, iconBox ] = await Promise.all( [
-		block.boundingBox(),
-		icon.boundingBox(),
+	const [ blockGeometry, iconGeometry ] = await Promise.all( [
+		getElementGeometry( block ),
+		getElementGeometry( icon ),
 	] );
-	expect( blockBox ).not.toBeNull();
-	expect( iconBox ).not.toBeNull();
-	expect( iconBox.x ).toBeGreaterThanOrEqual( blockBox.x - positionTolerance );
-	expect( iconBox.x + iconBox.width ).toBeLessThanOrEqual(
-		blockBox.x + blockBox.width + positionTolerance
+	const tolerance = Math.max(
+		blockGeometry.tolerance,
+		iconGeometry.tolerance
+	);
+	expect( iconGeometry.borderLeft ).toBeGreaterThanOrEqual(
+		blockGeometry.contentLeft - tolerance
+	);
+	expect( iconGeometry.borderRight ).toBeLessThanOrEqual(
+		blockGeometry.contentRight + tolerance
 	);
 
 	if ( 'left' === justification ) {
-		expect( Math.abs( iconBox.x - blockBox.x ) ).toBeLessThan( positionTolerance );
+		expect(
+			Math.abs( iconGeometry.borderLeft - blockGeometry.contentLeft )
+		).toBeLessThanOrEqual( tolerance );
 	} else if ( 'center' === justification ) {
 		expect(
 			Math.abs(
-				blockBox.x + blockBox.width / 2 - ( iconBox.x + iconBox.width / 2 )
+				blockGeometry.contentLeft + blockGeometry.contentWidth / 2 -
+					( iconGeometry.borderLeft + iconGeometry.borderWidth / 2 )
 			)
-		).toBeLessThan( positionTolerance );
+		).toBeLessThanOrEqual( tolerance );
 	} else {
 		expect(
-			Math.abs( blockBox.x + blockBox.width - ( iconBox.x + iconBox.width ) )
-		).toBeLessThan( positionTolerance );
+			Math.abs( blockGeometry.contentRight - iconGeometry.borderRight )
+		).toBeLessThanOrEqual( tolerance );
 	}
 }
 
 async function expectBlockWithin( block, boundary ) {
-	const [ blockBox, boundaryBox ] = await Promise.all( [
-		block.boundingBox(),
-		boundary.boundingBox(),
+	const [ blockGeometry, boundaryGeometry ] = await Promise.all( [
+		getElementGeometry( block ),
+		getElementGeometry( boundary ),
 	] );
-	expect( blockBox ).not.toBeNull();
-	expect( boundaryBox ).not.toBeNull();
-	expect( blockBox.x ).toBeGreaterThanOrEqual( boundaryBox.x - positionTolerance );
-	expect( blockBox.x + blockBox.width ).toBeLessThanOrEqual(
-		boundaryBox.x + boundaryBox.width + positionTolerance
+	const tolerance = Math.max(
+		blockGeometry.tolerance,
+		boundaryGeometry.tolerance
+	);
+	expect( blockGeometry.borderLeft ).toBeGreaterThanOrEqual(
+		boundaryGeometry.contentLeft - tolerance
+	);
+	expect( blockGeometry.borderRight ).toBeLessThanOrEqual(
+		boundaryGeometry.contentRight + tolerance
 	);
 }
 
@@ -144,10 +232,7 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 		title: 'Localized Font Awesome Icon',
 	} );
 
-	const post = await page.evaluate( async () => {
-		const paragraph = window.wp.blocks.createBlock( 'core/paragraph', {
-			content: 'Reference paragraph',
-		} );
+	const post = await page.evaluate( async ( boundaryClass ) => {
 		const leftBlock = window.wp.blocks.createBlock( 'better-font-awesome/icon', {
 			iconName: 'flag',
 			iconStyle: 'solid',
@@ -166,6 +251,16 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 				iconName: 'arrow-right',
 				iconStyle: 'solid',
 			}
+		);
+		const justificationBoundary = window.wp.blocks.createBlock(
+			'core/group',
+			{
+				className: boundaryClass,
+				layout: {
+					type: 'default',
+				},
+			},
+			[ leftBlock, centerBlock, rightBlock ]
 		);
 		const row = window.wp.blocks.createBlock(
 			'core/group',
@@ -209,10 +304,7 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 		window.wp.data
 			.dispatch( 'core/block-editor' )
 			.insertBlocks( [
-				paragraph,
-				leftBlock,
-				centerBlock,
-				rightBlock,
+				justificationBoundary,
 				row,
 				columns,
 			] );
@@ -229,7 +321,7 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 			link: window.wp.data.select( 'core/editor' ).getPermalink(),
 			rightClientId: rightBlock.clientId,
 		};
-	} );
+	}, controlledBoundaryClass );
 	await page.evaluate( ( clientId ) => {
 		window.wp.data.dispatch( 'core/block-editor' ).selectBlock( clientId );
 	}, post.leftClientId );
@@ -259,6 +351,9 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 		window.wp.data.dispatch( 'core/block-editor' ).selectBlock( clientId );
 	}, post.leftClientId );
 
+	const editorFrame = page.frame( { name: 'editor-canvas' } );
+	expect( editorFrame ).not.toBeNull();
+	await editorFrame.addStyleTag( { content: controlledBoundaryCss } );
 	const editor = page.frameLocator( 'iframe[name="editor-canvas"]' );
 	const canvasFontAwesomeStylesheet = editor.locator(
 		'link#bfa-font-awesome-css[rel="stylesheet"]'
@@ -314,16 +409,16 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 	expect( selectedOptionGlyph.fontFamily ).toContain( 'Font Awesome' );
 	await iconControl.press( 'Escape' );
 
-	const referenceParagraph = editor.getByText( 'Reference paragraph', {
-		exact: true,
-	} );
-	const leftBlock = editor.locator(
+	const justificationBoundary = editor.locator(
+		`.wp-block-group.${ controlledBoundaryClass }`
+	);
+	const leftBlock = justificationBoundary.locator(
 		'.wp-block-better-font-awesome-icon.items-justified-left:has(.fas.fa-flag)'
 	);
-	const centerBlock = editor.locator(
+	const centerBlock = justificationBoundary.locator(
 		'.wp-block-better-font-awesome-icon.items-justified-center:has(.fas.fa-star)'
 	);
-	const rightBlock = editor.locator(
+	const rightBlock = justificationBoundary.locator(
 		'.wp-block-better-font-awesome-icon.items-justified-right:has(.fas.fa-arrow-right)'
 	);
 	const centerIcon = centerBlock.locator( '.fas.fa-star' );
@@ -336,7 +431,7 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 	const columnBlock = firstColumn.locator(
 		'.wp-block-better-font-awesome-icon.items-justified-right:has(.far.fa-heart)'
 	);
-	await expect( referenceParagraph ).toBeVisible();
+	await expect( justificationBoundary ).toBeVisible();
 	await expect( centerIcon ).toBeVisible();
 	await expect( rightIcon ).toBeVisible();
 	await expect( row.locator( '.fas.fa-coffee' ) ).toBeVisible();
@@ -344,9 +439,10 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 	await expect( leftBlock ).toHaveCSS( 'justify-content', 'flex-start' );
 	await expect( centerBlock ).toHaveCSS( 'justify-content', 'center' );
 	await expect( rightBlock ).toHaveCSS( 'justify-content', 'flex-end' );
-	await expectBlockWithin( leftBlock, referenceParagraph );
-	await expectBlockWithin( centerBlock, referenceParagraph );
-	await expectBlockWithin( rightBlock, referenceParagraph );
+	await expectControlledBoundary( justificationBoundary );
+	await expectWrapperFillsBoundary( leftBlock, justificationBoundary );
+	await expectWrapperFillsBoundary( centerBlock, justificationBoundary );
+	await expectWrapperFillsBoundary( rightBlock, justificationBoundary );
 	await expectIconPosition( leftBlock, editorIcon, 'left' );
 	await expectIconPosition( centerBlock, centerIcon, 'center' );
 	await expectIconPosition( rightBlock, rightIcon, 'right' );
@@ -371,12 +467,17 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 	await page.waitForFunction( () => {
 		return Boolean( window.wp?.data?.select( 'core/block-editor' ).getBlocks().length );
 	} );
-	const attributes = await page.evaluate( () => {
+	const attributes = await page.evaluate( ( boundaryClass ) => {
 		const blocks = window.wp.data.select( 'core/block-editor' ).getBlocks();
-		const iconBlocks = blocks.filter(
-			( item ) => 'better-font-awesome/icon' === item.name
+		const justificationBoundaryBlock = blocks.find(
+			( item ) =>
+				'core/group' === item.name && item.attributes.className === boundaryClass
 		);
-		const rowBlock = blocks.find( ( item ) => 'core/group' === item.name );
+		const iconBlocks = justificationBoundaryBlock.innerBlocks;
+		const rowBlock = blocks.find(
+			( item ) =>
+				'core/group' === item.name && 'flex' === item.attributes.layout?.type
+		);
 		const columnsBlock = blocks.find( ( item ) => 'core/columns' === item.name );
 		const firstColumnBlock = columnsBlock.innerBlocks[ 0 ];
 
@@ -385,11 +486,12 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 			columnChildren: firstColumnBlock.innerBlocks.map( ( item ) => item.name ),
 			columnIcon: firstColumnBlock.innerBlocks[ 1 ].attributes,
 			columnsChildren: columnsBlock.innerBlocks.map( ( item ) => item.name ),
+			justificationBoundaryChildren: iconBlocks.map( ( item ) => item.name ),
 			left: iconBlocks[ 0 ].attributes,
 			right: iconBlocks[ 2 ].attributes,
 			rowChildren: rowBlock.innerBlocks.map( ( item ) => item.name ),
 		};
-	} );
+	}, controlledBoundaryClass );
 	expect( attributes.left ).toMatchObject( {
 		iconJustification: 'left',
 		iconName: 'flag',
@@ -409,6 +511,11 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 	expect( attributes.left ).not.toHaveProperty( 'align' );
 	expect( attributes.center ).not.toHaveProperty( 'align' );
 	expect( attributes.right ).not.toHaveProperty( 'align' );
+	expect( attributes.justificationBoundaryChildren ).toEqual( [
+		'better-font-awesome/icon',
+		'better-font-awesome/icon',
+		'better-font-awesome/icon',
+	] );
 	expect( attributes.rowChildren ).toEqual( [
 		'better-font-awesome/icon',
 		'core/paragraph',
@@ -425,23 +532,28 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 	} );
 
 	await page.goto( post.link );
-	const frontendReference = page.getByText( 'Reference paragraph', { exact: true } );
-	const frontendLeftBlock = page.locator(
+	await page.addStyleTag( { content: controlledBoundaryCss } );
+	const frontendBoundary = page.locator(
+		`.wp-block-group.${ controlledBoundaryClass }`
+	);
+	const frontendLeftBlock = frontendBoundary.locator(
 		'.wp-block-better-font-awesome-icon.items-justified-left[role="img"]:has(.fas.fa-flag)'
 	);
-	const frontendCenterBlock = page.locator(
+	const frontendCenterBlock = frontendBoundary.locator(
 		'.wp-block-better-font-awesome-icon.items-justified-center:has(.fas.fa-star)'
 	);
-	const frontendRightBlock = page.locator(
+	const frontendRightBlock = frontendBoundary.locator(
 		'.wp-block-better-font-awesome-icon.items-justified-right:has(.fas.fa-arrow-right)'
 	);
+	await expect( frontendBoundary ).toBeVisible();
 	await expect( frontendLeftBlock ).toHaveAttribute( 'aria-label', 'Favorite' );
 	await expect( frontendLeftBlock.locator( '.fas.fa-flag' ) ).toBeVisible();
 	await expect( frontendCenterBlock ).toHaveCSS( 'justify-content', 'center' );
 	await expect( frontendRightBlock ).toHaveCSS( 'justify-content', 'flex-end' );
-	await expectBlockWithin( frontendLeftBlock, frontendReference );
-	await expectBlockWithin( frontendCenterBlock, frontendReference );
-	await expectBlockWithin( frontendRightBlock, frontendReference );
+	await expectControlledBoundary( frontendBoundary );
+	await expectWrapperFillsBoundary( frontendLeftBlock, frontendBoundary );
+	await expectWrapperFillsBoundary( frontendCenterBlock, frontendBoundary );
+	await expectWrapperFillsBoundary( frontendRightBlock, frontendBoundary );
 	await expectIconPosition(
 		frontendLeftBlock,
 		frontendLeftBlock.locator( '.fas.fa-flag' ),
