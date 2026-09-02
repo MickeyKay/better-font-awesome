@@ -39,12 +39,13 @@ abstract class Better_Font_Awesome_Metadata_Test_Case extends WP_UnitTestCase {
 		$this->previous_object_cache_mode = wp_using_ext_object_cache();
 		wp_using_ext_object_cache( false );
 		if ( 'rollback' === getenv( 'BFA_BFAL_VALIDATION_MODE' ) ) {
-			$this->markTestSkipped( 'Expected current-only skip in the BFAL 2.0.3 rollback suite.' );
+			$this->markTestSkipped( 'Expected current-only skip in the BFAL 2.1.0 rollback suite.' );
 		}
 		$this->reset_singletons();
 		$this->clear_metadata_state();
 		$this->font_awesome_http_calls    = 0;
 		$this->font_awesome_http_response = null;
+		add_filter( 'bfa_font_awesome_release_channel', array( $this, 'select_legacy_release_channel' ) );
 		add_filter( 'pre_http_request', array( $this, 'intercept_font_awesome_http' ), 5, 3 );
 		add_filter( 'better_font_awesome_metadata_jitter', '__return_zero', 10, 3 );
 	}
@@ -54,6 +55,7 @@ abstract class Better_Font_Awesome_Metadata_Test_Case extends WP_UnitTestCase {
 	 */
 	public function tearDown(): void {
 		remove_filter( 'pre_http_request', array( $this, 'intercept_font_awesome_http' ), 5 );
+		remove_filter( 'bfa_font_awesome_release_channel', array( $this, 'select_legacy_release_channel' ) );
 		remove_filter( 'better_font_awesome_metadata_jitter', '__return_zero', 10 );
 		$_POST    = array();
 		$_REQUEST = array();
@@ -65,7 +67,23 @@ abstract class Better_Font_Awesome_Metadata_Test_Case extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Intercept only the Font Awesome metadata endpoint.
+	 * Keep established metadata orchestration tests on BFAL's explicit FA5 path.
+	 *
+	 * @return string Legacy release channel.
+	 */
+	public function select_legacy_release_channel() {
+		return '5.x';
+	}
+
+	/**
+	 * Use BFAL 3's default channel for an integration test.
+	 */
+	protected function use_default_release_channel() {
+		remove_filter( 'bfa_font_awesome_release_channel', array( $this, 'select_legacy_release_channel' ) );
+	}
+
+	/**
+	 * Intercept Font Awesome metadata and asset-validation endpoints.
 	 *
 	 * @param false|array|WP_Error $preempt     Existing preempted response.
 	 * @param array                $parsed_args HTTP request arguments.
@@ -74,7 +92,21 @@ abstract class Better_Font_Awesome_Metadata_Test_Case extends WP_UnitTestCase {
 	 */
 	public function intercept_font_awesome_http( $preempt, $parsed_args, $url ) {
 		unset( $parsed_args );
-		if ( Better_Font_Awesome_Library::FONT_AWESOME_API_BASE_URL !== $url ) {
+		$remote_prefixes = array(
+			Better_Font_Awesome_Library::FONT_AWESOME_API_BASE_URL,
+			'https://registry.npmjs.org/',
+			'https://cdnjs.cloudflare.com/',
+			'https://cdn.jsdelivr.net/',
+		);
+		$is_font_awesome_request = false;
+		foreach ( $remote_prefixes as $prefix ) {
+			if ( 0 === strpos( $url, $prefix ) ) {
+				$is_font_awesome_request = true;
+				break;
+			}
+		}
+
+		if ( ! $is_font_awesome_request ) {
 			return $preempt;
 		}
 
@@ -98,6 +130,39 @@ abstract class Better_Font_Awesome_Metadata_Test_Case extends WP_UnitTestCase {
 		$release  = $payload['data']['release'];
 		$release['version'] = $version;
 		return $release;
+	}
+
+	/**
+	 * Return a valid schema-2 record based on BFAL's packaged FA7 metadata.
+	 *
+	 * @param string $version Release version.
+	 * @return array Valid schema-2 record.
+	 */
+	protected function valid_schema_2_record( $version = '7.3.1' ) {
+		$path    = dirname( __DIR__ ) . '/vendor/mickey-kay/better-font-awesome-library/inc/font-awesome-7-fallback/metadata.json';
+		$record  = json_decode( file_get_contents( $path ), true );
+		$record['release']['version'] = $version;
+		return $record;
+	}
+
+	/**
+	 * Persist one durable schema-2 record.
+	 *
+	 * @param string   $version     Release version.
+	 * @param int|null $fresh_until Freshness deadline.
+	 * @return array Durable record.
+	 */
+	protected function persist_schema_2_record( $version = '7.3.1', $fresh_until = null ) {
+		$validation = Better_Font_Awesome_Release_Data_V2_Validator::validate_record( $this->valid_schema_2_record( $version ) );
+		$fetched_at = time() - HOUR_IN_SECONDS;
+		if ( null === $fresh_until ) {
+			$fresh_until = time() + DAY_IN_SECONDS;
+		}
+
+		$store  = new Better_Font_Awesome_Metadata_Store();
+		$record = $store->build_record( $validation['record'], $fetched_at, $fresh_until );
+		$this->assertTrue( $store->persist_record( $record ) );
+		return $record;
 	}
 
 	/**

@@ -94,19 +94,24 @@ function _manually_load_plugin() {
 		'request_release_data_refresh',
 		'refresh_release_data',
 	);
-	$has_current_api = class_exists( 'Better_Font_Awesome_Release_Data_Validator' ) &&
+	$has_legacy_api = class_exists( 'Better_Font_Awesome_Release_Data_Validator' ) &&
 		defined( 'Better_Font_Awesome_Release_Data_Validator::RELEASE_CHANNEL' );
 	foreach ( $validator_methods as $method ) {
-		$has_current_api = $has_current_api && is_callable( array( 'Better_Font_Awesome_Release_Data_Validator', $method ) );
+		$has_legacy_api = $has_legacy_api && is_callable( array( 'Better_Font_Awesome_Release_Data_Validator', $method ) );
 	}
 	foreach ( $library_methods as $method ) {
-		$has_current_api = $has_current_api && method_exists( 'Better_Font_Awesome_Library', $method );
+		$has_legacy_api = $has_legacy_api && method_exists( 'Better_Font_Awesome_Library', $method );
 	}
-	if ( 'current' === $better_font_awesome_bfal_validation_mode && ! $has_current_api ) {
-		throw new RuntimeException( 'Current mode requires the stable BFAL validator, provider record, asynchronous request, and explicit worker APIs.' );
+	$has_schema_2_api = class_exists( 'Better_Font_Awesome_Release_Data_V2_Validator' ) &&
+		defined( 'Better_Font_Awesome_Release_Data_V2_Validator::RELEASE_CHANNEL' );
+	foreach ( $validator_methods as $method ) {
+		$has_schema_2_api = $has_schema_2_api && is_callable( array( 'Better_Font_Awesome_Release_Data_V2_Validator', $method ) );
 	}
-	if ( 'rollback' === $better_font_awesome_bfal_validation_mode && $has_current_api ) {
-		throw new RuntimeException( 'Rollback mode requires BFAL 2.0.3 without the current refresh API.' );
+	if ( 'current' === $better_font_awesome_bfal_validation_mode && ( ! $has_legacy_api || ! $has_schema_2_api ) ) {
+		throw new RuntimeException( 'Current mode requires BFAL schema-1 and schema-2 validation, channel selection, provider, request, and worker APIs.' );
+	}
+	if ( 'rollback' === $better_font_awesome_bfal_validation_mode && ( ! $has_legacy_api || $has_schema_2_api ) ) {
+		throw new RuntimeException( 'Rollback mode requires BFAL 2.1.0 schema-1 asynchronous metadata APIs without schema-2 support.' );
 	}
 }
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );

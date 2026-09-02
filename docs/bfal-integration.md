@@ -23,11 +23,11 @@ All metadata options are site-scoped and created with autoload disabled.
 
 `better_font_awesome_release_record` stores:
 
-- `schema_version`: BFAL record schema, currently `1`.
-- `channel`: `5.x`.
+- `schema_version`: BFAL record schema, `1` for the legacy `5.x` channel or `2` for the default `7.x` channel.
+- `channel`: the record's declared `5.x` or `7.x` release channel.
 - `edition`: `free`.
 - `source`: validated BFAL source such as `api` or `transient`.
-- `release`: the complete validated release array used for icons, CSS, the v4 shim, and webfont paths.
+- `release`: the complete channel-specific release array used for icons, aliases, CSS, compatibility assets, and webfont paths.
 - `storage_schema_version`: BFA storage schema, currently `1`.
 - `fetched_at`: Unix timestamp of the successful fetch or inferred transient fetch.
 - `fresh_until`: Unix timestamp used by BFA freshness evaluation.
@@ -59,7 +59,7 @@ All metadata options are site-scoped and created with autoload disabled.
 - Failed refreshes never remove or replace a valid durable record.
 - The BFAL bundled fallback is used only when neither the durable provider nor the compatibility transient supplies a valid release.
 
-The current supported channel is Font Awesome 5 Free. Font Awesome 6 and 7 are not currently supported.
+BFAL 3 defaults to the Font Awesome 7 Free `7.x` channel and its packaged fallback. A plugin or theme that deliberately owns the BFAL singleton first may select the legacy Font Awesome 5 Free `5.x` channel and remains authoritative for that request. BFA validates stored records against their declared schema and channel, offers a valid record as a local provider candidate, and preserves a wrong-channel record when BFAL rejects it. After singleton initialization, refresh and persistence behavior follows BFAL's actual immutable channel. There is no separate Font Awesome 6 channel or claim of comprehensive native Font Awesome 6 support.
 
 ## Scheduling, locking, and retries
 
@@ -89,15 +89,15 @@ If scheduled refresh does not run, BFA continues serving validated last-known-go
 
 ## Migration
 
-Migration is idempotent and versioned. On an eligible upgrade request BFA:
+Migration is idempotent, versioned, and channel-aware. On an eligible upgrade request BFA:
 
-1. Validates the existing `bfa-release-data` transient through BFAL.
-2. Promotes it only when no valid durable record exists.
+1. Validates the existing `bfa-release-data` transient for BFAL's actual selected channel.
+2. Promotes it only when no valid durable record exists for that channel.
 3. Infers fetch and freshness times from the transient timeout only when WordPress is not using an external object cache.
 4. Under external object caching, ignores any leftover database timeout and treats transient age as unknown. The data remains last-known-good but is stale and immediately eligible for one duplicate-suppressed asynchronous refresh.
 5. Persists the complete durable replacement before serving it.
-6. Preserves the established transient for BFAL and third-party compatibility.
-7. Never deletes or overwrites an existing valid durable record during migration.
+6. Preserves the established transient for BFAL and third-party compatibility, including data for another channel.
+7. Never deletes or overwrites an existing valid durable record during migration, including a record that belongs to another channel.
 
 The schema version is the final migration commit marker. A valid transient migration records completion only after the durable record and migrated state are both verified as stored. Any required write failure leaves the schema incomplete, preserves the transient, and allows a later request to retry. Once the schema is complete, ordinary requests perform no recurring migration writes.
 
@@ -119,7 +119,11 @@ Activation, provider freshness checks, and stale-work recovery schedule the WP-C
 
 ## External services
 
-The site server contacts `https://api.fontawesome.com` asynchronously for public Font Awesome 5 Free metadata. It intentionally sends no site, user, or content data and uses no account token. Visitors' browsers request versioned CSS and webfonts from `https://use.fontawesome.com` and therefore disclose normal connection data such as IP address and user agent to Fonticons, Inc.
+The default `7.x` worker posts its fixed public release query to `https://api.fontawesome.com`. When that service reports a newer candidate, the worker confirms the exact `@fortawesome/fontawesome-free` package through `https://registry.npmjs.org/%40fortawesome%2Ffontawesome-free/{version}`. It then downloads an allowlisted CSS and WOFF2 inventory from `https://cdnjs.cloudflare.com/ajax/libs/font-awesome/{version}/` and `https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@{version}/`, requires both providers to return identical bytes, validates CSS-to-font references, and derives integrity values. BFAL does not call a separate cdnjs catalog API. These are bounded server-side background requests.
+
+The packaged Font Awesome 7 fallback uses local CSS and fonts. After a newer record passes complete validation, cdnjs is the browser runtime host for its selected CSS and referenced fonts; jsDelivr remains an independent validation source. A deliberate earlier `5.x` singleton owner may instead select versioned CSS and fonts under `https://use.fontawesome.com/releases/`.
+
+Normal frontend, administrator, REST, editor, settings, shortcode, picker, and getter requests do not perform BFA or BFAL metadata discovery or candidate asset validation. WordPress core may separately fetch a registered external editor stylesheet while constructing Block Editor assets. Provider requests receive ordinary connection data. Server-side requests may disclose the server IP, requested URL and version, timing, and HTTP headers, and WordPress's default user agent may include the WordPress version and site URL. Browser asset requests may disclose the visitor IP, user agent, referrer, and requested asset. BFA adds no post content, user content, Font Awesome account credential, or API token. A failed request or validation retains the packaged or last-known-good release.
 
 Automated tests intercept the WordPress HTTP API and never use the live Font Awesome API or CDN.
 
@@ -140,7 +144,7 @@ For each supported WordPress and PHP combination, run single-site and multisite 
 
 Before release, also verify:
 
-- The exact Composer lock and installed BFAL package match the release candidate's approved dependency identity.
+- The exact Composer lock and installed BFAL package match the approved dependency identity.
 - Every packaged BFAL production file matches the clean Composer install.
 - The package includes the validator, fallback data, fallback checksum, runtime files, and licenses, while excluding BFAL development files and development dependencies.
 - Frontend, administrator, REST, editor, settings, and shortcode requests perform no metadata HTTP.

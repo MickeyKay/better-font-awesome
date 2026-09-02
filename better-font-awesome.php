@@ -198,13 +198,13 @@ class Better_Font_Awesome_Plugin {
 		// Prepare durable local metadata before BFAL resolves release data.
 		if ( $this->supports_async_metadata() ) {
 			$this->metadata_manager = new Better_Font_Awesome_Metadata_Manager();
-			$this->metadata_manager->boot();
 		}
 
 		// Initialize the Better Font Awesome Library.
 		$this->initialize_better_font_awesome_library( $this->options );
 		if ( $this->metadata_manager ) {
 			$this->metadata_manager->set_library( $this->bfa_lib );
+			$this->metadata_manager->boot();
 		}
 
 		// Register the native dynamic icon block without changing shortcodes.
@@ -347,7 +347,7 @@ class Better_Font_Awesome_Plugin {
 	 * Check whether the reviewed BFAL asynchronous metadata API is available.
 	 *
 	 * Keeping this compatibility check allows an emergency lockfile rollback to
-	 * BFAL 2.0.3 without making the plugin fail to load.
+	 * BFAL 2.1.0 without making the plugin fail to load.
 	 *
 	 * @return bool Whether BFA can own metadata orchestration.
 	 */
@@ -360,7 +360,7 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * Activation can run after the normal init hook has passed, so it cannot
 	 * assume the plugin constructor already loaded BFAL. Loading only the class
-	 * file allows lifecycle scheduling to fail closed in BFAL 2.0.3 rollback
+	 * file allows lifecycle scheduling to fail closed in BFAL 2.1.0 rollback
 	 * mode without attempting the unsupported early-hook singleton workaround.
 	 *
 	 * @return bool Whether BFA can own asynchronous metadata orchestration.

@@ -89,7 +89,8 @@ class Better_Font_Awesome_Icon_Block_Test extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'role="img"', $output );
 		$this->assertStringContainsString( 'aria-label="Coffee time"', $output );
 		$this->assertStringNotContainsString( '<strong>', $output );
-		$this->assertStringContainsString( '<i class="fas fa-coffee " ></i>', $output );
+		$icon_name = 'rollback' === getenv( 'BFA_BFAL_VALIDATION_MODE' ) ? 'coffee' : 'mug-saucer';
+		$this->assertStringContainsString( '<i class="fas fa-' . $icon_name . ' " ></i>', $output );
 	}
 
 	public function test_render_preserves_existing_icon_output_filter() {

@@ -43,6 +43,7 @@ class Better_Font_Awesome_Metadata_Request_Test extends Better_Font_Awesome_Meta
 		set_transient( 'bfa-release-data', $release, DAY_IN_SECONDS );
 		$earlier = Better_Font_Awesome_Library::get_instance(
 			array(
+				'release_channel'      => '5.x',
 				'include_v4_shim'     => false,
 				'remove_existing_fa'  => false,
 				'load_styles'         => false,
@@ -58,6 +59,7 @@ class Better_Font_Awesome_Metadata_Request_Test extends Better_Font_Awesome_Meta
 		$first_configuration = $args->getValue( $library );
 
 		$this->assertSame( $earlier, $library );
+		$this->assertSame( '5.x', $library->get_release_channel() );
 		$this->assertFalse( $first_configuration['load_styles'] );
 		$this->assertFalse( $first_configuration['load_admin_styles'] );
 		$this->assertFalse( $first_configuration['load_shortcode'] );

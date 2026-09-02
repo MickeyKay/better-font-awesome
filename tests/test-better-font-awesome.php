@@ -15,11 +15,12 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 	protected $bfa;
 	protected $bfa_lib;
 
-	protected $core_font_awesome_version = '5.14.0';
+	protected $core_font_awesome_version = '7.3.1';
 
 	public function setUp(): void {
 		parent::setUp();
 
+		$this->core_font_awesome_version = 'rollback' === getenv( 'BFA_BFAL_VALIDATION_MODE' ) ? '5.14.0' : '7.3.1';
 		$this->reset_plugin_instance();
 		delete_option( Better_Font_Awesome_Plugin::SLUG . '_options' );
 		$this->bfa     = Better_Font_Awesome_Plugin::get_instance( [] );
@@ -229,13 +230,23 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 		$this->assertEquals( $this->core_font_awesome_version, $this->bfa_lib->get_version() );
   	}
 
-  	public function test_get_stylesheet_url() {
-  		$this->assertEquals( 'https://use.fontawesome.com/releases/v' . $this->core_font_awesome_version . '/css/all.css', $this->bfa_lib->get_stylesheet_url() );
-  	}
+	public function test_get_stylesheet_url() {
+		if ( 'rollback' === getenv( 'BFA_BFAL_VALIDATION_MODE' ) ) {
+			$this->assertSame( 'https://use.fontawesome.com/releases/v5.14.0/css/all.css', $this->bfa_lib->get_stylesheet_url() );
+			return;
+		}
 
-  	public function test_get_stylesheet_url_v4_shim() {
-  		$this->assertEquals( 'https://use.fontawesome.com/releases/v' . $this->core_font_awesome_version . '/css/v4-shims.css', $this->bfa_lib->get_stylesheet_url_v4_shim() );
-  	}
+		$this->assertStringEndsWith( '/vendor/mickey-kay/better-font-awesome-library/inc/font-awesome-7-fallback/css/all.min.css', $this->bfa_lib->get_stylesheet_url() );
+	}
+
+	public function test_get_stylesheet_url_v4_shim() {
+		if ( 'rollback' === getenv( 'BFA_BFAL_VALIDATION_MODE' ) ) {
+			$this->assertSame( 'https://use.fontawesome.com/releases/v5.14.0/css/v4-shims.css', $this->bfa_lib->get_stylesheet_url_v4_shim() );
+			return;
+		}
+
+		$this->assertStringEndsWith( '/vendor/mickey-kay/better-font-awesome-library/inc/font-awesome-7-fallback/css/v4-shims.min.css', $this->bfa_lib->get_stylesheet_url_v4_shim() );
+	}
 
   	public function test_get_icons() {
   		$expected_icon_keys = [

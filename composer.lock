@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a63f06e02150d1c5470232624dc9d784",
+    "content-hash": "8e7fbcb3a63d9895c0aad9e974f637be",
     "packages": [
         {
             "name": "mickey-kay/better-font-awesome-library",
-            "version": "2.1.0",
+            "version": "3.0.0-rc.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MickeyKay/better-font-awesome-library.git",
-                "reference": "b845f8d2c105c34a9afe62e8470d67d0e3978164"
+                "reference": "1ec60a55c312ffed689f9fc1c3046b3982daee61"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/b845f8d2c105c34a9afe62e8470d67d0e3978164",
-                "reference": "b845f8d2c105c34a9afe62e8470d67d0e3978164",
+                "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/1ec60a55c312ffed689f9fc1c3046b3982daee61",
+                "reference": "1ec60a55c312ffed689f9fc1c3046b3982daee61",
                 "shasum": ""
             },
             "require-dev": {
@@ -35,9 +35,9 @@
             "description": "Better Font Awesome Library for WordPress",
             "support": {
                 "issues": "https://github.com/MickeyKay/better-font-awesome-library/issues",
-                "source": "https://github.com/MickeyKay/better-font-awesome-library/tree/2.1.0"
+                "source": "https://github.com/MickeyKay/better-font-awesome-library/tree/3.0.0-rc.1"
             },
-            "time": "2026-08-31T19:03:14+00:00"
+            "time": "2026-09-02T18:38:28+00:00"
         }
     ],
     "packages-dev": [
@@ -2695,7 +2695,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "mickey-kay/better-font-awesome-library": 5
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

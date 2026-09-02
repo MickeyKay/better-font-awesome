@@ -9,11 +9,11 @@
 	<php>
 		<const name="WP_TESTS_MULTISITE" value="1" />
 		<env name="BFA_BFAL_VALIDATION_MODE" value="rollback" force="true" />
-		<env name="BFA_EXPECTED_BFAL_VERSION" value="2.0.3" force="true" />
-		<env name="BFA_EXPECTED_BFAL_REFERENCE" value="c5ae75d273ff8a594f9fa58b43542d6dc1482fb0" force="true" />
+		<env name="BFA_EXPECTED_BFAL_VERSION" value="2.1.0" force="true" />
+		<env name="BFA_EXPECTED_BFAL_REFERENCE" value="b845f8d2c105c34a9afe62e8470d67d0e3978164" force="true" />
 	</php>
 	<testsuites>
-		<testsuite name="Better Font Awesome stable BFAL 2.0.3 rollback multisite">
+		<testsuite name="Better Font Awesome stable BFAL 2.1.0 rollback multisite">
 			<directory prefix="test-" suffix=".php">./tests/</directory>
 		</testsuite>
 	</testsuites>

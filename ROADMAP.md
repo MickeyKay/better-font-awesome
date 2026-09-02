@@ -14,7 +14,7 @@ This roadmap describes direction, not delivery dates. Concrete defects and suppo
 - Support Font Awesome Free first. Consider Pro and kits only after the Free experience is stable.
 - Require focused automated tests, production-package checks, manual acceptance coverage, and a rollback path for compatibility-sensitive releases.
 
-## Shipped foundation
+## Publicly shipped foundation
 
 The 2.1 generation established the baseline for subsequent work:
 
@@ -23,6 +23,13 @@ The 2.1 generation established the baseline for subsequent work:
 - Hardened settings persistence and release packaging.
 - A separately tested and released BFAL dependency.
 - A documented, reproducible WordPress.org release process.
+
+## Implemented in current development
+
+- A native API v3 dynamic icon block registered through `block.json`, with semantic attributes, server-side rendering, searchable Free icon selection, accessible decorative or labelled modes, and browser coverage.
+- A channel-aware BFAL integration that defaults to Font Awesome 7 Free, serves packaged Font Awesome 7 assets immediately, refreshes compatible releases in the background, and preserves Font Awesome 4 and 5 content compatibility.
+
+These additions are present in the development code but are not part of the currently published BFA 2.1.0 package.
 
 ## Now
 
@@ -41,22 +48,22 @@ The 2.1 generation established the baseline for subsequent work:
 
 ## Next
 
-### Add a native block editor experience
+### Refine the native block editor experience
 
-- Add an API v3 dynamic icon block registered through `block.json`.
-- Store semantic icon choices and render through the existing PHP and shortcode-compatible output contract.
-- Provide searchable Font Awesome Free icon selection and accessible decorative or labelled modes.
-- Add browser coverage for insertion, editing, serialization, frontend rendering, and editor combinations that include legacy `wp_editor()` instances.
-- Preserve the Classic Editor picker and existing shortcode workflows.
+- Refine alignment behavior and other block supports based on editor testing.
+- Decide whether inline icon handling belongs in the block contract without changing saved shortcode compatibility.
+- Extend browser coverage when new block behavior is approved.
+- Preserve the Classic Editor picker and existing shortcode workflows while refining the block.
 
 ## Following
 
-### Support current Font Awesome Free generations
+### Maintain current Font Awesome Free support
 
-- Research the official Font Awesome 6 and 7 Free metadata and asset channels before selecting an implementation.
-- Preserve the live-update value proposition rather than shipping a plugin release for every icon-data update.
-- Define migration and coexistence behavior for existing Font Awesome 4 and 5 content.
-- Test caching, asset loading, conflict behavior, accessibility, and rollback independently from the initial block release.
+- Monitor the Font Awesome 7 Free metadata and asset providers without weakening the validated live-update architecture.
+- Preserve the live-update value proposition rather than shipping a plugin release for every compatible icon-data update.
+- Keep migration and coexistence behavior for existing Font Awesome 4 and 5 content covered as the current channel evolves.
+- Investigate demand and compatibility requirements before considering a separate Font Awesome 6 channel; the current implementation does not claim comprehensive native Font Awesome 6 support.
+- Continue testing caching, asset loading, conflict behavior, accessibility, and rollback independently from editor refinements.
 
 ### Improve privacy, diagnostics, and integrations
 
