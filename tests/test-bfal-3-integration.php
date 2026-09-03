@@ -74,6 +74,11 @@ class Better_Font_Awesome_BFAL_3_Integration_Test extends Better_Font_Awesome_Me
 		$this->assertSame( 2, $record['schema_version'] );
 		$this->assertSame( '7.x', $record['channel'] );
 		$this->assertStringEndsWith( '/inc/font-awesome-7-fallback/css/all.min.css', $library->get_stylesheet_url() );
+		$this->assertSame( '', $library->get_error( 'provider' ) );
+		$this->assertArrayNotHasKey( 'provider', $library->get_errors() );
+		ob_start();
+		$library->do_admin_notice();
+		$this->assertSame( '', trim( ob_get_clean() ) );
 		$this->assertSame( 0, $this->font_awesome_http_calls );
 		$this->assertIsArray( get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
 	}

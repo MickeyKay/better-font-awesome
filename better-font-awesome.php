@@ -12,7 +12,7 @@
  * Plugin Name:       Better Font Awesome
  * Plugin URI:        https://github.com/MickeyKay/better-font-awesome
  * Description:       The ultimate Font Awesome icon plugin for WordPress.
- * Version:           2.1.0
+ * Version:           3.0.0
  * Author:            Mickey Kay
  * Author URI:        https://mickeykay.me/
  * License:           GPLv2+
@@ -68,7 +68,7 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @var    string
 	 */
-	const VERSION = '2.1.0';
+	const VERSION = '3.0.0';
 
 	/**
 	 * The Better Font Awesome Library object.

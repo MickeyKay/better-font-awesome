@@ -167,6 +167,42 @@ class Better_Font_Awesome_Metadata_Request_Test extends Better_Font_Awesome_Meta
 	}
 
 	/**
+	 * The native block layout survives the existing Font Awesome cleanup setting.
+	 */
+	public function test_block_layout_style_survives_existing_font_awesome_cleanup() {
+		$this->use_default_release_channel();
+		$plugin = $this->initialize_plugin(
+			array(
+				'include_v4_shim'    => 1,
+				'remove_existing_fa' => 1,
+				'hide_admin_notices' => 0,
+			)
+		);
+		$block_type       = $plugin->get( 'icon_block' )->register();
+		$layout_handle    = reset( $block_type->style_handles );
+		$competing_handle = 'theme-font-awesome';
+
+		wp_register_style( $competing_handle, 'https://example.org/font-awesome.css', array(), '1.0.0' );
+		wp_enqueue_style( $layout_handle );
+		wp_enqueue_style( $competing_handle );
+
+		try {
+			do_action( 'wp_enqueue_scripts' );
+
+			$this->assertTrue( wp_style_is( $layout_handle, 'enqueued' ) );
+			$this->assertFalse( wp_style_is( $competing_handle, 'enqueued' ) );
+			$this->assertTrue( wp_style_is( 'bfa-font-awesome', 'enqueued' ) );
+			$this->assertSame( 0, $this->font_awesome_http_calls );
+		} finally {
+			wp_dequeue_style( $layout_handle );
+			wp_deregister_style( $layout_handle );
+			wp_dequeue_style( $competing_handle );
+			wp_deregister_style( $competing_handle );
+			unregister_block_type( Better_Font_Awesome_Icon_Block::NAME );
+		}
+	}
+
+	/**
 	 * The settings page keeps existing controls without exposing metadata state or controls.
 	 */
 	public function test_settings_page_is_background_only_and_performs_zero_metadata_http() {

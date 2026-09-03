@@ -75,6 +75,19 @@ class Better_Font_Awesome_Callback_Metadata_Library {
 class Better_Font_Awesome_Metadata_Manager_Test extends Better_Font_Awesome_Metadata_Test_Case {
 
 	/**
+	 * Schedule markers use the scheduler's single captured timestamp.
+	 */
+	public function test_new_schedule_marker_uses_captured_scheduler_timestamp() {
+		$manager      = new Better_Font_Awesome_Metadata_Manager();
+		$captured_now = time() - HOUR_IN_SECONDS;
+		$run_at       = $captured_now + DAY_IN_SECONDS;
+		$marker       = $this->invoke_method( $manager, 'new_schedule_marker', array( $run_at, false, $captured_now ) );
+
+		$this->assertSame( $captured_now, $marker['created_at'] );
+		$this->assertSame( $run_at, $marker['run_at'] );
+	}
+
+	/**
 	 * A cold request returns fallback immediately and schedules exactly once.
 	 */
 	public function test_cold_request_returns_fallback_and_schedules_once_without_http() {
@@ -86,6 +99,8 @@ class Better_Font_Awesome_Metadata_Manager_Test extends Better_Font_Awesome_Meta
 		$this->assertSame( '5.14.0', $library->get_version() );
 		$this->assertSame( 0, $this->font_awesome_http_calls );
 		$this->assertIsArray( $marker );
+		$this->assertSame( $marker['created_at'], $marker['run_at'] );
+		$this->assertLessThanOrEqual( time(), $marker['run_at'] );
 		$this->assertFalse( $manager->schedule_refresh() );
 		$this->assertSame( $marker, get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
 	}
@@ -270,6 +285,7 @@ class Better_Font_Awesome_Metadata_Manager_Test extends Better_Font_Awesome_Meta
 		$this->assertTrue( $manager->schedule_refresh() );
 		$marker = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
 		$state  = ( new Better_Font_Awesome_Metadata_Store() )->get_state();
+		$this->assertSame( $marker['created_at'], $marker['run_at'] );
 		$this->assertSame( 'scheduled', $state['status'] );
 		$this->assertSame( $marker['run_at'], $state['scheduled_for'] );
 		$this->assertArrayNotHasKey( Better_Font_Awesome_Metadata_Manager::STATE_OPTION, wp_load_alloptions( true ) );
@@ -782,9 +798,11 @@ class Better_Font_Awesome_Metadata_Manager_Test extends Better_Font_Awesome_Meta
 
 		$regular = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
 		$this->assertIsArray( $regular );
+		$this->assertSame( $state['next_retry_at'], $regular['run_at'] );
 		$this->assertTrue( $manager->schedule_refresh( true ) );
 		$manual = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
 		$this->assertLessThan( $regular['run_at'], $manual['run_at'] );
+		$this->assertSame( $manual['created_at'], $manual['run_at'] );
 		$this->assertTrue( $manual['force'] );
 
 		$active_lock = array(

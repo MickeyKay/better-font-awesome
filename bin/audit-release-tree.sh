@@ -5,8 +5,8 @@ set -eu
 release_root=${1:-svn/trunk}
 bfal_root="$release_root/vendor/mickey-kay/better-font-awesome-library"
 installed_bfal_root="vendor/mickey-kay/better-font-awesome-library"
-expected_version="3.0.0-rc.1"
-expected_reference="1ec60a55c312ffed689f9fc1c3046b3982daee61"
+expected_version="3.0.1"
+expected_reference="759176801f12a3b8add646ac229cdbd9bd6a3d19"
 
 php -r '
 $lock = json_decode( file_get_contents( "composer.lock" ), true );
@@ -14,8 +14,8 @@ $packages = array_filter( $lock["packages"], static function ( $package ) {
 	return "mickey-kay/better-font-awesome-library" === $package["name"];
 } );
 $package = reset( $packages );
-if ( ! $package || "3.0.0-rc.1" !== $package["version"] || "1ec60a55c312ffed689f9fc1c3046b3982daee61" !== $package["source"]["reference"] || "1ec60a55c312ffed689f9fc1c3046b3982daee61" !== $package["dist"]["reference"] ) {
-	fwrite( STDERR, "composer.lock does not contain the exact public BFAL candidate.\n" );
+if ( ! $package || "3.0.1" !== $package["version"] || "759176801f12a3b8add646ac229cdbd9bd6a3d19" !== $package["source"]["reference"] || "759176801f12a3b8add646ac229cdbd9bd6a3d19" !== $package["dist"]["reference"] ) {
+	fwrite( STDERR, "composer.lock does not contain the exact public stable BFAL release.\n" );
 	exit( 1 );
 }
 '
@@ -23,8 +23,8 @@ if ( ! $package || "3.0.0-rc.1" !== $package["version"] || "1ec60a55c312ffed689f
 php -r '
 require "vendor/autoload.php";
 $package = "mickey-kay/better-font-awesome-library";
-if ( "3.0.0-rc.1" !== Composer\InstalledVersions::getPrettyVersion( $package ) || "1ec60a55c312ffed689f9fc1c3046b3982daee61" !== Composer\InstalledVersions::getReference( $package ) ) {
-	fwrite( STDERR, "The installed BFAL package does not match the exact public candidate.\n" );
+if ( "3.0.1" !== Composer\InstalledVersions::getPrettyVersion( $package ) || "759176801f12a3b8add646ac229cdbd9bd6a3d19" !== Composer\InstalledVersions::getReference( $package ) ) {
+	fwrite( STDERR, "The installed BFAL package does not match the exact public stable release.\n" );
 	exit( 1 );
 }
 '
