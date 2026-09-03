@@ -261,6 +261,183 @@ async function dismissWelcomeModal( page ) {
 	}
 }
 
+test( 'loads FA7 assets inside the strict block editor iframe', async ( {
+	page,
+} ) => {
+	const fontAwesomeErrors = [];
+	const rootWebfontFailures = [];
+	const isRootWebfontRequest = ( url ) =>
+		/^\/webfonts\/[^/]+\.woff2$/.test( new URL( url ).pathname );
+
+	page.on( 'requestfailed', ( request ) => {
+		if ( isRootWebfontRequest( request.url() ) ) {
+			rootWebfontFailures.push( {
+				error: request.failure()?.errorText ?? 'request failed',
+				url: request.url(),
+			} );
+		}
+	} );
+	page.on( 'response', ( response ) => {
+		if ( isRootWebfontRequest( response.url() ) && response.status() >= 400 ) {
+			rootWebfontFailures.push( {
+				error: `HTTP ${ response.status() }`,
+				url: response.url(),
+			} );
+		}
+	} );
+	page.on( 'console', ( message ) => {
+		const text = message.text();
+		if (
+			/font awesome|fontawesome|better font awesome|\bbfa\b|\bbfal\b|cors/i.test(
+				text
+			) && 'error' === message.type()
+		) {
+			fontAwesomeErrors.push( text );
+		}
+	} );
+
+	await page.goto( '/wp-login.php' );
+	await page.locator( '#user_login' ).fill( 'admin' );
+	await page.locator( '#user_pass' ).fill( 'password' );
+	await page.locator( '#wp-submit' ).click();
+	await expect( page.locator( '#wpadminbar' ) ).toBeVisible();
+
+	await page.goto( '/wp-admin/post-new.php?post_type=bfa_iframe_test' );
+	await page.waitForFunction( () => {
+		return Boolean( window.wp?.blocks?.getBlockType( 'better-font-awesome/icon' ) );
+	} );
+	await dismissWelcomeModal( page );
+
+	const canvas = page.locator( 'iframe[name="editor-canvas"]' );
+	await expect( canvas ).toBeAttached();
+	const editorFrame = page.frame( { name: 'editor-canvas' } );
+	expect( editorFrame ).not.toBeNull();
+	expect(
+		await editorFrame.evaluate( () => window.frameElement?.name )
+	).toBe( 'editor-canvas' );
+
+	const blocks = await page.evaluate( () => {
+		const solid = window.wp.blocks.createBlock( 'better-font-awesome/icon', {
+			iconName: 'flag',
+			iconStyle: 'solid',
+		} );
+		const regular = window.wp.blocks.createBlock( 'better-font-awesome/icon', {
+			iconName: 'heart',
+			iconStyle: 'regular',
+		} );
+		const brand = window.wp.blocks.createBlock( 'better-font-awesome/icon', {
+			iconName: 'github',
+			iconStyle: 'brands',
+		} );
+		window.wp.data
+			.dispatch( 'core/block-editor' )
+			.insertBlocks( [ solid, regular, brand ] );
+
+		return {
+			brand: brand.clientId,
+			regular: regular.clientId,
+			solid: solid.clientId,
+		};
+	} );
+
+	const editor = page.frameLocator( 'iframe[name="editor-canvas"]' );
+	await expectIntegrityStyles( editor );
+	const iconSelectors = {
+		brand: '.fab.fa-github',
+		regular: '.far.fa-heart',
+		solid: '.fas.fa-flag',
+	};
+	for ( const [ style, selector ] of Object.entries( iconSelectors ) ) {
+		const icon = editor.locator(
+			`[data-block="${ blocks[ style ] }"] ${ selector }`
+		);
+		await expect( icon ).toBeVisible();
+		const glyph = await icon.evaluate( ( element ) => {
+			const computed = window.getComputedStyle( element, '::before' );
+			return {
+				content: computed.content,
+				fontFamily: computed.fontFamily,
+			};
+		} );
+		expect( glyph.content ).not.toBe( 'none' );
+		expect( glyph.content ).not.toBe( 'normal' );
+		expect( glyph.fontFamily ).toContain( 'Font Awesome' );
+	}
+
+	const loadedFaces = await loadFontAwesomeFaces( editorFrame );
+	for ( const face of loadedFaces ) {
+		expect( face.status ).toBe( 'fulfilled' );
+		expect( face.loaded ).toBeGreaterThan( 0 );
+	}
+
+	const exactStyleMatches = await editorFrame.evaluate( async () => {
+		const settings = window.parent.wp.data
+			.select( 'core/block-editor' )
+			.getSettings();
+		const linkedStyles = Array.from(
+			document.querySelectorAll(
+				'link[id^="bfa-font-awesome"][rel="stylesheet"]'
+			)
+		).map( ( link ) => ( {
+			href: link.href,
+			integrity: link.integrity,
+		} ) );
+		const bytesToBase64 = ( bytes ) => {
+			let binary = '';
+			for ( const byte of bytes ) {
+				binary += String.fromCharCode( byte );
+			}
+			return window.btoa( binary );
+		};
+		const matches = [];
+
+		for ( const style of settings.styles ?? [] ) {
+			if ( 'string' !== typeof style.css || 'string' !== typeof style.baseURL ) {
+				continue;
+			}
+
+			for ( const linkedStyle of linkedStyles ) {
+				const separator = linkedStyle.integrity.indexOf( '-' );
+				if ( separator < 1 ) {
+					continue;
+				}
+				const algorithm = linkedStyle.integrity.slice( 0, separator );
+				const expectedDigest = linkedStyle.integrity.slice( separator + 1 );
+				const digest = await window.crypto.subtle.digest(
+					algorithm.replace( /^sha/, 'SHA-' ),
+					new TextEncoder().encode( style.css )
+				);
+				if ( bytesToBase64( new Uint8Array( digest ) ) !== expectedDigest ) {
+					continue;
+				}
+
+				const baseURL = new URL( style.baseURL, window.location.href );
+				const href = new URL( linkedStyle.href );
+				matches.push( {
+					baseURL: `${ baseURL.origin }${ baseURL.pathname }`,
+					href: `${ href.origin }${ href.pathname }`,
+					integrity: linkedStyle.integrity,
+				} );
+			}
+		}
+
+		return matches;
+	} );
+	expect( exactStyleMatches.length ).toBeGreaterThanOrEqual( 2 );
+	for ( const match of exactStyleMatches ) {
+		expect( match.baseURL ).toBe( match.href );
+		expect( match.integrity ).toMatch( /^sha(?:256|384|512)-/ );
+	}
+	expect( exactStyleMatches.map( ( match ) => match.href ) ).toEqual(
+		expect.arrayContaining( [
+			expect.stringMatching( /\/css\/all\.min\.css$/ ),
+			expect.stringMatching( /\/css\/v5-font-face\.min\.css$/ ),
+		] )
+	);
+	expect( rootWebfontFailures ).toEqual( [] );
+	expect( fontAwesomeErrors ).toEqual( [] );
+} );
+
 test( 'inserts, persists, and renders a native icon block', async ( { page } ) => {
 	const fontAwesomeErrors = [];
 	const fontAwesomeStylesheetRequests = [];

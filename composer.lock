@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "65777f91f8662a491bf50f6ceb213087",
+    "content-hash": "a560227a8adf40c90563c9657c230d3f",
     "packages": [
         {
             "name": "mickey-kay/better-font-awesome-library",
-            "version": "3.0.0",
+            "version": "3.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MickeyKay/better-font-awesome-library.git",
-                "reference": "4632345f50efb0e7942b00576c14901e64370124"
+                "reference": "759176801f12a3b8add646ac229cdbd9bd6a3d19"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/4632345f50efb0e7942b00576c14901e64370124",
-                "reference": "4632345f50efb0e7942b00576c14901e64370124",
+                "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/759176801f12a3b8add646ac229cdbd9bd6a3d19",
+                "reference": "759176801f12a3b8add646ac229cdbd9bd6a3d19",
                 "shasum": ""
             },
             "require-dev": {
@@ -35,9 +35,9 @@
             "description": "Better Font Awesome Library for WordPress",
             "support": {
                 "issues": "https://github.com/MickeyKay/better-font-awesome-library/issues",
-                "source": "https://github.com/MickeyKay/better-font-awesome-library/tree/3.0.0"
+                "source": "https://github.com/MickeyKay/better-font-awesome-library/tree/3.0.1"
             },
-            "time": "2026-09-02T23:43:10+00:00"
+            "time": "2026-09-03T21:47:54+00:00"
         }
     ],
     "packages-dev": [

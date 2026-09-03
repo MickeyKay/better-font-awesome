@@ -75,6 +75,19 @@ class Better_Font_Awesome_Callback_Metadata_Library {
 class Better_Font_Awesome_Metadata_Manager_Test extends Better_Font_Awesome_Metadata_Test_Case {
 
 	/**
+	 * Schedule markers use the scheduler's single captured timestamp.
+	 */
+	public function test_new_schedule_marker_uses_captured_scheduler_timestamp() {
+		$manager      = new Better_Font_Awesome_Metadata_Manager();
+		$captured_now = time() - HOUR_IN_SECONDS;
+		$run_at       = $captured_now + DAY_IN_SECONDS;
+		$marker       = $this->invoke_method( $manager, 'new_schedule_marker', array( $run_at, false, $captured_now ) );
+
+		$this->assertSame( $captured_now, $marker['created_at'] );
+		$this->assertSame( $run_at, $marker['run_at'] );
+	}
+
+	/**
 	 * A cold request returns fallback immediately and schedules exactly once.
 	 */
 	public function test_cold_request_returns_fallback_and_schedules_once_without_http() {

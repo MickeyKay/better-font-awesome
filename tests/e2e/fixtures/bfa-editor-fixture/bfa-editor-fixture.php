@@ -20,6 +20,20 @@ add_action(
 				'supports'     => array( 'title', 'editor' ),
 			)
 		);
+
+		register_post_type(
+			'bfa_iframe_test',
+			array(
+				'labels'       => array(
+					'name'          => 'BFA iframe fixtures',
+					'singular_name' => 'BFA iframe fixture',
+				),
+				'public'       => false,
+				'show_ui'      => true,
+				'show_in_rest' => true,
+				'supports'     => array( 'title', 'editor' ),
+			)
+		);
 	}
 );
 

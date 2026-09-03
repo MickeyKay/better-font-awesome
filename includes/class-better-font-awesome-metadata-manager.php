@@ -161,7 +161,7 @@ class Better_Font_Awesome_Metadata_Manager {
 		$stored_state = get_option( self::STATE_OPTION, null );
 		$state        = $this->store->get_state();
 		$run_at       = $force ? $now : max( $now, (int) $state['next_retry_at'] );
-		$marker       = $this->new_schedule_marker( $run_at, $force );
+		$marker       = $this->new_schedule_marker( $run_at, $force, $now );
 		$created      = $this->add_non_autoloaded_option( self::SCHEDULE_OPTION, $marker );
 
 		if ( ! $created ) {
@@ -796,15 +796,16 @@ class Better_Font_Awesome_Metadata_Manager {
 	/**
 	 * Build an atomic schedule marker.
 	 *
-	 * @param int  $run_at Scheduled timestamp.
-	 * @param bool $force  Whether this is an administrator override.
+	 * @param int  $run_at    Scheduled timestamp.
+	 * @param bool $force     Whether this is an administrator override.
+	 * @param int  $created_at Scheduler timestamp captured for this attempt.
 	 * @return array Schedule marker.
 	 */
-	private function new_schedule_marker( $run_at, $force ) {
+	private function new_schedule_marker( $run_at, $force, $created_at ) {
 		return array(
 			'schema_version' => self::SCHEMA_VERSION,
 			'token'          => wp_generate_uuid4(),
-			'created_at'     => time(),
+			'created_at'     => (int) $created_at,
 			'run_at'         => (int) $run_at,
 			'force'          => (bool) $force,
 		);
