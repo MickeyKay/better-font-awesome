@@ -116,6 +116,22 @@ async function expectIconPosition( block, icon, justification ) {
 	}
 }
 
+async function setDocumentDirection( context, direction ) {
+	await context.evaluate( async ( nextDirection ) => {
+		document.documentElement.dir = nextDirection;
+		await new Promise( ( resolve ) => requestAnimationFrame( resolve ) );
+	}, direction );
+}
+
+async function expectJustificationGeometry( boundary, positions ) {
+	await expectControlledBoundary( boundary );
+
+	for ( const { block, icon, justification } of positions ) {
+		await expectWrapperFillsBoundary( block, boundary );
+		await expectIconPosition( block, icon, justification );
+	}
+}
+
 async function expectBlockWithin( block, boundary ) {
 	const [ blockGeometry, boundaryGeometry ] = await Promise.all( [
 		getElementGeometry( block ),
@@ -436,16 +452,25 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 	await expect( rightIcon ).toBeVisible();
 	await expect( row.locator( '.fas.fa-coffee' ) ).toBeVisible();
 	await expect( columnBlock.locator( '.far.fa-heart' ) ).toBeVisible();
-	await expect( leftBlock ).toHaveCSS( 'justify-content', 'flex-start' );
+	const editorJustifications = [
+		{ block: leftBlock, icon: editorIcon, justification: 'left' },
+		{ block: centerBlock, icon: centerIcon, justification: 'center' },
+		{ block: rightBlock, icon: rightIcon, justification: 'right' },
+	];
+	await setDocumentDirection( editorFrame, 'ltr' );
+	await expectJustificationGeometry(
+		justificationBoundary,
+		editorJustifications
+	);
+	await setDocumentDirection( editorFrame, 'rtl' );
+	await expectJustificationGeometry(
+		justificationBoundary,
+		editorJustifications
+	);
+	await expect( leftBlock ).toHaveCSS( 'justify-content', 'left' );
 	await expect( centerBlock ).toHaveCSS( 'justify-content', 'center' );
-	await expect( rightBlock ).toHaveCSS( 'justify-content', 'flex-end' );
-	await expectControlledBoundary( justificationBoundary );
-	await expectWrapperFillsBoundary( leftBlock, justificationBoundary );
-	await expectWrapperFillsBoundary( centerBlock, justificationBoundary );
-	await expectWrapperFillsBoundary( rightBlock, justificationBoundary );
-	await expectIconPosition( leftBlock, editorIcon, 'left' );
-	await expectIconPosition( centerBlock, centerIcon, 'center' );
-	await expectIconPosition( rightBlock, rightIcon, 'right' );
+	await expect( rightBlock ).toHaveCSS( 'justify-content', 'right' );
+	await setDocumentDirection( editorFrame, 'ltr' );
 	await expectBlockWithin( columnBlock, firstColumn );
 	await expectIconPosition( columnBlock, columnBlock.locator( '.far.fa-heart' ), 'right' );
 	expect( await row.evaluate( ( element ) => getComputedStyle( element ).display ) ).toBe(
@@ -548,27 +573,31 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 	await expect( frontendBoundary ).toBeVisible();
 	await expect( frontendLeftBlock ).toHaveAttribute( 'aria-label', 'Favorite' );
 	await expect( frontendLeftBlock.locator( '.fas.fa-flag' ) ).toBeVisible();
+	const frontendJustifications = [
+		{
+			block: frontendLeftBlock,
+			icon: frontendLeftBlock.locator( '.fas.fa-flag' ),
+			justification: 'left',
+		},
+		{
+			block: frontendCenterBlock,
+			icon: frontendCenterBlock.locator( '.fas.fa-star' ),
+			justification: 'center',
+		},
+		{
+			block: frontendRightBlock,
+			icon: frontendRightBlock.locator( '.fas.fa-arrow-right' ),
+			justification: 'right',
+		},
+	];
+	await setDocumentDirection( page, 'ltr' );
+	await expectJustificationGeometry( frontendBoundary, frontendJustifications );
+	await setDocumentDirection( page, 'rtl' );
+	await expectJustificationGeometry( frontendBoundary, frontendJustifications );
+	await expect( frontendLeftBlock ).toHaveCSS( 'justify-content', 'left' );
 	await expect( frontendCenterBlock ).toHaveCSS( 'justify-content', 'center' );
-	await expect( frontendRightBlock ).toHaveCSS( 'justify-content', 'flex-end' );
-	await expectControlledBoundary( frontendBoundary );
-	await expectWrapperFillsBoundary( frontendLeftBlock, frontendBoundary );
-	await expectWrapperFillsBoundary( frontendCenterBlock, frontendBoundary );
-	await expectWrapperFillsBoundary( frontendRightBlock, frontendBoundary );
-	await expectIconPosition(
-		frontendLeftBlock,
-		frontendLeftBlock.locator( '.fas.fa-flag' ),
-		'left'
-	);
-	await expectIconPosition(
-		frontendCenterBlock,
-		frontendCenterBlock.locator( '.fas.fa-star' ),
-		'center'
-	);
-	await expectIconPosition(
-		frontendRightBlock,
-		frontendRightBlock.locator( '.fas.fa-arrow-right' ),
-		'right'
-	);
+	await expect( frontendRightBlock ).toHaveCSS( 'justify-content', 'right' );
+	await setDocumentDirection( page, 'ltr' );
 	await expect(
 		page.locator( '.wp-block-group.is-layout-flex:has-text("Row icon text") .fas.fa-mug-saucer' )
 	).toBeVisible();
