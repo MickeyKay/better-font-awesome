@@ -7,11 +7,11 @@
 **Requires at least:** 6.5<br>
 **Tested up to:** 7.1<br>
 **Requires PHP:** 7.4<br>
-**Stable tag:** 2.1.0<br>
+**Stable tag:** 3.0.0<br>
 **License:** GPLv2+<br>
 **License URI:** https://www.gnu.org/licenses/gpl-2.0.html<br>
 
-Font Awesome 7 Free icons for WordPress with a native block, shortcodes, HTML, TinyMCE, automatic metadata updates, and Font Awesome 4 and 5 compatibility.
+Font Awesome 7 Free icons for WordPress with a native block, shortcodes, TinyMCE, background metadata updates, and Font Awesome 4 and 5 compatibility.
 
 ## Description ##
 
@@ -142,6 +142,13 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 ## Changelog ##
 
+### 3.0.0 ###
+* Makes Font Awesome Free 7 the default current channel and refreshes validated metadata for compatible Font Awesome 7.x releases in the background.
+* Includes a bundled Font Awesome Free 7.3.1 fallback for immediate cold-start rendering and recovery when external services are unavailable.
+* Adds a native dynamic Font Awesome Icon block with catalog search, Free style selection, core sizing controls, accessible labels, and left, center, or right internal justification.
+* Preserves existing shortcodes, settings, filters, hooks, Classic Editor picker, hybrid editor integration, and deliberate earlier ownership of the Better Font Awesome Library singleton.
+* Continues to require WordPress 6.5 or newer and PHP 7.4 or newer, and is tested with WordPress through 7.1.
+
 ### 2.1.0 ###
 * Integrates the public stable Better Font Awesome Library 2.1.0 while preserving existing settings and shortcode content.
 * Refreshes Font Awesome 5 Free metadata asynchronously through WP-Cron, with no metadata API wait on normal frontend, admin, editor, REST, or shortcode requests.
@@ -201,6 +208,9 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 * Switch from using git submodules to composer dependency management for core library inclusion.
 
 ## Upgrade Notice ##
+
+### 3.0.0 ###
+Adds Font Awesome Free 7, validated background-only 7.x metadata updates, bundled 7.3.1 fallback, and native Icon block controls. Preserves existing settings, shortcodes, Classic Editor, and integrations. Requires WordPress 6.5+ and PHP 7.4+.
 
 ### 2.1.0 ###
 Reliability and compatibility release for Font Awesome 5 Free. Requires WordPress 6.5 or newer and PHP 7.4 or newer. Existing settings and shortcodes are preserved.
