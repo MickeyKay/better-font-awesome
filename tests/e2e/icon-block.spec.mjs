@@ -467,9 +467,12 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 		justificationBoundary,
 		editorJustifications
 	);
-	await expect( leftBlock ).toHaveCSS( 'justify-content', 'left' );
+	for ( const block of [ leftBlock, centerBlock, rightBlock ] ) {
+		await expect( block ).toHaveCSS( 'direction', 'ltr' );
+	}
+	await expect( leftBlock ).toHaveCSS( 'justify-content', 'flex-start' );
 	await expect( centerBlock ).toHaveCSS( 'justify-content', 'center' );
-	await expect( rightBlock ).toHaveCSS( 'justify-content', 'right' );
+	await expect( rightBlock ).toHaveCSS( 'justify-content', 'flex-end' );
 	await setDocumentDirection( editorFrame, 'ltr' );
 	await expectBlockWithin( columnBlock, firstColumn );
 	await expectIconPosition( columnBlock, columnBlock.locator( '.far.fa-heart' ), 'right' );
@@ -594,9 +597,22 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 	await expectJustificationGeometry( frontendBoundary, frontendJustifications );
 	await setDocumentDirection( page, 'rtl' );
 	await expectJustificationGeometry( frontendBoundary, frontendJustifications );
-	await expect( frontendLeftBlock ).toHaveCSS( 'justify-content', 'left' );
+	for ( const block of [
+		frontendLeftBlock,
+		frontendCenterBlock,
+		frontendRightBlock,
+	] ) {
+		await expect( block ).toHaveCSS( 'direction', 'ltr' );
+	}
+	await expect( frontendLeftBlock ).toHaveCSS(
+		'justify-content',
+		'flex-start'
+	);
 	await expect( frontendCenterBlock ).toHaveCSS( 'justify-content', 'center' );
-	await expect( frontendRightBlock ).toHaveCSS( 'justify-content', 'right' );
+	await expect( frontendRightBlock ).toHaveCSS(
+		'justify-content',
+		'flex-end'
+	);
 	await setDocumentDirection( page, 'ltr' );
 	await expect(
 		page.locator( '.wp-block-group.is-layout-flex:has-text("Row icon text") .fas.fa-mug-saucer' )

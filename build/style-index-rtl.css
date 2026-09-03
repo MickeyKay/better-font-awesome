@@ -1,5 +1,7 @@
 .wp-block-better-font-awesome-icon {
 	color: inherit;
+	/*rtl:ignore*/
+	direction: ltr;
 	display: flex;
 	font-size: inherit;
 }
@@ -7,8 +9,6 @@
 .wp-block-better-font-awesome-icon,
 .wp-block-better-font-awesome-icon.items-justified-left {
 	justify-content: flex-start;
-	/*rtl:ignore*/
-	justify-content: left;
 }
 
 .wp-block-better-font-awesome-icon.items-justified-center {
@@ -17,6 +17,4 @@
 
 .wp-block-better-font-awesome-icon.items-justified-right {
 	justify-content: flex-end;
-	/*rtl:ignore*/
-	justify-content: right;
 }
