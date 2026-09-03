@@ -49,6 +49,14 @@ class Better_Font_Awesome_Icon_Block_Test extends WP_UnitTestCase {
 		$this->assertTrue( is_callable( $registered->render_callback ) );
 	}
 
+	public function test_shared_layout_style_uses_a_neutral_handle() {
+		$registered = WP_Block_Type_Registry::get_instance()->get_registered( Better_Font_Awesome_Icon_Block::NAME );
+
+		$this->assertSame( array( 'bfa-icon-block-style' ), $registered->style_handles );
+		$this->assertStringNotContainsString( 'font-awesome', $registered->style_handles[0] );
+		$this->assertStringNotContainsString( 'fontawesome', $registered->style_handles[0] );
+	}
+
 	public function test_decorative_icon_uses_existing_renderer_and_is_hidden_from_assistive_technology() {
 		$output = $this->render_block(
 			array(

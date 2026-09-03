@@ -533,6 +533,9 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 
 	await page.goto( post.link );
 	await page.addStyleTag( { content: controlledBoundaryCss } );
+	await expect(
+		page.locator( 'link#bfa-icon-block-style-css[rel="stylesheet"]' )
+	).toHaveAttribute( 'href', /\/build\/style-index\.css(?:\?.*)?$/ );
 	const frontendBoundary = page.locator(
 		`.wp-block-group.${ controlledBoundaryClass }`
 	);

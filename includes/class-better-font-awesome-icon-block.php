@@ -22,6 +22,13 @@ class Better_Font_Awesome_Icon_Block {
 	const NAME = 'better-font-awesome/icon';
 
 	/**
+	 * Shared block layout stylesheet handle.
+	 *
+	 * @var string
+	 */
+	private const STYLE_HANDLE = 'bfa-icon-block-style';
+
+	/**
 	 * Supported Font Awesome 5 Free styles.
 	 *
 	 * @var string[]
@@ -74,14 +81,28 @@ class Better_Font_Awesome_Icon_Block {
 	 */
 	public function register() {
 		$block_path = dirname( __DIR__ ) . '/build';
+		$style_path = $block_path . '/style-index.css';
 
-		if ( ! function_exists( 'register_block_type_from_metadata' ) || ! is_readable( $block_path . '/block.json' ) ) {
+		if ( ! function_exists( 'register_block_type_from_metadata' ) || ! is_readable( $block_path . '/block.json' ) || ! is_readable( $style_path ) ) {
 			return false;
 		}
 
 		$existing = WP_Block_Type_Registry::get_instance()->get_registered( self::NAME );
 		if ( $existing ) {
 			return $existing;
+		}
+
+		if ( ! wp_style_is( self::STYLE_HANDLE, 'registered' ) ) {
+			$registered = wp_register_style(
+				self::STYLE_HANDLE,
+				plugins_url( 'build/style-index.css', dirname( __DIR__ ) . '/better-font-awesome.php' ),
+				array(),
+				Better_Font_Awesome_Plugin::VERSION
+			);
+			if ( ! $registered ) {
+				return false;
+			}
+			wp_style_add_data( self::STYLE_HANDLE, 'rtl', 'replace' );
 		}
 
 		return register_block_type_from_metadata(
