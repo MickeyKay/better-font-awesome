@@ -43,16 +43,35 @@ class Better_Font_Awesome_Icon_Block {
 	private const JUSTIFICATIONS = array( 'left', 'center', 'right' );
 
 	/**
+	 * BFAL Font Awesome 7 stylesheet handles keyed by validated asset path.
+	 *
+	 * @var array<string, string>
+	 */
+	private const EDITOR_STYLE_HANDLES = array(
+		'css/all.min.css'          => 'bfa-font-awesome',
+		'css/v5-font-face.min.css' => 'bfa-font-awesome-v5-compat',
+		'css/v4-font-face.min.css' => 'bfa-font-awesome-v4-font-face',
+		'css/v4-shims.min.css'     => 'bfa-font-awesome-v4-shim',
+	);
+
+	/**
 	 * Better Font Awesome Library instance.
 	 *
-	 * @var Better_Font_Awesome_Library
+	 * @var object
 	 */
 	private $library;
 
 	/**
+	 * Exact Font Awesome 7 stylesheet URLs registered for the block canvas.
+	 *
+	 * @var array<string, string>
+	 */
+	private $editor_asset_urls = array();
+
+	/**
 	 * Constructor.
 	 *
-	 * @param Better_Font_Awesome_Library $library Better Font Awesome Library instance.
+	 * @param object $library Better Font Awesome Library-compatible instance.
 	 */
 	public function __construct( $library ) {
 		$this->library = $library;
@@ -65,6 +84,7 @@ class Better_Font_Awesome_Icon_Block {
 		add_action( 'init', array( $this, 'register_on_init' ), 20 );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_data' ) );
 		add_action( 'enqueue_block_assets', array( $this, 'enqueue_editor_font_awesome' ) );
+		add_filter( 'block_editor_settings_all', array( $this, 'add_editor_style_base_urls' ) );
 	}
 
 	/**
@@ -232,5 +252,152 @@ class Better_Font_Awesome_Icon_Block {
 		}
 
 		$this->library->register_font_awesome_css();
+		$this->capture_editor_asset_urls();
+	}
+
+	/**
+	 * Restore base URLs omitted when WordPress fetches remote editor styles.
+	 *
+	 * This compatibility boundary changes only exact BFAL manifest-matched CSS
+	 * already present in the public block editor settings.
+	 *
+	 * @param array $editor_settings Block Editor settings.
+	 * @return array Filtered Block Editor settings.
+	 */
+	public function add_editor_style_base_urls( $editor_settings ) {
+		if (
+			! isset( $editor_settings['styles'] ) ||
+			! is_array( $editor_settings['styles'] ) ||
+			empty( $this->editor_asset_urls ) ||
+			'7.x' !== $this->library_release_channel()
+		) {
+			return $editor_settings;
+		}
+
+		$method = 'get_release_assets';
+		if ( ! is_callable( array( $this->library, $method ) ) ) {
+			return $editor_settings;
+		}
+
+		$assets = call_user_func( array( $this->library, $method ) );
+		if ( ! is_array( $assets ) ) {
+			return $editor_settings;
+		}
+
+		$verified_assets = array();
+		foreach ( $assets as $asset ) {
+			if (
+				! is_array( $asset ) ||
+				! isset( $asset['path'], $asset['value'] ) ||
+				! is_string( $asset['path'] ) ||
+				! isset( self::EDITOR_STYLE_HANDLES[ $asset['path'] ], $this->editor_asset_urls[ $asset['path'] ] )
+			) {
+				continue;
+			}
+
+			$integrity = $this->parse_integrity( $asset['value'] );
+			if ( empty( $integrity ) ) {
+				continue;
+			}
+
+			$verified_assets[] = array(
+				'algorithm' => $integrity['algorithm'],
+				'digest'    => $integrity['digest'],
+				'url'       => $this->editor_asset_urls[ $asset['path'] ],
+			);
+		}
+
+		foreach ( $editor_settings['styles'] as $index => $style ) {
+			if (
+				! is_array( $style ) ||
+				! isset( $style['css'] ) ||
+				! is_string( $style['css'] ) ||
+				array_key_exists( 'baseURL', $style )
+			) {
+				continue;
+			}
+
+			foreach ( $verified_assets as $asset ) {
+				$digest = hash( $asset['algorithm'], $style['css'], true );
+				if ( ! hash_equals( $asset['digest'], $digest ) ) {
+					continue;
+				}
+
+				$editor_settings['styles'][ $index ]['baseURL'] = $asset['url'];
+				break;
+			}
+		}
+
+		return $editor_settings;
+	}
+
+	/**
+	 * Capture the exact URLs registered by the existing block asset callback.
+	 */
+	private function capture_editor_asset_urls() {
+		$this->editor_asset_urls = array();
+		if ( '7.x' !== $this->library_release_channel() ) {
+			return;
+		}
+
+		$styles = wp_styles();
+		foreach ( self::EDITOR_STYLE_HANDLES as $path => $handle ) {
+			if ( ! isset( $styles->registered[ $handle ] ) || ! is_string( $styles->registered[ $handle ]->src ) ) {
+				continue;
+			}
+
+			$url      = $styles->registered[ $handle ]->src;
+			$url_path = wp_parse_url( $url, PHP_URL_PATH );
+			$suffix   = '/' . $path;
+			if ( ! is_string( $url_path ) || substr( $url_path, -strlen( $suffix ) ) !== $suffix ) {
+				continue;
+			}
+
+			$this->editor_asset_urls[ $path ] = $url;
+		}
+	}
+
+	/**
+	 * Read the immutable channel only when the installed BFAL exposes it.
+	 *
+	 * @return string Selected channel, or an empty string.
+	 */
+	private function library_release_channel() {
+		$method = 'get_release_channel';
+		if ( ! is_callable( array( $this->library, $method ) ) ) {
+			return '';
+		}
+
+		$channel = call_user_func( array( $this->library, $method ) );
+		return is_string( $channel ) ? $channel : '';
+	}
+
+	/**
+	 * Parse one canonical supported SRI value.
+	 *
+	 * @param mixed $value Candidate SRI value.
+	 * @return array{algorithm: string, digest: string}|array{} Parsed integrity data.
+	 */
+	private function parse_integrity( $value ) {
+		if ( ! is_string( $value ) || ! preg_match( '/^(sha256|sha384|sha512)-([A-Za-z0-9+\/]+={0,2})\z/', $value, $matches ) ) {
+			return array();
+		}
+
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Decode a validated Subresource Integrity digest for byte comparison.
+		$digest  = base64_decode( $matches[2], true );
+		$lengths = array(
+			'sha256' => 32,
+			'sha384' => 48,
+			'sha512' => 64,
+		);
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Confirm the Subresource Integrity digest uses canonical encoding.
+		if ( false === $digest || base64_encode( $digest ) !== $matches[2] || strlen( $digest ) !== $lengths[ $matches[1] ] ) {
+			return array();
+		}
+
+		return array(
+			'algorithm' => $matches[1],
+			'digest'    => $digest,
+		);
 	}
 }

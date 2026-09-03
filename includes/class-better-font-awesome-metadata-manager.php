@@ -160,7 +160,7 @@ class Better_Font_Awesome_Metadata_Manager {
 
 		$stored_state = get_option( self::STATE_OPTION, null );
 		$state        = $this->store->get_state();
-		$run_at       = $force ? $now + 1 : max( $now + 1, (int) $state['next_retry_at'] );
+		$run_at       = $force ? $now : max( $now, (int) $state['next_retry_at'] );
 		$marker       = $this->new_schedule_marker( $run_at, $force );
 		$created      = $this->add_non_autoloaded_option( self::SCHEDULE_OPTION, $marker );
 

@@ -2,7 +2,8 @@
   "$schema": "https://schemas.wp.org/trunk/wp-env.json",
   "phpVersion": "8.3",
   "plugins": [
-    "."
+    ".",
+    "./tests/e2e/fixtures/bfa-editor-fixture"
   ],
   "config": {
     "WP_DEBUG": true,

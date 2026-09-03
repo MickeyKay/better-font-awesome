@@ -5,6 +5,69 @@
  * @package Better_Font_Awesome
  */
 
+/**
+ * Deterministic BFAL-compatible collaborator for editor style tests.
+ */
+class Better_Font_Awesome_Editor_Style_Test_Library {
+
+	/** @var string */
+	private $channel;
+
+	/** @var array */
+	private $assets;
+
+	/** @var array */
+	private $style_urls;
+
+	/**
+	 * Store deterministic release and registration data.
+	 *
+	 * @param string $channel    Release channel.
+	 * @param array  $assets     Validated asset manifest.
+	 * @param array  $style_urls Asset paths keyed to stylesheet URLs.
+	 */
+	public function __construct( $channel, $assets, $style_urls ) {
+		$this->channel    = $channel;
+		$this->assets     = $assets;
+		$this->style_urls = $style_urls;
+	}
+
+	/** @return string */
+	public function get_release_channel() {
+		return $this->channel;
+	}
+
+	/** @return array */
+	public function get_release_assets() {
+		return $this->assets;
+	}
+
+	/** Register the deterministic styles through WordPress. */
+	public function register_font_awesome_css() {
+		$handles = array(
+			'css/all.min.css'          => 'bfa-font-awesome',
+			'css/v5-font-face.min.css' => 'bfa-font-awesome-v5-compat',
+			'css/v4-font-face.min.css' => 'bfa-font-awesome-v4-font-face',
+			'css/v4-shims.min.css'     => 'bfa-font-awesome-v4-shim',
+		);
+
+		foreach ( $this->style_urls as $path => $url ) {
+			wp_deregister_style( $handles[ $path ] );
+			wp_register_style( $handles[ $path ], $url, array(), 'test' );
+			wp_enqueue_style( $handles[ $path ] );
+		}
+	}
+}
+
+/**
+ * BFAL-compatible collaborator lacking the channel and asset APIs.
+ */
+class Better_Font_Awesome_Legacy_Editor_Style_Test_Library {
+
+	/** Register no editor styles. */
+	public function register_font_awesome_css() {}
+}
+
 class Better_Font_Awesome_Icon_Block_Test extends WP_UnitTestCase {
 
 	/**
@@ -32,6 +95,7 @@ class Better_Font_Awesome_Icon_Block_Test extends WP_UnitTestCase {
 	public function tearDown(): void {
 		unregister_block_type( Better_Font_Awesome_Icon_Block::NAME );
 		remove_all_filters( 'bfa_icon' );
+		set_current_screen( 'front' );
 		parent::tearDown();
 	}
 
@@ -146,6 +210,153 @@ class Better_Font_Awesome_Icon_Block_Test extends WP_UnitTestCase {
 		$this->assertSame( array( 'label', 'name', 'style' ), array_keys( $catalog[0] ) );
 		$this->assertMatchesRegularExpression( '/^[a-z0-9-]+$/', $catalog[0]['name'] );
 		$this->assertContains( $catalog[0]['style'], array( 'brands', 'regular', 'solid' ) );
+	}
+
+	/**
+	 * Exact FA7 editor CSS receives its own validated registered URL only.
+	 */
+	public function test_editor_style_base_urls_require_exact_individual_sri_matches() {
+		$main_css       = '.fa{font-family:"Font Awesome 7 Free"}';
+		$compat_css     = '@font-face{font-family:"Font Awesome 5 Free"}';
+		$main_url       = 'https://example.test/font-awesome/7.3.1/css/all.min.css';
+		$compat_url     = 'https://example.test/font-awesome/7.3.1/css/v5-font-face.min.css';
+		$library        = new Better_Font_Awesome_Editor_Style_Test_Library(
+			'7.x',
+			array(
+				$this->release_asset( 'css/all.min.css', $main_css, 'sha256' ),
+				$this->release_asset( 'css/v5-font-face.min.css', $compat_css, 'sha384' ),
+			),
+			array(
+				'css/all.min.css'          => $main_url,
+				'css/v5-font-face.min.css' => $compat_url,
+			)
+		);
+		$block          = new Better_Font_Awesome_Icon_Block( $library );
+		$wrong_digest   = $this->release_asset( 'css/all.min.css', $main_css . 'changed' );
+		$wrong_library  = new Better_Font_Awesome_Editor_Style_Test_Library(
+			'7.x',
+			array( $wrong_digest ),
+			array( 'css/all.min.css' => $main_url )
+		);
+		$wrong_block    = new Better_Font_Awesome_Icon_Block( $wrong_library );
+		$editor_settings = array(
+			'styles' => array(
+				array( 'css' => $main_css ),
+				array( 'css' => $compat_css ),
+				array(
+					'css'    => '.unrelated{color:red}',
+					'source' => 'theme',
+				),
+				array( 'css' => $main_css . ' ' ),
+				array( 'source' => 'missing-css' ),
+				'malformed',
+				array(
+					'baseURL' => 'https://example.test/already-present.css',
+					'css'     => $main_css,
+				),
+			),
+		);
+
+		$this->capture_editor_assets( $block );
+		$filtered = $block->add_editor_style_base_urls( $editor_settings );
+
+		$this->assertSame( $main_url, $filtered['styles'][0]['baseURL'] );
+		$this->assertSame( $compat_url, $filtered['styles'][1]['baseURL'] );
+		$this->assertSame( $editor_settings['styles'][2], $filtered['styles'][2] );
+		$this->assertSame( $editor_settings['styles'][3], $filtered['styles'][3] );
+		$this->assertSame( $editor_settings['styles'][4], $filtered['styles'][4] );
+		$this->assertSame( $editor_settings['styles'][5], $filtered['styles'][5] );
+		$this->assertSame( $editor_settings['styles'][6], $filtered['styles'][6] );
+		$this->assertSame( $main_css, $filtered['styles'][0]['css'] );
+		$this->assertSame( $compat_css, $filtered['styles'][1]['css'] );
+
+		$this->capture_editor_assets( $wrong_block );
+		$this->assertSame( $editor_settings, $wrong_block->add_editor_style_base_urls( $editor_settings ) );
+	}
+
+	/**
+	 * Missing APIs, malformed manifests, and non-7.x channels are no-ops.
+	 */
+	public function test_editor_style_base_urls_fail_closed_for_unsupported_libraries() {
+		$settings = array(
+			'styles' => array(
+				array( 'css' => '.fa{display:inline-block}' ),
+			),
+		);
+		$libraries = array(
+			new Better_Font_Awesome_Editor_Style_Test_Library(
+				'5.x',
+				array( $this->release_asset( 'css/all.min.css', $settings['styles'][0]['css'] ) ),
+				array( 'css/all.min.css' => 'https://example.test/css/all.min.css' )
+			),
+			new Better_Font_Awesome_Editor_Style_Test_Library(
+				'7.x',
+				array(
+					array(
+						'path'  => 'css/all.min.css',
+						'value' => 'not-supported-sri',
+					),
+				),
+				array( 'css/all.min.css' => 'https://example.test/css/all.min.css' )
+			),
+			new Better_Font_Awesome_Legacy_Editor_Style_Test_Library(),
+		);
+
+		foreach ( $libraries as $library ) {
+			$block = new Better_Font_Awesome_Icon_Block( $library );
+			$this->capture_editor_assets( $block );
+			$this->assertSame( $settings, $block->add_editor_style_base_urls( $settings ) );
+			$this->assertSame( array( 'other' => 'value' ), $block->add_editor_style_base_urls( array( 'other' => 'value' ) ) );
+		}
+	}
+
+	/**
+	 * The request-local compatibility filter performs no remote validation.
+	 */
+	public function test_editor_style_base_url_filter_performs_no_http() {
+		$calls = 0;
+		$count = static function ( $preempt, $parsed_args, $url ) use ( &$calls ) {
+			unset( $parsed_args, $url );
+			++$calls;
+			return $preempt;
+		};
+		add_filter( 'pre_http_request', $count, 1, 3 );
+
+		try {
+			$settings = array( 'styles' => array( array( 'css' => '.unrelated{}' ) ) );
+			$this->capture_editor_assets( $this->block );
+			$this->block->add_editor_style_base_urls( $settings );
+		} finally {
+			remove_filter( 'pre_http_request', $count, 1 );
+		}
+
+		$this->assertSame( 0, $calls );
+	}
+
+	/**
+	 * Capture exact registered editor asset URLs through the existing callback.
+	 *
+	 * @param Better_Font_Awesome_Icon_Block $block Block controller.
+	 */
+	private function capture_editor_assets( $block ) {
+		set_current_screen( 'post' );
+		$this->assertTrue( get_current_screen()->is_block_editor() );
+		$block->enqueue_editor_font_awesome();
+	}
+
+	/**
+	 * Build one deterministic validated asset manifest entry.
+	 *
+	 * @param string $path Asset path.
+	 * @param string $css  Exact stylesheet bytes.
+	 * @param string $algorithm Hash algorithm.
+	 * @return array Asset manifest entry.
+	 */
+	private function release_asset( $path, $css, $algorithm = 'sha512' ) {
+		return array(
+			'path'  => $path,
+			'value' => $algorithm . '-' . base64_encode( hash( $algorithm, $css, true ) ),
+		);
 	}
 
 	/**

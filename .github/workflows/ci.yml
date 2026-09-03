@@ -62,8 +62,14 @@ jobs:
         run: npm audit --audit-level=high
 
   block-e2e:
-    name: Native icon block browser test
+    name: Editor browser test - WordPress ${{ matrix.wordpress }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        wordpress:
+          - '6.5'
+          - '7.1'
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -87,10 +93,15 @@ jobs:
           npm ci
           npx playwright install --with-deps chromium
 
+      - name: Select WordPress version
+        env:
+          BFA_WORDPRESS_VERSION: ${{ matrix.wordpress }}
+        run: node -e 'const fs = require("fs"); const path = ".wp-env.json"; const config = JSON.parse(fs.readFileSync(path, "utf8")); config.core = `WordPress/WordPress#${process.env.BFA_WORDPRESS_VERSION}`; fs.writeFileSync(path, `${JSON.stringify(config, null, "\t")}\n`);'
+
       - name: Start WordPress
         run: WP_ENV_PORT=8888 WP_ENV_TESTS_PORT=8889 npm run env:start
 
-      - name: Run block browser test
+      - name: Run editor browser test
         run: WP_ENV_PORT=8888 npm run test:e2e
 
       - name: Stop WordPress
