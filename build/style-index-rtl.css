@@ -1,9 +1,14 @@
 .wp-block-better-font-awesome-icon {
 	color: inherit;
+	display: flex;
 	font-size: inherit;
+	justify-content: flex-start;
 }
 
-.wp-block-better-font-awesome-icon.aligncenter {
-	display: flex;
+.wp-block-better-font-awesome-icon.items-justified-center {
 	justify-content: center;
+}
+
+.wp-block-better-font-awesome-icon.items-justified-right {
+	justify-content: flex-end;
 }

@@ -2,8 +2,3 @@
 	min-width: 1.5em;
 	min-height: 1.5em;
 }
-
-.wp-block[data-align="center"] > .wp-block-better-font-awesome-icon {
-	display: flex;
-	justify-content: center;
-}

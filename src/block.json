@@ -17,13 +17,17 @@
 			"type": "string",
 			"default": "solid"
 		},
+		"iconJustification": {
+			"type": "string",
+			"enum": [ "left", "center", "right" ],
+			"default": "left"
+		},
 		"label": {
 			"type": "string",
 			"default": ""
 		}
 	},
 	"supports": {
-		"align": [ "left", "center", "right" ],
 		"anchor": true,
 		"color": {
 			"background": false,
