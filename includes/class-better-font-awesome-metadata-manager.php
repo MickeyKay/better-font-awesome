@@ -118,10 +118,14 @@ class Better_Font_Awesome_Metadata_Manager {
 	 *
 	 * This provider never performs HTTP and never mutates storage.
 	 *
+	 * @param string $channel Selected channel while BFAL initializes.
 	 * @return array BFAL-valid record, or an empty array.
 	 */
-	public function provide_release_data() {
-		$record = $this->store->get_valid_record( $this->release_channel );
+	public function provide_release_data( $channel = '' ) {
+		if ( ! $this->is_supported_channel( $channel ) ) {
+			$channel = $this->release_channel;
+		}
+		$record = $this->store->get_valid_record( $channel );
 		return empty( $record ) ? array() : $record;
 	}
 

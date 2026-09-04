@@ -7,7 +7,7 @@
 **Requires at least:** 6.5<br>
 **Tested up to:** 7.1<br>
 **Requires PHP:** 7.4<br>
-**Stable tag:** 3.0.0<br>
+**Stable tag:** 3.0.1<br>
 **License:** GPLv2+<br>
 **License URI:** https://www.gnu.org/licenses/gpl-2.0.html<br>
 
@@ -142,6 +142,9 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 
 ## Changelog ##
 
+### 3.0.1 ###
+* Fixes a false metadata validation warning after upgrading a site with valid retained Font Awesome 5 cache data to the default Font Awesome 7 channel.
+
 ### 3.0.0 ###
 * Makes Font Awesome Free 7 the default current channel and refreshes validated metadata for compatible Font Awesome 7.x releases in the background.
 * Includes a bundled Font Awesome Free 7.3.1 fallback for immediate cold-start rendering and recovery when external services are unavailable.
@@ -208,6 +211,9 @@ Better Font Awesome does it's best to load after any existing Font Awesome CSS, 
 * Switch from using git submodules to composer dependency management for core library inclusion.
 
 ## Upgrade Notice ##
+
+### 3.0.1 ###
+Removes a false post-upgrade Font Awesome metadata warning while preserving legacy cache data, safe fallback rendering, and background-only updates.
 
 ### 3.0.0 ###
 Adds Font Awesome Free 7, validated background-only 7.x metadata updates, bundled 7.3.1 fallback, and native Icon block controls. Preserves existing settings, shortcodes, Classic Editor, and integrations. Requires WordPress 6.5+ and PHP 7.4+.

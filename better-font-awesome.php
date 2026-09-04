@@ -11,8 +11,8 @@
  * @wordpress-plugin
  * Plugin Name:       Better Font Awesome
  * Plugin URI:        https://github.com/MickeyKay/better-font-awesome
- * Description:       The ultimate Font Awesome icon plugin for WordPress.
- * Version:           3.0.0
+ * Description:       Add Font Awesome 7 Free icons with a native WordPress block, shortcodes, a Classic Editor picker, automatic icon updates, and legacy support.
+ * Version:           3.0.1
  * Author:            Mickey Kay
  * Author URI:        https://mickeykay.me/
  * License:           GPLv2+
@@ -68,7 +68,7 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @var    string
 	 */
-	const VERSION = '3.0.0';
+	const VERSION = '3.0.1';
 
 	/**
 	 * The Better Font Awesome Library object.
@@ -449,11 +449,25 @@ class Better_Font_Awesome_Plugin {
 		);
 
 		if ( $this->metadata_manager ) {
-			$args['release_data_provider']         = array( $this->metadata_manager, 'provide_release_data' );
+			$release_channel                       = '';
+			$capture_channel                       = static function ( $channel ) use ( &$release_channel ) {
+				$release_channel = is_string( $channel ) ? $channel : '';
+				return $channel;
+			};
+			$args['release_data_provider']         = function () use ( &$release_channel ) {
+				return $this->metadata_manager->provide_release_data( $release_channel );
+			};
 			$args['release_data_refresh_callback'] = array( $this->metadata_manager, 'request_release_data_refresh' );
+			add_filter( 'bfa_font_awesome_release_channel', $capture_channel, PHP_INT_MAX );
 		}
 
-		$this->bfa_lib = Better_Font_Awesome_Library::get_instance( $args );
+		try {
+			$this->bfa_lib = Better_Font_Awesome_Library::get_instance( $args );
+		} finally {
+			if ( isset( $capture_channel ) ) {
+				remove_filter( 'bfa_font_awesome_release_channel', $capture_channel, PHP_INT_MAX );
+			}
+		}
 	}
 
 	/**
