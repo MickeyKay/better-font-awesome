@@ -21,22 +21,22 @@ Add Font Awesome Free icons to WordPress using a native Icon block, shortcodes, 
 
 A built-in fallback means icons work immediately. Better Font Awesome automatically keeps Font Awesome Free icons current with newer compatible releases in the background, while pages and editors keep loading normally.
 
-### Key features ###
+## Key features ##
 
 * **Native Icon block** - search the latest compatible Font Awesome Free icons and styles, then adjust size, color, spacing, alignment, and an optional accessible label.
 * **Flexible workflows** - use the block, shortcodes, the Classic Editor picker, or HTML and CSS.
 * **Automatic icon updates** - start with the built-in fallback and receive newer compatible icons automatically in the background.
 * **Legacy compatibility** - keep established Font Awesome 4 and 5 content working, with optional controls for older or competing styles.
 
-### Getting started ###
+## Getting started ##
 
-## Native Icon block ##
+### Native Icon block ###
 
 In the Block Editor, insert the **Font Awesome Icon** block. Choose an icon and available Free style, then use WordPress controls for font size, text color, margin, padding, and left, center, or right alignment. Add an accessible label when the icon communicates meaning, or leave it empty for a decorative icon.
 
 The Icon block is a standalone block that works in layouts such as Groups, Rows, and Columns. To place an icon directly within a line of text, use the shortcode.
 
-## Shortcodes ##
+### Shortcodes ###
 
 Use the `[icon]` shortcode wherever WordPress processes shortcodes:
 
@@ -44,19 +44,19 @@ Use the `[icon]` shortcode wherever WordPress processes shortcodes:
 
 The `fa-` and `icon-` prefixes are optional in shortcode attributes, and established prefixed forms continue to work.
 
-## Classic Editor picker ##
+### Classic Editor picker ###
 
 In the Classic Editor visual toolbar, choose **Insert Icon**, search the Free catalog, and select an icon. The picker inserts the matching shortcode into your content.
 
-## HTML and CSS ##
+### HTML and CSS ###
 
 You can also use Font Awesome classes in HTML or CSS. Unlike shortcodes, HTML class prefixes are required and depend on the selected style. For current syntax, see the [Font Awesome guide to adding icons](https://docs.fontawesome.com/web/add-icons/how-to/).
 
-### Automatic icon updates and built-in fallback ###
+## Automatic icon updates and built-in fallback ##
 
 Font Awesome Free CSS, fonts, and icon data ship with the plugin, so icons render immediately after activation. A scheduled task checks for the latest compatible release in the background and uses it only after validation. If a check is delayed or fails, the last validated release or built-in fallback stays active.
 
-### Compatibility and conflicts ###
+## Compatibility and conflicts ##
 
 Established Font Awesome 4 and 5 shortcode names and classes are supported through compatible aliases and styles, plus an optional Font Awesome 4 CSS shim. Font Awesome Pro and a separate Font Awesome 6 channel are not provided.
 
