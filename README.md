@@ -11,19 +11,19 @@
 **License:** GPLv2+<br>
 **License URI:** https://www.gnu.org/licenses/gpl-2.0.html<br>
 
-Add Font Awesome 7 Free icons with a native WordPress Icon block, shortcodes, a Classic Editor picker, automatic updates, and legacy compatibility.
+Add Font Awesome 7 Free icons with a native WordPress block, shortcodes, a Classic Editor picker, automatic icon updates, and legacy support.
 
 ## Description ##
 
-Add Font Awesome 7 Free icons to WordPress using a native Icon block, shortcodes, the Classic Editor picker, or HTML. Search the current Free catalog, customize icons in the Block Editor, and keep established Font Awesome 4 and 5 content working.
+Add Font Awesome Free icons to WordPress using a native Icon block, shortcodes, the Classic Editor picker, or HTML. Search the latest compatible Free catalog, customize icons in the Block Editor, and keep established Font Awesome 4 and 5 content working.
 
-The packaged, validated fallback means icons work immediately without waiting for WP-Cron or a remote service. In the background, Better Font Awesome checks for newer compatible Font Awesome 7 Free releases while normal page and editor requests continue using local data.
+A built-in fallback means icons work immediately. Better Font Awesome automatically keeps Font Awesome Free icons current with newer compatible releases in the background, while pages and editors keep loading normally.
 
 ### Key features ###
 
-* **Native Icon block** - search Font Awesome 7 Free icons and styles, then adjust size, color, spacing, alignment, and an optional accessible label.
+* **Native Icon block** - search the latest compatible Font Awesome Free icons and styles, then adjust size, color, spacing, alignment, and an optional accessible label.
 * **Flexible workflows** - use the block, shortcodes, the Classic Editor picker, or HTML and CSS.
-* **Ready immediately and kept current** - start with the packaged fallback and receive validated, compatible updates in the background.
+* **Automatic icon updates** - start with the built-in fallback and receive newer compatible icons automatically in the background.
 * **Legacy compatibility** - keep established Font Awesome 4 and 5 content working, with optional controls for older or competing styles.
 
 ### Getting started ###
@@ -32,7 +32,7 @@ The packaged, validated fallback means icons work immediately without waiting fo
 
 In the Block Editor, insert the **Font Awesome Icon** block. Choose an icon and available Free style, then use WordPress controls for font size, text color, margin, padding, and left, center, or right alignment. Add an accessible label when the icon communicates meaning, or leave it empty for a decorative icon.
 
-The Icon block is a standalone block. Place it in normal block layouts, including Groups, Rows, and Columns. It is not an inline RichText control inside Paragraph or Heading blocks.
+The Icon block is a standalone block that works in layouts such as Groups, Rows, and Columns. To place an icon directly within a line of text, use the shortcode.
 
 ## Shortcodes ##
 
@@ -50,7 +50,7 @@ In the Classic Editor visual toolbar, choose **Insert Icon**, search the Free ca
 
 You can also use Font Awesome classes in HTML or CSS. Unlike shortcodes, HTML class prefixes are required and depend on the selected style. For current syntax, see the [Font Awesome guide to adding icons](https://docs.fontawesome.com/web/add-icons/how-to/).
 
-### Automatic updates and packaged fallback ###
+### Automatic icon updates and built-in fallback ###
 
 Validated Font Awesome 7 Free CSS, fonts, and icon data ship with the plugin, so icons render immediately after activation. A scheduled task checks for newer compatible Font Awesome 7 releases in the background and uses one only after validation. If a check is delayed or fails, the last validated release or packaged fallback stays active.
 
@@ -105,12 +105,11 @@ If Better Font Awesome helps your site, please consider leaving a brief [WordPre
 
 ## Screenshots ##
 
-1. Add a Font Awesome 7 Free icon with the native Icon block.
-2. Search the Free catalog, choose an available icon style, and add an accessible label.
-3. Use the toolbar and WordPress style controls to adjust alignment, size, color, and spacing.
-4. Combine icons with text and other blocks in a frontend layout.
-5. Search and insert a shortcode with the Classic Editor picker.
-6. Review the active Font Awesome version and optional compatibility settings.
+1. Search the Font Awesome Free catalog, choose an available style, and add an accessible label.
+2. Adjust icon alignment, size, color, and spacing with WordPress block controls.
+3. Combine standalone Icon blocks with text in a polished frontend layout.
+4. Search and insert a matching shortcode with the Classic Editor picker.
+5. Review the active Font Awesome version and optional compatibility settings.
 
 ## Changelog ##
 
