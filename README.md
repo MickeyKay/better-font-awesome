@@ -11,7 +11,7 @@
 **License:** GPLv2+<br>
 **License URI:** https://www.gnu.org/licenses/gpl-2.0.html<br>
 
-Add Font Awesome 7 Free icons with a native WordPress block, shortcodes, a Classic Editor picker, automatic icon updates, and legacy support.
+Add Font Awesome Free icons that stay current automatically, with a native WordPress block, shortcodes, a Classic Editor picker, and legacy support.
 
 ## Description ##
 
@@ -52,7 +52,7 @@ You can also use Font Awesome classes in HTML or CSS. Unlike shortcodes, HTML cl
 
 ### Automatic icon updates and built-in fallback ###
 
-Validated Font Awesome 7 Free CSS, fonts, and icon data ship with the plugin, so icons render immediately after activation. A scheduled task checks for newer compatible Font Awesome 7 releases in the background and uses one only after validation. If a check is delayed or fails, the last validated release or packaged fallback stays active.
+Font Awesome Free CSS, fonts, and icon data ship with the plugin, so icons render immediately after activation. A scheduled task checks for the latest compatible release in the background and uses it only after validation. If a check is delayed or fails, the last validated release or built-in fallback stays active.
 
 ### Compatibility and conflicts ###
 
@@ -85,9 +85,9 @@ Enable **Remove existing Font Awesome** under **Settings > Better Font Awesome**
 
 ## External services ##
 
-Better Font Awesome works immediately from its packaged Font Awesome 7 Free fallback. It uses the following external services only for background updates or for assets from a newer validated release. No Font Awesome account or API token is required for the Free channel.
+Better Font Awesome works immediately from its built-in Font Awesome Free fallback. It uses the following external services only for background updates or for assets from a newer validated release. No Font Awesome account or API token is required for the Free channel.
 
-* **Font Awesome GraphQL API** (`https://api.fontawesome.com`) - an asynchronous server-side WP-Cron worker requests the latest public `7.x` Free release version, icon names, aliases, families, and styles. Review the [Font Awesome terms of service](https://fontawesome.com/tos) and [privacy policy](https://fontawesome.com/privacy).
+* **Font Awesome GraphQL API** (`https://api.fontawesome.com`) - an asynchronous server-side WP-Cron worker requests the latest public compatible Font Awesome Free release version, icon names, aliases, families, and styles. Review the [Font Awesome terms of service](https://fontawesome.com/tos) and [privacy policy](https://fontawesome.com/privacy).
 * **npm registry** (`https://registry.npmjs.org/%40fortawesome%2Ffontawesome-free/{version}`) - when Font Awesome reports a newer candidate, the same background worker confirms that exact official Free package version, name, and license. Review the [npm terms](https://docs.npmjs.com/policies/terms) and [privacy notice](https://docs.npmjs.com/policies/privacy).
 * **cdnjs asset service** (`https://cdnjs.cloudflare.com/ajax/libs/font-awesome/{version}/`) - the background worker downloads an allowlisted set of exact-version CSS and WOFF2 files for validation. BFAL does not call a separate cdnjs catalog API. After a newer release passes every check, visitors' browsers may request its selected CSS and referenced font files from this host. Review the [cdnjs service information](https://cdnjs.com/about), [Cloudflare website terms](https://www.cloudflare.com/website-terms/), and [Cloudflare privacy policy](https://www.cloudflare.com/privacypolicy/).
 * **jsDelivr asset service** (`https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@{version}/`) - the background worker independently downloads the same allowlisted files and requires their bytes to match cdnjs. BFA does not select jsDelivr as the browser runtime host. Review the [jsDelivr terms and policies](https://www.jsdelivr.com/terms).
@@ -114,7 +114,7 @@ If Better Font Awesome helps your site, please consider leaving a brief [WordPre
 ## Changelog ##
 
 ### 3.0.0 ###
-* Adds Font Awesome 7 Free with validated background updates and a packaged fallback.
+* Adds automatic updates for the current Font Awesome Free catalog with a built-in fallback.
 * Adds a native Icon block with catalog search, style and design controls, alignment, and accessible labels.
 * Preserves existing shortcodes, settings, integrations, Classic Editor picker, and Font Awesome 4 and 5 compatibility.
 
@@ -123,4 +123,4 @@ Older release history is preserved in the project's [historical changelog](https
 ## Upgrade Notice ##
 
 ### 3.0.0 ###
-Adds Font Awesome 7 Free, background updates, a packaged fallback, and the native Icon block while preserving existing settings, shortcodes, and Classic Editor workflows. Requires WordPress 6.5+ and PHP 7.4+.
+Adds automatic Font Awesome Free icon updates, a built-in fallback, and the native Icon block while preserving existing settings, shortcodes, and Classic Editor workflows. Requires WordPress 6.5+ and PHP 7.4+.
