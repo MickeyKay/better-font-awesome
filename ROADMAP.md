@@ -16,27 +16,26 @@ This roadmap describes direction, not delivery dates. Concrete defects and suppo
 
 ## Publicly shipped foundation
 
-The 2.1 generation established the baseline for subsequent work:
+BFA 3.0.0 is publicly released and builds on the foundation established by the 2.1 generation:
 
 - Reliable asynchronous Font Awesome 5 Free metadata updates with cached and bundled fallbacks.
 - Current supported WordPress and PHP compatibility coverage.
 - Hardened settings persistence and release packaging.
 - A separately tested and released BFAL dependency.
 - A documented, reproducible WordPress.org release process.
-
-## Implemented in current development
-
 - A native API v3 dynamic icon block registered through `block.json`, with semantic attributes, server-side rendering, searchable Free icon selection, accessible decorative or labelled modes, and browser coverage.
 - A channel-aware BFAL integration that defaults to Font Awesome 7 Free, serves packaged Font Awesome 7 assets immediately, refreshes compatible releases in the background, and preserves Font Awesome 4 and 5 content compatibility.
 
-These additions are present in the development code but are not part of the currently published BFA 2.1.0 package.
-
 ## Now
 
-### Monitor and consolidate the 2.1 release
+### Correct the cross-major legacy-transient warning
+
+- Release BFAL 3.0.2 followed by BFA 3.0.1 as the immediate corrective sequence for the cross-major legacy-transient warning.
+
+### Monitor and consolidate the 3.0 release
 
 - Triage new support reports against the released package before changing behavior.
-- Close or update legacy GitHub issues whose underlying work shipped in 2.1.
+- Close or update legacy GitHub issues whose underlying work shipped in 3.0.
 - Reproduce remaining Classic Editor picker, nested-shortcode, and performance reports on supported versions.
 
 ### Improve the contributor and release experience
@@ -50,6 +49,7 @@ These additions are present in the development code but are not part of the curr
 
 ### Refine the native block editor experience
 
+- Add a dedicated Style control to the native Icon block, populated dynamically from the Free styles available for the selected icon. Preserve the existing `iconStyle` attribute, rendering behavior, saved content, and combined icon-search compatibility. Show only available Free styles such as Solid, Regular, and Brands. Do not expose Light, Thin, Duotone, Sharp, or other Pro-only families until Font Awesome Pro support is explicitly designed and approved.
 - Refine alignment behavior and other block supports based on editor testing.
 - Decide whether inline icon handling belongs in the block contract without changing saved shortcode compatibility.
 - Extend browser coverage when new block behavior is approved.
