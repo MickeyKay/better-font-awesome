@@ -86,7 +86,7 @@ class Better_Font_Awesome_BFAL_3_Integration_Test extends Better_Font_Awesome_Me
 	/**
 	 * Released BFA 2.1.0 metadata remains stored but cannot become active on FA7.
 	 */
-	public function test_upgrade_ignores_but_preserves_released_fa5_data() {
+	public function test_upgrade_legacy_fa5_state_uses_fa7_fallback_without_false_notice_or_http() {
 		$legacy_release = $this->valid_release( '5.15.4' );
 		$legacy_record  = $this->persist_release( '5.15.4', time() + DAY_IN_SECONDS );
 		set_transient( 'bfa-release-data', $legacy_release, DAY_IN_SECONDS );
@@ -101,6 +101,18 @@ class Better_Font_Awesome_BFAL_3_Integration_Test extends Better_Font_Awesome_Me
 		$this->assertSame( array(), $store->get_valid_record( '7.x' ) );
 		$this->assertSame( $legacy_record, $store->get_valid_record( '5.x' ) );
 		$this->assertSame( $legacy_release, get_transient( 'bfa-release-data' ) );
+		$diagnostic_codes = array();
+		foreach ( $library->get_errors() as $error ) {
+			if ( is_wp_error( $error ) ) {
+				$diagnostic_codes[] = $error->get_error_code();
+			}
+		}
+		$this->assertNotContains( 'bfa_v2_record_schema_invalid', $diagnostic_codes );
+		$this->assertNotContains( 'bfa_v2_version_unsupported', $diagnostic_codes );
+		ob_start();
+		$library->do_admin_notice();
+		$this->assertSame( '', trim( ob_get_clean() ) );
+		$this->assertSame( 1, $this->count_scheduled_refresh_events() );
 		$this->assertSame( 0, $this->font_awesome_http_calls );
 
 		add_filter( 'bfa_font_awesome_release_channel', array( $this, 'select_legacy_release_channel' ) );

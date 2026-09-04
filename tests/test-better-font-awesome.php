@@ -83,14 +83,14 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 		}
 	}
 
-	public function test_release_identity_is_3_0_0() {
+	public function test_release_identity_is_3_0_1() {
 		$headers = get_file_data(
 			dirname( __DIR__ ) . '/better-font-awesome.php',
 			array( 'version' => 'Version' )
 		);
 
-		$this->assertSame( '3.0.0', Better_Font_Awesome_Plugin::VERSION );
-		$this->assertSame( '3.0.0', $headers['version'] );
+		$this->assertSame( '3.0.1', Better_Font_Awesome_Plugin::VERSION );
+		$this->assertSame( '3.0.1', $headers['version'] );
 	}
 
 	public function test_options_are_initialized_with_defaults() {
