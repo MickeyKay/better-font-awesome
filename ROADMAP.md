@@ -16,7 +16,7 @@ This roadmap describes direction, not delivery dates. Concrete defects and suppo
 
 ## Publicly shipped foundation
 
-BFA 3.0.0 is publicly released and builds on the foundation established by the 2.1 generation:
+BFA 3.0.1 is publicly released and builds on the foundation established by the 2.1 generation:
 
 - Reliable asynchronous Font Awesome 5 Free metadata updates with cached and bundled fallbacks.
 - Current supported WordPress and PHP compatibility coverage.
@@ -25,12 +25,9 @@ BFA 3.0.0 is publicly released and builds on the foundation established by the 2
 - A documented, reproducible WordPress.org release process.
 - A native API v3 dynamic icon block registered through `block.json`, with semantic attributes, server-side rendering, searchable Free icon selection, accessible decorative or labelled modes, and browser coverage.
 - A channel-aware BFAL integration that defaults to Font Awesome 7 Free, serves packaged Font Awesome 7 assets immediately, refreshes compatible releases in the background, and preserves Font Awesome 4 and 5 content compatibility.
+- The BFAL 3.0.2 and BFA 3.0.1 corrective sequence for the cross-major legacy-transient warning.
 
 ## Now
-
-### Correct the cross-major legacy-transient warning
-
-- Release BFAL 3.0.2 followed by BFA 3.0.1 as the immediate corrective sequence for the cross-major legacy-transient warning.
 
 ### Monitor and consolidate the 3.0 release
 
