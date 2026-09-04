@@ -13,6 +13,8 @@ Add Font Awesome Free icons that stay current automatically, with a native WordP
 
 == Description ==
 
+**Do you find this plugin helpful? Please consider [leaving a 5-star review](https://wordpress.org/support/plugin/better-font-awesome/reviews/).**
+
 Add Font Awesome Free icons to WordPress using a native Icon block, shortcodes, the Classic Editor picker, or HTML. Search the latest compatible Free catalog, customize icons in the Block Editor, and keep established Font Awesome 4 and 5 content working.
 
 A built-in fallback means icons work immediately. Better Font Awesome automatically keeps Font Awesome Free icons current with newer compatible releases in the background, while pages and editors keep loading normally.
