@@ -5,7 +5,7 @@ Donate link: https://mickeykay.me
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.0.1
+Stable tag: 3.1.0
 License: GPLv2+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -121,6 +121,10 @@ If Better Font Awesome helps your site, please consider leaving a brief [WordPre
 
 == Changelog ==
 
+= 3.1.0 =
+* Adds the optional **Serve Font Awesome locally** setting for loading the bundled Font Awesome Free catalog, CSS, and fonts from your site.
+* Keeps automatic delivery as the default. When local delivery is enabled, new icons arrive through plugin updates.
+
 = 3.0.1 =
 * Fixes a false metadata validation warning after upgrading a site with valid retained Font Awesome 5 cache data to the default Font Awesome 7 channel.
 
@@ -132,6 +136,9 @@ If Better Font Awesome helps your site, please consider leaving a brief [WordPre
 Older release history is preserved in the project's [historical changelog](https://github.com/MickeyKay/better-font-awesome/blob/master/docs/historical-changelog.md).
 
 == Upgrade Notice ==
+
+= 3.1.0 =
+Adds optional **Serve Font Awesome locally** delivery. Automatic delivery remains the default; local icons update through plugin updates. Existing settings and content are preserved.
 
 = 3.0.1 =
 Removes a false post-upgrade Font Awesome metadata warning while preserving legacy cache data, safe fallback rendering, and background-only updates.
