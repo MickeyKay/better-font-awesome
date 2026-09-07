@@ -604,7 +604,7 @@ class Better_Font_Awesome_Metadata_Manager {
 	}
 
 	/**
-	 * Clear this site's pending cron and ownership markers.
+	 * Clear pending cron and schedule markers while preserving active workers.
 	 */
 	public function clear_scheduled_work() {
 		$marker = get_option( self::SCHEDULE_OPTION, array() );
@@ -614,7 +614,8 @@ class Better_Font_Awesome_Metadata_Manager {
 
 		wp_clear_scheduled_hook( self::CRON_HOOK );
 		delete_option( self::SCHEDULE_OPTION );
-		delete_option( self::LOCK_OPTION );
+		// Recover inactive leases atomically, but let in-flight owners finish.
+		$this->worker_lock_is_active( time() );
 	}
 
 	/**

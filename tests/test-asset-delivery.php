@@ -109,6 +109,77 @@ class Better_Font_Awesome_Asset_Delivery_Test extends Better_Font_Awesome_Metada
 		);
 	}
 
+	public function test_local_switch_preserves_in_flight_lease_until_automatic_worker_finishes() {
+		$previous = $this->persist_schema_2_record( '7.3.1', time() - HOUR_IN_SECONDS );
+		$worker = $this->metadata_manager( $this->initialize_plugin( array( 'asset_delivery' => 'automatic' ) ) );
+		$marker = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
+		$interleaved = false;
+		$interleave = function ( $preempt, $args, $url ) use ( &$interleaved ) {
+			if ( Better_Font_Awesome_Library::FONT_AWESOME_API_BASE_URL !== $url || $interleaved ) {
+				return $preempt;
+			}
+			$interleaved = true;
+			$lease = get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION );
+			$this->assertNotEmpty( $lease['owner'] );
+			$http_before = $this->font_awesome_http_calls;
+
+			$local = $this->metadata_manager( $this->initialize_plugin( array( 'asset_delivery' => 'bundled-local' ) ) );
+			$this->assertSame( $lease, get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION ) );
+			$this->assertFalse( $local->schedule_refresh( true ) );
+			$this->assertSame( 'bfa_refresh_disabled', $local->run_scheduled_refresh( 'pending', true )->get_error_code() );
+			$this->assertSame( 'bfa_refresh_disabled', $local->run_refresh( true )->get_error_code() );
+			$this->assertSame( $lease, get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION ) );
+			$this->assertSame( $http_before, $this->font_awesome_http_calls );
+
+			$automatic = $this->metadata_manager( $this->initialize_plugin( array( 'asset_delivery' => 'automatic' ) ) );
+			$this->assertFalse( $automatic->schedule_refresh( true ) );
+			$this->assertSame( 'bfa_refresh_locked', $automatic->run_refresh( true )->get_error_code() );
+			$this->assertSame( $http_before, $this->font_awesome_http_calls );
+			$this->assertSame( $lease, get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION ) );
+			$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+			$this->assertSame( 0, $this->count_scheduled_refresh_events() );
+			return $preempt;
+		};
+		add_filter( 'pre_http_request', $interleave, 4, 3 );
+		$this->font_awesome_http_response = $this->successful_response( $this->valid_schema_2_record()['release'] );
+		try {
+			$result = $worker->run_scheduled_refresh( $marker['token'], true );
+		} finally {
+			remove_filter( 'pre_http_request', $interleave, 4 );
+		}
+
+		$this->assertTrue( $interleaved );
+		$this->assertNotWPError( $result );
+		$store = new Better_Font_Awesome_Metadata_Store();
+		$record = $store->get_valid_record( '7.x' );
+		$this->assertSame( $previous['release'], $record['release'] );
+		$this->assertGreaterThan( $previous['fresh_until'], $record['fresh_until'] );
+		$this->assertSame( 'fresh', $store->get_state()['status'] );
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION ) );
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+		$this->assertSame( 0, $this->count_scheduled_refresh_events() );
+		$this->assertSame( 1, $this->font_awesome_http_calls );
+	}
+
+	/** @dataProvider inactive_worker_leases */
+	public function test_local_cleanup_removes_inactive_leases_and_pending_work( $lease ) {
+		$this->initialize_plugin( array( 'asset_delivery' => 'automatic' ) );
+		$this->assertSame( 1, $this->count_scheduled_refresh_events() );
+		update_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION, $lease, false );
+		$this->initialize_plugin( array( 'asset_delivery' => 'bundled-local' ) );
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION ) );
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+		$this->assertSame( 0, $this->count_scheduled_refresh_events() );
+		$this->assertSame( 0, $this->font_awesome_http_calls );
+	}
+
+	public static function inactive_worker_leases() {
+		return array(
+			'expired' => array( array( 'owner' => 'expired-worker', 'expires_at' => 1 ) ),
+			'malformed' => array( array( 'owner' => 'missing-expiration' ) ),
+		);
+	}
+
 	public function test_queued_worker_rechecks_local_mode_without_boot_cleanup() {
 		$manager = $this->metadata_manager( $this->initialize_plugin( array( 'asset_delivery' => 'automatic' ) ) );
 		$marker = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
