@@ -42,7 +42,6 @@
 				if ('success' == status) {
 					message = response;
 					messageClass = 'updated';
-					window.location.reload();
 				} else {
 					message = response.responseText;
 					messageClass = 'error';

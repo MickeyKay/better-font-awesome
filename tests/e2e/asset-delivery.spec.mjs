@@ -87,12 +87,27 @@ async function saveMode( page, mode, beforeSave = () => {}, nativeSubmit = false
 	}
 	await page.locator( '#include_v4_shim' ).check();
 	beforeSave();
-	await Promise.all( [
-		page.waitForEvent( 'load' ),
-		nativeSubmit
-			? page.locator( '#bfa-settings-form' ).evaluate( ( form ) => form.requestSubmit() )
-			: page.locator( '.bfa-save-settings-button' ).click(),
-	] );
+	if ( nativeSubmit ) {
+		await Promise.all( [
+			page.waitForEvent( 'load' ),
+			page.locator( '#bfa-settings-form' ).evaluate( ( form ) => form.requestSubmit() ),
+		] );
+	} else {
+		const navigations = [];
+		const recordNavigation = ( frame ) => {
+			if ( frame === page.mainFrame() ) {
+				navigations.push( frame.url() );
+			}
+		};
+		page.on( 'framenavigated', recordNavigation );
+		await page.locator( '.bfa-save-settings-button' ).click();
+		const notice = page.locator( '.bfa-ajax-response-holder .updated' );
+		await expect( notice ).toHaveText( 'Settings saved.' );
+		await expect( notice ).toBeVisible();
+		await expect( notice ).toBeHidden();
+		page.off( 'framenavigated', recordNavigation );
+		expect( navigations ).toEqual( [] );
+	}
 	await expect( page.locator( '#asset_delivery' ) ).toBeChecked( { checked: 'bundled-local' === mode } );
 	await page.reload();
 	await expect( page.locator( '#asset_delivery' ) ).toBeChecked( { checked: 'bundled-local' === mode } );
