@@ -642,6 +642,95 @@ class Better_Font_Awesome_Metadata_Manager_Test extends Better_Font_Awesome_Meta
 	}
 
 	/**
+	 * Independent request caches expose both cached reads and read/write races.
+	 *
+	 * @dataProvider concurrent_lease_change_provider
+	 */
+	public function test_worker_completion_handles_concurrent_lease_changes( $operation, $change ) {
+		$this->persist_release( '5.15.3', time() - HOUR_IN_SECONDS );
+		$manager = new Better_Font_Awesome_Metadata_Manager();
+		$ready = false;
+		$interleaved = false;
+		$changed_lock = null;
+		$manager->set_library( new Better_Font_Awesome_Callback_Metadata_Library(
+			function () use ( &$ready ) {
+				$ready = true;
+				return $this->valid_release( '5.15.4' );
+			}
+		) );
+		$interleave = function () use ( $change, &$interleaved, &$changed_lock ) {
+			$interleaved = true;
+			// Model another PHP request without invalidating the worker's local cache.
+			get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION );
+			$worker_cache = $GLOBALS['wp_object_cache'];
+			$GLOBALS['wp_object_cache'] = new WP_Object_Cache();
+			try {
+				( new Better_Font_Awesome_Metadata_Manager() )->clear_scheduled_work();
+				$changed_lock = get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION );
+				if ( 'replacement' === $change ) {
+					$changed_lock['owner'] = wp_generate_uuid4();
+					update_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION, $changed_lock, false );
+				} elseif ( 'expiry' === $change ) {
+					$changed_lock['expires_at'] = time() - 1;
+					update_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION, $changed_lock, false );
+				}
+			} finally {
+				$GLOBALS['wp_object_cache'] = $worker_cache;
+			}
+		};
+		$before_write = function ( $query ) use ( $operation, &$ready, &$interleaved, $interleave ) {
+			$verb = 'renew' === $operation ? 'UPDATE' : 'DELETE';
+			if ( $ready && ! $interleaved && 'cached release' !== $operation && 0 === strpos( $query, $verb ) && false !== strpos( $query, Better_Font_Awesome_Metadata_Manager::LOCK_OPTION ) ) {
+				$interleave();
+			}
+			if ( 'renew' === $operation && $interleaved && 0 === strpos( $query, 'DELETE' ) && false !== strpos( $query, Better_Font_Awesome_Metadata_Manager::LOCK_OPTION ) ) {
+				$this->assertTrue( get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION )['retry_cancelled'] );
+			}
+			return $query;
+		};
+		$after_success = function ( $option, $old_value, $value ) use ( $operation, &$interleaved, $interleave ) {
+			if ( 'cached release' === $operation && ! $interleaved && Better_Font_Awesome_Metadata_Manager::STATE_OPTION === $option && 'fresh' === $value['status'] ) {
+				$interleave();
+			}
+		};
+		add_filter( 'query', $before_write );
+		add_action( 'updated_option', $after_success, 10, 3 );
+		try {
+			$result = $manager->run_refresh( true );
+		} finally {
+			remove_filter( 'query', $before_write );
+			remove_action( 'updated_option', $after_success, 10 );
+		}
+
+		$this->assertTrue( $interleaved );
+		$store = new Better_Font_Awesome_Metadata_Store();
+		if ( 'renew' === $operation && 'cancellation' !== $change ) {
+			$this->assertWPError( $result );
+			$this->assertSame( 'bfa_refresh_ownership_lost', $result->get_error_code() );
+			$this->assertSame( '5.15.3', $store->get_valid_record()['release']['version'] );
+		} else {
+			$this->assertNotWPError( $result );
+			$this->assertSame( '5.15.4', $store->get_valid_record()['release']['version'] );
+			$this->assertSame( 'fresh', $store->get_state()['status'] );
+		}
+		wp_cache_delete( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION, 'options' );
+		$this->assertSame( 'replacement' === $change ? $changed_lock : false, get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION ) );
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+		$this->assertSame( 0, $this->count_scheduled_refresh_events() );
+	}
+
+	public static function concurrent_lease_change_provider() {
+		return array(
+			'cancellation during renewal write' => array( 'renew', 'cancellation' ),
+			'cancellation during release write' => array( 'release', 'cancellation' ),
+			'cached lease before release' => array( 'cached release', 'cancellation' ),
+			'replacement during renewal write' => array( 'renew', 'replacement' ),
+			'replacement during release write' => array( 'release', 'replacement' ),
+			'expiry during renewal write' => array( 'renew', 'expiry' ),
+		);
+	}
+
+	/**
 	 * A stale failed worker neither displaces replacement ownership nor retries.
 	 */
 	public function test_stale_failure_does_not_schedule_retry_while_replacement_is_owned() {

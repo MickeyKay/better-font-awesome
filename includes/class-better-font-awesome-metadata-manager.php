@@ -786,6 +786,8 @@ class Better_Font_Awesome_Metadata_Manager {
 	 *
 	 * Expired owners cannot renew. A compare-and-swap against the complete lock
 	 * value prevents a stale worker from displacing a replacement owner.
+	 * Retry once after a conflict: cleanup may have cancelled retries without
+	 * changing ownership. The fresh value retains that cancellation flag.
 	 *
 	 * @param string $owner Ownership token.
 	 * @return bool Whether this worker retained and renewed ownership.
@@ -793,35 +795,47 @@ class Better_Font_Awesome_Metadata_Manager {
 	 * @phpstan-impure
 	 */
 	protected function renew_lock( $owner ) {
-		$now  = time();
-		$lock = get_option( self::LOCK_OPTION, array() );
-		if (
-			! $this->lock_value_is_active( $lock, $now ) ||
-			! isset( $lock['owner'] ) ||
-			! hash_equals( (string) $lock['owner'], (string) $owner )
-		) {
-			return false;
+		for ( $attempt = 0; $attempt < 2; ++$attempt ) {
+			$now  = time();
+			$lock = get_option( self::LOCK_OPTION, array() );
+			if (
+				! $this->lock_value_is_active( $lock, $now ) ||
+				! isset( $lock['owner'] ) ||
+				! hash_equals( (string) $lock['owner'], (string) $owner )
+			) {
+				return false;
+			}
+
+			$renewed               = $lock;
+			$renewed['expires_at'] = max( (int) $lock['expires_at'] + 1, $now + self::LOCK_TTL );
+
+			// The atomic helper invalidates the cached value even when the write loses.
+			if ( $this->atomic_update_option( self::LOCK_OPTION, $lock, $renewed ) ) {
+				return true;
+			}
 		}
-
-		$renewed               = $lock;
-		$renewed['expires_at'] = max( (int) $lock['expires_at'] + 1, $now + self::LOCK_TTL );
-
-		return $this->atomic_update_option( self::LOCK_OPTION, $lock, $renewed );
+		return false;
 	}
 
 	/**
 	 * Release only the lock owned by this worker.
+	 * Retry one conflicting delete using the fresh lease, rechecking ownership.
 	 *
 	 * @param string $owner Ownership token.
 	 * @return bool Whether the owned lock was released.
 	 */
 	protected function release_lock( $owner ) {
-		$lock = get_option( self::LOCK_OPTION, array() );
-		if ( ! is_array( $lock ) || ! isset( $lock['owner'] ) || ! hash_equals( (string) $lock['owner'], (string) $owner ) ) {
-			return false;
-		}
+		for ( $attempt = 0; $attempt < 2; ++$attempt ) {
+			$lock = get_option( self::LOCK_OPTION, array() );
+			if ( ! is_array( $lock ) || ! isset( $lock['owner'] ) || ! hash_equals( (string) $lock['owner'], (string) $owner ) ) {
+				return false;
+			}
 
-		return $this->atomic_delete_option( self::LOCK_OPTION, $lock );
+			if ( $this->atomic_delete_option( self::LOCK_OPTION, $lock ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
