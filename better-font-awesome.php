@@ -546,20 +546,20 @@ class Better_Font_Awesome_Plugin {
 		);
 
 		add_settings_field(
+			'version_check_frequency', // ID.
+			__( 'Version check frequency', 'better-font-awesome' ), // Title.
+			array( $this, 'version_check_frequency_callback' ), // Callback.
+			self::SLUG, // Page.
+			'settings_section_primary' // Section.
+		);
+
+		add_settings_field(
 			'asset_delivery',
 			__( 'Serve Font Awesome locally', 'better-font-awesome' ),
 			array( $this, 'asset_delivery_callback' ),
 			self::SLUG,
 			'settings_section_primary',
 			array( 'label_for' => 'asset_delivery' )
-		);
-
-		add_settings_field(
-			'version_check_frequency', // ID.
-			__( 'Version check frequency', 'better-font-awesome' ), // Title.
-			array( $this, 'version_check_frequency_callback' ), // Callback.
-			self::SLUG, // Page.
-			'settings_section_primary' // Section.
 		);
 
 		add_settings_field(
