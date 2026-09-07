@@ -75,6 +75,7 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 				'include_v4_shim'    => '',
 				'remove_existing_fa' => '',
 				'hide_admin_notices' => '',
+				'asset_delivery' => 'automatic',
 			),
 		);
 
@@ -144,11 +145,29 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 		$this->assertSame( $expected, get_option( $bfa->get( 'option_name' ) ) );
 	}
 
+	public function test_settings_script_does_not_reuse_the_old_dropdown_cache_key() {
+		$handle = Better_Font_Awesome_Plugin::SLUG . '-admin';
+		wp_dequeue_script( $handle );
+		wp_deregister_script( $handle );
+		$this->bfa->admin_enqueue_scripts( 'settings_page_better-font-awesome' );
+		$script = wp_scripts()->registered[ $handle ];
+		$this->assertNotSame( Better_Font_Awesome_Plugin::VERSION, $script->ver );
+		$this->assertNotEmpty( $script->ver );
+		$this->assertStringEndsWith( '/js/admin.js', $script->src );
+		wp_dequeue_script( $handle );
+		wp_deregister_script( $handle );
+		$this->bfa->admin_enqueue_scripts( 'settings_page_better-font-awesome' );
+		$this->assertSame( $script->ver, wp_scripts()->registered[ $handle ]->ver );
+		wp_dequeue_script( $handle );
+		wp_deregister_script( $handle );
+	}
+
 	public function test_settings_are_sanitized_as_checkboxes() {
 		$this->assertSame(
 			array(
 				'include_v4_shim'    => 1,
 				'remove_existing_fa' => 0,
+				'asset_delivery' => 'automatic',
 			),
 			$this->bfa->sanitize(
 				array(
@@ -183,16 +202,21 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 		$this->assertSame( $original_options, get_option( $this->bfa->get( 'option_name' ) ) );
 	}
 
-	public function test_administrator_can_save_checkbox_settings_with_valid_nonce() {
+	/** @dataProvider delivery_submissions */
+	public function test_administrator_can_save_checkbox_settings_with_valid_nonce( $submitted = 'automatic', $expected = 'automatic' ) {
 		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
 
 		wp_set_current_user( $user_id );
 		$_POST = array(
+			'asset_delivery' => $submitted,
 			'bfa_nonce'         => wp_create_nonce( Better_Font_Awesome_Plugin::SLUG . '-options' ),
 			'include_v4_shim'   => '1',
 			'remove_existing_fa' => '0',
 			'hide_admin_notices' => '1',
 		);
+		if ( null === $submitted ) {
+			unset( $_POST['asset_delivery'] );
+		}
 		$_REQUEST = $_POST;
 		add_filter( 'wp_die_handler', array( $this, 'filter_wp_die_handler' ) );
 
@@ -208,11 +232,53 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 
 		$this->assertSame(
 			array(
+				'asset_delivery' => $expected,
 				'include_v4_shim'    => true,
 				'remove_existing_fa' => false,
 				'hide_admin_notices' => true,
 			),
 			get_option( $this->bfa->get( 'option_name' ) )
+		);
+	}
+
+	/** @dataProvider delivery_submissions */
+	public function test_settings_api_preserves_delivery_strings_and_other_settings( $submitted, $expected ) {
+		$input = array( 'include_v4_shim' => 1, 'remove_existing_fa' => 1, 'hide_admin_notices' => 1 );
+		if ( null !== $submitted ) {
+			$input['asset_delivery'] = $submitted;
+		}
+		$sanitized = $this->bfa->sanitize( $input );
+		$this->assertSame( array( 'include_v4_shim' => 1, 'remove_existing_fa' => 1, 'hide_admin_notices' => 1, 'asset_delivery' => $expected ), $sanitized );
+		$plugin = $this->initialize_with_stored_options( $sanitized );
+		ob_start();
+		$plugin->asset_delivery_callback();
+		$html = ob_get_clean();
+		$this->assertSame( 'bundled-local' === $expected, false !== strpos( $html, ' checked=' ) );
+		$this->assertSame( $sanitized, get_option( $plugin->get( 'option_name' ) ) );
+	}
+
+	public function test_settings_save_rejects_invalid_nonce() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$before = get_option( $this->bfa->get( 'option_name' ) );
+		$_POST = array( 'asset_delivery' => 'bundled-local', 'bfa_nonce' => 'invalid' );
+		$_REQUEST = $_POST;
+		add_filter( 'wp_die_handler', array( $this, 'filter_wp_die_handler' ) );
+		try {
+			$this->bfa->save_options();
+			$this->fail( 'Expected nonce rejection.' );
+		} catch ( Better_Font_Awesome_WP_Die_Exception $exception ) {
+			$this->assertSame( 403, $exception->args['response'] );
+		}
+		$this->assertSame( $before, get_option( $this->bfa->get( 'option_name' ) ) );
+	}
+
+	public static function delivery_submissions() {
+		return array(
+			array( null, 'automatic' ),
+			array( 'automatic', 'automatic' ),
+			array( 'bundled-local', 'bundled-local' ),
+			array( array( 'bundled-local' ), 'automatic' ),
+			array( 'invalid', 'automatic' ),
 		);
 	}
 

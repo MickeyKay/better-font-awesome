@@ -102,9 +102,48 @@ class Better_Font_Awesome_Metadata_Manager {
 	}
 
 	/**
+	 * Use immutable BFAL delivery when attached; lifecycle work reads site options.
+	 *
+	 * Activation can visit multiple sites before their BFAL singleton exists.
+	 * Their first normal request resolves filters and earlier ownership and
+	 * reconciles pending work before any queued worker can perform HTTP.
+	 *
+	 * @return bool Whether automatic refreshes are enabled.
+	 */
+	private function refresh_is_enabled() {
+		if ( $this->library ) {
+			return 'automatic' === self::effective_asset_delivery( $this->library );
+		}
+
+		$options = maybe_unserialize( get_option( 'better-font-awesome_options', array() ) );
+		return ! is_array( $options ) || 'bundled-local' !== ( $options['asset_delivery'] ?? 'automatic' );
+	}
+
+	/**
+	 * Read delivery through BFAL's public API, retaining rollback compatibility.
+	 *
+	 * @param mixed $library BFAL-compatible instance.
+	 * @return string Effective delivery mode, or empty for invalid configuration.
+	 */
+	public static function effective_asset_delivery( $library ) {
+		$method = 'get_asset_delivery';
+		if ( ! is_object( $library ) || ! is_callable( array( $library, $method ) ) ) {
+			return 'automatic';
+		}
+
+		$mode = call_user_func( array( $library, $method ) );
+		return is_string( $mode ) ? $mode : '';
+	}
+
+	/**
 	 * Run storage migration and recover missing refresh schedules.
 	 */
 	public function boot() {
+		if ( ! $this->refresh_is_enabled() ) {
+			$this->clear_scheduled_work();
+			return;
+		}
+
 		$this->store->maybe_migrate_transient( self::FRESH_INTERVAL, $this->release_channel );
 
 		$record = $this->store->get_valid_record( $this->release_channel );
@@ -157,8 +196,24 @@ class Better_Font_Awesome_Metadata_Manager {
 	 * @return bool|WP_Error True when scheduled, false when owned work suppresses a duplicate, or an error when scheduling fails.
 	 */
 	public function schedule_refresh( $force = false ) {
+		return $this->schedule_refresh_work( $force );
+	}
+
+	/**
+	 * Publish ordinary work or a retry still protected by its worker lease.
+	 *
+	 * @param bool   $force Whether retry timing is overridden.
+	 * @param string $owner Retrying worker owner, or empty for ordinary scheduling.
+	 * @return bool|WP_Error Scheduling result.
+	 */
+	private function schedule_refresh_work( $force = false, $owner = '' ) {
+		if ( ! $this->refresh_is_enabled() ) {
+			$this->clear_scheduled_work();
+			return false;
+		}
+
 		$now = time();
-		if ( $this->worker_lock_is_active( $now ) ) {
+		if ( $this->lock_blocks_scheduling( $owner, $now ) ) {
 			return false;
 		}
 
@@ -193,7 +248,7 @@ class Better_Font_Awesome_Metadata_Manager {
 		 * marker is inserted. Recheck before enqueueing so a valid worker and a
 		 * future HTTP-capable event can never both become eligible.
 		 */
-		if ( $this->worker_lock_is_active( $now ) ) {
+		if ( $this->lock_blocks_scheduling( $owner, $now ) ) {
 			$this->atomic_delete_option( self::SCHEDULE_OPTION, $marker );
 			return false;
 		}
@@ -204,6 +259,13 @@ class Better_Font_Awesome_Metadata_Manager {
 			array( $marker['token'], $force ),
 			true
 		);
+
+		// Cleanup may revoke retry permission while WordPress publishes the event.
+		if ( '' !== $owner && $this->lock_blocks_scheduling( $owner, time() ) ) {
+			$this->atomic_delete_option( self::SCHEDULE_OPTION, $marker );
+			$this->unschedule_marker( $marker );
+			return false;
+		}
 
 		if ( true !== $scheduled ) {
 			$this->atomic_delete_option( self::SCHEDULE_OPTION, $marker );
@@ -244,6 +306,11 @@ class Better_Font_Awesome_Metadata_Manager {
 	 * @return array|WP_Error|null Refresh result.
 	 */
 	public function run_scheduled_refresh( $token = '', $force = false ) {
+		if ( ! $this->refresh_is_enabled() ) {
+			$this->clear_scheduled_work();
+			return new WP_Error( 'bfa_refresh_disabled', 'Font Awesome metadata refresh is disabled.' );
+		}
+
 		if ( '' === $token ) {
 			return null;
 		}
@@ -290,6 +357,11 @@ class Better_Font_Awesome_Metadata_Manager {
 	 * @return array|WP_Error Refresh result.
 	 */
 	public function run_refresh( $force = false, $owner = '' ) {
+		if ( ! $this->refresh_is_enabled() ) {
+			$this->clear_scheduled_work();
+			return new WP_Error( 'bfa_refresh_disabled', 'Font Awesome metadata refresh is disabled.' );
+		}
+
 		$refresh_callback = $this->get_refresh_callback();
 		if ( ! $refresh_callback ) {
 			if ( '' !== $owner ) {
@@ -319,6 +391,7 @@ class Better_Font_Awesome_Metadata_Manager {
 			return $this->ownership_lost_error();
 		}
 
+		$previous_state           = get_option( self::STATE_OPTION, null );
 		$state['attempt_count']   = (int) $state['attempt_count'] + 1;
 		$state['last_attempt_at'] = $now;
 		$state['scheduled_for']   = 0;
@@ -331,6 +404,14 @@ class Better_Font_Awesome_Metadata_Manager {
 			if ( is_wp_error( $result ) ) {
 				if ( ! $this->renew_lock( $owner ) ) {
 					return $this->ownership_lost_error();
+				}
+				if ( 'bfa_refresh_disabled' === $result->get_error_code() ) {
+					if ( null === $previous_state ) {
+						delete_option( self::STATE_OPTION );
+					} else {
+						update_option( self::STATE_OPTION, $previous_state, false );
+					}
+					return $result;
 				}
 				$schedule_retry = $this->record_failure( $result );
 				return $result;
@@ -376,9 +457,12 @@ class Better_Font_Awesome_Metadata_Manager {
 
 			return $result;
 		} finally {
-			$this->release_lock( $owner );
-			if ( $schedule_retry ) {
-				$this->schedule_refresh();
+			try {
+				if ( $schedule_retry ) {
+					$this->schedule_refresh_work( false, $owner );
+				}
+			} finally {
+				$this->release_lock( $owner );
 			}
 		}
 	}
@@ -486,13 +570,18 @@ class Better_Font_Awesome_Metadata_Manager {
 	/**
 	 * Activate refresh scheduling for one site or every existing network site.
 	 *
-	 * @param bool $network_wide Whether this is a network activation.
+	 * @param bool                             $network_wide Whether this is a network activation.
+	 * @param Better_Font_Awesome_Library|null $library Known singleton for the current site only.
 	 */
-	public static function activate( $network_wide = false ) {
+	public static function activate( $network_wide = false, $library = null ) {
+		$library_site = get_current_blog_id();
 		self::for_sites(
 			$network_wide,
-			function () {
+			function () use ( $library, $library_site ) {
 				$manager = new self();
+				if ( $library && get_current_blog_id() === $library_site ) {
+					$manager->set_library( $library );
+				}
 				$manager->schedule_refresh();
 			}
 		);
@@ -536,9 +625,22 @@ class Better_Font_Awesome_Metadata_Manager {
 	}
 
 	/**
-	 * Clear this site's pending cron and ownership markers.
+	 * Clear pending cron and schedule markers while preserving active workers.
 	 */
 	public function clear_scheduled_work() {
+		// Preserve exclusion and result ownership, but revoke this worker's retries.
+		while ( $this->worker_lock_is_active( time() ) ) {
+			$lock = get_option( self::LOCK_OPTION, array() );
+			if ( ! $this->lock_value_is_active( $lock, time() ) || ! empty( $lock['retry_cancelled'] ) ) {
+				break;
+			}
+			$cancelled                    = $lock;
+			$cancelled['retry_cancelled'] = true;
+			if ( $this->atomic_update_option( self::LOCK_OPTION, $lock, $cancelled ) ) {
+				break;
+			}
+		}
+
 		$marker = get_option( self::SCHEDULE_OPTION, array() );
 		if ( is_array( $marker ) && ! empty( $marker ) ) {
 			$this->unschedule_marker( $marker );
@@ -546,7 +648,26 @@ class Better_Font_Awesome_Metadata_Manager {
 
 		wp_clear_scheduled_hook( self::CRON_HOOK );
 		delete_option( self::SCHEDULE_OPTION );
-		delete_option( self::LOCK_OPTION );
+	}
+
+	/**
+	 * Only the current, uncancelled owner may enqueue a retry under its lease.
+	 *
+	 * @param string $owner Retrying owner, or empty for an ordinary scheduler.
+	 * @param int    $now Current Unix timestamp.
+	 * @return bool Whether the lease prevents this scheduling attempt.
+	 */
+	private function lock_blocks_scheduling( $owner, $now ) {
+		if ( '' === $owner ) {
+			return $this->worker_lock_is_active( $now );
+		}
+
+		// Another request can cancel retries while this request retains a cache entry.
+		wp_cache_delete( self::LOCK_OPTION, 'options' );
+		$lock = get_option( self::LOCK_OPTION, array() );
+		return ! $this->lock_value_is_active( $lock, $now ) ||
+			! hash_equals( (string) $lock['owner'], $owner ) ||
+			! empty( $lock['retry_cancelled'] );
 	}
 
 	/**
@@ -665,6 +786,8 @@ class Better_Font_Awesome_Metadata_Manager {
 	 *
 	 * Expired owners cannot renew. A compare-and-swap against the complete lock
 	 * value prevents a stale worker from displacing a replacement owner.
+	 * Retry once after a conflict: cleanup may have cancelled retries without
+	 * changing ownership. The fresh value retains that cancellation flag.
 	 *
 	 * @param string $owner Ownership token.
 	 * @return bool Whether this worker retained and renewed ownership.
@@ -672,35 +795,47 @@ class Better_Font_Awesome_Metadata_Manager {
 	 * @phpstan-impure
 	 */
 	protected function renew_lock( $owner ) {
-		$now  = time();
-		$lock = get_option( self::LOCK_OPTION, array() );
-		if (
-			! $this->lock_value_is_active( $lock, $now ) ||
-			! isset( $lock['owner'] ) ||
-			! hash_equals( (string) $lock['owner'], (string) $owner )
-		) {
-			return false;
+		for ( $attempt = 0; $attempt < 2; ++$attempt ) {
+			$now  = time();
+			$lock = get_option( self::LOCK_OPTION, array() );
+			if (
+				! $this->lock_value_is_active( $lock, $now ) ||
+				! isset( $lock['owner'] ) ||
+				! hash_equals( (string) $lock['owner'], (string) $owner )
+			) {
+				return false;
+			}
+
+			$renewed               = $lock;
+			$renewed['expires_at'] = max( (int) $lock['expires_at'] + 1, $now + self::LOCK_TTL );
+
+			// The atomic helper invalidates the cached value even when the write loses.
+			if ( $this->atomic_update_option( self::LOCK_OPTION, $lock, $renewed ) ) {
+				return true;
+			}
 		}
-
-		$renewed               = $lock;
-		$renewed['expires_at'] = max( (int) $lock['expires_at'] + 1, $now + self::LOCK_TTL );
-
-		return $this->atomic_update_option( self::LOCK_OPTION, $lock, $renewed );
+		return false;
 	}
 
 	/**
 	 * Release only the lock owned by this worker.
+	 * Retry one conflicting delete using the fresh lease, rechecking ownership.
 	 *
 	 * @param string $owner Ownership token.
 	 * @return bool Whether the owned lock was released.
 	 */
 	protected function release_lock( $owner ) {
-		$lock = get_option( self::LOCK_OPTION, array() );
-		if ( ! is_array( $lock ) || ! isset( $lock['owner'] ) || ! hash_equals( (string) $lock['owner'], (string) $owner ) ) {
-			return false;
-		}
+		for ( $attempt = 0; $attempt < 2; ++$attempt ) {
+			$lock = get_option( self::LOCK_OPTION, array() );
+			if ( ! is_array( $lock ) || ! isset( $lock['owner'] ) || ! hash_equals( (string) $lock['owner'], (string) $owner ) ) {
+				return false;
+			}
 
-		return $this->atomic_delete_option( self::LOCK_OPTION, $lock );
+			if ( $this->atomic_delete_option( self::LOCK_OPTION, $lock ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

@@ -5,8 +5,8 @@ set -eu
 release_root=${1:-svn/trunk}
 bfal_root="$release_root/vendor/mickey-kay/better-font-awesome-library"
 installed_bfal_root="vendor/mickey-kay/better-font-awesome-library"
-expected_version="3.0.2"
-expected_reference="a617fb562724ae5a97a6e308759b8235b60f87be"
+expected_version="3.1.0"
+expected_reference="89f732ddda61ef0ca6226a45898d0f7bfb8ff1da"
 
 php -r '
 $lock = json_decode( file_get_contents( "composer.lock" ), true );
@@ -14,8 +14,8 @@ $packages = array_filter( $lock["packages"], static function ( $package ) {
 	return "mickey-kay/better-font-awesome-library" === $package["name"];
 } );
 $package = reset( $packages );
-if ( ! $package || "3.0.2" !== $package["version"] || "a617fb562724ae5a97a6e308759b8235b60f87be" !== $package["source"]["reference"] || "a617fb562724ae5a97a6e308759b8235b60f87be" !== $package["dist"]["reference"] ) {
-	fwrite( STDERR, "composer.lock does not contain the exact public stable BFAL release.\n" );
+if ( ! $package || "3.1.0" !== $package["version"] || "89f732ddda61ef0ca6226a45898d0f7bfb8ff1da" !== $package["source"]["reference"] || "89f732ddda61ef0ca6226a45898d0f7bfb8ff1da" !== $package["dist"]["reference"] ) {
+	fwrite( STDERR, "composer.lock does not contain the exact reviewed stable BFAL release.\n" );
 	exit( 1 );
 }
 '
@@ -23,8 +23,8 @@ if ( ! $package || "3.0.2" !== $package["version"] || "a617fb562724ae5a97a6e3087
 php -r '
 require "vendor/autoload.php";
 $package = "mickey-kay/better-font-awesome-library";
-if ( "3.0.2" !== Composer\InstalledVersions::getPrettyVersion( $package ) || "a617fb562724ae5a97a6e308759b8235b60f87be" !== Composer\InstalledVersions::getReference( $package ) ) {
-	fwrite( STDERR, "The installed BFAL package does not match the exact public stable release.\n" );
+if ( "3.1.0" !== Composer\InstalledVersions::getPrettyVersion( $package ) || "89f732ddda61ef0ca6226a45898d0f7bfb8ff1da" !== Composer\InstalledVersions::getReference( $package ) ) {
+	fwrite( STDERR, "The installed BFAL package does not match the exact reviewed stable release.\n" );
 	exit( 1 );
 }
 '

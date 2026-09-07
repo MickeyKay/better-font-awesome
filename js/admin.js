@@ -25,6 +25,7 @@
 
 			data = {
 				'action': 'bfa_save_options',
+				'asset_delivery': $bfaSettingsForm.find( '#asset_delivery' ).is( ':checked' ) ? 'bundled-local' : 'automatic',
 				'bfa_nonce': nonce,
 				'include_v4_shim': include_v4_shim,
 				'remove_existing_fa': remove_existing_fa,

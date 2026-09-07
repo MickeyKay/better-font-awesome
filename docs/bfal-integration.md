@@ -17,6 +17,20 @@ BFAL intentionally keeps the first caller's singleton configuration. Hook priori
 
 Stable BFAL releases must preserve the public singleton, validation, refresh, stylesheet, shortcode, and filter behaviors used by BFA and other consumers. Compatibility changes belong in the BFAL repository and require standalone BFAL verification before BFA adopts them.
 
+## Optional bundled delivery
+
+BFA requires exact public BFAL `3.1.0`, with source and dist reference `89f732ddda61ef0ca6226a45898d0f7bfb8ff1da` and tree `ec08cb97de7efe6eb13fc6d570cc69e3cf918d03`. The [public release archive](https://github.com/MickeyKay/better-font-awesome-library/releases/tag/3.1.0) has SHA-256 `6196463b9108e4282077140bc79ba998c1bc5472856432acc2a499eaf9a57421`; all 35 installed production files match it. Compared with the previously integrated PR #52 merge `7bd53f548fe5028e0f60a35c6b457c05356ec811`, runtime implementation differs only in the BFAL version constant and resulting asset cache keys. Documentation changes are expected; bundled metadata and assets are unchanged. The corrected `get_asset_delivery()` contract and stable rollback compatibility remain intact. Strict Composer validation is restored; see the [release procedure](release-procedure.md) for the remaining release checks.
+
+The site setting `better-font-awesome_options[asset_delivery]` accepts `automatic` (the default) and `bundled-local`. BFA passes the sanitized choice through its existing first singleton call. It reads the public effective mode afterward (empty for unsupported configurations), so earlier owners and initialization filters remain authoritative. Older BFAL dependencies without a delivery accessor retain their automatic behavior; the settings page reports that a requested local choice is not active.
+
+Effective local mode uses only the bundled FA7 Free catalog and matching CSS, fonts, and compatibility assets, even when a newer remote record exists. Unavailable bundled files fail closed with settings-page information and no third-party fallback. Explicit FA5/local is unsupported and never changes the selected major. Local mode leaves content, durable records, legacy transients, settings, and migration state intact. The catalog can be older than the prior automatic release; newer icon names will not render until a plugin update includes them or automatic delivery is restored.
+
+Manager boot skips migration in local or invalid configurations and uses the existing cleanup mechanism to remove pending refresh events and ownership markers. Scheduling and queued/direct worker entry points recheck effective delivery before remote work. A BFAL `bfa_refresh_disabled` result restores prior refresh state without recording a failure or scheduling a retry. Cleanup preserves active worker leases while revoking their permission to schedule retries, including during retry publication. A request already doing remote work before a setting change or deactivation can finish and retain its validated result or failure history, but cannot recreate cleared refresh work.
+
+Activation and new-site lifecycle callbacks read each site's setting before its singleton exists. The next normal request resolves effective ownership and reconciles pending work. Returning to automatic reuses valid stored metadata and schedules missing or stale work asynchronously under the existing locking/backoff policy. AJAX settings saves show the existing success notice without navigating. The displayed version and conditional delivery messages update on the next page load; saving does not fetch remote metadata.
+
+Existing frontend, native block, Classic Editor, hybrid editor, stylesheet-base-URL, and CORS paths consume BFAL's matching local assets without URL rewriting. Other plugins, themes, and site infrastructure remain outside the delivery setting.
+
 ## Option schema
 
 All metadata options are site-scoped and created with autoload disabled.
@@ -57,7 +71,7 @@ All metadata options are site-scoped and created with autoload disabled.
 - A valid record is served immediately whether fresh, near expiry, or stale.
 - There is no maximum stale age.
 - Failed refreshes never remove or replace a valid durable record.
-- The BFAL bundled fallback is used only when neither the durable provider nor the compatibility transient supplies a valid release.
+- In automatic mode, the BFAL bundled fallback is used only when neither the durable provider nor the compatibility transient supplies a valid release.
 
 BFAL 3 defaults to the Font Awesome 7 Free `7.x` channel and its packaged fallback. A plugin or theme that deliberately owns the BFAL singleton first may select the legacy Font Awesome 5 Free `5.x` channel and remains authoritative for that request. BFA validates stored records against their declared schema and channel, offers a valid record as a local provider candidate, and preserves a wrong-channel record when BFAL rejects it. After singleton initialization, refresh and persistence behavior follows BFAL's actual immutable channel. There is no separate Font Awesome 6 channel or claim of comprehensive native Font Awesome 6 support.
 
