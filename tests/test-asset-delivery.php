@@ -124,6 +124,7 @@ class Better_Font_Awesome_Asset_Delivery_Test extends Better_Font_Awesome_Metada
 			$http_before = $this->font_awesome_http_calls;
 
 			$local = $this->metadata_manager( $this->initialize_plugin( array( 'asset_delivery' => 'bundled-local' ) ) );
+			$lease['retry_cancelled'] = true;
 			$this->assertSame( $lease, get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION ) );
 			$this->assertFalse( $local->schedule_refresh( true ) );
 			$this->assertSame( 'bfa_refresh_disabled', $local->run_scheduled_refresh( 'pending', true )->get_error_code() );
@@ -159,6 +160,62 @@ class Better_Font_Awesome_Asset_Delivery_Test extends Better_Font_Awesome_Metada
 		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
 		$this->assertSame( 0, $this->count_scheduled_refresh_events() );
 		$this->assertSame( 1, $this->font_awesome_http_calls );
+	}
+
+	/** @dataProvider failed_worker_cleanup_transitions */
+	public function test_failed_worker_does_not_recreate_work_after_cleanup( $transition, $phase ) {
+		$previous = $this->persist_schema_2_record( '7.3.1', time() - HOUR_IN_SECONDS );
+		$worker = $this->metadata_manager( $this->initialize_plugin( array( 'asset_delivery' => 'automatic' ) ) );
+		$marker = get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION );
+		$interleaved = false;
+		$interleave = function ( $value ) use ( $transition, $phase, &$interleaved ) {
+			if ( $interleaved || ( 'pre_http_request' !== $phase && 0 === $this->font_awesome_http_calls ) || ( 'updated_option' === $phase && 'cron' !== $value ) ) {
+				return $value;
+			}
+			$interleaved = true;
+			$lease = get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION );
+			$this->assertNotEmpty( $lease['owner'] );
+			if ( 'local' === $transition ) {
+				$this->initialize_plugin( array( 'asset_delivery' => 'bundled-local' ) );
+			} else {
+				Better_Font_Awesome_Metadata_Manager::deactivate();
+			}
+			$this->assertSame( $lease['owner'], get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION )['owner'] );
+			$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+			$this->assertSame( 0, $this->count_scheduled_refresh_events() );
+			return $value;
+		};
+		add_filter( $phase, $interleave, 4 );
+		$this->font_awesome_http_response = new WP_Error( 'http_request_failed', 'Simulated in-flight failure.' );
+		try {
+			$result = $worker->run_scheduled_refresh( $marker['token'], true );
+		} finally {
+			remove_filter( $phase, $interleave, 4 );
+		}
+
+		$this->assertTrue( $interleaved );
+		$this->assertWPError( $result );
+		$this->assertSame( 1, $this->font_awesome_http_calls );
+		$this->assertSame( $previous, ( new Better_Font_Awesome_Metadata_Store() )->get_valid_record( '7.x' ) );
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::LOCK_OPTION ) );
+		$this->assertFalse( get_option( Better_Font_Awesome_Metadata_Manager::SCHEDULE_OPTION ) );
+		$this->assertSame( 0, $this->count_scheduled_refresh_events() );
+
+		// Later automatic traffic can schedule again after the original lease ends.
+		$this->initialize_plugin( array( 'asset_delivery' => 'automatic' ) );
+		$this->assertSame( 1, $this->count_scheduled_refresh_events() );
+		$this->assertSame( 1, $this->font_awesome_http_calls );
+	}
+
+	public static function failed_worker_cleanup_transitions() {
+		return array(
+			'local during HTTP' => array( 'local', 'pre_http_request' ),
+			'deactivation during HTTP' => array( 'deactivate', 'pre_http_request' ),
+			'local during retry enqueue' => array( 'local', 'pre_schedule_event' ),
+			'deactivation during retry enqueue' => array( 'deactivate', 'pre_schedule_event' ),
+			'local after retry enqueue' => array( 'local', 'updated_option' ),
+			'deactivation after retry enqueue' => array( 'deactivate', 'updated_option' ),
+		);
 	}
 
 	/** @dataProvider inactive_worker_leases */

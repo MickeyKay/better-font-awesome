@@ -196,13 +196,24 @@ class Better_Font_Awesome_Metadata_Manager {
 	 * @return bool|WP_Error True when scheduled, false when owned work suppresses a duplicate, or an error when scheduling fails.
 	 */
 	public function schedule_refresh( $force = false ) {
+		return $this->schedule_refresh_work( $force );
+	}
+
+	/**
+	 * Publish ordinary work or a retry still protected by its worker lease.
+	 *
+	 * @param bool   $force Whether retry timing is overridden.
+	 * @param string $owner Retrying worker owner, or empty for ordinary scheduling.
+	 * @return bool|WP_Error Scheduling result.
+	 */
+	private function schedule_refresh_work( $force = false, $owner = '' ) {
 		if ( ! $this->refresh_is_enabled() ) {
 			$this->clear_scheduled_work();
 			return false;
 		}
 
 		$now = time();
-		if ( $this->worker_lock_is_active( $now ) ) {
+		if ( $this->lock_blocks_scheduling( $owner, $now ) ) {
 			return false;
 		}
 
@@ -237,7 +248,7 @@ class Better_Font_Awesome_Metadata_Manager {
 		 * marker is inserted. Recheck before enqueueing so a valid worker and a
 		 * future HTTP-capable event can never both become eligible.
 		 */
-		if ( $this->worker_lock_is_active( $now ) ) {
+		if ( $this->lock_blocks_scheduling( $owner, $now ) ) {
 			$this->atomic_delete_option( self::SCHEDULE_OPTION, $marker );
 			return false;
 		}
@@ -248,6 +259,13 @@ class Better_Font_Awesome_Metadata_Manager {
 			array( $marker['token'], $force ),
 			true
 		);
+
+		// Cleanup may revoke retry permission while WordPress publishes the event.
+		if ( '' !== $owner && $this->lock_blocks_scheduling( $owner, time() ) ) {
+			$this->atomic_delete_option( self::SCHEDULE_OPTION, $marker );
+			$this->unschedule_marker( $marker );
+			return false;
+		}
 
 		if ( true !== $scheduled ) {
 			$this->atomic_delete_option( self::SCHEDULE_OPTION, $marker );
@@ -439,9 +457,12 @@ class Better_Font_Awesome_Metadata_Manager {
 
 			return $result;
 		} finally {
-			$this->release_lock( $owner );
-			if ( $schedule_retry ) {
-				$this->schedule_refresh();
+			try {
+				if ( $schedule_retry ) {
+					$this->schedule_refresh_work( false, $owner );
+				}
+			} finally {
+				$this->release_lock( $owner );
 			}
 		}
 	}
@@ -607,6 +628,19 @@ class Better_Font_Awesome_Metadata_Manager {
 	 * Clear pending cron and schedule markers while preserving active workers.
 	 */
 	public function clear_scheduled_work() {
+		// Preserve exclusion and result ownership, but revoke this worker's retries.
+		while ( $this->worker_lock_is_active( time() ) ) {
+			$lock = get_option( self::LOCK_OPTION, array() );
+			if ( ! $this->lock_value_is_active( $lock, time() ) || ! empty( $lock['retry_cancelled'] ) ) {
+				break;
+			}
+			$cancelled                    = $lock;
+			$cancelled['retry_cancelled'] = true;
+			if ( $this->atomic_update_option( self::LOCK_OPTION, $lock, $cancelled ) ) {
+				break;
+			}
+		}
+
 		$marker = get_option( self::SCHEDULE_OPTION, array() );
 		if ( is_array( $marker ) && ! empty( $marker ) ) {
 			$this->unschedule_marker( $marker );
@@ -614,8 +648,26 @@ class Better_Font_Awesome_Metadata_Manager {
 
 		wp_clear_scheduled_hook( self::CRON_HOOK );
 		delete_option( self::SCHEDULE_OPTION );
-		// Recover inactive leases atomically, but let in-flight owners finish.
-		$this->worker_lock_is_active( time() );
+	}
+
+	/**
+	 * Only the current, uncancelled owner may enqueue a retry under its lease.
+	 *
+	 * @param string $owner Retrying owner, or empty for an ordinary scheduler.
+	 * @param int    $now Current Unix timestamp.
+	 * @return bool Whether the lease prevents this scheduling attempt.
+	 */
+	private function lock_blocks_scheduling( $owner, $now ) {
+		if ( '' === $owner ) {
+			return $this->worker_lock_is_active( $now );
+		}
+
+		// Another request can cancel retries while this request retains a cache entry.
+		wp_cache_delete( self::LOCK_OPTION, 'options' );
+		$lock = get_option( self::LOCK_OPTION, array() );
+		return ! $this->lock_value_is_active( $lock, $now ) ||
+			! hash_equals( (string) $lock['owner'], $owner ) ||
+			! empty( $lock['retry_cancelled'] );
 	}
 
 	/**
