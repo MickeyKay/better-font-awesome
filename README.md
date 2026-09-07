@@ -54,7 +54,15 @@ You can also use Font Awesome classes in HTML or CSS. Unlike shortcodes, HTML cl
 
 ## Automatic icon updates and built-in fallback ##
 
-Font Awesome Free CSS, fonts, and icon data ship with the plugin, so icons render immediately after activation. A scheduled task checks for the latest compatible release in the background and uses it only after validation. If a check is delayed or fails, the last validated release or built-in fallback stays active.
+Font Awesome Free CSS, fonts, and icon data ship with the plugin, so icons render immediately after activation. In the default **Automatic updates (CDN)** mode, a scheduled task checks for the latest compatible release in the background and uses it only after validation. If a check is delayed or fails, the last validated release or built-in fallback stays active.
+
+### Optional local delivery ###
+
+Under **Settings > Better Font Awesome > Font Awesome delivery**, choose **Local files** to serve the bundled Font Awesome 7 Free catalog, CSS, compatibility styles, and fonts from your site. This mode disables BFA background metadata and asset-validation requests. New icons arrive through plugin updates. It never falls back to third-party assets if bundled files are unavailable.
+
+The bundled catalog may be older than a previously adopted automatic release. Icons introduced after the bundled version will not render until a plugin update includes them or you switch back to automatic delivery. Existing content and stored metadata are preserved; switching back reuses valid metadata and schedules a background check when needed. Settings saving does not wait for remote metadata. A refresh already running when the setting changes cannot be retroactively canceled.
+
+The settings page reports the effective delivery mode. If a theme, plugin, or initialization filter has already selected the shared library configuration, BFA preserves that selection and explains any mismatch. Explicit Font Awesome 5 ownership cannot be combined with local delivery. Local delivery does not control other plugins, themes, or site infrastructure that rewrites asset URLs to a CDN.
 
 ## Compatibility and conflicts ##
 
@@ -75,7 +83,7 @@ No. Better Font Awesome supports Font Awesome Free.
 
 ### Do visitors download fonts from another service? ###
 
-The packaged fallback loads CSS and fonts from your own site. If the plugin validates and adopts a newer compatible release, visitors' browsers may load that release's selected CSS and font files from cdnjs.
+Choose **Local files** to keep BFA's bundled CSS and fonts on your site, subject to your site's URL-rewriting infrastructure. In automatic mode, the packaged fallback also loads from your site. If the plugin validates and adopts a newer compatible release, visitors' browsers may load that release's selected CSS and font files from cdnjs.
 
 ### Will existing Font Awesome 4 and 5 content keep working? ###
 
@@ -87,7 +95,7 @@ Enable **Remove existing Font Awesome** under **Settings > Better Font Awesome**
 
 ## External services ##
 
-Better Font Awesome works immediately from its built-in Font Awesome Free fallback. It uses the following external services only for background updates or for assets from a newer validated release. No Font Awesome account or API token is required for the Free channel.
+Better Font Awesome works immediately from its built-in Font Awesome Free fallback. In automatic mode, it uses the following external services for background updates or for assets from a newer validated release. Effective local mode makes no BFA/BFAL requests to these services. Other site components and site CDN infrastructure remain outside this setting. No Font Awesome account or API token is required for the Free channel.
 
 * **Font Awesome GraphQL API** (`https://api.fontawesome.com`) - an asynchronous server-side WP-Cron worker requests the latest public compatible Font Awesome Free release version, icon names, aliases, families, and styles. Review the [Font Awesome terms of service](https://fontawesome.com/tos) and [privacy policy](https://fontawesome.com/privacy).
 * **npm registry** (`https://registry.npmjs.org/%40fortawesome%2Ffontawesome-free/{version}`) - when Font Awesome reports a newer candidate, the same background worker confirms that exact official Free package version, name, and license. Review the [npm terms](https://docs.npmjs.com/policies/terms) and [privacy notice](https://docs.npmjs.com/policies/privacy).
@@ -97,7 +105,7 @@ Better Font Awesome works immediately from its built-in Font Awesome Free fallba
 
 Normal frontend, administrator, REST, editor, settings, shortcode, picker, and getter requests do not perform BFA or BFAL metadata discovery or candidate asset-validation HTTP. Separately, WordPress core may fetch a registered external editor stylesheet while constructing Block Editor assets; that core behavior is not a BFA or BFAL metadata-validation request.
 
-Server-side provider requests expose ordinary connection data such as the server IP address, requested URL and version, timing, and HTTP headers. WordPress's default HTTP user agent may include the WordPress version and site URL. Browser asset requests can expose ordinary connection data such as the visitor's IP address, user agent, referring page, and requested asset. BFA does not add post content, user content, Font Awesome credentials, or an API token to these requests. If discovery, publication, transport, or validation fails, BFA continues using the packaged fallback or validated last-known-good release.
+Server-side provider requests expose ordinary connection data such as the server IP address, requested URL and version, timing, and HTTP headers. WordPress's default HTTP user agent may include the WordPress version and site URL. Browser asset requests can expose ordinary connection data such as the visitor's IP address, user agent, referring page, and requested asset. BFA does not add post content, user content, Font Awesome credentials, or an API token to these requests. In automatic mode, if discovery, publication, transport, or validation fails, BFA continues using the packaged fallback or validated last-known-good release.
 
 ## Support ##
 

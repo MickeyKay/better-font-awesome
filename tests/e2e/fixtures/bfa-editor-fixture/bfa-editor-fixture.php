@@ -68,3 +68,16 @@ add_action(
 		);
 	}
 );
+
+// Keep browser fixtures deterministic when automatic-mode cron becomes due.
+add_filter(
+	'pre_http_request',
+	static function ( $preempt, $args, $url ) {
+		if ( preg_match( '#^https://(?:api\.fontawesome\.com|registry\.npmjs\.org|cdnjs\.cloudflare\.com|cdn\.jsdelivr\.net|use\.fontawesome\.com)(?:/|$)#', $url ) ) {
+			return new WP_Error( 'bfa_e2e_offline', 'Font Awesome remote transport is disabled by the browser test fixture.' );
+		}
+		return $preempt;
+	},
+	5,
+	3
+);

@@ -75,6 +75,7 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 				'include_v4_shim'    => '',
 				'remove_existing_fa' => '',
 				'hide_admin_notices' => '',
+				'asset_delivery' => 'automatic',
 			),
 		);
 
@@ -149,6 +150,7 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 			array(
 				'include_v4_shim'    => 1,
 				'remove_existing_fa' => 0,
+				'asset_delivery' => 'automatic',
 			),
 			$this->bfa->sanitize(
 				array(
@@ -183,11 +185,13 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 		$this->assertSame( $original_options, get_option( $this->bfa->get( 'option_name' ) ) );
 	}
 
-	public function test_administrator_can_save_checkbox_settings_with_valid_nonce() {
+	/** @dataProvider delivery_submissions */
+	public function test_administrator_can_save_checkbox_settings_with_valid_nonce( $submitted = 'automatic', $expected = 'automatic' ) {
 		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
 
 		wp_set_current_user( $user_id );
 		$_POST = array(
+			'asset_delivery' => $submitted,
 			'bfa_nonce'         => wp_create_nonce( Better_Font_Awesome_Plugin::SLUG . '-options' ),
 			'include_v4_shim'   => '1',
 			'remove_existing_fa' => '0',
@@ -208,11 +212,21 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 
 		$this->assertSame(
 			array(
+				'asset_delivery' => $expected,
 				'include_v4_shim'    => true,
 				'remove_existing_fa' => false,
 				'hide_admin_notices' => true,
 			),
 			get_option( $this->bfa->get( 'option_name' ) )
+		);
+	}
+
+	public static function delivery_submissions() {
+		return array(
+			array( 'automatic', 'automatic' ),
+			array( 'bundled-local', 'bundled-local' ),
+			array( array( 'bundled-local' ), 'automatic' ),
+			array( 'invalid', 'automatic' ),
 		);
 	}
 

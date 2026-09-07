@@ -17,7 +17,13 @@ BFAL resolves its channel once through its public initialization process. The fi
 
 Before BFA receives the singleton, its provider validates the one durable record using the channel declared by that record and returns it as a candidate. BFAL accepts the candidate only when its schema and channel match BFAL's already-selected immutable channel. BFA preserves rejected wrong-channel records. After BFA receives the singleton, provider, migration, refresh, and persistence behavior use BFAL's actual channel.
 
-## Request and cache behavior
+## Delivery selection
+
+The default `automatic` delivery mode retains the background update behavior below. Optional `bundled-local` delivery pins the FA7 Free catalog, CSS, compatibility assets, and fonts to the plugin package. New icons arrive through plugin updates. It performs no metadata or candidate asset-validation HTTP, bypasses remote records without deleting them, and never falls back to third-party assets.
+
+BFA reads BFAL's effective first-caller mode and configuration errors before scheduling. Local or invalid configurations clear pending work, and workers recheck before remote operations. `bfa_refresh_disabled` is a disabled operation without failure backoff or retry. Explicit FA5/local is unsupported. The settings page explains effective-mode mismatches, unavailable bundled files, and the possibility of losing icons newer than the bundled catalog. Mode switching preserves content and persistent metadata. Existing in-flight remote requests cannot be retroactively canceled.
+
+## Request and cache behavior (automatic mode)
 
 | State | Ordinary request behavior | Background behavior |
 | --- | --- | --- |
@@ -58,7 +64,7 @@ Cron callbacks are idempotent. The normal settings page exposes no metadata stat
 
 ## Font Awesome 7 providers and validation
 
-The default `7.x` background worker uses these services in order:
+In automatic mode, the default `7.x` background worker uses these services in order:
 
 1. It posts a fixed GraphQL query to `https://api.fontawesome.com` for the latest `7.x` Free version, icons, aliases, families, and styles.
 2. If the candidate is newer, it requests `https://registry.npmjs.org/%40fortawesome%2Ffontawesome-free/{version}` and verifies the exact official package name, version, and Free package license expression.
@@ -72,7 +78,7 @@ The worker uses the WordPress HTTP API with TLS verification, unsafe-URL rejecti
 
 ## Browser asset delivery
 
-The packaged Font Awesome 7 fallback serves its CSS and fonts from the plugin on the site's own origin. A newer completely validated `7.x` record uses exact-version cdnjs URLs for the main stylesheet, Font Awesome 5 font-face compatibility stylesheet, optional Font Awesome 4 compatibility stylesheets, and the WOFF2 fonts those styles reference.
+The packaged Font Awesome 7 fallback serves its CSS and fonts from the plugin on the site's own origin. In automatic mode, a newer completely validated `7.x` record uses exact-version cdnjs URLs for the main stylesheet, Font Awesome 5 font-face compatibility stylesheet, optional Font Awesome 4 compatibility stylesheets, and the WOFF2 fonts those styles reference.
 
 A deliberate earlier `5.x` singleton owner uses the legacy channel's versioned `use.fontawesome.com/releases/` CSS and font paths. BFA does not silently convert a selected `5.x` owner to `7.x`.
 

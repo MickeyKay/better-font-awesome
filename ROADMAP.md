@@ -64,7 +64,7 @@ BFA 3.0.1 is publicly released and builds on the foundation established by the 2
 
 ### Improve privacy, diagnostics, and integrations
 
-- Evaluate opt-in local asset hosting with clear update, licensing, disk-use, and cleanup behavior.
+- Implemented optional bundled local FA7 Free delivery: matching catalog, CSS, compatibility assets, and fonts; effective-mode settings information; no background refresh work in local mode; retained metadata for returning to automatic. Release gates: replace the exact unpublished BFAL PR #52 commit with a published stable version, pass hosted compatibility/package checks, and complete production-package manual QA. No asset downloader or uploads cache. Style-selector work remains subsequent scope.
 - Add narrowly scoped diagnostics for active Font Awesome versions, duplicate assets, metadata freshness, cron health, and common integration conflicts.
 - Document and test boundaries with themes, builders, ACF fields, widgets, Classic Editor, and hybrid editor screens.
 - Measure initialization and picker performance before changing the shortcode or icon-catalog architecture.

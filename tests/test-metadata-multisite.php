@@ -203,6 +203,28 @@ class Better_Font_Awesome_Metadata_Multisite_Test extends Better_Font_Awesome_Me
 		$this->assertSame( $original_blog, get_current_blog_id() );
 	}
 
+	/** Network reactivation respects each site's persisted delivery choice. */
+	public function test_network_reactivation_preserves_local_sites_and_schedules_automatic_sites() {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Requires multisite.' );
+		}
+		$original = get_current_blog_id();
+		$local_site = self::factory()->blog->create();
+		$record = $this->in_site( $local_site, function () {
+			update_option( 'better-font-awesome_options', array( 'asset_delivery' => 'bundled-local' ) );
+			return $this->persist_schema_2_record( '7.99.0' );
+		} );
+		Better_Font_Awesome_Plugin::deactivate_metadata( true );
+		Better_Font_Awesome_Plugin::activate( true );
+		$this->assertIsArray( $this->site_schedule_marker( $original ) );
+		$this->assertFalse( $this->site_schedule_marker( $local_site ) );
+		$this->assertSame( $record, $this->site_metadata_state( $local_site )['record'] );
+		Better_Font_Awesome_Metadata_Manager::initialize_site( get_site( $local_site ) );
+		$this->assertFalse( $this->site_schedule_marker( $local_site ) );
+		$this->assertSame( $original, get_current_blog_id() );
+		$this->assertSame( 0, $this->font_awesome_http_calls );
+	}
+
 	/**
 	 * Set the current network's canonical plugin activation state.
 	 *

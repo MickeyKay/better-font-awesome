@@ -25,6 +25,7 @@
 
 			data = {
 				'action': 'bfa_save_options',
+				'asset_delivery': $bfaSettingsForm.find( '#asset_delivery' ).val(),
 				'bfa_nonce': nonce,
 				'include_v4_shim': include_v4_shim,
 				'remove_existing_fa': remove_existing_fa,
@@ -41,6 +42,7 @@
 				if ('success' == status) {
 					message = response;
 					messageClass = 'updated';
+					window.location.reload();
 				} else {
 					message = response.responseText;
 					messageClass = 'error';

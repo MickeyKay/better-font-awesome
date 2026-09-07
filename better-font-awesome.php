@@ -146,6 +146,7 @@ class Better_Font_Awesome_Plugin {
 		'include_v4_shim'    => '',
 		'remove_existing_fa' => '',
 		'hide_admin_notices' => '',
+		'asset_delivery'     => 'automatic',
 	);
 
 	/**
@@ -153,7 +154,7 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @since  0.9.0
 	 *
-	 * @var    Better_Font_Awesome_Plugin
+	 * @var    Better_Font_Awesome_Plugin|null
 	 */
 	protected static $instance = null;
 
@@ -442,6 +443,7 @@ class Better_Font_Awesome_Plugin {
 		$args = array(
 			'include_v4_shim'     => isset( $options['include_v4_shim'] ) ? $options['include_v4_shim'] : '',
 			'remove_existing_fa'  => isset( $options['remove_existing_fa'] ) ? $options['remove_existing_fa'] : '',
+			'asset_delivery'      => self::sanitize_asset_delivery( $options['asset_delivery'] ?? 'automatic' ),
 			'load_styles'         => true,
 			'load_admin_styles'   => true,
 			'load_shortcode'      => true,
@@ -541,6 +543,15 @@ class Better_Font_Awesome_Plugin {
 			array( $this, 'version_callback' ), // Callback.
 			self::SLUG, // Page.
 			'settings_section_primary' // Section.
+		);
+
+		add_settings_field(
+			'asset_delivery',
+			__( 'Font Awesome delivery', 'better-font-awesome' ),
+			array( $this, 'asset_delivery_callback' ),
+			self::SLUG,
+			'settings_section_primary',
+			array( 'label_for' => 'asset_delivery' )
 		);
 
 		add_settings_field(
@@ -647,6 +658,7 @@ class Better_Font_Awesome_Plugin {
 		}
 
 		$options = array(
+			'asset_delivery'     => self::sanitize_asset_delivery( isset( $_POST['asset_delivery'] ) ? sanitize_key( wp_unslash( $_POST['asset_delivery'] ) ) : 'automatic' ),
 			'include_v4_shim'    => isset( $_POST['include_v4_shim'] ) && (bool) absint( wp_unslash( $_POST['include_v4_shim'] ) ),
 			'remove_existing_fa' => isset( $_POST['remove_existing_fa'] ) && (bool) absint( wp_unslash( $_POST['remove_existing_fa'] ) ),
 			'hide_admin_notices' => isset( $_POST['hide_admin_notices'] ) && (bool) absint( wp_unslash( $_POST['hide_admin_notices'] ) ),
@@ -671,7 +683,7 @@ class Better_Font_Awesome_Plugin {
 			return;
 		}
 
-		Better_Font_Awesome_Metadata_Manager::activate( $network_wide );
+		Better_Font_Awesome_Metadata_Manager::activate( $network_wide, self::$instance ? self::$instance->bfa_lib : null );
 	}
 
 	/**
@@ -698,11 +710,74 @@ class Better_Font_Awesome_Plugin {
 	 * @since  2.0.0
 	 */
 	public function version_check_frequency_callback() {
+		if ( 'automatic' !== $this->effective_asset_delivery() ) {
+			esc_html_e( 'Background updates are disabled for the effective delivery configuration.', 'better-font-awesome' );
+			return;
+		}
+
 		$current_time              = time();
 		$expiration_time           = time() + $this->bfa_lib->get_transient_expiration() - 1; // -1 to improve readability (e.g. "24 hours" instead of "1 days")
 		$human_readable_expiration = human_time_diff( $current_time, $expiration_time );
 		/* translators: placeholder is the numeric current version number. */
 		echo wp_kses_post( sprintf( __( '%s (The plugin automatically uses the latest version of Font Awesome, and checks for updates at this frequency)', 'better-font-awesome' ), "<code>{$human_readable_expiration}</code>" ) );
+	}
+
+	/**
+	 * Normalize the optional delivery setting without changing legacy options.
+	 *
+	 * @param mixed $value Submitted or stored delivery setting.
+	 * @return string Supported requested mode.
+	 */
+	public static function sanitize_asset_delivery( $value ) {
+		return 'bundled-local' === $value ? 'bundled-local' : 'automatic';
+	}
+
+	/**
+	 * Read first-caller delivery ownership, including rollback dependencies.
+	 *
+	 * @return string Effective mode or empty for unsupported configuration.
+	 */
+	private function effective_asset_delivery() {
+		return Better_Font_Awesome_Metadata_Manager::effective_asset_delivery( $this->bfa_lib );
+	}
+
+	/**
+	 * Display requested delivery and the immutable effective configuration.
+	 */
+	public function asset_delivery_callback() {
+		$requested = self::sanitize_asset_delivery( $this->options['asset_delivery'] ?? 'automatic' );
+		$effective = $this->effective_asset_delivery();
+		$choices   = array(
+			'automatic'     => __( 'Automatic updates (CDN)', 'better-font-awesome' ),
+			'bundled-local' => __( 'Local files', 'better-font-awesome' ),
+		);
+		printf( '<select id="asset_delivery" name="%s[asset_delivery]" aria-describedby="bfa-delivery-help bfa-delivery-status">', esc_attr( $this->option_name ) );
+		foreach ( $choices as $value => $label ) {
+			printf( '<option value="%s" %s>%s</option>', esc_attr( $value ), selected( $requested, $value, false ), esc_html( $label ) );
+		}
+		echo '</select><p id="bfa-delivery-help" class="description">';
+		esc_html_e( 'Local files are served from your site. The included icon collection is updated when you update the plugin. Automatic mode checks for newer compatible icons in the background and may load files from a third-party CDN.', 'better-font-awesome' );
+		echo '</p><p id="bfa-delivery-status">';
+		if ( ! isset( $choices[ $effective ] ) ) {
+			esc_html_e( 'The effective Font Awesome configuration is unsupported. Local files require Font Awesome 7 Free and cannot be combined with an explicit Font Awesome 5 selection. Check the library configuration selected by other plugins, themes, or filters.', 'better-font-awesome' );
+		} else {
+			/* translators: %s: effective delivery choice. */
+			printf( esc_html__( 'Effective delivery: %s.', 'better-font-awesome' ), esc_html( $choices[ $effective ] ) );
+			if ( $requested !== $effective ) {
+				echo ' ';
+				esc_html_e( 'The saved choice is not active because an earlier library owner or initialization filter selected a different configuration. Better Font Awesome preserves that selection.', 'better-font-awesome' );
+			}
+			if ( 'bundled-local' === $effective ) {
+				echo ' ';
+				/* translators: %s: bundled Font Awesome version. */
+				printf( esc_html__( 'Bundled catalog: %s. This may be older than your automatic catalog. Icons introduced after this version will not render until included in a plugin update, or until you switch back to automatic delivery.', 'better-font-awesome' ), esc_html( $this->bfa_lib->get_version() ) );
+				if ( is_wp_error( $this->bfa_lib->get_error( 'fallback' ) ) ) {
+					echo ' ';
+					esc_html_e( 'The bundled files could not be loaded. Reinstall the plugin package. No third-party fallback will be used.', 'better-font-awesome' );
+				}
+			}
+		}
+		echo '</p>';
 	}
 
 	/**
@@ -755,6 +830,8 @@ class Better_Font_Awesome_Plugin {
 		if ( isset( $input['hide_admin_notices'] ) ) {
 			$new_input['hide_admin_notices'] = absint( $input['hide_admin_notices'] );
 		}
+
+		$new_input['asset_delivery'] = self::sanitize_asset_delivery( $input['asset_delivery'] ?? 'automatic' );
 
 		return $new_input;
 	}
