@@ -8,8 +8,8 @@
 	>
 	<php>
 		<env name="BFA_BFAL_VALIDATION_MODE" value="current" force="true" />
-		<env name="BFA_EXPECTED_BFAL_VERSION" value="dev-bundled-local-font-awesome" force="true" />
-		<env name="BFA_EXPECTED_BFAL_REFERENCE" value="c0b4031f563bcdab16f5b9e6864ac827af94dd88" force="true" />
+		<env name="BFA_EXPECTED_BFAL_VERSION" value="dev-master" force="true" />
+		<env name="BFA_EXPECTED_BFAL_REFERENCE" value="7bd53f548fe5028e0f60a35c6b457c05356ec811" force="true" />
 	</php>
 	<testsuites>
 		<testsuite name="Better Font Awesome">

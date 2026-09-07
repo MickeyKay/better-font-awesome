@@ -72,6 +72,8 @@ npm run lint
 npm run analyze
 ```
 
+The temporary BFAL development commit pin emits a Composer commit-ref warning. Integration CI currently runs `composer validate --no-check-publish --no-check-all`, which is non-strict validation. Before release, replace the development pin with a public stable BFAL release, restore `--strict` in CI, and pass the strict command above. The temporary relaxation is not a completed strict-validation gate.
+
 Run the current and rollback test modes required by the release checklist. Tests must use deterministic fixtures rather than the live Font Awesome service. Record command output and exact test counts in the release PR.
 
 ## Two deterministic production builds

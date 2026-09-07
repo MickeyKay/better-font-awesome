@@ -38,7 +38,8 @@ jobs:
         run: npm ci
 
       - name: Validate Composer metadata
-        # Temporary reviewed commit pin emits Composer's expected commit-ref warning.
+        # Temporary development pin emits Composer's expected commit-ref warning.
+        # Release gate: restore --strict when replacing the pin with a public stable release.
         run: composer validate --no-check-publish --no-check-all
 
       - name: Check PHP coding standards
@@ -157,7 +158,7 @@ jobs:
       - name: Report exact primary dependency
         run: |
           php -r 'require "vendor/autoload.php"; $package = "mickey-kay/better-font-awesome-library"; printf("BFAL version: %s\nBFAL reference: %s\n", Composer\InstalledVersions::getPrettyVersion($package), Composer\InstalledVersions::getReference($package));'
-          node -e 'const lock = JSON.parse(require("fs").readFileSync("composer.lock", "utf8")); const item = lock.packages.find((entry) => entry.name === "mickey-kay/better-font-awesome-library"); process.exit(item && item.version === "dev-bundled-local-font-awesome" && item.source.reference === "c0b4031f563bcdab16f5b9e6864ac827af94dd88" && item.dist.reference === "c0b4031f563bcdab16f5b9e6864ac827af94dd88" ? 0 : 1);'
+          node -e 'const lock = JSON.parse(require("fs").readFileSync("composer.lock", "utf8")); const item = lock.packages.find((entry) => entry.name === "mickey-kay/better-font-awesome-library"); process.exit(item && item.version === "dev-master" && item.source.reference === "7bd53f548fe5028e0f60a35c6b457c05356ec811" && item.dist.reference === "7bd53f548fe5028e0f60a35c6b457c05356ec811" ? 0 : 1);'
 
       - name: Install WordPress test suite
         run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1:3306 "${{ matrix.wordpress }}" true

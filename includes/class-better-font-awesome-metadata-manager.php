@@ -126,11 +126,6 @@ class Better_Font_Awesome_Metadata_Manager {
 	 * @return string Effective delivery mode, or empty for invalid configuration.
 	 */
 	public static function effective_asset_delivery( $library ) {
-		// The reviewed commit retains its mode for invalid channel combinations.
-		if ( $library instanceof Better_Font_Awesome_Library && ( is_wp_error( $library->get_error( 'delivery' ) ) || is_wp_error( $library->get_error( 'channel' ) ) ) ) {
-			return '';
-		}
-
 		$method = 'get_asset_delivery';
 		if ( ! is_object( $library ) || ! is_callable( array( $library, $method ) ) ) {
 			return 'automatic';

@@ -6,7 +6,7 @@ release_root=${1:-svn/trunk}
 bfal_root="$release_root/vendor/mickey-kay/better-font-awesome-library"
 installed_bfal_root="vendor/mickey-kay/better-font-awesome-library"
 expected_version="3.0.2"
-expected_reference="c0b4031f563bcdab16f5b9e6864ac827af94dd88"
+expected_reference="7bd53f548fe5028e0f60a35c6b457c05356ec811"
 
 php -r '
 $lock = json_decode( file_get_contents( "composer.lock" ), true );
@@ -14,7 +14,7 @@ $packages = array_filter( $lock["packages"], static function ( $package ) {
 	return "mickey-kay/better-font-awesome-library" === $package["name"];
 } );
 $package = reset( $packages );
-if ( ! $package || "dev-bundled-local-font-awesome" !== $package["version"] || "c0b4031f563bcdab16f5b9e6864ac827af94dd88" !== $package["source"]["reference"] || "c0b4031f563bcdab16f5b9e6864ac827af94dd88" !== $package["dist"]["reference"] ) {
+if ( ! $package || "dev-master" !== $package["version"] || "7bd53f548fe5028e0f60a35c6b457c05356ec811" !== $package["source"]["reference"] || "7bd53f548fe5028e0f60a35c6b457c05356ec811" !== $package["dist"]["reference"] ) {
 	fwrite( STDERR, "composer.lock does not contain the exact reviewed BFAL development commit.\n" );
 	exit( 1 );
 }
@@ -23,7 +23,7 @@ if ( ! $package || "dev-bundled-local-font-awesome" !== $package["version"] || "
 php -r '
 require "vendor/autoload.php";
 $package = "mickey-kay/better-font-awesome-library";
-if ( "dev-bundled-local-font-awesome" !== Composer\InstalledVersions::getPrettyVersion( $package ) || "c0b4031f563bcdab16f5b9e6864ac827af94dd88" !== Composer\InstalledVersions::getReference( $package ) ) {
+if ( "dev-master" !== Composer\InstalledVersions::getPrettyVersion( $package ) || "7bd53f548fe5028e0f60a35c6b457c05356ec811" !== Composer\InstalledVersions::getReference( $package ) ) {
 	fwrite( STDERR, "The installed BFAL package does not match the exact reviewed development commit.\n" );
 	exit( 1 );
 }

@@ -142,7 +142,8 @@ class Better_Font_Awesome_Asset_Delivery_Test extends Better_Font_Awesome_Metada
 		$owner = Better_Font_Awesome_Library::get_instance( array( 'asset_delivery' => $owner_mode, 'release_channel' => $channel ) );
 		$plugin = Better_Font_Awesome_Plugin::get_instance();
 		$this->assertSame( $owner, $plugin->get_bfa_lib_instance() );
-		$this->assertSame( '' === $effective ? 'bundled-local' : $effective, $owner->get_asset_delivery() );
+		$this->assertSame( $effective, $owner->get_asset_delivery() );
+		$this->assertSame( $effective, Better_Font_Awesome_Metadata_Manager::effective_asset_delivery( $owner ) );
 		ob_start();
 		$plugin->asset_delivery_callback();
 		$html = ob_get_clean();
@@ -164,6 +165,37 @@ class Better_Font_Awesome_Asset_Delivery_Test extends Better_Font_Awesome_Metada
 			array( 'bundled-local', 'automatic', '7.x', 'bundled-local' ),
 			array( 'bundled-local', 'bundled-local', '5.x', '' ),
 		);
+	}
+
+	/** @dataProvider invalid_configurations */
+	public function test_invalid_configuration_reports_no_effective_mode_and_does_no_work( $mode, $channel, $code ) {
+		$owner = Better_Font_Awesome_Library::get_instance( array( 'asset_delivery' => $mode, 'release_channel' => $channel ) );
+		$plugin = Better_Font_Awesome_Plugin::get_instance();
+		$manager = $this->metadata_manager( $plugin );
+		$this->assertSame( $owner, $plugin->get_bfa_lib_instance() );
+		$this->assertSame( '', $owner->get_asset_delivery() );
+		$this->assertSame( '', Better_Font_Awesome_Metadata_Manager::effective_asset_delivery( $owner ) );
+		$this->assertSame( $code, $owner->refresh_release_data()->get_error_code() );
+		$this->assertFalse( $manager->schedule_refresh( true ) );
+		$this->assertSame( 0, $this->count_scheduled_refresh_events() );
+		$this->assertSame( 0, $this->font_awesome_http_calls );
+		ob_start();
+		$plugin->asset_delivery_callback();
+		$this->assertStringContainsString( 'configuration is unsupported', ob_get_clean() );
+	}
+
+	public static function invalid_configurations() {
+		return array(
+			array( 'invalid', '7.x', 'bfa_asset_delivery_unsupported' ),
+			array( 'automatic', 'invalid', 'bfa_channel_unsupported' ),
+			array( 'bundled-local', 'invalid', 'bfa_channel_unsupported' ),
+			array( 'bundled-local', '5.x', 'bfa_asset_delivery_channel_unsupported' ),
+		);
+	}
+
+	public function test_dependency_without_delivery_accessor_retains_automatic_compatibility() {
+		$legacy_library = new stdClass();
+		$this->assertSame( 'automatic', Better_Font_Awesome_Metadata_Manager::effective_asset_delivery( $legacy_library ) );
 	}
 
 	/** @dataProvider invalid_settings */

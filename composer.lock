@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d11f38d9160c97f067c72d0a44a709f6",
+    "content-hash": "15e1d383ec6177dd6255661eb0284633",
     "packages": [
         {
             "name": "mickey-kay/better-font-awesome-library",
-            "version": "dev-bundled-local-font-awesome",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MickeyKay/better-font-awesome-library.git",
-                "reference": "c0b4031f563bcdab16f5b9e6864ac827af94dd88"
+                "reference": "7bd53f548fe5028e0f60a35c6b457c05356ec811"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/c0b4031f563bcdab16f5b9e6864ac827af94dd88",
-                "reference": "c0b4031f563bcdab16f5b9e6864ac827af94dd88",
+                "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/7bd53f548fe5028e0f60a35c6b457c05356ec811",
+                "reference": "7bd53f548fe5028e0f60a35c6b457c05356ec811",
                 "shasum": ""
             },
             "require-dev": {
@@ -27,6 +27,7 @@
                 "szepeviktor/phpstan-wordpress": "^2.0.4",
                 "wp-coding-standards/wpcs": "^3.4"
             },
+            "default-branch": true,
             "type": "library",
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -35,9 +36,9 @@
             "description": "Better Font Awesome Library for WordPress",
             "support": {
                 "issues": "https://github.com/MickeyKay/better-font-awesome-library/issues",
-                "source": "https://github.com/MickeyKay/better-font-awesome-library/tree/bundled-local-font-awesome"
+                "source": "https://github.com/MickeyKay/better-font-awesome-library/tree/master"
             },
-            "time": "2026-09-06T23:55:22+00:00"
+            "time": "2026-09-07T00:13:46+00:00"
         }
     ],
     "packages-dev": [
