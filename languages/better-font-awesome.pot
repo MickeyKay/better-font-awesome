@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-07T00:14:59+00:00\n"
+"POT-Creation-Date: 2026-09-07T16:47:06+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: better-font-awesome\n"
@@ -76,7 +76,7 @@ msgid "Font Awesome version"
 msgstr ""
 
 #: better-font-awesome.php:550
-msgid "Font Awesome delivery"
+msgid "Serve Font Awesome locally"
 msgstr ""
 
 #: better-font-awesome.php:559
@@ -129,43 +129,33 @@ msgstr ""
 msgid "%s (The plugin automatically uses the latest version of Font Awesome, and checks for updates at this frequency)"
 msgstr ""
 
-#: better-font-awesome.php:751
-msgid "Automatic updates (CDN)"
+#: better-font-awesome.php:753
+msgid "This Font Awesome configuration is unsupported. Local files require Font Awesome 7 Free."
 msgstr ""
 
-#: better-font-awesome.php:752
-msgid "Local files"
+#: better-font-awesome.php:756
+msgid "Local delivery is not active because another plugin, theme, or filter controls Font Awesome."
 msgstr ""
 
-#: better-font-awesome.php:759
-msgid "Local files are served from your site. The included icon collection is updated when you update the plugin. Automatic mode checks for newer compatible icons in the background and may load files from a third-party CDN."
+#: better-font-awesome.php:757
+msgid "Local delivery is active because another plugin, theme, or filter controls Font Awesome."
 msgstr ""
 
 #: better-font-awesome.php:762
-msgid "The effective Font Awesome configuration is unsupported. Local files require Font Awesome 7 Free and cannot be combined with an explicit Font Awesome 5 selection. Check the library configuration selected by other plugins, themes, or filters."
+msgid "Local icon files are unavailable. Reinstall Better Font Awesome."
 msgstr ""
 
-#. translators: %s: effective delivery choice.
-#: better-font-awesome.php:765
+#. translators: 1: local Font Awesome version, 2: previously downloaded Font Awesome version.
+#: better-font-awesome.php:770
 #, php-format
-msgid "Effective delivery: %s."
+msgid "Local files use Font Awesome %1$s; your previously downloaded version is %2$s. Newer icons may be unavailable."
 msgstr ""
 
-#: better-font-awesome.php:768
-msgid "The saved choice is not active because an earlier library owner or initialization filter selected a different configuration. Better Font Awesome preserves that selection."
+#: better-font-awesome.php:783
+msgid "Load icons from your site instead of a third-party CDN. New icons arrive through plugin updates."
 msgstr ""
 
-#. translators: %s: bundled Font Awesome version.
-#: better-font-awesome.php:773
-#, php-format
-msgid "Bundled catalog: %s. This may be older than your automatic catalog. Icons introduced after this version will not render until included in a plugin update, or until you switch back to automatic delivery."
-msgstr ""
-
-#: better-font-awesome.php:776
-msgid "The bundled files could not be loaded. Reinstall the plugin package. No third-party fallback will be used."
-msgstr ""
-
-#: includes/class-better-font-awesome-metadata-manager.php:265
+#: includes/class-better-font-awesome-metadata-manager.php:260
 msgid "Font Awesome metadata refresh could not be scheduled."
 msgstr ""
 

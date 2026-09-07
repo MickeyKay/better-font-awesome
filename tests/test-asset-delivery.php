@@ -55,7 +55,7 @@ class Better_Font_Awesome_Asset_Delivery_Test extends Better_Font_Awesome_Metada
 		$this->assertSame( $content, get_post( $post )->post_content );
 		ob_start();
 		$plugin->asset_delivery_callback();
-		$this->assertStringContainsString( 'Icons introduced after this version will not render', ob_get_clean() );
+		$this->assertStringContainsString( 'Local files use Font Awesome 7.3.1; your previously downloaded version is 7.99.0. Newer icons may be unavailable.', ob_get_clean() );
 
 		$automatic = $this->initialize_plugin( array( 'asset_delivery' => 'automatic' ) );
 		$this->assertSame( '7.99.0', $automatic->get_bfa_lib_instance()->get_version() );
@@ -63,6 +63,50 @@ class Better_Font_Awesome_Asset_Delivery_Test extends Better_Font_Awesome_Metada
 		$this->assertSame( $remote, get_option( Better_Font_Awesome_Metadata_Manager::RECORD_OPTION ) );
 		$this->assertSame( $content, get_post( $post )->post_content );
 		$this->assertSame( 0, $this->font_awesome_http_calls );
+	}
+
+	/** @dataProvider catalog_messages */
+	public function test_catalog_message_requires_valid_newer_preserved_data( $mode, $version, $invalid, $expected ) {
+		if ( null !== $version ) {
+			$record = $this->persist_schema_2_record( $version, time() - HOUR_IN_SECONDS );
+			if ( 'checksum' === $invalid ) {
+				$record['checksum'] = str_repeat( '0', 64 );
+			} elseif ( 'release' === $invalid ) {
+				$record['release']['version'] = '<script>7.99.0</script>';
+				$record['checksum'] = hash( 'sha256', maybe_serialize( $record['release'] ) );
+			}
+			update_option( Better_Font_Awesome_Metadata_Store::RECORD_OPTION, $record );
+		}
+		$plugin = $this->initialize_plugin( array( 'asset_delivery' => $mode ) );
+		$before = array_map( 'get_option', array( Better_Font_Awesome_Metadata_Store::RECORD_OPTION, Better_Font_Awesome_Metadata_Store::STATE_OPTION, Better_Font_Awesome_Metadata_Store::SCHEMA_OPTION ) );
+		ob_start();
+		$plugin->asset_delivery_callback();
+		$html = ob_get_clean();
+		$this->assertSame( $expected, false !== strpos( $html, 'your previously downloaded version' ) );
+		if ( ! $expected ) {
+			$this->assertStringNotContainsString( 'id="bfa-delivery-status"', $html );
+		}
+		$this->assertStringContainsString( 'type="checkbox" value="bundled-local"', $html );
+		$this->assertSame( 'bundled-local' === $mode, false !== strpos( $html, ' checked=' ) );
+		$this->assertStringContainsString( 'Load icons from your site instead of a third-party CDN. New icons arrive through plugin updates.', $html );
+		$this->assertStringNotContainsString( 'Effective delivery:', $html );
+		$this->assertStringNotContainsString( 'Bundled catalog:', $html );
+		$this->assertStringNotContainsString( '<script>', $html );
+		$this->assertSame( $before, array_map( 'get_option', array( Better_Font_Awesome_Metadata_Store::RECORD_OPTION, Better_Font_Awesome_Metadata_Store::STATE_OPTION, Better_Font_Awesome_Metadata_Store::SCHEMA_OPTION ) ) );
+		$this->assertSame( 0, $this->font_awesome_http_calls );
+	}
+
+	public static function catalog_messages() {
+		return array(
+			'no record local' => array( 'bundled-local', null, '', false ),
+			'no record automatic' => array( 'automatic', null, '', false ),
+			'equal' => array( 'bundled-local', '7.3.1', '', false ),
+			'older' => array( 'bundled-local', '7.0.0', '', false ),
+			'newer stale' => array( 'bundled-local', '7.99.0', '', true ),
+			'bad checksum' => array( 'bundled-local', '7.99.0', 'checksum', false ),
+			'invalid release' => array( 'bundled-local', '7.99.0', 'release', false ),
+			'automatic with record' => array( 'automatic', '7.99.0', '', false ),
+		);
 	}
 
 	public function test_queued_worker_rechecks_local_mode_without_boot_cleanup() {
@@ -86,8 +130,9 @@ class Better_Font_Awesome_Asset_Delivery_Test extends Better_Font_Awesome_Metada
 		ob_start();
 		$plugin->asset_delivery_callback();
 		$html = ob_get_clean();
-		$this->assertStringContainsString( 'bundled files could not be loaded', $html );
-		$this->assertStringContainsString( 'No third-party fallback', $html );
+		$this->assertStringContainsString( 'Local icon files are unavailable. Reinstall Better Font Awesome.', $html );
+		$this->assertStringNotContainsString( 'previously downloaded', $html );
+		$this->assertSame( 0, $this->font_awesome_http_calls );
 		ob_start();
 		$plugin->version_check_frequency_callback();
 		$this->assertStringContainsString( 'Background updates are disabled', ob_get_clean() );
@@ -149,12 +194,13 @@ class Better_Font_Awesome_Asset_Delivery_Test extends Better_Font_Awesome_Metada
 		$html = ob_get_clean();
 		if ( '' === $effective ) {
 			$this->assertStringContainsString( 'configuration is unsupported', $html );
-			$this->assertStringNotContainsString( 'Effective delivery: Local files', $html );
+			$this->assertStringContainsString( 'This Font Awesome configuration is unsupported. Local files require Font Awesome 7 Free.', $html );
 			$this->assertSame( 'bfa_asset_delivery_channel_unsupported', $owner->refresh_release_data()->get_error_code() );
 		} else {
-			$this->assertStringContainsString( 'saved choice is not active', $html );
-			$this->assertStringContainsString( 'Effective delivery: ' . ( 'automatic' === $effective ? 'Automatic updates (CDN)' : 'Local files' ), $html );
+			$this->assertStringContainsString( 'Local delivery is ' . ( 'automatic' === $effective ? 'not active' : 'active' ) . ' because another plugin, theme, or filter controls Font Awesome.', $html );
 		}
+		$this->assertSame( 'bundled-local' === $requested, false !== strpos( $html, ' checked=' ) );
+		$this->assertStringNotContainsString( 'Effective delivery:', $html );
 		$this->assertSame( 'automatic' === $effective ? 1 : 0, $this->count_scheduled_refresh_events() );
 		$this->assertSame( 0, $this->font_awesome_http_calls );
 	}

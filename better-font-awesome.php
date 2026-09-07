@@ -547,7 +547,7 @@ class Better_Font_Awesome_Plugin {
 
 		add_settings_field(
 			'asset_delivery',
-			__( 'Font Awesome delivery', 'better-font-awesome' ),
+			__( 'Serve Font Awesome locally', 'better-font-awesome' ),
 			array( $this, 'asset_delivery_callback' ),
 			self::SLUG,
 			'settings_section_primary',
@@ -747,37 +747,48 @@ class Better_Font_Awesome_Plugin {
 	public function asset_delivery_callback() {
 		$requested = self::sanitize_asset_delivery( $this->options['asset_delivery'] ?? 'automatic' );
 		$effective = $this->effective_asset_delivery();
-		$choices   = array(
-			'automatic'     => __( 'Automatic updates (CDN)', 'better-font-awesome' ),
-			'bundled-local' => __( 'Local files', 'better-font-awesome' ),
-		);
-		printf( '<select id="asset_delivery" name="%s[asset_delivery]" aria-describedby="bfa-delivery-help bfa-delivery-status">', esc_attr( $this->option_name ) );
-		foreach ( $choices as $value => $label ) {
-			printf( '<option value="%s" %s>%s</option>', esc_attr( $value ), selected( $requested, $value, false ), esc_html( $label ) );
+		$messages  = array();
+
+		if ( ! in_array( $effective, array( 'automatic', 'bundled-local' ), true ) ) {
+			$messages[] = __( 'This Font Awesome configuration is unsupported. Local files require Font Awesome 7 Free.', 'better-font-awesome' );
+		} elseif ( $requested !== $effective ) {
+			$messages[] = 'bundled-local' === $requested
+				? __( 'Local delivery is not active because another plugin, theme, or filter controls Font Awesome.', 'better-font-awesome' )
+				: __( 'Local delivery is active because another plugin, theme, or filter controls Font Awesome.', 'better-font-awesome' );
 		}
-		echo '</select><p id="bfa-delivery-help" class="description">';
-		esc_html_e( 'Local files are served from your site. The included icon collection is updated when you update the plugin. Automatic mode checks for newer compatible icons in the background and may load files from a third-party CDN.', 'better-font-awesome' );
-		echo '</p><p id="bfa-delivery-status">';
-		if ( ! isset( $choices[ $effective ] ) ) {
-			esc_html_e( 'The effective Font Awesome configuration is unsupported. Local files require Font Awesome 7 Free and cannot be combined with an explicit Font Awesome 5 selection. Check the library configuration selected by other plugins, themes, or filters.', 'better-font-awesome' );
-		} else {
-			/* translators: %s: effective delivery choice. */
-			printf( esc_html__( 'Effective delivery: %s.', 'better-font-awesome' ), esc_html( $choices[ $effective ] ) );
-			if ( $requested !== $effective ) {
-				echo ' ';
-				esc_html_e( 'The saved choice is not active because an earlier library owner or initialization filter selected a different configuration. Better Font Awesome preserves that selection.', 'better-font-awesome' );
-			}
-			if ( 'bundled-local' === $effective ) {
-				echo ' ';
-				/* translators: %s: bundled Font Awesome version. */
-				printf( esc_html__( 'Bundled catalog: %s. This may be older than your automatic catalog. Icons introduced after this version will not render until included in a plugin update, or until you switch back to automatic delivery.', 'better-font-awesome' ), esc_html( $this->bfa_lib->get_version() ) );
-				if ( is_wp_error( $this->bfa_lib->get_error( 'fallback' ) ) ) {
-					echo ' ';
-					esc_html_e( 'The bundled files could not be loaded. Reinstall the plugin package. No third-party fallback will be used.', 'better-font-awesome' );
+
+		if ( 'bundled-local' === $effective ) {
+			if ( is_wp_error( $this->bfa_lib->get_error( 'fallback' ) ) ) {
+				$messages[] = __( 'Local icon files are unavailable. Reinstall Better Font Awesome.', 'better-font-awesome' );
+			} else {
+				$store   = new Better_Font_Awesome_Metadata_Store();
+				$record  = $store->get_valid_record( '7.x' );
+				$version = $this->bfa_lib->get_version();
+				if ( ! empty( $record ) && version_compare( $record['release']['version'], $version, '>' ) ) {
+					$messages[] = sprintf(
+						/* translators: 1: local Font Awesome version, 2: previously downloaded Font Awesome version. */
+						__( 'Local files use Font Awesome %1$s; your previously downloaded version is %2$s. Newer icons may be unavailable.', 'better-font-awesome' ),
+						$version,
+						$record['release']['version']
+					);
 				}
 			}
 		}
-		echo '</p>';
+
+		printf(
+			'<label for="asset_delivery"><input type="checkbox" value="bundled-local" id="asset_delivery" name="%1$s[asset_delivery]" %2$s aria-describedby="%3$s"/> <span id="bfa-delivery-help">%4$s</span></label>',
+			esc_attr( $this->option_name ),
+			checked( 'bundled-local', $requested, false ),
+			esc_attr( empty( $messages ) ? 'bfa-delivery-help' : 'bfa-delivery-help bfa-delivery-status' ),
+			esc_html__( 'Load icons from your site instead of a third-party CDN. New icons arrive through plugin updates.', 'better-font-awesome' )
+		);
+		if ( ! empty( $messages ) ) {
+			echo '<div id="bfa-delivery-status">';
+			foreach ( $messages as $message ) {
+				printf( '<p>%s</p>', esc_html( $message ) );
+			}
+			echo '</div>';
+		}
 	}
 
 	/**

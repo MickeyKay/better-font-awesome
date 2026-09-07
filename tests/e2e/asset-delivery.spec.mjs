@@ -78,19 +78,26 @@ async function expectLocalGlyphs( frame ) {
 	}
 }
 
-async function saveMode( page, mode, beforeSave = () => {} ) {
+async function saveMode( page, mode, beforeSave = () => {}, nativeSubmit = false ) {
 	await page.goto( '/wp-admin/options-general.php?page=better-font-awesome' );
-	await page.locator( '#asset_delivery' ).selectOption( mode );
+	const checkbox = page.getByLabel( 'Serve Font Awesome locally', { exact: true } );
+	if ( await checkbox.isChecked() !== ( 'bundled-local' === mode ) ) {
+		await checkbox.focus();
+		await checkbox.press( 'Space' );
+	}
 	await page.locator( '#include_v4_shim' ).check();
 	beforeSave();
 	await Promise.all( [
 		page.waitForEvent( 'load' ),
-		page.locator( '.bfa-save-settings-button' ).click(),
+		nativeSubmit
+			? page.locator( '#bfa-settings-form' ).evaluate( ( form ) => form.requestSubmit() )
+			: page.locator( '.bfa-save-settings-button' ).click(),
 	] );
-	await expect( page.locator( '#asset_delivery' ) ).toHaveValue( mode );
-	await expect( page.locator( '#bfa-delivery-status' ) ).toContainText(
-		`Effective delivery: ${ 'bundled-local' === mode ? 'Local files' : 'Automatic updates (CDN)' }`
-	);
+	await expect( page.locator( '#asset_delivery' ) ).toBeChecked( { checked: 'bundled-local' === mode } );
+	await page.reload();
+	await expect( page.locator( '#asset_delivery' ) ).toBeChecked( { checked: 'bundled-local' === mode } );
+	await expect( page.locator( '#bfa-delivery-help' ) ).toHaveText( 'Load icons from your site instead of a third-party CDN. New icons arrive through plugin updates.' );
+	await expect( page.locator( '#bfa-delivery-status' ) ).toHaveCount( 0 );
 }
 
 test( 'local delivery renders real fonts with third-party requests blocked across all editor surfaces', async ( { page, context } ) => {
@@ -127,7 +134,11 @@ test( 'local delivery renders real fonts with third-party requests blocked acros
 		}
 	} );
 
+	// Exercise options.php with checked and omitted checkbox values before the AJAX path.
+	await saveMode( page, 'bundled-local', () => {}, true );
+	await saveMode( page, 'automatic', () => {}, true );
 	await saveMode( page, 'bundled-local', () => { localSelected = true; } );
+	await test.info().attach( 'local-delivery-settings', { body: await page.screenshot(), contentType: 'image/png' } );
 	await page.goto( '/wp-admin/post-new.php?post_type=bfa_iframe_test' );
 	await page.waitForFunction( () => Boolean( window.wp?.blocks?.getBlockType( 'better-font-awesome/icon' ) ) );
 	const welcome = page.getByRole( 'button', { name: 'Close', exact: true } );

@@ -197,6 +197,9 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 			'remove_existing_fa' => '0',
 			'hide_admin_notices' => '1',
 		);
+		if ( null === $submitted ) {
+			unset( $_POST['asset_delivery'] );
+		}
 		$_REQUEST = $_POST;
 		add_filter( 'wp_die_handler', array( $this, 'filter_wp_die_handler' ) );
 
@@ -221,8 +224,40 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 		);
 	}
 
+	/** @dataProvider delivery_submissions */
+	public function test_settings_api_preserves_delivery_strings_and_other_settings( $submitted, $expected ) {
+		$input = array( 'include_v4_shim' => 1, 'remove_existing_fa' => 1, 'hide_admin_notices' => 1 );
+		if ( null !== $submitted ) {
+			$input['asset_delivery'] = $submitted;
+		}
+		$sanitized = $this->bfa->sanitize( $input );
+		$this->assertSame( array( 'include_v4_shim' => 1, 'remove_existing_fa' => 1, 'hide_admin_notices' => 1, 'asset_delivery' => $expected ), $sanitized );
+		$plugin = $this->initialize_with_stored_options( $sanitized );
+		ob_start();
+		$plugin->asset_delivery_callback();
+		$html = ob_get_clean();
+		$this->assertSame( 'bundled-local' === $expected, false !== strpos( $html, ' checked=' ) );
+		$this->assertSame( $sanitized, get_option( $plugin->get( 'option_name' ) ) );
+	}
+
+	public function test_settings_save_rejects_invalid_nonce() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$before = get_option( $this->bfa->get( 'option_name' ) );
+		$_POST = array( 'asset_delivery' => 'bundled-local', 'bfa_nonce' => 'invalid' );
+		$_REQUEST = $_POST;
+		add_filter( 'wp_die_handler', array( $this, 'filter_wp_die_handler' ) );
+		try {
+			$this->bfa->save_options();
+			$this->fail( 'Expected nonce rejection.' );
+		} catch ( Better_Font_Awesome_WP_Die_Exception $exception ) {
+			$this->assertSame( 403, $exception->args['response'] );
+		}
+		$this->assertSame( $before, get_option( $this->bfa->get( 'option_name' ) ) );
+	}
+
 	public static function delivery_submissions() {
 		return array(
+			array( null, 'automatic' ),
 			array( 'automatic', 'automatic' ),
 			array( 'bundled-local', 'bundled-local' ),
 			array( array( 'bundled-local' ), 'automatic' ),

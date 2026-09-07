@@ -54,11 +54,11 @@ You can also use Font Awesome classes in HTML or CSS. Unlike shortcodes, HTML cl
 
 ## Automatic icon updates and built-in fallback ##
 
-Font Awesome Free CSS, fonts, and icon data ship with the plugin, so icons render immediately after activation. In the default **Automatic updates (CDN)** mode, a scheduled task checks for the latest compatible release in the background and uses it only after validation. If a check is delayed or fails, the last validated release or built-in fallback stays active.
+Font Awesome Free CSS, fonts, and icon data ship with the plugin, so icons render immediately after activation. With **Serve Font Awesome locally** unchecked (the default), a scheduled task checks for the latest compatible release in the background and uses it only after validation. If a check is delayed or fails, the last validated release or built-in fallback stays active.
 
 ### Optional local delivery ###
 
-Under **Settings > Better Font Awesome > Font Awesome delivery**, choose **Local files** to serve the bundled Font Awesome 7 Free catalog, CSS, compatibility styles, and fonts from your site. This mode disables BFA background metadata and asset-validation requests. New icons arrive through plugin updates. It never falls back to third-party assets if bundled files are unavailable.
+Under **Settings > Better Font Awesome**, check **Serve Font Awesome locally** to serve the bundled Font Awesome 7 Free catalog, CSS, compatibility styles, and fonts from your site. This mode disables BFA background metadata and asset-validation requests. New icons arrive through plugin updates. It never falls back to third-party assets if bundled files are unavailable.
 
 The bundled catalog may be older than a previously adopted automatic release. Icons introduced after the bundled version will not render until a plugin update includes them or you switch back to automatic delivery. Existing content and stored metadata are preserved; switching back reuses valid metadata and schedules a background check when needed. Settings saving does not wait for remote metadata. A refresh already running when the setting changes cannot be retroactively canceled.
 
@@ -83,7 +83,7 @@ No. Better Font Awesome supports Font Awesome Free.
 
 ### Do visitors download fonts from another service? ###
 
-Choose **Local files** to keep BFA's bundled CSS and fonts on your site, subject to your site's URL-rewriting infrastructure. In automatic mode, the packaged fallback also loads from your site. If the plugin validates and adopts a newer compatible release, visitors' browsers may load that release's selected CSS and font files from cdnjs.
+Check **Serve Font Awesome locally** to keep BFA's bundled CSS and fonts on your site, subject to your site's URL-rewriting infrastructure. In automatic mode, the packaged fallback also loads from your site. If the plugin validates and adopts a newer compatible release, visitors' browsers may load that release's selected CSS and font files from cdnjs.
 
 ### Will existing Font Awesome 4 and 5 content keep working? ###
 
