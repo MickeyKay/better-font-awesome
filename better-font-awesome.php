@@ -616,12 +616,13 @@ class Better_Font_Awesome_Plugin {
 				self::VERSION
 			);
 
+			// Invalidate cached settings handlers when packages share a plugin version.
 			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion, WordPress.WP.EnqueuedResourceParameters.NotInFooter
 			wp_enqueue_script(
 				self::SLUG . '-admin',
 				plugin_dir_url( __FILE__ ) . 'js/admin.js',
 				array( 'jquery' ),
-				self::VERSION
+				self::VERSION . '-' . md5_file( __DIR__ . '/js/admin.js' )
 			);
 
 			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter

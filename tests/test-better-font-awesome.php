@@ -145,6 +145,23 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 		$this->assertSame( $expected, get_option( $bfa->get( 'option_name' ) ) );
 	}
 
+	public function test_settings_script_does_not_reuse_the_old_dropdown_cache_key() {
+		$handle = Better_Font_Awesome_Plugin::SLUG . '-admin';
+		wp_dequeue_script( $handle );
+		wp_deregister_script( $handle );
+		$this->bfa->admin_enqueue_scripts( 'settings_page_better-font-awesome' );
+		$script = wp_scripts()->registered[ $handle ];
+		$this->assertNotSame( Better_Font_Awesome_Plugin::VERSION, $script->ver );
+		$this->assertNotEmpty( $script->ver );
+		$this->assertStringEndsWith( '/js/admin.js', $script->src );
+		wp_dequeue_script( $handle );
+		wp_deregister_script( $handle );
+		$this->bfa->admin_enqueue_scripts( 'settings_page_better-font-awesome' );
+		$this->assertSame( $script->ver, wp_scripts()->registered[ $handle ]->ver );
+		wp_dequeue_script( $handle );
+		wp_deregister_script( $handle );
+	}
+
 	public function test_settings_are_sanitized_as_checkboxes() {
 		$this->assertSame(
 			array(
