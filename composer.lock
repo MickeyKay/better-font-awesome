@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "15e1d383ec6177dd6255661eb0284633",
+    "content-hash": "c9bff407c2697c2fac4e2e4d9f870186",
     "packages": [
         {
             "name": "mickey-kay/better-font-awesome-library",
-            "version": "dev-master",
+            "version": "3.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MickeyKay/better-font-awesome-library.git",
-                "reference": "7bd53f548fe5028e0f60a35c6b457c05356ec811"
+                "reference": "89f732ddda61ef0ca6226a45898d0f7bfb8ff1da"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/7bd53f548fe5028e0f60a35c6b457c05356ec811",
-                "reference": "7bd53f548fe5028e0f60a35c6b457c05356ec811",
+                "url": "https://api.github.com/repos/MickeyKay/better-font-awesome-library/zipball/89f732ddda61ef0ca6226a45898d0f7bfb8ff1da",
+                "reference": "89f732ddda61ef0ca6226a45898d0f7bfb8ff1da",
                 "shasum": ""
             },
             "require-dev": {
@@ -27,7 +27,6 @@
                 "szepeviktor/phpstan-wordpress": "^2.0.4",
                 "wp-coding-standards/wpcs": "^3.4"
             },
-            "default-branch": true,
             "type": "library",
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -36,9 +35,9 @@
             "description": "Better Font Awesome Library for WordPress",
             "support": {
                 "issues": "https://github.com/MickeyKay/better-font-awesome-library/issues",
-                "source": "https://github.com/MickeyKay/better-font-awesome-library/tree/master"
+                "source": "https://github.com/MickeyKay/better-font-awesome-library/tree/3.1.0"
             },
-            "time": "2026-09-07T00:13:46+00:00"
+            "time": "2026-09-07T21:33:16+00:00"
         }
     ],
     "packages-dev": [
@@ -2696,9 +2695,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "mickey-kay/better-font-awesome-library": 20
-    },
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

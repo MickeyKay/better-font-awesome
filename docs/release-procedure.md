@@ -65,14 +65,14 @@ npm run composer:install
 npm run build
 git diff --exit-code -- README.md readme.txt
 git diff --check
-sh bin/composer.sh validate --strict
+sh bin/composer.sh validate --strict --no-check-publish --no-check-all
 sh bin/composer.sh audit
 npm audit --audit-level=high
 npm run lint
 npm run analyze
 ```
 
-The temporary BFAL development commit pin emits a Composer commit-ref warning. Integration CI currently runs `composer validate --no-check-publish --no-check-all`, which is non-strict validation. Before release, replace the development pin with a public stable BFAL release, restore `--strict` in CI, and pass the strict command above. The temporary relaxation is not a completed strict-validation gate.
+BFA now requires public stable BFAL 3.1.0. The temporary development-pin exception is removed: integration CI runs `composer validate --strict --no-check-publish --no-check-all`. Strict validation must continue to pass for the exact release candidate. Stable dependency adoption and restoration of strict validation are complete; owner QA and the remaining compatibility and package gates still apply.
 
 Run the current and rollback test modes required by the release checklist. Tests must use deterministic fixtures rather than the live Font Awesome service. Record command output and exact test counts in the release PR.
 
