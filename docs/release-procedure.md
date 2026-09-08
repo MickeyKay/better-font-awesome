@@ -72,7 +72,7 @@ npm run lint
 npm run analyze
 ```
 
-BFA now requires public stable BFAL 3.1.0. The temporary development-pin exception is removed: integration CI runs `composer validate --strict --no-check-publish --no-check-all`. Strict validation must continue to pass for the exact release candidate. Stable dependency adoption and restoration of strict validation are complete; owner QA and the remaining compatibility and package gates still apply.
+Require the reviewed public stable BFAL dependency and verify its exact locked source/dist reference. Integration CI runs `composer validate --strict --no-check-publish --no-check-all`; the exact release candidate must pass this command without development-pin exceptions. Record dependency identity and completed validation, owner QA, compatibility, and package evidence in the release PR.
 
 Run the current and rollback test modes required by the release checklist. Tests must use deterministic fixtures rather than the live Font Awesome service. Record command output and exact test counts in the release PR.
 
@@ -164,7 +164,7 @@ All metadata values and cron events are site-scoped. Network activation does not
 - `better-font-awesome_options` is the established site-scoped plugin settings option.
 - Published posts and other content containing `[icon]` shortcodes remain ordinary WordPress content.
 
-Deactivation must clear the site's pending worker events, schedule claims, and worker locks while preserving the durable metadata record, refresh state, migration marker, established settings, compatibility transient, and published shortcode content. Network deactivation must perform that cleanup separately for each site in the current network.
+Deactivation must clear the site's pending worker events, schedule claims, and inactive worker locks. Active worker leases remain until completion or expiry, with retries cancelled. Cleanup preserves the durable metadata record, refresh state, migration marker, established settings, compatibility transient, and published shortcode content. Network deactivation must perform that cleanup separately for each site in the current network.
 
 The plugin has no uninstall hook and no `uninstall.php`. Uninstall therefore performs no plugin-specific option or content cleanup. WordPress removes plugin files while settings, durable metadata, refresh state, migration markers, compatibility transients, and published content remain in the database.
 
