@@ -60,11 +60,11 @@ export function buildCatalogOptions( catalog, filterValue, selectedName, current
 		icons.unshift( selectedIcon );
 	}
 	return icons.map( ( icon ) => ( {
-		// WP 6.5 also filters options by label. Retain alias/style query matches
-		// internally; renderIconOption displays only iconLabel. Clear the search
+		// WP 6.5 also filters labels against the raw input, including whitespace.
+		// Retain matches internally; renderIconOption displays only iconLabel. Clear the search
 		// when leaving the picker so its closed value also uses the base label.
-		label: filterValue && ! icon.label.toLowerCase().includes( filterValue.trim().toLowerCase() )
-			? `${ icon.label } ${ filterValue.trim() }` : icon.label,
+		label: filterValue && ! icon.label.toLowerCase().includes( filterValue.toLowerCase() )
+			? `${ icon.label } ${ filterValue }` : icon.label,
 		iconLabel: icon.label,
 		name: icon.name,
 		style: icon.name === selectedName ? currentStyle : selectionStyle( icon, currentStyle ),

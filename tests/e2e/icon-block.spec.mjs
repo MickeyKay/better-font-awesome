@@ -1012,7 +1012,7 @@ test( 'unique Icon picker and Free Style control synchronize, undo, persist, and
 
 	const uniqueCount = await page.evaluate( () => new Set( window.bfaBlockEditor.icons.map( ( icon ) => icon.name ) ).size );
 	await expect( page.getByText( `Search all ${ uniqueCount } available Font Awesome Free icons.`, { exact: true } ) ).toBeVisible();
-	for ( const query of [ 'Address Book', 'address-book', 'Address Book (regular)' ] ) {
+	for ( const query of [ 'Address Book', 'Address Book ', ' ADDRESS BOOK ', 'address-book', 'Address Book (regular)', 'Address Book (regular) ' ] ) {
 		await iconControl.click();
 		await iconControl.fill( query );
 		const result = page.getByRole( 'listbox' ).getByRole( 'option', { name: 'Address Book', exact: true } );

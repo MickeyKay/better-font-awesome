@@ -76,6 +76,16 @@ test( 'searches base labels, slugs, and original style-labelled queries without 
 	assert.deepEqual( filterCatalog( icons, '' ), icons );
 } );
 
+test( 'keeps whitespace queries visible through the native combobox label filter', () => {
+	for ( const query of [ 'Address Book ', ' Address Book', ' ADDRESS BOOK ', 'address-book ', 'Address Book (regular) ', '   ' ] ) {
+		const options = buildCatalogOptions( icons, query, 'heart', 'solid' );
+		// WordPress 6.5 filters the supplied labels against the untrimmed input.
+		const visible = options.filter( ( option ) => option.label.toLowerCase().includes( query.toLowerCase() ) );
+		assert.deepEqual( visible, options );
+		assert.equal( visible.find( ( option ) => option.value === 'address-book' ).iconLabel, 'Address Book' );
+	}
+} );
+
 test( 'limits unique results after grouping and keeps the selected icon once', () => {
 	const catalog = Array.from( { length: 102 }, ( _, index ) => [ 'regular', 'solid' ].map( ( style ) => ( {
 		name: `icon-${ index }`, label: `Icon ${ index } (${ style })`, style,
