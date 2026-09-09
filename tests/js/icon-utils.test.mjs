@@ -5,7 +5,8 @@ import {
 	buildCatalogOptions,
 	filterCatalog,
 	getAvailableStyles,
-	parseSelection,
+	groupCatalog,
+	selectIcon,
 	styleClass,
 } from '../../src/icon-utils.mjs';
 
@@ -39,75 +40,96 @@ test( 'does not invent styles for missing icons, empty catalogs, or unsupported 
 	assert.deepEqual( getAvailableStyles( catalog, '' ), [] );
 } );
 
-test( 'finds all styles beyond the combined picker result limit and search filter', () => {
-	const icons = [
-		...Array.from( { length: 102 }, ( _, index ) => ( {
-			label: `Icon ${ index }`, name: `icon-${ index }`, style: 'solid',
-		} ) ),
-		{ label: 'Heart (solid)', name: 'heart', style: 'solid' },
-		{ label: 'Heart (regular)', name: 'heart', style: 'regular' },
-	];
-	for ( const search of [ '', 'regular', 'no matches' ] ) {
-		const results = buildCatalogOptions( icons, search, 'regular:heart' );
-		assert.equal( results.some( ( icon ) => icon.value === 'solid:heart' ), false );
-		assert.deepEqual( getAvailableStyles( icons, 'heart' ), [ 'solid', 'regular' ] );
+const fullCatalog = [
+	{ label: 'Address Book (regular)', name: 'address-book', style: 'regular' },
+	{ label: 'Address Book (solid)', name: 'address-book', style: 'solid' },
+	{ label: 'Coffee (solid)', name: 'coffee', style: 'solid' },
+	{ label: 'Github (brands)', name: 'github', style: 'brands' },
+	{ label: 'Heart (regular)', name: 'heart', style: 'regular' },
+	{ label: 'Heart (solid)', name: 'heart', style: 'solid' },
+];
+const icons = groupCatalog( fullCatalog );
+
+test( 'groups supported catalog rows by name with base labels and unique counts', () => {
+	const input = [ ...fullCatalog, fullCatalog[ 0 ], { label: 'Pro (light)', name: 'pro', style: 'light' } ];
+	const before = structuredClone( input );
+	const grouped = groupCatalog( input );
+	assert.equal( grouped.length, 4 );
+	assert.deepEqual( grouped.map( ( icon ) => icon.label ), [ 'Address Book', 'Coffee', 'Github', 'Heart' ] );
+	assert.deepEqual( grouped[ 0 ].styles, [ 'solid', 'regular' ] );
+	assert.deepEqual( input, before );
+	assert.deepEqual( groupCatalog( [] ), [] );
+	assert.equal( groupCatalog( fullCatalog.slice( 0, 2 ) ).length, 1 );
+} );
+
+test( 'removes only the trailing Free style suffix', () => {
+	assert.equal( groupCatalog( [ { name: 'example', label: 'Example (alternate) (regular)', style: 'regular' } ] )[ 0 ].label, 'Example (alternate)' );
+	assert.equal( groupCatalog( [ { name: 'example', label: 'Example', style: 'solid' } ] )[ 0 ].label, 'Example' );
+} );
+
+test( 'searches base labels, slugs, and original style-labelled queries without duplicates', () => {
+	for ( const query of [ ' ADDRESS BOOK ', 'address-book', 'Address Book (regular)', 'address book (solid)' ] ) {
+		assert.deepEqual( filterCatalog( icons, query ).map( ( icon ) => icon.name ), [ 'address-book' ] );
+	}
+	assert.deepEqual( filterCatalog( icons, 'REGULAR' ).map( ( icon ) => icon.name ), [ 'address-book', 'heart' ] );
+	assert.deepEqual( filterCatalog( icons, 'missing' ), [] );
+	assert.deepEqual( filterCatalog( icons, '' ), icons );
+} );
+
+test( 'limits unique results after grouping and keeps the selected icon once', () => {
+	const catalog = Array.from( { length: 102 }, ( _, index ) => [ 'regular', 'solid' ].map( ( style ) => ( {
+		name: `icon-${ index }`, label: `Icon ${ index } (${ style })`, style,
+	} ) ) ).flat();
+	const grouped = groupCatalog( catalog );
+	const options = buildCatalogOptions( grouped, '', 'icon-101', 'regular' );
+	assert.equal( options.length, 101 );
+	assert.equal( new Set( options.map( ( option ) => option.value ) ).size, 101 );
+	assert.equal( options[ 0 ].value, 'icon-101' );
+	assert.equal( options[ 100 ].value, 'icon-99' );
+	assert.equal( buildCatalogOptions( grouped, '', 'icon-0', 'solid' ).length, 100 );
+	assert.equal( buildCatalogOptions( grouped, '', 'missing', 'solid' ).length, 100 );
+	assert.deepEqual( buildCatalogOptions( grouped, 'no matches', 'icon-101', 'regular' ).map( ( option ) => option.value ), [ 'icon-101' ] );
+} );
+
+test( 'uses all styles even when a query matches only one original catalog row', () => {
+	const options = buildCatalogOptions( icons, 'Heart (regular)', 'coffee', 'solid' );
+	const heart = options.find( ( option ) => option.value === 'heart' );
+	assert.equal( heart.style, 'solid' );
+	assert.equal( heart.iconLabel, 'Heart' );
+	// WordPress's own label filter must also allow the result through.
+	assert.ok( heart.label.includes( 'Heart (regular)' ) );
+	assert.equal( buildCatalogOptions( icons, '', 'heart', 'solid' ).find( ( option ) => option.value === 'heart' ).label, 'Heart' );
+} );
+
+test( 'preserves supported styles and falls back deterministically for explicit new icons', () => {
+	assert.deepEqual( selectIcon( icons, 'address-book', 'heart', 'regular' ), { iconName: 'address-book', iconStyle: 'regular' } );
+	assert.deepEqual( selectIcon( icons, 'address-book', 'github', 'brands' ), { iconName: 'address-book', iconStyle: 'solid' } );
+	assert.deepEqual( selectIcon( icons, 'coffee', 'heart', 'regular' ), { iconName: 'coffee', iconStyle: 'solid' } );
+	assert.deepEqual( selectIcon( icons, 'github', 'heart', 'regular' ), { iconName: 'github', iconStyle: 'brands' } );
+	const withoutSolid = groupCatalog( [
+		{ name: 'example', label: 'Example (brands)', style: 'brands' },
+		{ name: 'example', label: 'Example (regular)', style: 'regular' },
+	] );
+	assert.equal( selectIcon( withoutSolid, 'example', 'missing', 'unknown' ).iconStyle, 'regular' );
+} );
+
+test( 'each new icon preview uses exactly the style that selecting it will choose', () => {
+	for ( const style of [ 'regular', 'solid', 'brands', '', 'unknown' ] ) {
+		for ( const option of buildCatalogOptions( icons, '', 'missing', style ) ) {
+			assert.equal( option.style, selectIcon( icons, option.value, 'missing', style ).iconStyle );
+		}
 	}
 } );
 
-test( 'filters the icon catalog by label or slug', () => {
-	assert.deepEqual( filterCatalog( catalog, 'REGULAR' ), [ catalog[ 0 ] ] );
-	assert.deepEqual( filterCatalog( catalog, 'coffee' ), [ catalog[ 1 ] ] );
-	assert.deepEqual( filterCatalog( catalog, '' ), catalog );
-} );
-
-test( 'keeps the selected icon available beyond the result limit', () => {
-	const largeCatalog = Array.from( { length: 102 }, ( value, index ) => ( {
-		label: `Icon ${ index }`,
-		name: `icon-${ index }`,
-		style: 'solid',
-	} ) );
-	const options = buildCatalogOptions( largeCatalog, '', 'solid:icon-101' );
-
-	assert.equal( options.length, 101 );
-	assert.deepEqual( options[ 0 ], {
-		label: 'Icon 101',
-		name: 'icon-101',
-		style: 'solid',
-		value: 'solid:icon-101',
-	} );
-	assert.equal(
-		options.filter( ( option ) => 'solid:icon-101' === option.value ).length,
-		1
-	);
-} );
-
-test( 'does not duplicate a selected icon already in the results', () => {
-	const options = buildCatalogOptions( catalog, '', 'regular:address-book' );
-
-	assert.deepEqual( options, [
-		{
-			label: catalog[ 0 ].label,
-			name: 'address-book',
-			style: 'regular',
-			value: 'regular:address-book',
-		},
-		{
-			label: catalog[ 1 ].label,
-			name: 'coffee',
-			style: 'solid',
-			value: 'solid:coffee',
-		},
-	] );
-} );
-
-test( 'parses only supported complete selections', () => {
-	assert.deepEqual( parseSelection( 'regular:address-book' ), {
-		name: 'address-book',
-		style: 'regular',
-	} );
-	assert.equal( parseSelection( 'unsupported:address-book' ), null );
-	assert.equal( parseSelection( 'regular:' ), null );
-	assert.equal( parseSelection( '' ), null );
+test( 'missing and already-selected icons never normalize saved styles', () => {
+	for ( const style of [ 'regular', 'brands', '', 'unknown' ] ) {
+		assert.equal( selectIcon( icons, 'heart', 'heart', style ), null );
+		assert.equal( selectIcon( icons, 'missing', 'heart', style ), null );
+		assert.equal( selectIcon( icons, null, 'heart', style ), null );
+		assert.equal( buildCatalogOptions( icons, 'regular', 'heart', style ).find( ( icon ) => icon.value === 'heart' ).style, style );
+	}
+	assert.deepEqual( buildCatalogOptions( [], '', 'missing', 'unknown' ), [] );
+	assert.deepEqual( selectIcon( icons, 'heart', 'missing', 'unknown' ), { iconName: 'heart', iconStyle: 'solid' } );
 } );
 
 test( 'maps supported styles and defaults safely', () => {

@@ -1,4 +1,4 @@
-import { buildCatalogOptions, getAvailableStyles, parseSelection, styleClass } from './icon-utils.mjs';
+import { buildCatalogOptions, getAvailableStyles, groupCatalog, selectIcon, styleClass } from './icon-utils.mjs';
 
 const { __, sprintf } = wp.i18n;
 const {
@@ -34,7 +34,7 @@ const renderIconOption = ( { item } ) => (
 				width: '1.25em',
 			} }
 		/>
-		<span>{ item.label }</span>
+		<span>{ item.iconLabel }</span>
 	</span>
 );
 
@@ -45,12 +45,12 @@ export default function Edit( { attributes, setAttributes } ) {
 		: 'left';
 	const [ filterValue, setFilterValue ] = useState( '' );
 	const catalog = getCatalog();
-	const selectedValue = `${ iconStyle }:${ iconName }`;
+	const icons = useMemo( () => groupCatalog( catalog ), [ catalog ] );
 	const options = useMemo( () => {
-		return buildCatalogOptions( catalog, filterValue, selectedValue );
-	}, [ catalog, filterValue, selectedValue ] );
+		return buildCatalogOptions( icons, filterValue, iconName, iconStyle );
+	}, [ icons, filterValue, iconName, iconStyle ] );
 	const selectedIcon = catalog.find(
-		( icon ) => `${ icon.style }:${ icon.name }` === selectedValue
+		( icon ) => icon.name === iconName && icon.style === iconStyle
 	);
 	const availableStyles = useMemo(
 		() => getAvailableStyles( catalog, iconName ),
@@ -83,19 +83,11 @@ export default function Edit( { attributes, setAttributes } ) {
 	} );
 
 	const onSelectIcon = ( value ) => {
-		if ( ! value || ! value.includes( ':' ) ) {
-			return;
+		setFilterValue( '' );
+		const selection = selectIcon( icons, value, iconName, iconStyle );
+		if ( selection ) {
+			setAttributes( selection );
 		}
-
-		const selection = parseSelection( value );
-		if ( ! selection ) {
-			return;
-		}
-
-		setAttributes( {
-			iconName: selection.name,
-			iconStyle: selection.style,
-		} );
 	};
 
 	return (
@@ -114,22 +106,35 @@ export default function Edit( { attributes, setAttributes } ) {
 			<InspectorControls>
 				<PanelBody title={ __( 'Icon settings', 'better-font-awesome' ) }>
 					<VStack spacing={ 4 }>
-						<ComboboxControl
-							label={ __( 'Icon', 'better-font-awesome' ) }
-							value={ selectedValue }
-							options={ options }
-							onChange={ onSelectIcon }
-							onFilterValueChange={ setFilterValue }
-							__experimentalRenderItem={ renderIconOption }
-							help={ sprintf(
-								/* translators: %d is the number of available icon and style options. */
-								__(
-									'Search all %d available Font Awesome Free icon and style options.',
-									'better-font-awesome'
-								),
-								catalog.length
-							) }
-						/>
+						<div
+							onBlur={ ( event ) => {
+								if ( ! event.currentTarget.contains( event.relatedTarget ) ) {
+									setFilterValue( '' );
+								}
+							} }
+							onKeyDown={ ( event ) => {
+								if ( event.key === 'Escape' ) {
+									setFilterValue( '' );
+								}
+							} }
+						>
+							<ComboboxControl
+								label={ __( 'Icon', 'better-font-awesome' ) }
+								value={ iconName }
+								options={ options }
+								onChange={ onSelectIcon }
+								onFilterValueChange={ setFilterValue }
+								__experimentalRenderItem={ renderIconOption }
+								help={ sprintf(
+									/* translators: %d is the number of unique selectable icons. */
+									__(
+										'Search all %d available Font Awesome Free icons.',
+										'better-font-awesome'
+									),
+									icons.length
+								) }
+							/>
+						</div>
 						<SelectControl
 							__nextHasNoMarginBottom
 							label={ __( 'Style', 'better-font-awesome' ) }

@@ -47,8 +47,9 @@ BFA 3.1.0 is publicly released and builds on the foundation established by the 2
 
 ### Refine the native block editor experience
 
-- Dedicated Free Style control implemented for the native Icon block, pending review, manual acceptance, and publication. Choices come from the selected icon in the active catalog; existing attributes, rendering, unavailable saved selections, and combined icon search are preserved. This feature has not shipped.
-- Font Awesome Pro integration is the next substantial feature, with its design and scope to be approved separately.
+- Dedicated Free Style control implemented for the native Icon block, pending review, manual acceptance, and publication. Choices come from the selected icon in the active catalog; existing attributes, rendering, unavailable saved selections, and useful icon search are preserved. The Icon picker shows one entry per name; the separate Style control selects its style. This feature has not shipped.
+- Next: site-wide default style with explicit per-block inheritance, preserving legacy content and handling unavailable styles. This is separate from the current picker change.
+- Font Awesome Pro integration follows the default-style and inheritance work, with its design and scope to be approved separately.
 - Refine alignment behavior and other block supports based on editor testing.
 - Decide whether inline icon handling belongs in the block contract without changing saved shortcode compatibility.
 - Extend browser coverage when new block behavior is approved.

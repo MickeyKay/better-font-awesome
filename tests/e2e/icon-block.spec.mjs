@@ -700,7 +700,7 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 	const selectedLabel = await page.evaluate( () => {
 		return window.bfaBlockEditor.icons.find(
 			( icon ) => 'flag' === icon.name && 'solid' === icon.style
-		).label;
+		).label.replace( / \((?:solid|regular|brands)\)$/, '' );
 	} );
 	await expect( iconControl ).toHaveValue( selectedLabel );
 	const catalogHelp = page.getByText(
@@ -995,7 +995,7 @@ async function readIconAttributes( page, clientId ) {
 	return page.evaluate( ( id ) => window.wp.data.select( 'core/block-editor' ).getBlock( id ).attributes, clientId );
 }
 
-test( 'Free Style control switches with the keyboard, synchronizes, and preserves saved attributes', async ( { page } ) => {
+test( 'unique Icon picker and Free Style control synchronize, undo, persist, and render', async ( { page } ) => {
 	const clientId = await openStyleEditor( page, {
 		iconName: 'heart', iconStyle: 'solid', label: 'Favorite',
 		iconJustification: 'right', className: 'retained-class',
@@ -1007,11 +1007,29 @@ test( 'Free Style control switches with the keyboard, synchronizes, and preserve
 	const labelControl = page.getByLabel( 'Accessible label', { exact: true } );
 	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Solid', 'Regular' ] );
 	await expect( styleControl ).toHaveValue( 'solid' );
-	const catalogLabel = ( name, style ) => page.evaluate( ( { name, style } ) =>
-		window.bfaBlockEditor.icons.find( ( icon ) => icon.name === name && icon.style === style ).label,
-	{ name, style } );
+	const catalogLabel = ( name ) => page.evaluate( ( name ) =>
+		window.bfaBlockEditor.icons.find( ( icon ) => icon.name === name ).label.replace( / \((?:solid|regular|brands)\)$/, '' ), name );
 
-	// The full catalog still supplies Solid while the combined search shows Regular only.
+	const uniqueCount = await page.evaluate( () => new Set( window.bfaBlockEditor.icons.map( ( icon ) => icon.name ) ).size );
+	await expect( page.getByText( `Search all ${ uniqueCount } available Font Awesome Free icons.`, { exact: true } ) ).toBeVisible();
+	for ( const query of [ 'Address Book', 'address-book', 'Address Book (regular)' ] ) {
+		await iconControl.click();
+		await iconControl.fill( query );
+		const result = page.getByRole( 'listbox' ).getByRole( 'option', { name: 'Address Book', exact: true } );
+		await expect( result ).toHaveCount( 1 );
+		await expect( result.locator( '.fas.fa-address-book' ) ).toBeVisible();
+		await expect( page.getByRole( 'listbox' ) ).not.toContainText( '(regular)' );
+		await expect( page.getByRole( 'listbox' ) ).not.toContainText( '(solid)' );
+		expect( await readIconAttributes( page, clientId ) ).toEqual( original );
+		await iconControl.press( 'Escape' );
+		await expect( iconControl ).toHaveValue( 'Heart' );
+	}
+	await iconControl.click();
+	await iconControl.fill( 'Heart (regular)' );
+	await labelControl.focus();
+	await expect( iconControl ).toHaveValue( 'Heart' );
+	expect( await readIconAttributes( page, clientId ) ).toEqual( original );
+	// Style-labelled queries find unique icons without changing the saved style.
 	await iconControl.fill( 'regular' );
 	await iconControl.press( 'Escape' );
 	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Solid', 'Regular' ] );
@@ -1023,18 +1041,27 @@ test( 'Free Style control switches with the keyboard, synchronizes, and preserve
 	await styleControl.press( 'Tab' );
 	await expect( labelControl ).toBeFocused();
 	await expect( styleControl ).toHaveValue( 'regular' );
-	await expect( iconControl ).toHaveValue( await catalogLabel( 'heart', 'regular' ) );
+	await expect( iconControl ).toHaveValue( await catalogLabel( 'heart' ) );
 	expect( await readIconAttributes( page, clientId ) ).toEqual( { ...original, iconStyle: 'regular' } );
 
 	const chooseIcon = async ( name, style ) => {
-		const label = await catalogLabel( name, style );
+		const label = await catalogLabel( name );
 		await iconControl.click();
 		await iconControl.fill( label );
-		await page.getByRole( 'option', { name: label, exact: true } ).click();
+		const result = page.getByRole( 'listbox' ).getByRole( 'option', { name: label, exact: true } );
+		await expect( result ).toHaveCount( 1 );
+		await expect( result.locator( `.${ { solid: 'fas', regular: 'far', brands: 'fab' }[ style ] }.fa-${ name }` ) ).toBeVisible();
+		await result.click();
 		await expect( styleControl ).toHaveValue( style );
 		expect( await readIconAttributes( page, clientId ) ).toEqual( { ...original, iconName: name, iconStyle: style } );
 	};
-	await chooseIcon( 'heart', 'solid' );
+	await chooseIcon( 'address-book', 'regular' );
+	await page.getByRole( 'button', { name: 'Undo', exact: true } ).click();
+	await expect( iconControl ).toHaveValue( 'Heart' );
+	await expect( styleControl ).toHaveValue( 'regular' );
+	await page.getByRole( 'button', { name: 'Redo', exact: true } ).click();
+	await expect( iconControl ).toHaveValue( 'Address Book' );
+	await expect( styleControl ).toHaveValue( 'regular' );
 	await expect( styleControl ).toBeEnabled();
 	await chooseIcon( 'github', 'brands' );
 	await expect( styleControl ).toBeDisabled();
@@ -1042,8 +1069,9 @@ test( 'Free Style control switches with the keyboard, synchronizes, and preserve
 	await chooseIcon( 'arrow-right', 'solid' );
 	await expect( styleControl ).toBeDisabled();
 	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Solid' ] );
-	await chooseIcon( 'heart', 'regular' );
+	await chooseIcon( 'heart', 'solid' );
 	await expect( styleControl ).toBeEnabled();
+	await styleControl.selectOption( 'regular' );
 
 	const post = await page.evaluate( async () => {
 		window.wp.data.dispatch( 'core/editor' ).editPost( { title: 'Free Style acceptance', status: 'publish' } );
@@ -1059,7 +1087,7 @@ test( 'Free Style control switches with the keyboard, synchronizes, and preserve
 	} );
 	expect( saved ).toEqual( { attributes: { ...original, iconStyle: 'regular' }, valid: true } );
 	await expect( styleControl ).toHaveValue( 'regular' );
-	await expect( iconControl ).toHaveValue( await catalogLabel( 'heart', 'regular' ) );
+	await expect( iconControl ).toHaveValue( await catalogLabel( 'heart' ) );
 	await test.info().attach( 'free-style-selector', { body: await page.screenshot(), contentType: 'image/png' } );
 	await page.goto( post.link );
 	const block = page.locator( '.wp-block-better-font-awesome-icon.retained-class' );
@@ -1115,7 +1143,44 @@ test( 'Free Style control preserves unavailable selections until an explicit cho
 	await expect( unavailable ).toBeVisible();
 	await expect( styleControl ).toHaveValue( '' );
 	expect( await readIconAttributes( page, savedId ) ).toEqual( { ...original, iconStyle: '' } );
+	const iconControl = page.getByLabel( 'Icon', { exact: true } );
+	await iconControl.click();
+	await iconControl.fill( 'Heart (regular)' );
+	await page.getByRole( 'listbox' ).getByRole( 'option', { name: 'Heart', exact: true } ).click();
+	await expect( iconControl ).toHaveValue( 'Heart' );
+	await expect( unavailable ).toBeVisible();
+	expect( await readIconAttributes( page, savedId ) ).toEqual( { ...original, iconStyle: '' } );
 	await styleControl.selectOption( 'regular' );
 	await expect( unavailable ).toHaveCount( 0 );
 	expect( await readIconAttributes( page, savedId ) ).toEqual( { ...original, iconStyle: 'regular' } );
+} );
+
+
+test( 'catalog changes and missing icons preserve saved content until explicit recovery', async ( { page } ) => {
+	const clientId = await openStyleEditor( page, { iconName: 'not-in-the-catalog', iconStyle: 'legacy-style', label: 'Keep me', iconJustification: 'right' } );
+	const original = await readIconAttributes( page, clientId );
+	const iconControl = page.getByLabel( 'Icon', { exact: true } );
+	const styleControl = page.getByRole( 'combobox', { name: 'Style', exact: true } );
+	await expect( styleControl ).toHaveValue( 'legacy-style' );
+	const catalog = await page.evaluate( () => window.bfaBlockEditor.icons );
+	await page.evaluate( () => { window.bfaBlockEditor.icons = []; } );
+	await iconControl.fill( 'Heart' );
+	await expect( page.getByText( 'Search all 0 available Font Awesome Free icons.', { exact: true } ) ).toBeVisible();
+	expect( await readIconAttributes( page, clientId ) ).toEqual( original );
+	await page.evaluate( ( icons ) => { window.bfaBlockEditor.icons = icons; }, catalog );
+	await iconControl.fill( 'Heart (regular)' );
+	const heart = page.getByRole( 'listbox' ).getByRole( 'option', { name: 'Heart', exact: true } );
+	await expect( heart ).toHaveCount( 1 );
+	await expect( heart.locator( '.fas.fa-heart' ) ).toBeVisible();
+	expect( await readIconAttributes( page, clientId ) ).toEqual( original );
+	await heart.click();
+	await expect( iconControl ).toHaveValue( 'Heart' );
+	await expect( styleControl ).toHaveValue( 'solid' );
+	expect( await readIconAttributes( page, clientId ) ).toEqual( { ...original, iconName: 'heart', iconStyle: 'solid' } );
+	await page.getByRole( 'button', { name: 'Undo', exact: true } ).click();
+	await expect( styleControl ).toHaveValue( 'legacy-style' );
+	expect( await readIconAttributes( page, clientId ) ).toEqual( original );
+	await page.getByRole( 'button', { name: 'Redo', exact: true } ).click();
+	await expect( iconControl ).toHaveValue( 'Heart' );
+	await expect( styleControl ).toHaveValue( 'solid' );
 } );

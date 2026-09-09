@@ -3,58 +3,73 @@ const STYLE_CLASSES = {
 	regular: 'far',
 	solid: 'fas',
 };
+const SUPPORTED_STYLES = [ 'solid', 'regular', 'brands' ];
 
 export function getAvailableStyles( catalog, iconName ) {
-	return [ 'solid', 'regular', 'brands' ].filter( ( style ) =>
+	return SUPPORTED_STYLES.filter( ( style ) =>
 		catalog.some( ( icon ) => icon.name === iconName && icon.style === style )
 	);
 }
 
-export function filterCatalog( catalog, filterValue ) {
-	const needle = filterValue.trim().toLowerCase();
-
-	return catalog.filter( ( icon ) => {
-		return (
-			! needle ||
-			icon.label.toLowerCase().includes( needle ) ||
-			icon.name.includes( needle )
-		);
-	} );
+export function groupCatalog( catalog ) {
+	const icons = new Map();
+	for ( const icon of catalog ) {
+		if ( ! SUPPORTED_STYLES.includes( icon.style ) ) {
+			continue;
+		}
+		if ( ! icons.has( icon.name ) ) {
+			icons.set( icon.name, {
+				name: icon.name,
+				label: icon.label.replace( / \((?:solid|regular|brands)\)$/, '' ),
+				styles: [],
+				searchLabels: [],
+			} );
+		}
+		const entry = icons.get( icon.name );
+		entry.styles = SUPPORTED_STYLES.filter( ( style ) => style === icon.style || entry.styles.includes( style ) );
+		entry.searchLabels.push( icon.label );
+	}
+	return Array.from( icons.values() );
 }
 
-export function buildCatalogOptions( catalog, filterValue, selectedValue, limit = 100 ) {
-	const icons = filterCatalog( catalog, filterValue ).slice( 0, limit );
-	const selectedIcon = catalog.find( ( icon ) => {
-		return `${ icon.style }:${ icon.name }` === selectedValue;
-	} );
-	const includesSelectedIcon = icons.some( ( icon ) => {
-		return `${ icon.style }:${ icon.name }` === selectedValue;
-	} );
+export function filterCatalog( icons, filterValue ) {
+	const needle = filterValue.trim().toLowerCase();
+	return icons.filter( ( icon ) => ! needle ||
+		icon.label.toLowerCase().includes( needle ) ||
+		icon.name.includes( needle ) ||
+		icon.searchLabels.some( ( label ) => label.toLowerCase().includes( needle ) )
+	);
+}
 
-	if ( selectedIcon && ! includesSelectedIcon ) {
+function selectionStyle( icon, currentStyle ) {
+	return icon.styles.includes( currentStyle ) ? currentStyle : icon.styles[ 0 ];
+}
+
+export function selectIcon( icons, name, selectedName, currentStyle ) {
+	const icon = icons.find( ( item ) => item.name === name );
+	if ( ! icon || name === selectedName ) {
+		return null;
+	}
+	return { iconName: name, iconStyle: selectionStyle( icon, currentStyle ) };
+}
+
+export function buildCatalogOptions( catalog, filterValue, selectedName, currentStyle, limit = 100 ) {
+	const icons = filterCatalog( catalog, filterValue ).slice( 0, limit );
+	const selectedIcon = catalog.find( ( icon ) => icon.name === selectedName );
+	if ( selectedIcon && ! icons.includes( selectedIcon ) ) {
 		icons.unshift( selectedIcon );
 	}
-
 	return icons.map( ( icon ) => ( {
-		label: icon.label,
+		// WP 6.5 also filters options by label. Retain alias/style query matches
+		// internally; renderIconOption displays only iconLabel. Clear the search
+		// when leaving the picker so its closed value also uses the base label.
+		label: filterValue && ! icon.label.toLowerCase().includes( filterValue.trim().toLowerCase() )
+			? `${ icon.label } ${ filterValue.trim() }` : icon.label,
+		iconLabel: icon.label,
 		name: icon.name,
-		style: icon.style,
-		value: `${ icon.style }:${ icon.name }`,
+		style: icon.name === selectedName ? currentStyle : selectionStyle( icon, currentStyle ),
+		value: icon.name,
 	} ) );
-}
-
-export function parseSelection( value ) {
-	if ( ! value || ! value.includes( ':' ) ) {
-		return null;
-	}
-
-	const [ style, ...nameParts ] = value.split( ':' );
-	const name = nameParts.join( ':' );
-	if ( ! STYLE_CLASSES[ style ] || ! name ) {
-		return null;
-	}
-
-	return { name, style };
 }
 
 export function styleClass( style ) {
