@@ -140,7 +140,7 @@ export default function Edit( { attributes, setAttributes } ) {
 							label={ __( 'Style', 'better-font-awesome' ) }
 							value={ iconStyle }
 							options={ styleOptions }
-							disabled={ availableStyles.length <= 1 }
+							disabled={ availableStyles.length === 0 || ( styleAvailable && availableStyles.length === 1 ) }
 							onChange={ ( value ) => {
 								if ( availableStyles.includes( value ) ) {
 									setAttributes( { iconStyle: value } );

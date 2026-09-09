@@ -1112,6 +1112,7 @@ test( 'Free Style control preserves unavailable selections until an explicit cho
 	for ( const selection of [
 		{ iconName: 'not-in-the-catalog', iconStyle: 'solid' },
 		{ iconName: 'github', iconStyle: 'regular' },
+		{ iconName: 'arrow-right', iconStyle: 'regular' },
 		{ iconName: 'heart', iconStyle: 'brands' },
 		{ iconName: 'heart', iconStyle: 'legacy-style' },
 		{ iconName: 'heart', iconStyle: '' },
@@ -1121,12 +1122,20 @@ test( 'Free Style control preserves unavailable selections until an explicit cho
 		await expect( styleControl ).toHaveValue( selection.iconStyle );
 		await expect( styleControl.locator( 'option:checked' ) ).toHaveText( /^Unavailable \(/ );
 		await expect( styleControl.locator( 'option:checked' ) ).toBeDisabled();
-		if ( [ 'not-in-the-catalog', 'github' ].includes( selection.iconName ) ) {
+		if ( selection.iconName === 'not-in-the-catalog' ) {
 			await expect( styleControl ).toBeDisabled();
 		} else {
 			await expect( styleControl ).toBeEnabled();
 		}
 		expect( await readIconAttributes( page, clientId ) ).toEqual( { ...original, ...selection } );
+		const recoveryStyle = { github: 'brands', 'arrow-right': 'solid' }[ selection.iconName ];
+		if ( recoveryStyle ) {
+			await styleControl.selectOption( recoveryStyle );
+			await expect( unavailable ).toHaveCount( 0 );
+			await expect( styleControl ).toHaveValue( recoveryStyle );
+			await expect( styleControl ).toBeDisabled();
+			expect( await readIconAttributes( page, clientId ) ).toEqual( { ...original, ...selection, iconStyle: recoveryStyle } );
+		}
 	}
 	// Save and reload an unavailable style, including all unrelated attributes.
 	await page.evaluate( async () => {
