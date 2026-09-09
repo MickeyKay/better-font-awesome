@@ -4,6 +4,12 @@ const STYLE_CLASSES = {
 	solid: 'fas',
 };
 
+export function getAvailableStyles( catalog, iconName ) {
+	return [ 'solid', 'regular', 'brands' ].filter( ( style ) =>
+		catalog.some( ( icon ) => icon.name === iconName && icon.style === style )
+	);
+}
+
 export function filterCatalog( catalog, filterValue ) {
 	const needle = filterValue.trim().toLowerCase();
 

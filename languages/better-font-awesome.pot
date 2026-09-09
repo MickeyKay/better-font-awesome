@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-07T22:09:15+00:00\n"
+"POT-Creation-Date: 2026-09-09T18:03:21+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: better-font-awesome\n"
@@ -155,30 +155,56 @@ msgstr ""
 msgid "Font Awesome metadata refresh could not be scheduled."
 msgstr ""
 
-#: src/edit.js:89
+#: src/edit.js:60
+msgid "Solid"
+msgstr ""
+
+#: src/edit.js:61
+msgid "Regular"
+msgstr ""
+
+#: src/edit.js:62
+msgid "Brands"
+msgstr ""
+
+#. translators: %s is the saved icon style.
+#: src/edit.js:73
+#, js-format
+msgid "Unavailable (%s)"
+msgstr ""
+
+#: src/edit.js:115
 msgid "Icon settings"
 msgstr ""
 
-#: src/edit.js:92
+#: src/edit.js:118
 msgid "Icon"
 msgstr ""
 
 #. translators: %d is the number of available icon and style options.
-#: src/edit.js:100
+#: src/edit.js:126
 #, js-format
 msgid "Search all %d available Font Awesome Free icon and style options."
 msgstr ""
 
-#: src/edit.js:108
+#: src/edit.js:135
+msgid "Style"
+msgstr ""
+
+#: src/edit.js:144
+msgid "This icon or style is unavailable in the current catalog."
+msgstr ""
+
+#: src/edit.js:150
 msgid "Accessible label"
 msgstr ""
 
-#: src/edit.js:111
+#: src/edit.js:153
 msgid "Leave empty when the icon is decorative."
 msgstr ""
 
 #. translators: %s is the selected icon label.
-#: src/edit.js:127
+#: src/edit.js:169
 #, js-format
 msgid "Font Awesome icon: %s"
 msgstr ""

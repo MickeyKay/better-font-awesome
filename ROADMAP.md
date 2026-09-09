@@ -16,7 +16,7 @@ This roadmap describes direction, not delivery dates. Concrete defects and suppo
 
 ## Publicly shipped foundation
 
-BFA 3.0.1 is publicly released and builds on the foundation established by the 2.1 generation:
+BFA 3.1.0 is publicly released and builds on the foundation established by the 2.1 generation:
 
 - Reliable asynchronous Font Awesome 5 Free metadata updates with cached and bundled fallbacks.
 - Current supported WordPress and PHP compatibility coverage.
@@ -26,10 +26,11 @@ BFA 3.0.1 is publicly released and builds on the foundation established by the 2
 - A native API v3 dynamic icon block registered through `block.json`, with semantic attributes, server-side rendering, searchable Free icon selection, accessible decorative or labelled modes, and browser coverage.
 - A channel-aware BFAL integration that defaults to Font Awesome 7 Free, serves packaged Font Awesome 7 assets immediately, refreshes compatible releases in the background, and preserves Font Awesome 4 and 5 content compatibility.
 - The BFAL 3.0.2 and BFA 3.0.1 corrective sequence for the cross-major legacy-transient warning.
+- Optional bundled local Font Awesome 7 Free delivery, shipped in BFA 3.1.0 with BFAL 3.1.0. Automatic delivery and asynchronous metadata updates remain available.
 
 ## Now
 
-### Monitor and consolidate the 3.0 release
+### Monitor and consolidate the 3.1 release
 
 - Triage new support reports against the released package before changing behavior.
 - Close or update legacy GitHub issues whose underlying work shipped in 3.0.
@@ -46,7 +47,8 @@ BFA 3.0.1 is publicly released and builds on the foundation established by the 2
 
 ### Refine the native block editor experience
 
-- Add a dedicated Style control to the native Icon block, populated dynamically from the Free styles available for the selected icon. Preserve the existing `iconStyle` attribute, rendering behavior, saved content, and combined icon-search compatibility. Show only available Free styles such as Solid, Regular, and Brands. Do not expose Light, Thin, Duotone, Sharp, or other Pro-only families until Font Awesome Pro support is explicitly designed and approved.
+- Dedicated Free Style control implemented for the native Icon block, pending review, manual acceptance, and publication. Choices come from the selected icon in the active catalog; existing attributes, rendering, unavailable saved selections, and combined icon search are preserved. This feature has not shipped.
+- Font Awesome Pro integration is the next substantial feature, with its design and scope to be approved separately.
 - Refine alignment behavior and other block supports based on editor testing.
 - Decide whether inline icon handling belongs in the block contract without changing saved shortcode compatibility.
 - Extend browser coverage when new block behavior is approved.
@@ -64,14 +66,13 @@ BFA 3.0.1 is publicly released and builds on the foundation established by the 2
 
 ### Improve privacy, diagnostics, and integrations
 
-- Implemented optional bundled local FA7 Free delivery: matching catalog, CSS, compatibility assets, and fonts; effective-mode settings information; no background refresh work in local mode; retained metadata for returning to automatic. Adopted exact public BFAL 3.1.0 and restored strict Composer validation. Remaining release gates: pass hosted compatibility/package checks and complete production-package manual QA. No asset downloader or uploads cache. Style-selector work remains subsequent scope.
 - Add narrowly scoped diagnostics for active Font Awesome versions, duplicate assets, metadata freshness, cron health, and common integration conflicts.
 - Document and test boundaries with themes, builders, ACF fields, widgets, Classic Editor, and hybrid editor screens.
 - Measure initialization and picker performance before changing the shortcode or icon-catalog architecture.
 
 ## Later
 
-- Font Awesome Pro and custom kit support with secure credential handling.
+- Custom kit support with secure credential handling, following separately scoped Pro integration.
 - Advanced styling and composition after the basic block and Free asset path are stable.
 - Broader builder-specific integrations where evidence shows durable user value.
 

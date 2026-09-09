@@ -1,4 +1,4 @@
-import { buildCatalogOptions, parseSelection, styleClass } from './icon-utils.mjs';
+import { buildCatalogOptions, getAvailableStyles, parseSelection, styleClass } from './icon-utils.mjs';
 
 const { __, sprintf } = wp.i18n;
 const {
@@ -10,6 +10,7 @@ const {
 const {
 	ComboboxControl,
 	PanelBody,
+	SelectControl,
 	TextControl,
 	__experimentalVStack: VStack,
 } = wp.components;
@@ -51,6 +52,31 @@ export default function Edit( { attributes, setAttributes } ) {
 	const selectedIcon = catalog.find(
 		( icon ) => `${ icon.style }:${ icon.name }` === selectedValue
 	);
+	const availableStyles = useMemo(
+		() => getAvailableStyles( catalog, iconName ),
+		[ catalog, iconName ]
+	);
+	const styleLabels = {
+		solid: __( 'Solid', 'better-font-awesome' ),
+		regular: __( 'Regular', 'better-font-awesome' ),
+		brands: __( 'Brands', 'better-font-awesome' ),
+	};
+	const styleAvailable = availableStyles.includes( iconStyle );
+	const styleOptions = availableStyles.map( ( style ) => ( {
+		label: styleLabels[ style ],
+		value: style,
+	} ) );
+	if ( ! styleAvailable ) {
+		styleOptions.unshift( {
+			label: sprintf(
+				/* translators: %s is the saved icon style. */
+				__( 'Unavailable (%s)', 'better-font-awesome' ),
+				styleLabels[ iconStyle ] ?? iconStyle
+			),
+			value: iconStyle,
+			disabled: true,
+		} );
+	}
 	const iconLabel = selectedIcon?.label ?? iconName;
 	const blockProps = useBlockProps( {
 		className: `bfa-icon-block-editor items-justified-${ justification }`,
@@ -102,6 +128,22 @@ export default function Edit( { attributes, setAttributes } ) {
 									'better-font-awesome'
 								),
 								catalog.length
+							) }
+						/>
+						<SelectControl
+							__nextHasNoMarginBottom
+							label={ __( 'Style', 'better-font-awesome' ) }
+							value={ iconStyle }
+							options={ styleOptions }
+							disabled={ availableStyles.length <= 1 }
+							onChange={ ( value ) => {
+								if ( availableStyles.includes( value ) ) {
+									setAttributes( { iconStyle: value } );
+								}
+							} }
+							help={ ! styleAvailable && __(
+								'This icon or style is unavailable in the current catalog.',
+								'better-font-awesome'
 							) }
 						/>
 						<TextControl

@@ -970,3 +970,154 @@ test( 'inserts, persists, and renders a native icon block', async ( { page } ) =
 	expect( fontAwesomeWebfontFailures ).toEqual( [] );
 	expect( metadataRequests ).toEqual( [] );
 } );
+
+async function openStyleEditor( page, attributes ) {
+	page.setDefaultTimeout( 15000 );
+	await page.goto( '/wp-login.php' );
+	// Wait for WordPress's delayed autofocus before filling the password.
+	await expect( page.locator( '#user_login' ) ).toBeFocused();
+	await page.locator( '#user_login' ).fill( 'admin' );
+	await page.locator( '#user_pass' ).fill( 'password' );
+	await page.locator( '#wp-submit' ).click();
+	await expect( page.locator( '#wpadminbar' ) ).toBeVisible();
+	await page.goto( '/wp-admin/post-new.php' );
+	await page.waitForFunction( () => Boolean( window.wp?.blocks?.getBlockType( 'better-font-awesome/icon' ) ) );
+	await dismissWelcomeModal( page );
+	return page.evaluate( ( attributes ) => {
+		const block = window.wp.blocks.createBlock( 'better-font-awesome/icon', attributes );
+		window.wp.data.dispatch( 'core/block-editor' ).insertBlocks( [ block ] );
+		window.wp.data.dispatch( 'core/block-editor' ).selectBlock( block.clientId );
+		return block.clientId;
+	}, attributes );
+}
+
+async function readIconAttributes( page, clientId ) {
+	return page.evaluate( ( id ) => window.wp.data.select( 'core/block-editor' ).getBlock( id ).attributes, clientId );
+}
+
+test( 'Free Style control switches with the keyboard, synchronizes, and preserves saved attributes', async ( { page } ) => {
+	const clientId = await openStyleEditor( page, {
+		iconName: 'heart', iconStyle: 'solid', label: 'Favorite',
+		iconJustification: 'right', className: 'retained-class',
+		style: { color: { text: '#123456' }, typography: { fontSize: '48px' }, spacing: { padding: { top: '12px' } } },
+	} );
+	const original = await readIconAttributes( page, clientId );
+	const iconControl = page.getByLabel( 'Icon', { exact: true } );
+	const styleControl = page.getByRole( 'combobox', { name: 'Style', exact: true } );
+	const labelControl = page.getByLabel( 'Accessible label', { exact: true } );
+	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Solid', 'Regular' ] );
+	await expect( styleControl ).toHaveValue( 'solid' );
+	const catalogLabel = ( name, style ) => page.evaluate( ( { name, style } ) =>
+		window.bfaBlockEditor.icons.find( ( icon ) => icon.name === name && icon.style === style ).label,
+	{ name, style } );
+
+	// The full catalog still supplies Solid while the combined search shows Regular only.
+	await iconControl.fill( 'regular' );
+	await iconControl.press( 'Escape' );
+	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Solid', 'Regular' ] );
+	await labelControl.focus();
+	await labelControl.press( 'Shift+Tab' );
+	await expect( styleControl ).toBeFocused();
+	// Native select type-ahead works in Chromium on both macOS and Linux.
+	await styleControl.press( 'r' );
+	await styleControl.press( 'Tab' );
+	await expect( labelControl ).toBeFocused();
+	await expect( styleControl ).toHaveValue( 'regular' );
+	await expect( iconControl ).toHaveValue( await catalogLabel( 'heart', 'regular' ) );
+	expect( await readIconAttributes( page, clientId ) ).toEqual( { ...original, iconStyle: 'regular' } );
+
+	const chooseIcon = async ( name, style ) => {
+		const label = await catalogLabel( name, style );
+		await iconControl.click();
+		await iconControl.fill( label );
+		await page.getByRole( 'option', { name: label, exact: true } ).click();
+		await expect( styleControl ).toHaveValue( style );
+		expect( await readIconAttributes( page, clientId ) ).toEqual( { ...original, iconName: name, iconStyle: style } );
+	};
+	await chooseIcon( 'heart', 'solid' );
+	await expect( styleControl ).toBeEnabled();
+	await chooseIcon( 'github', 'brands' );
+	await expect( styleControl ).toBeDisabled();
+	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Brands' ] );
+	await chooseIcon( 'arrow-right', 'solid' );
+	await expect( styleControl ).toBeDisabled();
+	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Solid' ] );
+	await chooseIcon( 'heart', 'regular' );
+	await expect( styleControl ).toBeEnabled();
+
+	const post = await page.evaluate( async () => {
+		window.wp.data.dispatch( 'core/editor' ).editPost( { title: 'Free Style acceptance', status: 'publish' } );
+		await window.wp.data.dispatch( 'core/editor' ).savePost();
+		return { id: window.wp.data.select( 'core/editor' ).getCurrentPostId(), link: window.wp.data.select( 'core/editor' ).getPermalink() };
+	} );
+	await page.reload();
+	await page.waitForFunction( () => window.wp?.data?.select( 'core/block-editor' ).getBlocks().length );
+	const saved = await page.evaluate( () => {
+		const block = window.wp.data.select( 'core/block-editor' ).getBlocks()[ 0 ];
+		window.wp.data.dispatch( 'core/block-editor' ).selectBlock( block.clientId );
+		return { attributes: block.attributes, valid: block.isValid };
+	} );
+	expect( saved ).toEqual( { attributes: { ...original, iconStyle: 'regular' }, valid: true } );
+	await expect( styleControl ).toHaveValue( 'regular' );
+	await expect( iconControl ).toHaveValue( await catalogLabel( 'heart', 'regular' ) );
+	await test.info().attach( 'free-style-selector', { body: await page.screenshot(), contentType: 'image/png' } );
+	await page.goto( post.link );
+	const block = page.locator( '.wp-block-better-font-awesome-icon.retained-class' );
+	await expect( block ).toHaveClass( /retained-class/ );
+	await expect( block ).toHaveClass( /items-justified-right/ );
+	await expect( block ).toHaveCSS( 'color', 'rgb(18, 52, 86)' );
+	// The theme's fluid typography can round the rendered size slightly.
+	expect( await block.evaluate( ( element ) => parseFloat( getComputedStyle( element ).fontSize ) ) ).toBeCloseTo( 48, 0 );
+	await expect( block ).toHaveCSS( 'padding-top', '12px' );
+	const icon = block.locator( '.far.fa-heart' );
+	await expect( icon ).toBeVisible();
+	await expect( block ).toHaveAttribute( 'aria-label', 'Favorite' );
+	await expect( block ).toHaveAttribute( 'role', 'img' );
+	await expect( icon ).toHaveCSS( 'font-weight', '400' );
+	const faces = await loadFontAwesomeFaces( page );
+	expect( faces.every( ( face ) => face.status === 'fulfilled' && face.loaded > 0 ) ).toBe( true );
+} );
+
+test( 'Free Style control preserves unavailable selections until an explicit choice', async ( { page } ) => {
+	const clientId = await openStyleEditor( page, { iconName: 'heart', iconStyle: 'solid', label: 'Keep me', iconJustification: 'center' } );
+	const original = await readIconAttributes( page, clientId );
+	const styleControl = page.getByRole( 'combobox', { name: 'Style', exact: true } );
+	const unavailable = page.getByText( 'This icon or style is unavailable in the current catalog.', { exact: true } );
+	for ( const selection of [
+		{ iconName: 'not-in-the-catalog', iconStyle: 'solid' },
+		{ iconName: 'github', iconStyle: 'regular' },
+		{ iconName: 'heart', iconStyle: 'brands' },
+		{ iconName: 'heart', iconStyle: 'legacy-style' },
+		{ iconName: 'heart', iconStyle: '' },
+	] ) {
+		await page.evaluate( ( { clientId, selection } ) => window.wp.data.dispatch( 'core/block-editor' ).updateBlockAttributes( clientId, selection ), { clientId, selection } );
+		await expect( unavailable ).toBeVisible();
+		await expect( styleControl ).toHaveValue( selection.iconStyle );
+		await expect( styleControl.locator( 'option:checked' ) ).toHaveText( /^Unavailable \(/ );
+		await expect( styleControl.locator( 'option:checked' ) ).toBeDisabled();
+		if ( [ 'not-in-the-catalog', 'github' ].includes( selection.iconName ) ) {
+			await expect( styleControl ).toBeDisabled();
+		} else {
+			await expect( styleControl ).toBeEnabled();
+		}
+		expect( await readIconAttributes( page, clientId ) ).toEqual( { ...original, ...selection } );
+	}
+	// Save and reload an unavailable style, including all unrelated attributes.
+	await page.evaluate( async () => {
+		window.wp.data.dispatch( 'core/editor' ).editPost( { title: 'Unavailable Free Style acceptance' } );
+		await window.wp.data.dispatch( 'core/editor' ).savePost();
+	} );
+	await page.reload();
+	await page.waitForFunction( () => window.wp?.data?.select( 'core/block-editor' ).getBlocks().length );
+	const savedId = await page.evaluate( () => {
+		const block = window.wp.data.select( 'core/block-editor' ).getBlocks()[ 0 ];
+		window.wp.data.dispatch( 'core/block-editor' ).selectBlock( block.clientId );
+		return block.clientId;
+	} );
+	await expect( unavailable ).toBeVisible();
+	await expect( styleControl ).toHaveValue( '' );
+	expect( await readIconAttributes( page, savedId ) ).toEqual( { ...original, iconStyle: '' } );
+	await styleControl.selectOption( 'regular' );
+	await expect( unavailable ).toHaveCount( 0 );
+	expect( await readIconAttributes( page, savedId ) ).toEqual( { ...original, iconStyle: 'regular' } );
+} );
