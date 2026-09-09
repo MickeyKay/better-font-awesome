@@ -5,7 +5,7 @@ Donate link: https://mickeykay.me
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.1.0
+Stable tag: 3.2.0
 License: GPLv2+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,7 +30,13 @@ A built-in fallback means icons work immediately. Better Font Awesome automatica
 
 = Native Icon block =
 
-In the Block Editor, insert the **Font Awesome Icon** block. Choose an icon and available Free style, then use WordPress controls for font size, text color, margin, padding, and left, center, or right alignment. Add an accessible label when the icon communicates meaning, or leave it empty for a decorative icon.
+In the Block Editor, insert the **Font Awesome Icon** block. Choose an icon once in the Icon picker, then select an available Free style in the Style control. Use WordPress controls for font size, text color, margin, padding, and left, center, or right alignment. Add an accessible label when the icon communicates meaning, or leave it empty for a decorative icon.
+
+Set **Default block icon style** to Solid or Regular under **Settings > Better Font Awesome**. New blocks added through the standard inserter follow **Site default**. Existing icons retain their styling unless you explicitly choose **Site default**; individual blocks can override it with an available style.
+
+If the default style is unavailable for an icon, the block uses Solid, then Regular, then Brands, choosing the first available style. Brand-only icons stay Brands. The Style control shows the effective style. Missing icons and unavailable explicitly saved styles keep their saved selections until you change them.
+
+Changing the default updates inherited icons without rewriting posts. Refresh page caches and reopen an already open editor to see the change. If you downgrade to an older BFA version, inherited styles render as Solid. Choose explicit supported styles before downgrading if their appearance must stay the same.
 
 The Icon block is a standalone block that works in layouts such as Groups, Rows, and Columns. To place an icon directly within a line of text, use the shortcode.
 
@@ -121,6 +127,11 @@ If Better Font Awesome helps your site, please consider leaving a brief [WordPre
 
 == Changelog ==
 
+= 3.2.0 =
+* Choose an icon once, then select its available Free style with a dedicated Style control.
+* Set a default block icon style centrally. New blocks added through the standard inserter follow **Site default**, and individual blocks can override it.
+* Existing icons retain their styling unless explicitly opted in. Changing the default updates inherited icons without rewriting posts.
+
 = 3.1.0 =
 * Adds the optional **Serve Font Awesome locally** setting for loading the bundled Font Awesome Free catalog, CSS, and fonts from your site.
 * Keeps automatic delivery as the default. When local delivery is enabled, new icons arrive through plugin updates.
@@ -136,6 +147,9 @@ If Better Font Awesome helps your site, please consider leaving a brief [WordPre
 Older release history is preserved in the project's [historical changelog](https://github.com/MickeyKay/better-font-awesome/blob/master/docs/historical-changelog.md).
 
 == Upgrade Notice ==
+
+= 3.2.0 =
+Adds separate icon and Free style selection and a central default for new blocks. Existing icons keep their styling unless opted in; individual blocks can override the default.
 
 = 3.1.0 =
 Adds optional **Serve Font Awesome locally** delivery. Automatic delivery remains the default; local icons update through plugin updates. Existing settings and content are preserved.
