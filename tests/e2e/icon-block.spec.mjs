@@ -987,6 +987,7 @@ async function openStyleEditor( page, attributes ) {
 		const block = window.wp.blocks.createBlock( 'better-font-awesome/icon', attributes );
 		window.wp.data.dispatch( 'core/block-editor' ).insertBlocks( [ block ] );
 		window.wp.data.dispatch( 'core/block-editor' ).selectBlock( block.clientId );
+		window.wp.data.dispatch( 'core/edit-post' ).openGeneralSidebar( 'edit-post/block' );
 		return block.clientId;
 	}, attributes );
 }
@@ -1005,7 +1006,7 @@ test( 'unique Icon picker and Free Style control synchronize, undo, persist, and
 	const iconControl = page.getByLabel( 'Icon', { exact: true } );
 	const styleControl = page.getByRole( 'combobox', { name: 'Style', exact: true } );
 	const labelControl = page.getByLabel( 'Accessible label', { exact: true } );
-	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Solid', 'Regular' ] );
+	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Solid)', 'Solid', 'Regular' ] );
 	await expect( styleControl ).toHaveValue( 'solid' );
 	const catalogLabel = ( name ) => page.evaluate( ( name ) =>
 		window.bfaBlockEditor.icons.find( ( icon ) => icon.name === name ).label.replace( / \((?:solid|regular|brands)\)$/, '' ), name );
@@ -1032,7 +1033,7 @@ test( 'unique Icon picker and Free Style control synchronize, undo, persist, and
 	// Style-labelled queries find unique icons without changing the saved style.
 	await iconControl.fill( 'regular' );
 	await iconControl.press( 'Escape' );
-	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Solid', 'Regular' ] );
+	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Solid)', 'Solid', 'Regular' ] );
 	await labelControl.focus();
 	await labelControl.press( 'Shift+Tab' );
 	await expect( styleControl ).toBeFocused();
@@ -1064,11 +1065,11 @@ test( 'unique Icon picker and Free Style control synchronize, undo, persist, and
 	await expect( styleControl ).toHaveValue( 'regular' );
 	await expect( styleControl ).toBeEnabled();
 	await chooseIcon( 'github', 'brands' );
-	await expect( styleControl ).toBeDisabled();
-	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Brands' ] );
+	await expect( styleControl ).toBeEnabled();
+	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Brands)', 'Brands' ] );
 	await chooseIcon( 'arrow-right', 'solid' );
-	await expect( styleControl ).toBeDisabled();
-	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Solid' ] );
+	await expect( styleControl ).toBeEnabled();
+	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Solid)', 'Solid' ] );
 	await chooseIcon( 'heart', 'solid' );
 	await expect( styleControl ).toBeEnabled();
 	await styleControl.selectOption( 'regular' );
@@ -1133,7 +1134,7 @@ test( 'Free Style control preserves unavailable selections until an explicit cho
 			await styleControl.selectOption( recoveryStyle );
 			await expect( unavailable ).toHaveCount( 0 );
 			await expect( styleControl ).toHaveValue( recoveryStyle );
-			await expect( styleControl ).toBeDisabled();
+			await expect( styleControl ).toBeEnabled();
 			expect( await readIconAttributes( page, clientId ) ).toEqual( { ...original, ...selection, iconStyle: recoveryStyle } );
 		}
 	}
@@ -1147,6 +1148,7 @@ test( 'Free Style control preserves unavailable selections until an explicit cho
 	const savedId = await page.evaluate( () => {
 		const block = window.wp.data.select( 'core/block-editor' ).getBlocks()[ 0 ];
 		window.wp.data.dispatch( 'core/block-editor' ).selectBlock( block.clientId );
+		window.wp.data.dispatch( 'core/edit-post' ).openGeneralSidebar( 'edit-post/block' );
 		return block.clientId;
 	} );
 	await expect( unavailable ).toBeVisible();
@@ -1192,4 +1194,130 @@ test( 'catalog changes and missing icons preserve saved content until explicit r
 	await page.getByRole( 'button', { name: 'Redo', exact: true } ).click();
 	await expect( iconControl ).toHaveValue( 'Heart' );
 	await expect( styleControl ).toHaveValue( 'solid' );
+} );
+
+async function saveDefaultStyle( page, style, standardForm = false ) {
+	await page.goto( '/wp-admin/options-general.php?page=better-font-awesome' );
+	await page.getByLabel( 'Default block icon style', { exact: true } ).selectOption( style );
+	if ( standardForm ) {
+		await Promise.all( [
+			page.waitForURL( /settings-updated=true/ ),
+			page.locator( '#bfa-settings-form' ).evaluate( ( form ) => form.submit() ),
+		] );
+	} else {
+		await page.locator( '.bfa-save-settings-button' ).click();
+		await expect( page.locator( '.bfa-ajax-response-holder' ) ).toContainText( 'Settings saved.' );
+		await page.reload();
+	}
+	await expect( page.getByLabel( 'Default block icon style', { exact: true } ) ).toHaveValue( style );
+}
+
+test( 'site default insertion, inheritance, overrides, and saved legacy blocks retain their intent', async ( { page } ) => {
+	await openStyleEditor( page, { iconName: 'heart' } );
+	await saveDefaultStyle( page, 'regular' );
+	try {
+		await page.goto( '/wp-admin/post-new.php' );
+		await page.waitForFunction( () => Boolean( window.wp?.blocks?.getBlockType( 'better-font-awesome/icon' ) ) );
+		await dismissWelcomeModal( page );
+		await page.getByRole( 'button', { name: /^(Toggle block inserter|Block Inserter)$/ } ).click();
+		await page.getByPlaceholder( 'Search', { exact: true } ).fill( 'Font Awesome' );
+		await page.getByRole( 'option', { name: /Font Awesome Icon$/ } ).click();
+		const clientId = await page.evaluate( () => {
+			const block = window.wp.data.select( 'core/block-editor' ).getBlocks().find( ( block ) => block.name === 'better-font-awesome/icon' );
+			window.wp.data.dispatch( 'core/block-editor' ).selectBlock( block.clientId );
+			window.wp.data.dispatch( 'core/edit-post' ).openGeneralSidebar( 'edit-post/block' );
+			return block.clientId;
+		} );
+		const styleControl = page.getByRole( 'combobox', { name: 'Style', exact: true } );
+		const iconControl = page.getByLabel( 'Icon', { exact: true } );
+		await expect( styleControl ).toHaveValue( 'site-default' );
+		await expect( styleControl.locator( 'option:checked' ) ).toHaveText( 'Site default (Regular)' );
+		for ( const [ label, name, prefix, effective ] of [
+			[ 'Arrow Right', 'arrow-right', 'fas', 'Solid' ],
+			[ 'Github', 'github', 'fab', 'Brands' ],
+			[ 'Heart', 'heart', 'far', 'Regular' ],
+		] ) {
+			await iconControl.fill( label );
+			const result = page.getByRole( 'listbox' ).getByRole( 'option', { name: label, exact: true } );
+			await expect( result.locator( `.${ prefix }.fa-${ name }` ) ).toBeVisible();
+			await result.click();
+			await expect( styleControl ).toHaveValue( 'site-default' );
+			await expect( styleControl.locator( 'option:checked' ) ).toHaveText( `Site default (${ effective })` );
+			expect( ( await readIconAttributes( page, clientId ) ).iconStyle ).toBe( 'site-default' );
+		}
+		await styleControl.selectOption( 'solid' );
+		await page.getByRole( 'button', { name: 'Undo', exact: true } ).click();
+		await expect( styleControl ).toHaveValue( 'site-default' );
+		await page.getByRole( 'button', { name: 'Redo', exact: true } ).click();
+		await expect( styleControl ).toHaveValue( 'solid' );
+		await styleControl.selectOption( 'site-default' );
+		const post = await page.evaluate( async ( clientId ) => {
+			const store = window.wp.data.dispatch( 'core/block-editor' );
+			store.duplicateBlocks( [ clientId ] );
+			store.insertBlocks( window.wp.blocks.parse( '<!-- wp:better-font-awesome/icon {"iconName":"heart","label":"Legacy"} /--><!-- wp:better-font-awesome/icon {"iconName":"heart","iconStyle":"regular","label":"Explicit regular"} /-->' ) );
+			window.wp.data.dispatch( 'core/editor' ).editPost( { title: 'Site default acceptance', status: 'publish' } );
+			await window.wp.data.dispatch( 'core/editor' ).savePost();
+			return {
+				id: window.wp.data.select( 'core/editor' ).getCurrentPostId(),
+				link: window.wp.data.select( 'core/editor' ).getPermalink(),
+				content: window.wp.data.select( 'core/editor' ).getEditedPostContent(),
+			};
+		}, clientId );
+		await page.reload();
+		await page.waitForFunction( () => window.wp?.data?.select( 'core/block-editor' ).getBlocks().length >= 4 );
+		const styles = await page.evaluate( () => window.wp.data.select( 'core/block-editor' ).getBlocks().filter( ( block ) => block.name === 'better-font-awesome/icon' ).map( ( block ) => block.attributes.iconStyle ) );
+		expect( styles ).toEqual( [ 'site-default', 'site-default', 'solid', 'regular' ] );
+		// The legacy fixture can opt in without changing any other attribute, and undo it.
+		await page.evaluate( () => {
+			const block = window.wp.data.select( 'core/block-editor' ).getBlocks().find( ( block ) => block.attributes.label === 'Legacy' );
+			window.wp.data.dispatch( 'core/block-editor' ).selectBlock( block.clientId );
+		} );
+		await styleControl.selectOption( 'site-default' );
+		await expect( styleControl ).toHaveValue( 'site-default' );
+		await page.getByRole( 'button', { name: 'Undo', exact: true } ).click();
+		await page.evaluate( () => {
+			const block = window.wp.data.select( 'core/block-editor' ).getBlocks().find( ( block ) => block.attributes.label === 'Legacy' );
+			window.wp.data.dispatch( 'core/block-editor' ).selectBlock( block.clientId );
+		} );
+		await expect( styleControl ).toHaveValue( 'solid' );
+		await page.goto( post.link );
+		await expect( page.locator( '.wp-block-better-font-awesome-icon .far.fa-heart' ) ).toHaveCount( 3 );
+		await expect( page.locator( '.wp-block-better-font-awesome-icon .fas.fa-heart' ) ).toHaveCount( 1 );
+		await saveDefaultStyle( page, 'solid', true );
+		await page.goto( post.link );
+		await expect( page.locator( '.wp-block-better-font-awesome-icon .far.fa-heart' ) ).toHaveCount( 1 );
+		await expect( page.locator( '.wp-block-better-font-awesome-icon .fas.fa-heart' ) ).toHaveCount( 3 );
+		await page.goto( `/wp-admin/post.php?post=${ post.id }&action=edit` );
+		await page.waitForFunction( () => window.wp?.data?.select( 'core/block-editor' ).getBlocks().length >= 4 );
+		const persisted = await page.evaluate( async ( id ) => ( await window.wp.apiFetch( { path: `/wp/v2/posts/${ id }?context=edit` } ) ).content.raw, post.id );
+		expect( persisted ).toBe( post.content );
+		await page.evaluate( () => {
+			const block = window.wp.data.select( 'core/block-editor' ).getBlocks()[ 0 ];
+			window.wp.data.dispatch( 'core/block-editor' ).selectBlock( block.clientId );
+		} );
+		await expect( styleControl ).toHaveValue( 'site-default' );
+		await expect( styleControl.locator( 'option:checked' ) ).toHaveText( 'Site default (Solid)' );
+		await test.info().attach( 'site-default-selector', { body: await page.screenshot(), contentType: 'image/png' } );
+	} finally {
+		await saveDefaultStyle( page, 'solid' );
+	}
+} );
+
+test( 'inherited blocks preserve intent when their active catalog becomes unavailable', async ( { page } ) => {
+	const clientId = await openStyleEditor( page, { iconName: 'heart', iconStyle: 'site-default', label: 'Keep inherited' } );
+	const before = await readIconAttributes( page, clientId );
+	const catalog = await page.evaluate( () => window.bfaBlockEditor.icons );
+	const iconControl = page.getByLabel( 'Icon', { exact: true } );
+	const styleControl = page.getByRole( 'combobox', { name: 'Style', exact: true } );
+	await page.evaluate( () => { window.bfaBlockEditor.icons = []; } );
+	await iconControl.fill( 'Heart' );
+	await expect( styleControl ).toBeDisabled();
+	await expect( styleControl.locator( 'option:checked' ) ).toHaveText( 'Site default (icon unavailable)' );
+	expect( await readIconAttributes( page, clientId ) ).toEqual( before );
+	await page.evaluate( ( icons ) => { window.bfaBlockEditor.icons = icons; }, catalog );
+	await iconControl.fill( 'Heart (regular)' );
+	await iconControl.press( 'Escape' );
+	await expect( styleControl ).toBeEnabled();
+	await expect( styleControl ).toHaveValue( 'site-default' );
+	expect( await readIconAttributes( page, clientId ) ).toEqual( before );
 } );

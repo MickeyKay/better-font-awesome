@@ -1,4 +1,4 @@
-import { buildCatalogOptions, getAvailableStyles, groupCatalog, selectIcon, styleClass } from './icon-utils.mjs';
+import { buildCatalogOptions, getAvailableStyles, groupCatalog, resolveStyle, selectIcon, styleClass } from './icon-utils.mjs';
 
 const { __, sprintf } = wp.i18n;
 const {
@@ -45,28 +45,40 @@ export default function Edit( { attributes, setAttributes } ) {
 		: 'left';
 	const [ filterValue, setFilterValue ] = useState( '' );
 	const catalog = getCatalog();
+	const siteDefault = window.bfaBlockEditor?.defaultIconStyle ?? 'solid';
+	const inherited = iconStyle === 'site-default';
 	const icons = useMemo( () => groupCatalog( catalog ), [ catalog ] );
 	const options = useMemo( () => {
-		return buildCatalogOptions( icons, filterValue, iconName, iconStyle );
-	}, [ icons, filterValue, iconName, iconStyle ] );
-	const selectedIcon = catalog.find(
-		( icon ) => icon.name === iconName && icon.style === iconStyle
-	);
+		return buildCatalogOptions( icons, filterValue, iconName, iconStyle, 100, siteDefault );
+	}, [ icons, filterValue, iconName, iconStyle, siteDefault ] );
 	const availableStyles = useMemo(
 		() => getAvailableStyles( catalog, iconName ),
 		[ catalog, iconName ]
+	);
+	const effectiveDefault = resolveStyle( availableStyles, siteDefault );
+	const effectiveStyle = inherited ? effectiveDefault : iconStyle;
+	const selectedIcon = catalog.find(
+		( icon ) => icon.name === iconName && icon.style === effectiveStyle
 	);
 	const styleLabels = {
 		solid: __( 'Solid', 'better-font-awesome' ),
 		regular: __( 'Regular', 'better-font-awesome' ),
 		brands: __( 'Brands', 'better-font-awesome' ),
 	};
-	const styleAvailable = availableStyles.includes( iconStyle );
+	const styleAvailable = availableStyles.includes( effectiveStyle );
 	const styleOptions = availableStyles.map( ( style ) => ( {
 		label: styleLabels[ style ],
 		value: style,
 	} ) );
-	if ( ! styleAvailable ) {
+	styleOptions.unshift( {
+		label: availableStyles.length ? sprintf(
+			/* translators: %s is the effective icon style, including any fallback. */
+			__( 'Site default (%s)', 'better-font-awesome' ),
+			styleLabels[ effectiveDefault ]
+		) : __( 'Site default (icon unavailable)', 'better-font-awesome' ),
+		value: 'site-default',
+	} );
+	if ( ! inherited && ! styleAvailable ) {
 		styleOptions.unshift( {
 			label: sprintf(
 				/* translators: %s is the saved icon style. */
@@ -140,9 +152,9 @@ export default function Edit( { attributes, setAttributes } ) {
 							label={ __( 'Style', 'better-font-awesome' ) }
 							value={ iconStyle }
 							options={ styleOptions }
-							disabled={ availableStyles.length === 0 || ( styleAvailable && availableStyles.length === 1 ) }
+							disabled={ availableStyles.length === 0 }
 							onChange={ ( value ) => {
-								if ( availableStyles.includes( value ) ) {
+								if ( value === 'site-default' || availableStyles.includes( value ) ) {
 									setAttributes( { iconStyle: value } );
 								}
 							} }
@@ -165,7 +177,7 @@ export default function Edit( { attributes, setAttributes } ) {
 			</InspectorControls>
 			<div { ...blockProps }>
 				<i
-					className={ `${ styleClass( iconStyle ) } fa-${ iconName }` }
+					className={ `${ styleClass( effectiveStyle ) } fa-${ iconName }` }
 					aria-hidden="true"
 				/>
 				<span className="screen-reader-text">

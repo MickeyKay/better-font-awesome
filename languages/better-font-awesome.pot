@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-09T18:39:13+00:00\n"
+"POT-Creation-Date: 2026-09-09T21:46:33+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: better-font-awesome\n"
@@ -21,8 +21,8 @@ msgstr ""
 #. Plugin Name of the plugin
 #: better-font-awesome-library.php:1605
 #: better-font-awesome.php
-#: better-font-awesome.php:269
-#: better-font-awesome.php:326
+#: better-font-awesome.php:270
+#: better-font-awesome.php:327
 msgid "Better Font Awesome"
 msgstr ""
 
@@ -59,95 +59,113 @@ msgstr ""
 msgid "https://mickeykay.me/"
 msgstr ""
 
-#: better-font-awesome.php:327
+#: better-font-awesome.php:328
 msgid "It appears that Better Font Awesome is missing it's <a href=\"https://github.com/MickeyKay/better-font-awesome-library\" target=\"_blank\">core library</a>, which typically occurs when cloning the Git repository and failing to run <code>composer install</code>. Please refer to the plugin's <a href=\"https://github.com/MickeyKay/better-font-awesome\" target=\"_blank\">installation instructions</a> for details on how to properly install Better Font Awesome via Git. If you installed from within WordPress, or via the wordpress.org repo, then chances are the install failed and you can try again. If the issue persists, please create a new topic on the plugin's <a href=\"http://wordpress.org/support/plugin/better-font-awesome\" target=\"_blank\">support forum</a> or file an issue on the <a href=\"https://github.com/MickeyKay/better-font-awesome/issues\" target=\"_blank\">Github repo</a>."
 msgstr ""
 
-#: better-font-awesome.php:328
+#: better-font-awesome.php:329
 msgid "Back to the plugins page &rarr;"
 msgstr ""
 
-#: better-font-awesome.php:513
+#: better-font-awesome.php:514
 msgid "Save Settings"
 msgstr ""
 
-#: better-font-awesome.php:542
+#: better-font-awesome.php:543
 msgid "Font Awesome version"
 msgstr ""
 
-#: better-font-awesome.php:550
+#: better-font-awesome.php:551
 msgid "Serve Font Awesome locally"
 msgstr ""
 
-#: better-font-awesome.php:559
+#: better-font-awesome.php:560
+msgid "Default block icon style"
+msgstr ""
+
+#: better-font-awesome.php:569
 msgid "Include v4 CSS shim"
 msgstr ""
 
-#: better-font-awesome.php:565
+#: better-font-awesome.php:575
 msgid "Include the Font Awesome v4 CSS shim to support legacy icons (<a href=\"https://fontawesome.com/how-to-use/on-the-web/setup/upgrading-from-version-4#name-changes\" target=\"_blank\">more details</a>)."
 msgstr ""
 
-#: better-font-awesome.php:571
+#: better-font-awesome.php:581
 msgid "Remove existing Font Awesome"
 msgstr ""
 
-#: better-font-awesome.php:577
+#: better-font-awesome.php:587
 msgid "Attempt to remove Font Awesome CSS and shortcodes added by other plugins and themes."
 msgstr ""
 
-#: better-font-awesome.php:583
+#: better-font-awesome.php:593
 msgid "Hide admin notices"
 msgstr ""
 
-#: better-font-awesome.php:589
+#: better-font-awesome.php:599
 msgid "Hide the default admin warnings that are shown when API and CDN errors occur."
 msgstr ""
 
-#: better-font-awesome.php:639
+#: better-font-awesome.php:649
 msgid "You are not allowed to change these settings."
 msgstr ""
 
-#: better-font-awesome.php:647
+#: better-font-awesome.php:657
 msgid "Settings were not saved due to a missing nonce. Refresh the page and try again."
 msgstr ""
 
-#: better-font-awesome.php:664
+#: better-font-awesome.php:676
 msgid "Settings saved."
 msgstr ""
 
-#: better-font-awesome.php:707
+#: better-font-awesome.php:719
 msgid "Background updates are disabled for the effective delivery configuration."
 msgstr ""
 
 #. translators: placeholder is the numeric current version number.
-#: better-font-awesome.php:715
+#: better-font-awesome.php:727
 #, php-format
 msgid "%s (The plugin automatically uses the latest version of Font Awesome, and checks for updates at this frequency)"
 msgstr ""
 
-#: better-font-awesome.php:746
+#: better-font-awesome.php:765
+#: src/edit.js:64
+msgid "Solid"
+msgstr ""
+
+#: better-font-awesome.php:766
+#: src/edit.js:65
+msgid "Regular"
+msgstr ""
+
+#: better-font-awesome.php:771
+msgid "Sets the style for icon blocks that use the site default. You can override it in each block’s settings."
+msgstr ""
+
+#: better-font-awesome.php:793
 msgid "This Font Awesome configuration is unsupported. Local files require Font Awesome 7 Free."
 msgstr ""
 
-#: better-font-awesome.php:749
+#: better-font-awesome.php:796
 msgid "Local delivery is not active because another plugin, theme, or filter controls Font Awesome."
 msgstr ""
 
-#: better-font-awesome.php:750
+#: better-font-awesome.php:797
 msgid "Local delivery is active because another plugin, theme, or filter controls Font Awesome."
 msgstr ""
 
-#: better-font-awesome.php:755
+#: better-font-awesome.php:802
 msgid "Local icon files are unavailable. Reinstall Better Font Awesome."
 msgstr ""
 
 #. translators: 1: local Font Awesome version, 2: previously downloaded Font Awesome version.
-#: better-font-awesome.php:763
+#: better-font-awesome.php:810
 #, php-format
 msgid "Local files use Font Awesome %1$s; your previously downloaded version is %2$s. Newer icons may be unavailable."
 msgstr ""
 
-#: better-font-awesome.php:776
+#: better-font-awesome.php:823
 msgid "Load icons from your site instead of a third-party CDN. New icons arrive through plugin updates."
 msgstr ""
 
@@ -155,56 +173,58 @@ msgstr ""
 msgid "Font Awesome metadata refresh could not be scheduled."
 msgstr ""
 
-#: src/edit.js:60
-msgid "Solid"
-msgstr ""
-
-#: src/edit.js:61
-msgid "Regular"
-msgstr ""
-
-#: src/edit.js:62
+#: src/edit.js:66
 msgid "Brands"
 msgstr ""
 
+#. translators: %s is the effective icon style, including any fallback.
+#: src/edit.js:76
+#, js-format
+msgid "Site default (%s)"
+msgstr ""
+
+#: src/edit.js:78
+msgid "Site default (icon unavailable)"
+msgstr ""
+
 #. translators: %s is the saved icon style.
-#: src/edit.js:73
+#: src/edit.js:85
 #, js-format
 msgid "Unavailable (%s)"
 msgstr ""
 
-#: src/edit.js:107
+#: src/edit.js:119
 msgid "Icon settings"
 msgstr ""
 
-#: src/edit.js:122
+#: src/edit.js:134
 msgid "Icon"
 msgstr ""
 
 #. translators: %d is the number of unique selectable icons.
-#: src/edit.js:130
+#: src/edit.js:142
 #, js-format
 msgid "Search all %d available Font Awesome Free icons."
 msgstr ""
 
-#: src/edit.js:140
+#: src/edit.js:152
 msgid "Style"
 msgstr ""
 
-#: src/edit.js:149
+#: src/edit.js:161
 msgid "This icon or style is unavailable in the current catalog."
 msgstr ""
 
-#: src/edit.js:155
+#: src/edit.js:167
 msgid "Accessible label"
 msgstr ""
 
-#: src/edit.js:158
+#: src/edit.js:170
 msgid "Leave empty when the icon is decorative."
 msgstr ""
 
 #. translators: %s is the selected icon label.
-#: src/edit.js:174
+#: src/edit.js:186
 #, js-format
 msgid "Font Awesome icon: %s"
 msgstr ""

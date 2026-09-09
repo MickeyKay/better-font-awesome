@@ -75,3 +75,5 @@ Always write a clear log message for your commits. One-line messages are fine fo
 
 ## Thank you
 Seriously. Thank you. I very much appreciate your contributions to Better Font Awesome ♥️.
+
+Native block style inheritance is implemented but unpublished. See [behavior, compatibility, and rollback](docs/block-style-inheritance.md) when testing the default style setting.

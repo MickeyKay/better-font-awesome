@@ -62,6 +62,27 @@ class Better_Font_Awesome_Icon_Block {
 	private $library;
 
 	/**
+	 * Last raw catalog seen by this request's controller.
+	 *
+	 * @var array|null
+	 */
+	private $source_catalog = null;
+
+	/**
+	 * Validated and sorted editor catalog for the current source data.
+	 *
+	 * @var array<int, array{label: string, name: string, style: string}>
+	 */
+	private $editor_catalog = array();
+
+	/**
+	 * Validated styles indexed by icon name for inherited rendering.
+	 *
+	 * @var array<string, string[]>
+	 */
+	private $styles_by_name = array();
+
+	/**
 	 * Exact Font Awesome 7 stylesheet URLs registered for the block canvas.
 	 *
 	 * @var array<string, string>
@@ -148,6 +169,9 @@ class Better_Font_Awesome_Icon_Block {
 		if ( '' === $name ) {
 			$name = 'flag';
 		}
+		if ( 'site-default' === $style ) {
+			$style = $this->resolve_default_style( $name );
+		}
 		if ( ! in_array( $style, self::STYLES, true ) ) {
 			$style = 'solid';
 		}
@@ -182,14 +206,39 @@ class Better_Font_Awesome_Icon_Block {
 	}
 
 	/**
+	 * Resolve inheritance using the same validated catalog as the editor.
+	 * Missing names retain their name and the requested style for BFAL rendering.
+	 *
+	 * @param string $name Selected icon name.
+	 * @return string Effective supported style.
+	 */
+	private function resolve_default_style( $name ) {
+		$requested = Better_Font_Awesome_Plugin::get_default_block_icon_style();
+		$this->get_editor_catalog();
+		$available = $this->styles_by_name[ $name ] ?? array();
+		foreach ( array_unique( array( $requested, 'solid', 'regular', 'brands' ) ) as $style ) {
+			if ( in_array( $style, $available, true ) ) {
+				return $style;
+			}
+		}
+		return $requested;
+	}
+
+	/**
 	 * Return safe Font Awesome Free fields for the editor selector.
 	 *
 	 * @return array<int, array{label: string, name: string, style: string}> Editor catalog.
 	 */
 	public function get_editor_catalog() {
-		$catalog = array();
+		$icons = $this->library->get_icons();
+		if ( $icons === $this->source_catalog ) {
+			return $this->editor_catalog;
+		}
 
-		foreach ( $this->library->get_icons() as $icon ) {
+		// Rebuild when BFAL changes its active catalog, including an empty catalog.
+		$catalog        = array();
+		$styles_by_name = array();
+		foreach ( $icons as $icon ) {
 			if ( ! is_array( $icon ) || ! isset( $icon['slug'], $icon['style'], $icon['title'] ) ) {
 				continue;
 			}
@@ -201,7 +250,8 @@ class Better_Font_Awesome_Icon_Block {
 				continue;
 			}
 
-			$catalog[] = array(
+			$styles_by_name[ $name ][] = $style;
+			$catalog[]                 = array(
 				'label' => $label,
 				'name'  => $name,
 				'style' => $style,
@@ -215,6 +265,9 @@ class Better_Font_Awesome_Icon_Block {
 			}
 		);
 
+		$this->source_catalog = $icons;
+		$this->editor_catalog = $catalog;
+		$this->styles_by_name = $styles_by_name;
 		return $catalog;
 	}
 
@@ -232,7 +285,8 @@ class Better_Font_Awesome_Icon_Block {
 			$handle,
 			'bfaBlockEditor',
 			array(
-				'icons' => $this->get_editor_catalog(),
+				'icons'            => $this->get_editor_catalog(),
+				'defaultIconStyle' => Better_Font_Awesome_Plugin::get_default_block_icon_style(),
 			)
 		);
 		wp_set_script_translations( $handle, 'better-font-awesome', dirname( __DIR__ ) . '/languages' );

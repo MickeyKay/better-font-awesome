@@ -45,15 +45,20 @@ function selectionStyle( icon, currentStyle ) {
 	return icon.styles.includes( currentStyle ) ? currentStyle : icon.styles[ 0 ];
 }
 
+export function resolveStyle( availableStyles, requestedStyle ) {
+	const requested = requestedStyle === 'regular' ? 'regular' : 'solid';
+	return availableStyles.includes( requested ) ? requested : availableStyles[ 0 ] ?? requested;
+}
+
 export function selectIcon( icons, name, selectedName, currentStyle ) {
 	const icon = icons.find( ( item ) => item.name === name );
 	if ( ! icon || name === selectedName ) {
 		return null;
 	}
-	return { iconName: name, iconStyle: selectionStyle( icon, currentStyle ) };
+	return { iconName: name, iconStyle: currentStyle === 'site-default' ? currentStyle : selectionStyle( icon, currentStyle ) };
 }
 
-export function buildCatalogOptions( catalog, filterValue, selectedName, currentStyle, limit = 100 ) {
+export function buildCatalogOptions( catalog, filterValue, selectedName, currentStyle, limit = 100, siteDefault = 'solid' ) {
 	const icons = filterCatalog( catalog, filterValue ).slice( 0, limit );
 	const selectedIcon = catalog.find( ( icon ) => icon.name === selectedName );
 	if ( selectedIcon && ! icons.includes( selectedIcon ) ) {
@@ -67,7 +72,9 @@ export function buildCatalogOptions( catalog, filterValue, selectedName, current
 			? `${ icon.label } ${ filterValue }` : icon.label,
 		iconLabel: icon.label,
 		name: icon.name,
-		style: icon.name === selectedName ? currentStyle : selectionStyle( icon, currentStyle ),
+		style: currentStyle === 'site-default'
+			? resolveStyle( icon.styles, siteDefault )
+			: icon.name === selectedName ? currentStyle : selectionStyle( icon, currentStyle ),
 		value: icon.name,
 	} ) );
 }

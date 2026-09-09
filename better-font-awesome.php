@@ -143,10 +143,11 @@ class Better_Font_Awesome_Plugin {
 	 * @var    array
 	 */
 	protected $option_defaults = array(
-		'include_v4_shim'    => '',
-		'remove_existing_fa' => '',
-		'hide_admin_notices' => '',
-		'asset_delivery'     => 'automatic',
+		'include_v4_shim'          => '',
+		'remove_existing_fa'       => '',
+		'hide_admin_notices'       => '',
+		'asset_delivery'           => 'automatic',
+		'default_block_icon_style' => 'solid',
 	);
 
 	/**
@@ -546,6 +547,15 @@ class Better_Font_Awesome_Plugin {
 		);
 
 		add_settings_field(
+			'default_block_icon_style',
+			__( 'Default block icon style', 'better-font-awesome' ),
+			array( $this, 'default_block_icon_style_callback' ),
+			self::SLUG,
+			'settings_section_primary',
+			array( 'label_for' => 'default_block_icon_style' )
+		);
+
+		add_settings_field(
 			'asset_delivery',
 			__( 'Serve Font Awesome locally', 'better-font-awesome' ),
 			array( $this, 'asset_delivery_callback' ),
@@ -651,10 +661,12 @@ class Better_Font_Awesome_Plugin {
 		}
 
 		$options = array(
-			'asset_delivery'     => self::sanitize_asset_delivery( isset( $_POST['asset_delivery'] ) ? sanitize_key( wp_unslash( $_POST['asset_delivery'] ) ) : 'automatic' ),
-			'include_v4_shim'    => isset( $_POST['include_v4_shim'] ) && (bool) absint( wp_unslash( $_POST['include_v4_shim'] ) ),
-			'remove_existing_fa' => isset( $_POST['remove_existing_fa'] ) && (bool) absint( wp_unslash( $_POST['remove_existing_fa'] ) ),
-			'hide_admin_notices' => isset( $_POST['hide_admin_notices'] ) && (bool) absint( wp_unslash( $_POST['hide_admin_notices'] ) ),
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The strict allowlist sanitizer returns only solid or regular, including for non-scalar input.
+			'default_block_icon_style' => self::sanitize_default_block_icon_style( isset( $_POST['default_block_icon_style'] ) ? wp_unslash( $_POST['default_block_icon_style'] ) : self::get_default_block_icon_style() ),
+			'asset_delivery'           => self::sanitize_asset_delivery( isset( $_POST['asset_delivery'] ) ? sanitize_key( wp_unslash( $_POST['asset_delivery'] ) ) : 'automatic' ),
+			'include_v4_shim'          => isset( $_POST['include_v4_shim'] ) && (bool) absint( wp_unslash( $_POST['include_v4_shim'] ) ),
+			'remove_existing_fa'       => isset( $_POST['remove_existing_fa'] ) && (bool) absint( wp_unslash( $_POST['remove_existing_fa'] ) ),
+			'hide_admin_notices'       => isset( $_POST['hide_admin_notices'] ) && (bool) absint( wp_unslash( $_POST['hide_admin_notices'] ) ),
 		);
 
 		// Sanitize and update the options.
@@ -723,6 +735,41 @@ class Better_Font_Awesome_Plugin {
 	 */
 	public static function sanitize_asset_delivery( $value ) {
 		return 'bundled-local' === $value ? 'bundled-local' : 'automatic';
+	}
+
+	/**
+	 * Validate the site default independently of available icon styles.
+	 *
+	 * @param mixed $value Submitted or stored style.
+	 * @return string Supported default style.
+	 */
+	public static function sanitize_default_block_icon_style( $value ) {
+		return 'regular' === $value ? 'regular' : 'solid';
+	}
+
+	/**
+	 * Read the current site's setting without retaining another site's options.
+	 *
+	 * @return string Site default style.
+	 */
+	public static function get_default_block_icon_style() {
+		$options = get_option( self::SLUG . '_options', array() );
+		return self::sanitize_default_block_icon_style( is_array( $options ) ? ( $options['default_block_icon_style'] ?? 'solid' ) : 'solid' );
+	}
+
+	/** Output the site default selector. */
+	public function default_block_icon_style_callback() {
+		$selected = self::get_default_block_icon_style();
+		printf( '<select id="default_block_icon_style" name="%s[default_block_icon_style]" aria-describedby="bfa-default-style-help">', esc_attr( $this->option_name ) );
+		foreach ( array(
+			'solid'   => __( 'Solid', 'better-font-awesome' ),
+			'regular' => __( 'Regular', 'better-font-awesome' ),
+		) as $value => $label ) {
+			printf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $value ), selected( $selected, $value, false ), esc_html( $label ) );
+		}
+		echo '</select><p class="description" id="bfa-default-style-help">';
+		esc_html_e( 'Sets the style for icon blocks that use the site default. You can override it in each block’s settings.', 'better-font-awesome' );
+		echo '</p>';
 	}
 
 	/**
@@ -835,7 +882,8 @@ class Better_Font_Awesome_Plugin {
 			$new_input['hide_admin_notices'] = absint( $input['hide_admin_notices'] );
 		}
 
-		$new_input['asset_delivery'] = self::sanitize_asset_delivery( $input['asset_delivery'] ?? 'automatic' );
+		$new_input['default_block_icon_style'] = self::sanitize_default_block_icon_style( $input['default_block_icon_style'] ?? self::get_default_block_icon_style() );
+		$new_input['asset_delivery']           = self::sanitize_asset_delivery( $input['asset_delivery'] ?? 'automatic' );
 
 		return $new_input;
 	}

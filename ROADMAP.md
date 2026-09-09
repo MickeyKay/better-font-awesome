@@ -47,8 +47,8 @@ BFA 3.1.0 is publicly released and builds on the foundation established by the 2
 
 ### Refine the native block editor experience
 
-- Dedicated Free Style control implemented for the native Icon block, pending review, manual acceptance, and publication. Choices come from the selected icon in the active catalog; existing attributes, rendering, unavailable saved selections, and useful icon search are preserved. The Icon picker shows one entry per name; the separate Style control selects its style. This feature has not shipped.
-- Next: site-wide default style with explicit per-block inheritance, preserving legacy content and handling unavailable styles. This is separate from the current picker change.
+- Dedicated Free Style control implemented for the native Icon block, merged in #66, pending publication. Choices come from the selected icon in the active catalog; existing attributes, rendering, unavailable saved selections, and useful icon search are preserved. The Icon picker shows one entry per name; the separate Style control selects its style. This feature has not shipped.
+- Site-wide Solid/Regular default style with explicit native block inheritance is implemented but unpublished, pending review and manual acceptance. Legacy blocks retain Solid when their style was omitted; inherited blocks resolve available-style fallbacks without rewriting posts. See [behavior and rollback](docs/block-style-inheritance.md).
 - Font Awesome Pro integration follows the default-style and inheritance work, with its design and scope to be approved separately.
 - Refine alignment behavior and other block supports based on editor testing.
 - Decide whether inline icon handling belongs in the block contract without changing saved shortcode compatibility.
