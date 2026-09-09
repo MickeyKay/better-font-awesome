@@ -62,6 +62,27 @@ class Better_Font_Awesome_Icon_Block {
 	private $library;
 
 	/**
+	 * Last raw catalog seen by this request's controller.
+	 *
+	 * @var array|null
+	 */
+	private $source_catalog = null;
+
+	/**
+	 * Validated and sorted editor catalog for the current source data.
+	 *
+	 * @var array<int, array{label: string, name: string, style: string}>
+	 */
+	private $editor_catalog = array();
+
+	/**
+	 * Validated styles indexed by icon name for inherited rendering.
+	 *
+	 * @var array<string, string[]>
+	 */
+	private $styles_by_name = array();
+
+	/**
 	 * Exact Font Awesome 7 stylesheet URLs registered for the block canvas.
 	 *
 	 * @var array<string, string>
@@ -193,12 +214,8 @@ class Better_Font_Awesome_Icon_Block {
 	 */
 	private function resolve_default_style( $name ) {
 		$requested = Better_Font_Awesome_Plugin::get_default_block_icon_style();
-		$available = array();
-		foreach ( $this->get_editor_catalog() as $icon ) {
-			if ( $name === $icon['name'] ) {
-				$available[] = $icon['style'];
-			}
-		}
+		$this->get_editor_catalog();
+		$available = $this->styles_by_name[ $name ] ?? array();
 		foreach ( array_unique( array( $requested, 'solid', 'regular', 'brands' ) ) as $style ) {
 			if ( in_array( $style, $available, true ) ) {
 				return $style;
@@ -213,9 +230,15 @@ class Better_Font_Awesome_Icon_Block {
 	 * @return array<int, array{label: string, name: string, style: string}> Editor catalog.
 	 */
 	public function get_editor_catalog() {
-		$catalog = array();
+		$icons = $this->library->get_icons();
+		if ( $icons === $this->source_catalog ) {
+			return $this->editor_catalog;
+		}
 
-		foreach ( $this->library->get_icons() as $icon ) {
+		// Rebuild when BFAL changes its active catalog, including an empty catalog.
+		$catalog        = array();
+		$styles_by_name = array();
+		foreach ( $icons as $icon ) {
 			if ( ! is_array( $icon ) || ! isset( $icon['slug'], $icon['style'], $icon['title'] ) ) {
 				continue;
 			}
@@ -227,7 +250,8 @@ class Better_Font_Awesome_Icon_Block {
 				continue;
 			}
 
-			$catalog[] = array(
+			$styles_by_name[ $name ][] = $style;
+			$catalog[]                 = array(
 				'label' => $label,
 				'name'  => $name,
 				'style' => $style,
@@ -241,6 +265,9 @@ class Better_Font_Awesome_Icon_Block {
 			}
 		);
 
+		$this->source_catalog = $icons;
+		$this->editor_catalog = $catalog;
+		$this->styles_by_name = $styles_by_name;
 		return $catalog;
 	}
 

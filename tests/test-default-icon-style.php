@@ -94,6 +94,57 @@ class Better_Font_Awesome_Default_Icon_Style_Test extends Better_Font_Awesome_Me
 		$this->assertStringContainsString( 'far fa-heart', $this->render_icon( $block, array( 'iconName' => 'heart', 'iconStyle' => 'site-default' ) ) );
 		$this->assertSame( 0, $this->font_awesome_http_calls );
 	}
+	public function test_reuses_validated_catalog_until_active_library_data_changes() {
+		$library = new class() {
+			public $icons = array(
+				array( 'slug' => 'heart', 'title' => 'Cache Heart', 'style' => 'solid' ),
+				array( 'slug' => 'heart', 'title' => 'Cache Heart', 'style' => 'regular' ),
+			);
+			public function get_icons() {
+				return $this->icons;
+			}
+			public function render_shortcode( $attributes ) {
+				return $attributes['style'] . ':' . $attributes['name'];
+			}
+		};
+		$block = new Better_Font_Awesome_Icon_Block( $library );
+		$sanitized_titles = 0;
+		$count_titles = static function ( $filtered, $raw ) use ( &$sanitized_titles ) {
+			if ( 'Cache Heart' === $raw ) {
+				++$sanitized_titles;
+			}
+			return $filtered;
+		};
+		add_filter( 'sanitize_text_field', $count_titles, 10, 2 );
+		try {
+			update_option( 'better-font-awesome_options', array( 'default_block_icon_style' => 'solid' ) );
+			$this->render_icon( $block, array( 'iconName' => 'heart', 'iconStyle' => 'regular' ) );
+			$this->assertSame( 0, $sanitized_titles, 'Explicit styles need no catalog preparation.' );
+			for ( $index = 0; $index < 20; ++$index ) {
+				$this->assertStringContainsString( 'solid:heart', $this->render_icon( $block, array( 'iconName' => 'heart', 'iconStyle' => 'site-default' ) ) );
+			}
+			$this->assertSame( 2, $sanitized_titles, 'Prepare each catalog row once, regardless of block count.' );
+			$this->assertCount( 2, $block->get_editor_catalog() );
+			$this->assertSame( 2, $sanitized_titles, 'Editor data reuses the same validated catalog.' );
+			update_option( 'better-font-awesome_options', array( 'default_block_icon_style' => 'regular' ) );
+			$this->assertStringContainsString( 'regular:heart', $this->render_icon( $block, array( 'iconName' => 'heart', 'iconStyle' => 'site-default' ) ) );
+			$this->assertSame( 2, $sanitized_titles, 'The site setting is not cached with the catalog.' );
+
+			$library->icons = array();
+			$this->assertSame( array(), $block->get_editor_catalog() );
+			$this->assertStringContainsString( 'regular:heart', $this->render_icon( $block, array( 'iconName' => 'heart', 'iconStyle' => 'site-default' ) ) );
+			$library->icons = array( array( 'slug' => 'heart', 'title' => 'Cache Heart', 'style' => 'solid' ) );
+			$this->assertStringContainsString( 'solid:heart', $this->render_icon( $block, array( 'iconName' => 'heart', 'iconStyle' => 'site-default' ) ) );
+			$this->assertSame( 3, $sanitized_titles, 'Changed catalogs rebuild the lookup and effective fallback.' );
+			$this->assertSame( 'solid', $block->get_editor_catalog()[0]['style'] );
+			$other_block = new Better_Font_Awesome_Icon_Block( $library );
+			$this->assertCount( 1, $other_block->get_editor_catalog() );
+			$this->assertSame( 4, $sanitized_titles, 'Separate block controllers do not share cached catalogs.' );
+		} finally {
+			remove_filter( 'sanitize_text_field', $count_titles, 10 );
+		}
+	}
+
 	private function render_icon( $block, $attributes ) {
 		$registered = $block->register();
 		$registered->render_callback = array( $block, 'render' );
