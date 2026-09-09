@@ -148,6 +148,9 @@ class Better_Font_Awesome_Icon_Block {
 		if ( '' === $name ) {
 			$name = 'flag';
 		}
+		if ( 'site-default' === $style ) {
+			$style = $this->resolve_default_style( $name );
+		}
 		if ( ! in_array( $style, self::STYLES, true ) ) {
 			$style = 'solid';
 		}
@@ -179,6 +182,29 @@ class Better_Font_Awesome_Icon_Block {
 			get_block_wrapper_attributes( $wrapper_attributes ),
 			$icon
 		);
+	}
+
+	/**
+	 * Resolve inheritance using the same validated catalog as the editor.
+	 * Missing names retain their name and the requested style for BFAL rendering.
+	 *
+	 * @param string $name Selected icon name.
+	 * @return string Effective supported style.
+	 */
+	private function resolve_default_style( $name ) {
+		$requested = Better_Font_Awesome_Plugin::get_default_block_icon_style();
+		$available = array();
+		foreach ( $this->get_editor_catalog() as $icon ) {
+			if ( $name === $icon['name'] ) {
+				$available[] = $icon['style'];
+			}
+		}
+		foreach ( array_unique( array( $requested, 'solid', 'regular', 'brands' ) ) as $style ) {
+			if ( in_array( $style, $available, true ) ) {
+				return $style;
+			}
+		}
+		return $requested;
 	}
 
 	/**
@@ -232,7 +258,8 @@ class Better_Font_Awesome_Icon_Block {
 			$handle,
 			'bfaBlockEditor',
 			array(
-				'icons' => $this->get_editor_catalog(),
+				'icons'            => $this->get_editor_catalog(),
+				'defaultIconStyle' => Better_Font_Awesome_Plugin::get_default_block_icon_style(),
 			)
 		);
 		wp_set_script_translations( $handle, 'better-font-awesome', dirname( __DIR__ ) . '/languages' );

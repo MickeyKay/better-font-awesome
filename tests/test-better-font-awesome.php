@@ -75,6 +75,7 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 				'include_v4_shim'    => '',
 				'remove_existing_fa' => '',
 				'hide_admin_notices' => '',
+				'default_block_icon_style' => 'solid',
 				'asset_delivery' => 'automatic',
 			),
 		);
@@ -167,6 +168,7 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 			array(
 				'include_v4_shim'    => 1,
 				'remove_existing_fa' => 0,
+				'default_block_icon_style' => 'solid',
 				'asset_delivery' => 'automatic',
 			),
 			$this->bfa->sanitize(
@@ -185,6 +187,7 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 		wp_set_current_user( $user_id );
 		$_POST = array(
 			'bfa_nonce'         => wp_create_nonce( Better_Font_Awesome_Plugin::SLUG . '-options' ),
+			'default_block_icon_style' => 'regular',
 			'include_v4_shim'   => '1',
 			'remove_existing_fa' => '1',
 		);
@@ -232,6 +235,7 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 
 		$this->assertSame(
 			array(
+				'default_block_icon_style' => 'solid',
 				'asset_delivery' => $expected,
 				'include_v4_shim'    => true,
 				'remove_existing_fa' => false,
@@ -248,7 +252,7 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 			$input['asset_delivery'] = $submitted;
 		}
 		$sanitized = $this->bfa->sanitize( $input );
-		$this->assertSame( array( 'include_v4_shim' => 1, 'remove_existing_fa' => 1, 'hide_admin_notices' => 1, 'asset_delivery' => $expected ), $sanitized );
+		$this->assertSame( array( 'include_v4_shim' => 1, 'remove_existing_fa' => 1, 'hide_admin_notices' => 1, 'default_block_icon_style' => 'solid', 'asset_delivery' => $expected ), $sanitized );
 		$plugin = $this->initialize_with_stored_options( $sanitized );
 		ob_start();
 		$plugin->asset_delivery_callback();
@@ -260,7 +264,7 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 	public function test_settings_save_rejects_invalid_nonce() {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$before = get_option( $this->bfa->get( 'option_name' ) );
-		$_POST = array( 'asset_delivery' => 'bundled-local', 'bfa_nonce' => 'invalid' );
+		$_POST = array( 'default_block_icon_style' => 'regular', 'asset_delivery' => 'bundled-local', 'bfa_nonce' => 'invalid' );
 		$_REQUEST = $_POST;
 		add_filter( 'wp_die_handler', array( $this, 'filter_wp_die_handler' ) );
 		try {
@@ -270,6 +274,51 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 			$this->assertSame( 403, $exception->args['response'] );
 		}
 		$this->assertSame( $before, get_option( $this->bfa->get( 'option_name' ) ) );
+	}
+
+	/** @dataProvider default_style_submissions */
+	public function test_default_style_both_save_paths( $submitted, $expected ) {
+		$input = array( 'default_block_icon_style' => $submitted, 'asset_delivery' => 'bundled-local', 'include_v4_shim' => 1, 'remove_existing_fa' => 1, 'hide_admin_notices' => 1 );
+		$this->bfa->add_settings();
+		try {
+			update_option( $this->bfa->get( 'option_name' ), $input );
+			$this->assertSame( $expected, Better_Font_Awesome_Plugin::get_default_block_icon_style() );
+			$this->assertSame( array( 'include_v4_shim' => 1, 'remove_existing_fa' => 1, 'hide_admin_notices' => 1, 'default_block_icon_style' => $expected, 'asset_delivery' => 'bundled-local' ), get_option( $this->bfa->get( 'option_name' ) ) );
+		} finally {
+			unregister_setting( Better_Font_Awesome_Plugin::SLUG, $this->bfa->get( 'option_name' ) );
+		}
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$_POST = array_merge( $input, array( 'bfa_nonce' => wp_create_nonce( Better_Font_Awesome_Plugin::SLUG . '-options' ) ) );
+		$_REQUEST = $_POST;
+		add_filter( 'wp_die_handler', array( $this, 'filter_wp_die_handler' ) );
+		ob_start();
+		try {
+			$this->bfa->save_options();
+		} catch ( Better_Font_Awesome_WP_Die_Exception $exception ) {
+			$this->assertSame( '', $exception->getMessage() );
+		} finally {
+			ob_end_clean();
+		}
+		$this->assertSame( $expected, Better_Font_Awesome_Plugin::get_default_block_icon_style() );
+		$this->assertSame( array( 'default_block_icon_style' => $expected, 'asset_delivery' => 'bundled-local', 'include_v4_shim' => true, 'remove_existing_fa' => true, 'hide_admin_notices' => true ), get_option( $this->bfa->get( 'option_name' ) ) );
+	}
+
+	public static function default_style_submissions() {
+		return array(
+			array( 'solid', 'solid' ), array( 'regular', 'regular' ),
+			array( 'brands', 'solid' ), array( array( 'regular' ), 'solid' ),
+			array( '<script>regular</script>', 'solid' ), array( '', 'solid' ),
+		);
+	}
+
+	public function test_absent_default_setting_preserves_existing_choice() {
+		update_option( $this->bfa->get( 'option_name' ), array( 'default_block_icon_style' => 'regular' ) );
+		$this->assertSame( 'regular', $this->bfa->sanitize( array() )['default_block_icon_style'] );
+		ob_start();
+		$this->bfa->default_block_icon_style_callback();
+		$html = ob_get_clean();
+		$this->assertStringContainsString( 'value="regular"  selected=', $html );
+		$this->assertStringNotContainsString( 'brands', $html );
 	}
 
 	public static function delivery_submissions() {

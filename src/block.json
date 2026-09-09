@@ -27,6 +27,15 @@
 			"default": ""
 		}
 	},
+	"variations": [
+		{
+			"name": "site-default",
+			"isDefault": true,
+			"attributes": { "iconStyle": "site-default" },
+			"scope": [ "inserter" ],
+			"isActive": [ "iconStyle" ]
+		}
+	],
 	"supports": {
 		"anchor": true,
 		"color": {

@@ -6,6 +6,7 @@ import {
 	filterCatalog,
 	getAvailableStyles,
 	groupCatalog,
+	resolveStyle,
 	selectIcon,
 	styleClass,
 } from '../../src/icon-utils.mjs';
@@ -147,4 +148,28 @@ test( 'maps supported styles and defaults safely', () => {
 	assert.equal( styleClass( 'regular' ), 'far' );
 	assert.equal( styleClass( 'solid' ), 'fas' );
 	assert.equal( styleClass( 'unsupported' ), 'fas' );
+} );
+
+
+test( 'inherited previews resolve independently for each icon and preserve intent on selection', () => {
+	const icons = groupCatalog( [
+		{ name: 'heart', label: 'Heart (solid)', style: 'solid' },
+		{ name: 'heart', label: 'Heart (regular)', style: 'regular' },
+		{ name: 'arrow-right', label: 'Arrow Right (solid)', style: 'solid' },
+		{ name: 'github', label: 'GitHub (brands)', style: 'brands' },
+		{ name: 'regular-only', label: 'Regular only (regular)', style: 'regular' },
+	] );
+	for ( const requested of [ 'solid', 'regular' ] ) {
+		const options = buildCatalogOptions( icons, '', 'heart', 'site-default', 100, requested );
+		assert.deepEqual( options.map( ( icon ) => icon.style ), [ requested, 'solid', 'brands', 'regular' ] );
+		for ( const name of [ 'arrow-right', 'github', 'regular-only' ] ) {
+			assert.deepEqual( selectIcon( icons, name, 'heart', 'site-default' ), { iconName: name, iconStyle: 'site-default' } );
+		}
+	}
+	assert.equal( selectIcon( icons, 'heart', 'heart', 'site-default' ), null );
+	assert.equal( selectIcon( icons, 'missing', 'heart', 'site-default' ), null );
+	assert.equal( resolveStyle( [], 'regular' ), 'regular' );
+	assert.equal( resolveStyle( [ 'solid', 'brands' ], 'regular' ), 'solid' );
+	assert.equal( resolveStyle( [ 'regular', 'brands' ], 'solid' ), 'regular' );
+	assert.equal( resolveStyle( [ 'solid', 'regular' ], 'brands' ), 'solid' );
 } );
