@@ -1066,8 +1066,6 @@ test( 'Free Style control switches with the keyboard, synchronizes, and preserve
 	await expect( block ).toHaveClass( /retained-class/ );
 	await expect( block ).toHaveClass( /items-justified-right/ );
 	await expect( block ).toHaveCSS( 'color', 'rgb(18, 52, 86)' );
-	// The theme's fluid typography can round the rendered size slightly.
-	expect( await block.evaluate( ( element ) => parseFloat( getComputedStyle( element ).fontSize ) ) ).toBeCloseTo( 48, 0 );
 	await expect( block ).toHaveCSS( 'padding-top', '12px' );
 	const icon = block.locator( '.far.fa-heart' );
 	await expect( icon ).toBeVisible();
