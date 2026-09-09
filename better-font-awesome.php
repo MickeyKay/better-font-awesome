@@ -547,21 +547,21 @@ class Better_Font_Awesome_Plugin {
 		);
 
 		add_settings_field(
-			'asset_delivery',
-			__( 'Serve Font Awesome locally', 'better-font-awesome' ),
-			array( $this, 'asset_delivery_callback' ),
-			self::SLUG,
-			'settings_section_primary',
-			array( 'label_for' => 'asset_delivery' )
-		);
-
-		add_settings_field(
 			'default_block_icon_style',
 			__( 'Default block icon style', 'better-font-awesome' ),
 			array( $this, 'default_block_icon_style_callback' ),
 			self::SLUG,
 			'settings_section_primary',
 			array( 'label_for' => 'default_block_icon_style' )
+		);
+
+		add_settings_field(
+			'asset_delivery',
+			__( 'Serve Font Awesome locally', 'better-font-awesome' ),
+			array( $this, 'asset_delivery_callback' ),
+			self::SLUG,
+			'settings_section_primary',
+			array( 'label_for' => 'asset_delivery' )
 		);
 
 		add_settings_field(
