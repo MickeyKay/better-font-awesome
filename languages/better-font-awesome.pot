@@ -140,7 +140,7 @@ msgid "Regular"
 msgstr ""
 
 #: better-font-awesome.php:771
-msgid "Used by Icon blocks set to Site default. Individual blocks can override it."
+msgid "Sets the style for Icon blocks that use the site default. You can override it in each block’s settings."
 msgstr ""
 
 #: better-font-awesome.php:793

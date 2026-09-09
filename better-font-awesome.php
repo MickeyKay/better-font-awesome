@@ -768,7 +768,7 @@ class Better_Font_Awesome_Plugin {
 			printf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $value ), selected( $selected, $value, false ), esc_html( $label ) );
 		}
 		echo '</select><p class="description" id="bfa-default-style-help">';
-		esc_html_e( 'Used by Icon blocks set to Site default. Individual blocks can override it.', 'better-font-awesome' );
+		esc_html_e( 'Sets the style for Icon blocks that use the site default. You can override it in each block’s settings.', 'better-font-awesome' );
 		echo '</p>';
 	}
 
