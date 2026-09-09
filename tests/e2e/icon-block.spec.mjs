@@ -1219,7 +1219,7 @@ test( 'site default insertion, inheritance, overrides, and saved legacy blocks r
 		await page.goto( '/wp-admin/post-new.php' );
 		await page.waitForFunction( () => Boolean( window.wp?.blocks?.getBlockType( 'better-font-awesome/icon' ) ) );
 		await dismissWelcomeModal( page );
-		await page.getByRole( 'button', { name: 'Toggle block inserter', exact: true } ).click();
+		await page.getByRole( 'button', { name: /^(Toggle block inserter|Block Inserter)$/ } ).click();
 		await page.getByPlaceholder( 'Search', { exact: true } ).fill( 'Font Awesome' );
 		await page.getByRole( 'option', { name: /Font Awesome Icon$/ } ).click();
 		const clientId = await page.evaluate( () => {
