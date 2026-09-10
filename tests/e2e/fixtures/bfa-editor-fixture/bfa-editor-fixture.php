@@ -106,7 +106,7 @@ add_action( 'admin_menu', static function () {
 		echo '<p><label><input type="checkbox" name="enabled" ' . checked( get_option( 'bfa_test_pro_enabled' ), true, false ) . '>Enable synthetic API</label></p>';
 		echo '<p><label><input type="checkbox" name="large" ' . checked( get_option( 'bfa_test_pro_large' ), true, false ) . '>Full-sized synthetic catalog</label></p>';
 		echo '<p><label>Failure <select name="fault">';
-		foreach ( array( '' => 'None', 'auth' => 'Authorization', 'service' => 'Service', 'partial' => 'Incomplete catalog' ) as $value => $label ) { echo '<option value="' . esc_attr( $value ) . '" ' . selected( get_option( 'bfa_test_pro_fault' ), $value, false ) . '>' . esc_html( $label ) . '</option>'; }
+		foreach ( array( '' => 'None', 'auth' => 'Authorization', 'service' => 'Service', 'partial' => 'Incomplete catalog', 'empty-account' => 'No account Kits' ) as $value => $label ) { echo '<option value="' . esc_attr( $value ) . '" ' . selected( get_option( 'bfa_test_pro_fault' ), $value, false ) . '>' . esc_html( $label ) . '</option>'; }
 		echo '</select></label></p><button class="button" type="submit">Save fixture</button></form></div>';
 	} );
 } );

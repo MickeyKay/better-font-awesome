@@ -3,6 +3,8 @@
 class Better_Font_Awesome_Pro_Fixture {
 	public $fault    = '';
 	public $requests = 0;
+	public $queries = array();
+	public $kits = null;
 	public $revision = 'synthetic-r1';
 	public $rows     = array();
 	public $free     = array();
@@ -72,9 +74,11 @@ class Better_Font_Awesome_Pro_Fixture {
 		} else {
 			$request = json_decode( $args['body'], true );
 			$q       = $request['query'];
+			$this->queries[] = $q;
 			$vars    = $request['variables'];
 			$counts  = array_count_values( array_column( array_column( $this->rows, 'familyStyle' ), 'style' ) );
 			$meta    = array(
+				'name'              => 'BFA staging',
 				'kitRevision'        => $this->revision,
 				'release'            => array( 'version' => '7.3.1' ),
 				'version'            => '7.x',
@@ -100,6 +104,16 @@ class Better_Font_Awesome_Pro_Fixture {
 					'familyStyles'   => $styles,
 				);
 				$body                          = array( 'data' => array( 'me' => array( 'kit' => $meta ) ) );
+				if ( false !== strpos( $q, 'kits{' ) ) {
+					$kits = $this->kits ?? array(
+						array( 'token' => 'KIT_ID', 'name' => 'BFA staging' ),
+						array( 'token' => 'SECOND', 'name' => 'BFA staging' ),
+						array( 'token' => 'SVG_KIT', 'name' => 'SVG Kit', 'technologySelected' => 'svg' ),
+						array( 'token' => 'UNNAMED', 'name' => '' ),
+					);
+					$body = array( 'data' => array( 'me' => array( 'kits' => 'empty-account' === $this->fault ? array() : array_map( static function ( $kit ) use ( $meta ) { return array_merge( $meta, $kit ); }, $kits ) ) ) );
+				}
+
 			} elseif ( false !== strpos( $q, 'iconVariantsPaginated' ) ) {
 				$rows = array_slice( $this->rows, ( $vars['page'] - 1 ) * 500, 500 );
 				if ( 'partial' === $this->fault ) {

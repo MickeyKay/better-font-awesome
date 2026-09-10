@@ -198,9 +198,107 @@ class Better_Font_Awesome_Pro {
 			'retryAt'            => max( $c['retry_at'] ?? 0, $c['busy_until'] ?? 0 ),
 			'error'              => $allowed ? ( $s['error'] ?? '' ) : 'ownership',
 			'kit'                => $s['active']['kit'] ?? '',
+			'kitName'            => $s['active']['name'] ?? ( $s['active']['kit'] ?? '' ),
 			'version'            => $s['active']['version'] ?? '',
 			'styles'             => $s['active']['styles'] ?? array(),
 			'updated'            => $s['active']['updated'] ?? 0,
+		);
+	}
+
+	/**
+	 * Discover account Kits without acquiring catalogs or changing the active Kit.
+	 *
+	 * @param string $token Optional replacement account token.
+	 * @return array|WP_Error Safe Kit choices or a redacted failure.
+	 */
+	public function find_kits( $token = '' ) {
+		if ( ! $this->allowed() ) {
+			return $this->error( 'ownership' );
+		}
+		if ( '' !== $token && ( strlen( $token ) > 4096 || preg_match( '/\s/', $token ) ) ) {
+			return $this->error( 'auth' );
+		}
+		$old    = self::state();
+		$sealed = '' !== $token ? $this->secret( $token ) : ( $old['account']['credential'] ?? ( $old['active']['credential'] ?? $this->error( 'auth' ) ) );
+		if ( is_wp_error( $sealed ) ) {
+			return $sealed;
+		}
+		// Fence older responses and selections before doing any remote work.
+		$locked              = $old;
+		$locked['discovery'] = wp_generate_uuid4();
+		if ( ! $this->swap( $old, $locked ) ) {
+			return $this->error( 'changed' );
+		}
+		$auth = $this->authorize( $sealed );
+		if ( is_wp_error( $auth ) ) {
+			return $auth;
+		}
+		$access = $this->secret( $auth['access'], true );
+		if ( is_wp_error( $access ) ) {
+			return $access;
+		}
+		// Account.kits is an unpaginated list. Only configuration/counts, never icons.
+		$query = 'query{me{kits{token name ' . $this->meta_fields() . '}}}';
+		$data  = $this->request( $access, $query );
+		if ( is_wp_error( $data ) ) {
+			return $data;
+		}
+		$rows = $data['me']['kits'] ?? null;
+		if ( ! is_array( $rows ) || array_values( $rows ) !== $rows ) {
+			return $this->error( 'service' );
+		}
+		$kits = array();
+		foreach ( $rows as $row ) {
+			$id = $row['token'] ?? null;
+			if ( ! is_string( $id ) || ! preg_match( '/\A[A-Za-z0-9_-]{1,100}\z/', $id ) || isset( $kits[ $id ] ) ) {
+				return $this->error( 'service' );
+			}
+			$meta        = $this->validate_kit( $row );
+			$kits[ $id ] = array(
+				'id'        => $id,
+				'name'      => is_string( $row['name'] ?? null ) ? sanitize_text_field( $row['name'] ) : '',
+				'supported' => ! is_wp_error( $meta ),
+				'summary'   => is_wp_error( $meta ) ? sprintf(
+					/* translators: 1: selected version, 2: Kit license, 3: rendering technology, 4: supported configuration requirements. */
+					__( 'Configuration: %1$s, %2$s, %3$s. %4$s', 'better-font-awesome' ),
+					is_string( $row['version'] ?? null ) ? sanitize_text_field( $row['version'] ) : '?',
+					is_string( $row['licenseSelected'] ?? null ) ? sanitize_text_field( $row['licenseSelected'] ) : '?',
+					is_string( $row['technologySelected'] ?? null ) ? sanitize_text_field( $row['technologySelected'] ) : '?',
+					self::message( 'unsupported' )
+				) : sprintf(
+					/* translators: 1: Font Awesome version, 2: supported Classic styles. */
+					__( 'Pro %1$s, Web Fonts, By Style, compatibility enabled. Classic styles: %2$s. Catalog and delivery still need validation.', 'better-font-awesome' ),
+					$meta['version'],
+					implode( ', ', array_keys( $meta['counts'] ) )
+				),
+			);
+		}
+		$next            = $locked;
+		$next['account'] = array(
+			'id'         => $locked['discovery'],
+			'credential' => $sealed,
+			'kits'       => $kits,
+		);
+		if ( ! $this->allowed() || ! $this->swap( $locked, $next ) ) {
+			return $this->error( 'changed' );
+		}
+		return $this->account_status();
+	}
+
+	/**
+	 * Local, explicit projection of account authorization, separate from activation.
+	 *
+	 * @return array Safe discovery generation and choices, never saved tokens.
+	 */
+	public function account_status() {
+		$s       = self::state();
+		$a       = $s['account'] ?? array();
+		$current = ! empty( $a['id'] ) && ( $s['discovery'] ?? '' ) === $a['id'];
+		return array(
+			'saved'      => ! empty( $a['credential'] ) || ! empty( $s['active']['credential'] ),
+			'authorized' => $current,
+			'id'         => $current ? $a['id'] : '',
+			'kits'       => $current ? array_values( $a['kits'] ) : array(),
 		);
 	}
 
@@ -244,15 +342,20 @@ class Better_Font_Awesome_Pro {
 	/**
 	 * Start preparation without activating any partial data.
 	 *
-	 * @param string $kit   Kit identifier.
-	 * @param string $token Account read-Kits token, used only server-side.
+	 * @param string      $kit   Kit identifier.
+	 * @param string      $token Account read-Kits token, used only server-side.
+	 * @param string|null $selection Required discovery generation for browser connections.
 	 * @return array|WP_Error Safe status or validation failure.
 	 */
-	public function start( $kit = '', $token = '' ) {
+	public function start( $kit = '', $token = '', $selection = null ) {
 		if ( ! $this->allowed() ) {
 			return $this->error( 'ownership' );
 		}
 		$old = self::state();
+		if ( null !== $selection && ( '' === $selection || ( $old['discovery'] ?? '' ) !== $selection ||
+			( $old['account']['id'] ?? '' ) !== $selection || empty( $old['account']['kits'][ $kit ]['supported'] ) ) ) {
+			return $this->error( 'selection' );
+		}
 		if ( '' === $kit ) {
 			$kit = $old['active']['kit'] ?? '';
 		}
@@ -263,6 +366,9 @@ class Better_Font_Awesome_Pro {
 			return $this->error( 'auth' );
 		}
 		$sealed = '' !== $token ? $this->secret( $token ) : ( $old['active']['credential'] ?? $this->error( 'auth' ) );
+		if ( null !== $selection ) {
+			$sealed = $old['account']['credential'];
+		}
 		if ( is_wp_error( $sealed ) ) {
 			return $sealed;
 		}
@@ -381,12 +487,21 @@ class Better_Font_Awesome_Pro {
 	}
 
 	/**
-	 * The exact Kit metadata projection used by the authenticated experiment.
+	 * Selected Kit configuration and display name, rechecked before activation.
 	 *
 	 * @return string Fixed query.
 	 */
 	private function meta_query() {
-		return 'query($kit:String!){me{kit(token:$kit){status licenseSelected technologySelected version release{version} kitRevision subsetType shimEnabled familyStylesPaginated(pageSize:50){totalPageCount familyStyles{familyStyle{family style prefix} only{totalIconVariantCount}}}}}}';
+		return 'query($kit:String!){me{kit(token:$kit){name ' . $this->meta_fields() . '}}}';
+	}
+
+	/**
+	 * Configuration fields shared by discovery and selected-Kit validation.
+	 *
+	 * @return string Fixed projection, without icon catalogs or domains.
+	 */
+	private function meta_fields() {
+		return 'status licenseSelected technologySelected version release{version} kitRevision subsetType shimEnabled familyStylesPaginated(pageSize:50){totalPageCount familyStyles{familyStyle{family style prefix} only{totalIconVariantCount}}}';
 	}
 
 	/**
@@ -428,6 +543,33 @@ class Better_Font_Awesome_Pro {
 	}
 
 	/**
+	 * Exchange a sealed account token using the existing minimum read scopes.
+	 *
+	 * @param string $credential Encrypted account token.
+	 * @return array|WP_Error Encrypted access token and expiry, or safe failure.
+	 */
+	private function authorize( $credential ) {
+		$token = $this->secret( $credential, true );
+		if ( is_wp_error( $token ) ) {
+			return $token;
+		}
+		$data = $this->request( $token );
+		if ( is_wp_error( $data ) ) {
+			return $data;
+		}
+		if ( ! is_string( $data['access_token'] ?? null ) || '' === $data['access_token'] || strlen( $data['access_token'] ) > 16384 || preg_match( '/\s/', $data['access_token'] ) || ! is_array( $data['scopes'] ?? null ) || count( array_filter( $data['scopes'], 'is_string' ) ) !== count( $data['scopes'] ) ||
+			array_diff( array( 'public', 'kits_read' ), $data['scopes'] ) || ! is_numeric( $data['expires_in'] ?? null ) || (int) $data['expires_in'] < 120 ) {
+			return $this->error( 'auth' );
+		}
+		$auth['access'] = $this->secret( $data['access_token'] );
+		if ( is_wp_error( $auth['access'] ) ) {
+			return $auth['access'];
+		}
+		$auth['expires'] = time() + min( DAY_IN_SECONDS, (int) $data['expires_in'] );
+		return $auth;
+	}
+
+	/**
 	 * Acquire exactly one remote stage. Never called by getters or rendering.
 	 *
 	 * @param array $c Candidate copy.
@@ -435,24 +577,12 @@ class Better_Font_Awesome_Pro {
 	 */
 	private function acquire( $c ) {
 		if ( 'auth' === $c['phase'] || ( $c['expires'] ?? 0 ) < time() + 60 ) {
-			$token = $this->secret( $c['credential'], true );
-			if ( is_wp_error( $token ) ) {
-				return $token;
+			$auth = $this->authorize( $c['credential'] );
+			if ( is_wp_error( $auth ) ) {
+				return $auth;
 			}
-			$data = $this->request( $token );
-			if ( is_wp_error( $data ) ) {
-				return $data;
-			}
-			if ( ! is_string( $data['access_token'] ?? null ) || '' === $data['access_token'] || strlen( $data['access_token'] ) > 16384 || preg_match( '/\s/', $data['access_token'] ) || ! is_array( $data['scopes'] ?? null ) || count( array_filter( $data['scopes'], 'is_string' ) ) !== count( $data['scopes'] ) ||
-				array_diff( array( 'public', 'kits_read' ), $data['scopes'] ) || ! is_numeric( $data['expires_in'] ?? null ) || (int) $data['expires_in'] < 120 ) {
-				return $this->error( 'auth' );
-			}
-			$c['access'] = $this->secret( $data['access_token'] );
-			if ( is_wp_error( $c['access'] ) ) {
-				return $c['access'];
-			}
-			$c['expires'] = time() + min( DAY_IN_SECONDS, (int) $data['expires_in'] );
-			$c['phase']   = 'auth' === $c['phase'] ? 'metadata' : $c['phase'];
+			$c          = array_merge( $c, $auth );
+			$c['phase'] = 'auth' === $c['phase'] ? 'metadata' : $c['phase'];
 			return $c;
 		}
 		$token = $this->secret( $c['access'], true );
@@ -477,6 +607,7 @@ class Better_Font_Awesome_Pro {
 				'complete' => array(
 					'generation' => $c['id'],
 					'kit'        => $c['kit'],
+					'name'       => is_string( $data['me']['kit']['name'] ?? null ) ? sanitize_text_field( $data['me']['kit']['name'] ) : $c['kit'],
 					'credential' => $c['credential'],
 					'version'    => $meta['version'],
 					'revision'   => $meta['revision'],
@@ -641,6 +772,9 @@ class Better_Font_Awesome_Pro {
 			if ( ! $disconnect && isset( $old['active'] ) ) {
 				$next['active'] = $old['active'];
 			}
+			if ( ! $disconnect && isset( $old['account'] ) ) {
+				$next['account'] = $old['account'];
+			}
 			if ( $old === $next || $controller->swap( $old, $next ) ) {
 				wp_unschedule_hook( self::HOOK );
 				return true;
@@ -713,10 +847,11 @@ class Better_Font_Awesome_Pro {
 	public static function message( $code ) {
 		$messages = array(
 			'ownership'   => __( 'Pro connection is unavailable. Use automatic Free first and ensure BFA owns Font Awesome 7 initialization.', 'better-font-awesome' ),
-			'kit'         => __( 'Enter the Kit identifier from its CSS embed URL.', 'better-font-awesome' ),
+			'kit'         => __( 'Choose a Kit from the current account list.', 'better-font-awesome' ),
+			'selection'   => __( 'Kit selection expired or is unsupported. Find Kits again and choose a supported Kit.', 'better-font-awesome' ),
 			'auth'        => __( 'Authorization failed. Check your account token and Read Kits Data permission, then reconnect.', 'better-font-awesome' ),
 			'storage'     => __( 'Secure token storage is unavailable. Check OpenSSL and the WordPress authentication salts, then reconnect.', 'better-font-awesome' ),
-			'service'     => __( 'Font Awesome is temporarily unavailable. The working catalog is unchanged. Retrying is bounded; Refresh Kit starts a new attempt.', 'better-font-awesome' ),
+			'service'     => __( 'Font Awesome is temporarily unavailable. The working catalog is unchanged.', 'better-font-awesome' ),
 			'unsupported' => __( 'Use a published v7 Pro By Style Web Fonts Kit with compatibility and Classic Solid, Regular and Brands. Only Classic Light and Thin may also be selected.', 'better-font-awesome' ),
 			'revision'    => __( 'The Kit changed during preparation. The working catalog is unchanged. Refresh Kit to try again.', 'better-font-awesome' ),
 			'incomplete'  => __( 'The Kit catalog was incomplete or inconsistent. The working catalog is unchanged.', 'better-font-awesome' ),
@@ -734,11 +869,14 @@ class Better_Font_Awesome_Pro {
 		}
 		$operation = isset( $_POST['operation'] ) && is_string( $_POST['operation'] ) ? sanitize_key( wp_unslash( $_POST['operation'] ) ) : '';
 		$result    = null;
-		if ( 'connect' === $operation ) {
-			$kit = isset( $_POST['kit'] ) && is_string( $_POST['kit'] ) ? sanitize_text_field( wp_unslash( $_POST['kit'] ) ) : '';
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Tokens must not be transformed; start() validates length and whitespace before encryption.
+		if ( 'find' === $operation ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- find_kits() validates opaque tokens before encryption; never transform a credential.
 			$token  = isset( $_POST['token'] ) && is_string( $_POST['token'] ) ? wp_unslash( $_POST['token'] ) : '';
-			$result = $this->start( $kit, $token );
+			$result = $this->find_kits( $token );
+		} elseif ( 'connect' === $operation ) {
+			$kit    = isset( $_POST['kit'] ) && is_string( $_POST['kit'] ) ? sanitize_text_field( wp_unslash( $_POST['kit'] ) ) : '';
+			$id     = isset( $_POST['id'] ) && is_string( $_POST['id'] ) ? sanitize_text_field( wp_unslash( $_POST['id'] ) ) : '';
+			$result = $this->start( $kit, '', $id );
 		} elseif ( 'refresh' === $operation ) {
 			$result = $this->start();
 		} elseif ( 'step' === $operation ) {
@@ -759,6 +897,9 @@ class Better_Font_Awesome_Pro {
 		}
 		$status            = $this->status();
 		$status['message'] = self::message( $status['error'] );
+		if ( in_array( $operation, array( 'find', 'status' ), true ) ) {
+			$status['account'] = $this->account_status();
+		}
 		wp_send_json_success( $status );
 	}
 }

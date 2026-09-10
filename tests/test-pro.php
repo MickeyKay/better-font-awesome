@@ -355,11 +355,12 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		$this->complete();
 	}
 	public function test_admin_ajax_connect_starts_immediately_with_safe_status() {
+		$account = $this->pro->find_kits( 'SYNTHETIC-TOKEN' );
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$_POST    = array(
 			'operation' => 'connect',
 			'kit'       => 'KIT_ID',
-			'token'     => 'SYNTHETIC-TOKEN',
+			'id'        => $account['id'],
 			'nonce'     => wp_create_nonce( 'bfa-pro' ),
 		);
 		$_REQUEST = $_POST;
@@ -379,7 +380,7 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		} finally {
 			remove_filter( 'wp_doing_ajax', '__return_true' );
 				remove_filter( 'wp_die_ajax_handler', $handler );}
-		$this->assertSame( 1, $this->api->requests );
+		$this->assertSame( 3, $this->api->requests );
 		$this->assertTrue( json_decode( $output, true )['data']['pending'] );
 		$this->assertStringNotContainsString( 'SYNTHETIC-TOKEN', $output );
 		$this->assertStringNotContainsString( 'credential', $output );
@@ -541,6 +542,126 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		$this->assertWPError( $result );
 		$this->assertSame( $concurrent, Better_Font_Awesome_Pro::state() );
 		$this->assertSame( 0, $this->api->requests );
+	}
+
+	public function test_discovery_lists_named_unsupported_and_unnamed_kits_without_catalog_or_activation() {
+		$account = $this->pro->find_kits( 'SYNTHETIC-TOKEN' );
+		$this->assertTrue( $account['authorized'] );
+		$this->assertCount( 4, $account['kits'] );
+		$this->assertSame( 'BFA staging', $account['kits'][0]['name'] );
+		$this->assertSame( $account['kits'][0]['name'], $account['kits'][1]['name'] );
+		$this->assertFalse( $account['kits'][2]['supported'] );
+		$this->assertNotEmpty( $account['kits'][2]['summary'] );
+		$this->assertSame( '', $account['kits'][3]['name'] );
+		$this->assertSame( 2, $this->api->requests );
+		$this->assertCount( 1, $this->api->queries );
+		$this->assertStringNotContainsString( 'iconVariantsPaginated', $this->api->queries[0] );
+		$this->assertStringNotContainsString( 'icons{', $this->api->queries[0] );
+		$this->assertArrayNotHasKey( 'candidate', Better_Font_Awesome_Pro::state() );
+		$this->assertFalse( $this->pro->status()['connected'] );
+		$this->assertStringNotContainsString( 'SYNTHETIC-', wp_json_encode( Better_Font_Awesome_Pro::state() ) );
+		$this->assertStringNotContainsString( 'credential', wp_json_encode( $account ) );
+		$count = $this->api->requests;
+		$this->pro->account_status();
+		$this->pro->status();
+		$this->assertSame( $count, $this->api->requests );
+		$status = $this->pro->start( 'KIT_ID', '', $account['id'] );
+		$this->assertSame( 'metadata', $status['phase'] );
+		$active = $this->complete();
+		$this->assertSame( 'BFA staging', $active['name'] );
+	}
+	public function test_discovery_empty_list_is_authorized_but_does_not_connect() {
+		$this->api->kits = array();
+		$account = $this->pro->find_kits( 'SYNTHETIC-TOKEN' );
+		$this->assertTrue( $account['authorized'] );
+		$this->assertSame( array(), $account['kits'] );
+		$this->assertWPError( $this->pro->start( 'KIT_ID', '', $account['id'] ) );
+		$this->assertSame( 2, $this->api->requests );
+	}
+	public function test_discovery_rejects_forged_unsupported_and_stale_selections_without_http() {
+		$first = $this->pro->find_kits( 'SYNTHETIC-TOKEN' );
+		$second = $this->pro->find_kits();
+		foreach ( array( array( 'KIT_ID', '' ), array( 'FORGED', $second['id'] ), array( 'SVG_KIT', $second['id'] ), array( 'KIT_ID', $first['id'] ) ) as $selection ) {
+			$this->assertSame( 'selection', $this->pro->start( $selection[0], '', $selection[1] )->get_error_code() );
+		}
+		$this->assertSame( 4, $this->api->requests );
+	}
+	public function test_discovery_failed_replacement_preserves_active_and_saved_authorization() {
+		$account = $this->pro->find_kits( 'SYNTHETIC-TOKEN' );
+		$this->pro->start( 'KIT_ID', '', $account['id'] );
+		$active = $this->complete();
+		$saved = Better_Font_Awesome_Pro::state()['account'];
+		foreach ( array( 'auth', 'service', 'scope', 'empty-token' ) as $fault ) {
+			$this->api->fault = $fault;
+			$this->assertWPError( $this->pro->find_kits( 'SYNTHETIC-REPLACEMENT' ) );
+			$this->assertSame( $active, Better_Font_Awesome_Pro::state()['active'] );
+			$this->assertSame( $saved, Better_Font_Awesome_Pro::state()['account'] );
+			$this->assertFalse( $this->pro->account_status()['authorized'] );
+		}
+		$this->api->fault = '';
+		$this->assertTrue( $this->pro->find_kits()['authorized'] );
+		$this->assertSame( $saved['credential'], Better_Font_Awesome_Pro::state()['account']['credential'] );
+		$this->assertStringNotContainsString( 'DO-NOT-EXPOSE', wp_json_encode( Better_Font_Awesome_Pro::state() ) );
+	}
+	public function test_discovery_late_response_cannot_replace_newer_authorization() {
+		$newer = null;
+		$overlap = function ( $response ) use ( &$overlap, &$newer ) {
+			remove_filter( 'pre_http_request', $overlap, 30 );
+			$this->api->kits = array( array( 'token' => 'NEW_KIT', 'name' => 'New account' ) );
+			$newer = $this->pro->find_kits( 'SYNTHETIC-NEW-TOKEN' );
+			return $response;
+		};
+		add_filter( 'pre_http_request', $overlap, 30 );
+		$old = $this->pro->find_kits( 'SYNTHETIC-OLD-TOKEN' );
+		$this->assertSame( 'changed', $old->get_error_code() );
+		$this->assertSame( $newer, $this->pro->account_status() );
+		$this->assertSame( 'New account', $newer['kits'][0]['name'] );
+	}
+	public function test_discovery_selection_is_revalidated_under_current_token_before_catalog() {
+		$account = $this->pro->find_kits( 'SYNTHETIC-TOKEN' );
+		$this->api->fault = 'unsupported';
+		$status = $this->pro->start( 'KIT_ID', '', $account['id'] );
+		$this->pro->step( $status['operation'] );
+		$this->assertSame( 'unsupported', $this->pro->status()['error'] );
+		$this->assertSame( array(), Better_Font_Awesome_Pro::state()['candidate']['icons'] );
+		$this->assertArrayNotHasKey( 'active', Better_Font_Awesome_Pro::state() );
+	}
+	public function test_discovery_disconnect_fences_late_result_and_forgets_authorization() {
+		$this->pro->find_kits( 'SYNTHETIC-TOKEN' );
+		$cancel = static function ( $response ) { Better_Font_Awesome_Pro::cancel( true ); return $response; };
+		add_filter( 'pre_http_request', $cancel, 30 );
+		$this->assertWPError( $this->pro->find_kits() );
+		remove_filter( 'pre_http_request', $cancel, 30 );
+		$this->assertFalse( $this->pro->account_status()['saved'] );
+		$this->assertFalse( $this->pro->account_status()['authorized'] );
+	}
+
+	/** @dataProvider discovery_configurations */
+	public function test_discovery_configuration_checks_explain_unsupported_kits( $configuration ) {
+		$this->api->kits = array( array_merge( array( 'token' => 'KIT_ID', 'name' => 'Unsupported Kit' ), $configuration ) );
+		$account = $this->pro->find_kits( 'SYNTHETIC-TOKEN' );
+		$this->assertTrue( $account['authorized'] );
+		$this->assertCount( 1, $account['kits'] );
+		$this->assertFalse( $account['kits'][0]['supported'] );
+		$this->assertStringContainsString( 'Use a published v7', $account['kits'][0]['summary'] );
+		$this->assertSame( 2, $this->api->requests );
+	}
+	public static function discovery_configurations() {
+		return array(
+			array( array( 'status' => 'draft' ) ),
+			array( array( 'licenseSelected' => 'free' ) ),
+			array( array( 'technologySelected' => 'svg' ) ),
+			array( array( 'version' => '6.x' ) ),
+			array( array( 'subsetType' => 'CUSTOM' ) ),
+			array( array( 'shimEnabled' => false ) ),
+			array( array( 'familyStylesPaginated' => array( 'totalPageCount' => 2, 'familyStyles' => array() ) ) ),
+		);
+	}
+	public function test_discovery_rejects_invalid_remote_identity_without_persisting_it() {
+		$this->api->kits = array( array( 'token' => 'https://untrusted.invalid/style.css' ) );
+		$this->assertSame( 'service', $this->pro->find_kits( 'SYNTHETIC-TOKEN' )->get_error_code() );
+		$this->assertArrayNotHasKey( 'account', Better_Font_Awesome_Pro::state() );
+		$this->assertStringNotContainsString( 'untrusted', wp_json_encode( $this->pro->account_status() ) );
 	}
 
 }

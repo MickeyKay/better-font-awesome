@@ -83,7 +83,7 @@ If a theme or another plugin also loads Font Awesome, go to **Settings > Better 
 
 = Does Better Font Awesome support Font Awesome Pro? =
 
-You can connect an existing v7 Pro By Style Kit under **Settings > Better Font Awesome**. Use Web Fonts, CSS-only embedding, compatibility, and Classic Solid, Regular and Brands, with optional Light and Thin. Enter the Kit identifier and an account API token with Read Kits Data permission. Connect and Refresh Kit prepare icons immediately with progress, even when WP-Cron is disabled. Automatic Free remains the default. Pro requires hosted delivery; local Pro hosting, SVG Kits, other families, By Icon Kits and custom uploads are not supported.
+You can connect an existing v7 Pro By Style Kit under **Settings > Better Font Awesome**. Use Web Fonts, CSS-only embedding, compatibility, and Classic Solid, Regular and Brands, with optional Light and Thin. Enter an account API token with Read Kits Data permission, click Find Kits, then choose a named Kit and click Connect Kit. Finding Kits authorizes the account without activating a Kit or fetching its icon catalog. A blank token reuses saved authorization when refreshing the Kit list. Connect and Refresh Kit prepare icons immediately with progress, even when WP-Cron is disabled. Automatic Free remains the default. Pro requires hosted delivery; local Pro hosting, SVG Kits, other families, By Icon Kits and custom uploads are not supported.
 
 = Do visitors download fonts from another service? =
 

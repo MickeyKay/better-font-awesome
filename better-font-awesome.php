@@ -919,7 +919,6 @@ class Better_Font_Awesome_Plugin {
 
 	/** WordPress-native, separate connection controls with no secret values rendered. */
 	public function pro_settings() {
-		$status = $this->pro->status();
 		wp_enqueue_script( 'bfa-pro-settings', plugins_url( 'js/pro-settings.js', __FILE__ ), array( 'wp-i18n' ), self::VERSION . '-' . md5_file( __DIR__ . '/js/pro-settings.js' ), true );
 		wp_set_script_translations( 'bfa-pro-settings', 'better-font-awesome', __DIR__ . '/languages' );
 		wp_localize_script(
@@ -935,18 +934,20 @@ class Better_Font_Awesome_Plugin {
 		<p><?php esc_html_e( 'Use an existing v7 Pro By Style Kit with Web Fonts, CSS-only embedding and compatibility enabled. Include Classic Solid, Regular and Brands; Light and Thin are optional. Your account token needs Read Kits Data permission.', 'better-font-awesome' ); ?></p>
 		<p><?php esc_html_e( 'Hosted Pro loads CSS and fonts from Font Awesome in visitors’ browsers and editors. This is separate from local Free delivery. BFA does not manage your subscription, domains or Kit configuration.', 'better-font-awesome' ); ?></p>
 		<form id="bfa-pro-form" autocomplete="off">
-			<p><label for="bfa-pro-kit"><?php esc_html_e( 'Kit identifier', 'better-font-awesome' ); ?></label><br><input id="bfa-pro-kit" type="text" value="<?php echo esc_attr( $status['kit'] ); ?>" aria-describedby="bfa-pro-kit-help"></p>
-			<p id="bfa-pro-kit-help"><?php esc_html_e( 'For https://kit.fontawesome.com/KIT_ID.css, enter KIT_ID.', 'better-font-awesome' ); ?></p>
 			<p><label for="bfa-pro-token"><?php esc_html_e( 'Account API token', 'better-font-awesome' ); ?></label><br><input id="bfa-pro-token" type="password" autocomplete="new-password" spellcheck="false" aria-describedby="bfa-pro-token-help"></p>
-			<p id="bfa-pro-token-help"><?php esc_html_e( 'Leave blank to reuse the saved token. Tokens stay on your server, encrypted using WordPress salts. Changing those salts requires reconnecting.', 'better-font-awesome' ); ?></p>
+			<p id="bfa-pro-token-help"><?php esc_html_e( 'Leave blank to reuse the saved token. Tokens stay encrypted on your server. Changing WordPress salts requires entering the token again.', 'better-font-awesome' ); ?> <a href="https://fontawesome.com/account#api-tokens" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Get an API token from Font Awesome (opens in a new tab)', 'better-font-awesome' ); ?></a></p>
+			<p><button id="bfa-pro-find" type="button" class="button"><?php esc_html_e( 'Find Kits', 'better-font-awesome' ); ?></button></p>
+			<p id="bfa-pro-account-status" role="status" aria-live="polite" aria-atomic="true"></p>
+			<p><label for="bfa-pro-kit"><?php esc_html_e( 'Choose a Kit', 'better-font-awesome' ); ?></label><br><select id="bfa-pro-kit" aria-describedby="bfa-pro-kit-help" disabled><option value=""><?php esc_html_e( 'Choose a Kit', 'better-font-awesome' ); ?></option></select></p>
+			<p id="bfa-pro-kit-help" role="status" aria-live="polite" aria-atomic="true"><?php esc_html_e( 'Find Kits to authorize your account, then choose a Kit. No Kit is connected until you click Connect Kit and validation succeeds.', 'better-font-awesome' ); ?></p>
 			<p>
-			<button type="submit" class="button button-primary"><?php esc_html_e( 'Connect Kit', 'better-font-awesome' ); ?></button>
+			<button id="bfa-pro-connect" type="submit" class="button button-primary" disabled><?php esc_html_e( 'Connect Kit', 'better-font-awesome' ); ?></button>
 			<button type="button" class="button" data-pro-action="refresh"><?php esc_html_e( 'Refresh Kit', 'better-font-awesome' ); ?></button>
 			<button type="button" class="button" data-pro-action="pause"><?php esc_html_e( 'Use automatic Free', 'better-font-awesome' ); ?></button>
 			<button type="button" class="button" data-pro-action="disconnect"><?php esc_html_e( 'Disconnect and forget Kit', 'better-font-awesome' ); ?></button>
 			</p>
 			<p><?php esc_html_e( 'Disconnect removes the saved token, catalog and pending work. Switching to Free preserves the saved connection. Neither action changes saved icon names or styles; unavailable Pro icons may be blank.', 'better-font-awesome' ); ?></p>
-			<p id="bfa-pro-status" role="status" aria-live="polite"></p>
+			<p id="bfa-pro-status" role="status" aria-live="polite" aria-atomic="true"></p>
 		</form>
 		<?php
 	}
