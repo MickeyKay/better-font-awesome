@@ -267,7 +267,7 @@ class Better_Font_Awesome_Pro {
 					self::message( 'unsupported' )
 				) : sprintf(
 					/* translators: 1: Font Awesome version, 2: supported Classic styles. */
-					__( 'Pro %1$s, Web Fonts, By Style, compatibility enabled. Classic styles: %2$s. Catalog and delivery still need validation.', 'better-font-awesome' ),
+					__( 'Pro %1$s, Web Fonts, By Style, compatibility enabled. Classic styles: %2$s.', 'better-font-awesome' ),
 					$meta['version'],
 					implode( ', ', array_keys( $meta['counts'] ) )
 				),
@@ -850,16 +850,16 @@ class Better_Font_Awesome_Pro {
 	public static function message( $code ) {
 		$messages = array(
 			'ownership'   => __( 'Pro connection is unavailable. Use automatic Free first and ensure BFA owns Font Awesome 7 initialization.', 'better-font-awesome' ),
-			'kit'         => __( 'Choose a Kit from the current account list.', 'better-font-awesome' ),
-			'selection'   => __( 'Kit selection expired or is unsupported. Refresh the Kit list and choose a supported Kit.', 'better-font-awesome' ),
+			'kit'         => __( 'Choose a kit from the current account list.', 'better-font-awesome' ),
+			'selection'   => __( 'Kit selection expired or is unsupported. Refresh the kit list and choose a supported kit.', 'better-font-awesome' ),
 			'auth'        => __( 'Authorization failed. Check your account token and Read Kits Data permission, then reconnect.', 'better-font-awesome' ),
 			'storage'     => __( 'Secure token storage is unavailable. Check OpenSSL and the WordPress authentication salts, then reconnect.', 'better-font-awesome' ),
 			'service'     => __( 'Font Awesome is temporarily unavailable. The working catalog is unchanged.', 'better-font-awesome' ),
-			'unsupported' => __( 'Use a published v7 Pro By Style Web Fonts Kit with compatibility and Classic Solid, Regular and Brands. Only Classic Light and Thin may also be selected.', 'better-font-awesome' ),
-			'revision'    => __( 'The Kit changed during preparation. The working catalog is unchanged. Refresh Kit to try again.', 'better-font-awesome' ),
-			'incomplete'  => __( 'The Kit catalog was incomplete or inconsistent. The working catalog is unchanged.', 'better-font-awesome' ),
-			'coverage'    => __( 'The Kit is missing required Free icons. Check the included styles before reconnecting.', 'better-font-awesome' ),
-			'expired'     => __( 'Preparation expired. Connect or Refresh Kit to start again.', 'better-font-awesome' ),
+			'unsupported' => __( 'Use a published v7 Pro By Style Web Fonts kit with compatibility and Classic Solid, Regular and Brands. Only Classic Light and Thin may also be selected.', 'better-font-awesome' ),
+			'revision'    => __( 'The kit changed during preparation. The working catalog is unchanged. Refresh kit to try again.', 'better-font-awesome' ),
+			'incomplete'  => __( 'The kit catalog was incomplete or inconsistent. The working catalog is unchanged.', 'better-font-awesome' ),
+			'coverage'    => __( 'The kit is missing required Free icons. Check the included styles before reconnecting.', 'better-font-awesome' ),
+			'expired'     => __( 'Preparation expired. Connect or Refresh kit to start again.', 'better-font-awesome' ),
 			'changed'     => __( 'Another connection action won. Reload this page to see its status.', 'better-font-awesome' ),
 		);
 		return $messages[ $code ] ?? '';

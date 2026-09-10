@@ -234,6 +234,9 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		$plugin = Better_Font_Awesome_Plugin::get_instance();
 		$pro    = $plugin->get( 'pro' );
 		$this->assertTrue( $pro->effective() );
+		ob_start();
+		$plugin->asset_delivery_callback();
+		$this->assertStringNotContainsString( 'id="bfa-delivery-status"', ob_get_clean() );
 		$library = $plugin->get( 'bfa_lib' );
 		$this->assertSame( 'https://kit.fontawesome.com/KIT_ID.css', $library->get_stylesheet_url() );
 		$block = $plugin->get( 'icon_block' );
@@ -599,6 +602,8 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		$this->assertCount( 4, $account['kits'] );
 		$this->assertSame( 'BFA staging', $account['kits'][0]['name'] );
 		$this->assertSame( $account['kits'][0]['name'], $account['kits'][1]['name'] );
+		$this->assertStringContainsString( 'Classic styles:', $account['kits'][0]['summary'] );
+		$this->assertStringNotContainsString( 'still need validation', $account['kits'][0]['summary'] );
 		$this->assertFalse( $account['kits'][2]['supported'] );
 		$this->assertNotEmpty( $account['kits'][2]['summary'] );
 		$this->assertSame( '', $account['kits'][3]['name'] );

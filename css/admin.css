@@ -83,7 +83,7 @@
 	text-decoration: none;
 }
 
-.bfa-settings button.bfa-action:hover {
+.bfa-settings button.bfa-action:hover .bfa-action-label {
 	text-decoration: underline;
 }
 
@@ -95,6 +95,22 @@
 	vertical-align: text-bottom;
 }
 
-#bfa-pro-kit-help:empty {
+#bfa-pro-kit-warning:empty,
+#bfa-provider-help:empty {
 	display: none;
+}
+
+#bfa-pro-kit-details {
+	margin-top: 8px;
+	max-width: 600px;
+}
+
+#bfa-pro-kit-details summary {
+	width: fit-content;
+	cursor: pointer;
+	color: #2271b1;
+}
+
+#bfa-pro-kit-details summary:hover {
+	color: #135e96;
 }

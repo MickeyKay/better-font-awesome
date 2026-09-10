@@ -11,6 +11,8 @@
 	const retry = document.getElementById( 'bfa-pro-retry' );
 	const accountStatus = document.getElementById( 'bfa-pro-account-status' );
 	const summary = document.getElementById( 'bfa-pro-kit-help' );
+	const details = document.getElementById( 'bfa-pro-kit-details' );
+	const warning = document.getElementById( 'bfa-pro-kit-warning' );
 	const provider = document.getElementById( 'bfa-provider' );
 	const panel = document.getElementById( 'bfa-pro-panel' );
 	const saved = document.getElementById( 'bfa-pro-saved' );
@@ -27,6 +29,7 @@
 	let hasSavedToken = false;
 	let discovery = 0;
 	let account = { id: '', kits: [] };
+	let activeKit = null;
 	let generation = 0;
 	let connecting = false;
 	let retryAction;
@@ -54,6 +57,7 @@
 		connecting = operation !== 'status';
 		selectionChanged();
 		if ( operation !== 'status' ) {
+			status.classList.remove( 'screen-reader-text' );
 			kitSpinner.classList.add( 'is-active' );
 			if ( operation !== 'step' ) { status.textContent = __( 'Working...', 'better-font-awesome' ); }
 		}
@@ -61,6 +65,8 @@
 			const state = await send( operation, data );
 			if ( mine !== generation ) { return; }
 			connecting = Boolean( state.pending || state.activationRequired );
+			activeKit = state.connected ? { id: state.kit, name: state.kitName || state.kit } : null;
+			status.classList.toggle( 'screen-reader-text', Boolean( state.connected && ! connecting && ! state.message ) );
 			selectionChanged();
 			refreshActive.hidden = ! state.kit;
 			kitSpinner.classList.toggle( 'is-active', Boolean( state.pending || state.activationRequired ) );
@@ -69,9 +75,9 @@
 				const progress = {
 					icons: __( 'Loading Pro icons...', 'better-font-awesome' ),
 					'free-coverage': __( 'Checking icon compatibility...', 'better-font-awesome' ),
-					verify: __( 'Verifying Kit...', 'better-font-awesome' ),
+					verify: __( 'Verifying kit...', 'better-font-awesome' ),
 				};
-				status.textContent = state.message || progress[ state.phase ] || __( 'Validating Kit...', 'better-font-awesome' );
+				status.textContent = state.message || progress[ state.phase ] || __( 'Validating kit...', 'better-font-awesome' );
 				// Polling remains bounded and can resume after a reload, without WP-Cron.
 				const delay = Math.max( 250, Math.min( 30000, ( state.retryAt * 1000 ) - Date.now() ) );
 				timer = setTimeout( () => run( 'step', { id: state.operation } ), delay );
@@ -91,6 +97,7 @@
 				connecting = false;
 				retry.hidden = ! retryAction;
 				kitSpinner.classList.remove( 'is-active' );
+				status.classList.remove( 'screen-reader-text' );
 				status.textContent = error.message || __( 'Connection interrupted. Reload to resume or start again.', 'better-font-awesome' );
 				selectionChanged();
 			}
@@ -100,24 +107,31 @@
 		const kit = account.kits.find( ( item ) => item.id === select.value );
 		select.disabled = connecting || needsFreeSave() || ! account.authorized || ! account.kits.length;
 		retry.disabled = connecting || needsFreeSave();
-		summary.textContent = kit?.summary || '';
+		summary.textContent = kit?.supported ? kit.summary : '';
+		details.hidden = ! summary.textContent;
+		warning.textContent = kit && ! kit.supported ? kit.summary : '';
 	}
 	function clearChoices() {
 		retryAction = undefined;
 		retry.hidden = true;
 		account = { id: '', kits: [] };
-		select.replaceChildren( new Option( __( 'Choose a Kit', 'better-font-awesome' ), '' ) );
+		select.replaceChildren( new Option( __( 'Choose a kit', 'better-font-awesome' ), '' ) );
+		if ( activeKit ) {
+			select.add( new Option( activeLabel( activeKit.name ), activeKit.id, false, true ) );
+		}
 		select.disabled = true;
 		selectionChanged();
 	}
 	function showAccount( value ) {
+		const previous = select.value;
 		editingToken = false;
 		hasSavedToken = value.saved;
 		tokenControls();
 		clearChoices();
+		select.replaceChildren( new Option( __( 'Choose a kit', 'better-font-awesome' ), '' ) );
 		account = value;
 		account.kits.forEach( ( kit ) => {
-			let label = kit.name || __( 'Unnamed Kit', 'better-font-awesome' );
+			let label = kit.name || __( 'Unnamed kit', 'better-font-awesome' );
 			if ( ! kit.name || account.kits.filter( ( item ) => item.name === kit.name ).length > 1 ) {
 				// Extend a shared identifier prefix only as far as needed to distinguish it.
 				let length = Math.min( 8, kit.id.length );
@@ -128,12 +142,23 @@
 				// translators: %s: Kit name.
 				label = sprintf( __( '%s (unsupported)', 'better-font-awesome' ), label );
 			}
+			if ( kit.id === activeKit?.id ) { label = activeLabel( label ); }
 			// Unsupported options remain selectable; the linked summary explains why.
 			select.add( new Option( label, kit.id ) );
 		} );
+		if ( activeKit && ! account.kits.some( kit => kit.id === activeKit.id ) ) {
+			const option = new Option( activeLabel( activeKit.name ), activeKit.id );
+			option.disabled = true;
+			select.add( option );
+		}
+		select.value = [ ...select.options ].some( option => option.value === previous ) && previous ? previous : activeKit?.id || '';
 		selectionChanged();
 		if ( account.saved ) { refreshKits.after( feedback ); }
-		accountStatus.textContent = account.authorized && ! account.kits.length ? __( 'No Kits found. Create one in Font Awesome, then refresh.', 'better-font-awesome' ) : '';
+		accountStatus.textContent = account.authorized && ! account.kits.length ? __( 'No kits found. Create one in Font Awesome, then refresh.', 'better-font-awesome' ) : '';
+	}
+	function activeLabel( name ) {
+		// translators: %s: Kit name.
+		return sprintf( __( '%s (active)', 'better-font-awesome' ), name );
 	}
 	async function findKits( reuseSaved = false ) {
 		const mine = ++discovery;
@@ -143,7 +168,7 @@
 		( reuseSaved ? refreshKits : find ).after( feedback );
 		( reuseSaved ? refreshKits : find ).setAttribute( 'aria-busy', 'true' );
 		spinner.classList.add( 'is-active' );
-		accountStatus.textContent = reuseSaved ? __( 'Refreshing Kits...', 'better-font-awesome' ) : __( 'Connecting...', 'better-font-awesome' );
+		accountStatus.textContent = reuseSaved ? __( 'Refreshing kits...', 'better-font-awesome' ) : __( 'Connecting...', 'better-font-awesome' );
 		try {
 			const state = await send( 'find', { token: value } );
 			if ( mine !== discovery ) { return; }
@@ -166,6 +191,7 @@
 	find.addEventListener( 'click', () => findKits() );
 	refreshKits.addEventListener( 'click', () => findKits( true ) );
 	select.addEventListener( 'change', () => {
+		details.open = false;
 		selectionChanged();
 		const kit = account.kits.find( item => item.id === select.value );
 		if ( kit?.supported && ! select.disabled ) {
@@ -184,7 +210,7 @@
 	} );
 	form.querySelectorAll( '[data-pro-action]' ).forEach( ( button ) => {
 		button.addEventListener( 'click', () => {
-			if ( button.dataset.proAction === 'disconnect' && ! window.confirm( __( 'Delete the saved token and disconnect the Kit? Saved icons will not be changed.', 'better-font-awesome' ) ) ) { return; }
+			if ( button.dataset.proAction === 'disconnect' && ! window.confirm( __( 'Delete the saved token and disconnect the kit? Saved icons will not be changed.', 'better-font-awesome' ) ) ) { return; }
 			button.after( kitFeedback );
 			run( button.dataset.proAction );
 		} );
@@ -226,7 +252,7 @@
 		find.disabled = needsFreeSave();
 		refreshKits.disabled = needsFreeSave();
 		form.querySelector( '[data-pro-action="refresh"]' ).disabled = needsFreeSave();
-		document.getElementById( 'bfa-provider-help' ).textContent = needsFreeSave() ? __( 'Save Settings to switch off local delivery before setting up a hosted Kit.', 'better-font-awesome' ) : ( mode === 'kit-css' ? __( 'CSS and fonts load from Font Awesome.', 'better-font-awesome' ) : '' );
+		document.getElementById( 'bfa-provider-help' ).textContent = needsFreeSave() ? __( 'Save Settings to switch off local delivery before setting up a hosted kit.', 'better-font-awesome' ) : '';
 		selectionChanged();
 	}
 	if ( window.location.hash === '#bfa-kit' ) { provider.value = 'kit-css'; }
