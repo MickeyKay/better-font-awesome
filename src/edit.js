@@ -46,6 +46,12 @@ export default function Edit( { attributes, setAttributes } ) {
 	const [ filterValue, setFilterValue ] = useState( '' );
 	const catalog = getCatalog();
 	const siteDefault = window.bfaBlockEditor?.defaultIconStyle ?? 'solid';
+	/* translators: %d is the number of unique selectable Free icons. */
+	let catalogHelp = __( 'Search all %d available Font Awesome Free icons.', 'better-font-awesome' );
+	if ( window.bfaBlockEditor?.proCatalog ) {
+		/* translators: %d is the number of unique selectable Kit icons. */
+		catalogHelp = __( 'Search all %d available Font Awesome Kit icons.', 'better-font-awesome' );
+	}
 	const inherited = iconStyle === 'site-default';
 	const icons = useMemo( () => groupCatalog( catalog ), [ catalog ] );
 	const options = useMemo( () => {
@@ -64,6 +70,8 @@ export default function Edit( { attributes, setAttributes } ) {
 		solid: __( 'Solid', 'better-font-awesome' ),
 		regular: __( 'Regular', 'better-font-awesome' ),
 		brands: __( 'Brands', 'better-font-awesome' ),
+		light: __( 'Light', 'better-font-awesome' ),
+		thin: __( 'Thin', 'better-font-awesome' ),
 	};
 	const styleAvailable = availableStyles.includes( effectiveStyle );
 	const styleOptions = availableStyles.map( ( style ) => ( {
@@ -137,14 +145,7 @@ export default function Edit( { attributes, setAttributes } ) {
 								onChange={ onSelectIcon }
 								onFilterValueChange={ setFilterValue }
 								__experimentalRenderItem={ renderIconOption }
-								help={ sprintf(
-									/* translators: %d is the number of unique selectable icons. */
-									__(
-										'Search all %d available Font Awesome Free icons.',
-										'better-font-awesome'
-									),
-									icons.length
-								) }
+								help={ sprintf( catalogHelp, icons.length ) }
 							/>
 						</div>
 						<SelectControl

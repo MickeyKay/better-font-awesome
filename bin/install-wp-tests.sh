@@ -114,6 +114,8 @@ install_test_suite() {
     sed $ioption "s/yourusernamehere/$DB_USER/" "$WP_TESTS_DIR"/wp-tests-config.php
     sed $ioption "s/yourpasswordhere/$DB_PASS/" "$WP_TESTS_DIR"/wp-tests-config.php
     sed $ioption "s|localhost|${DB_HOST}|" "$WP_TESTS_DIR"/wp-tests-config.php
+    # Public test-only salt material, long enough to exercise encrypted Pro storage.
+    sed $ioption "s/put your unique phrase here/BFA-synthetic-test-key-material-not-a-production-secret/g" "$WP_TESTS_DIR"/wp-tests-config.php
   fi
 
 }

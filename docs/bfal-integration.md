@@ -166,3 +166,7 @@ Before release, also verify:
 - Classic Editor, supported `wp_editor()` integrations, shortcode insertion, frontend rendering, the optional v4 shim, stylesheet ownership, and existing filters remain compatible.
 
 Record exact dependency references, commits, trees, test counts, artifact identities, and completed gate evidence in the release PR and final release record, not in this evergreen architecture document.
+
+## Hosted Pro integration
+
+BFA can initialize one hosted v7 Kit through BFAL’s immutable `kit-css` contract. Pro connection state and acquisition are separate from the Free provider and release validators. See [the Pro Kit contract](pro-kits.md) for ownership, bounded connection work, mode transitions and publication gates. This does not change the automatic Free update path or bundled-local guarantee.

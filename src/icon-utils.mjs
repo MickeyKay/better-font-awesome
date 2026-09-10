@@ -2,8 +2,10 @@ const STYLE_CLASSES = {
 	brands: 'fab',
 	regular: 'far',
 	solid: 'fas',
+	light: 'fal',
+	thin: 'fat',
 };
-const SUPPORTED_STYLES = [ 'solid', 'regular', 'brands' ];
+const SUPPORTED_STYLES = [ 'solid', 'regular', 'brands', 'light', 'thin' ];
 
 export function getAvailableStyles( catalog, iconName ) {
 	return SUPPORTED_STYLES.filter( ( style ) =>
@@ -20,7 +22,7 @@ export function groupCatalog( catalog ) {
 		if ( ! icons.has( icon.name ) ) {
 			icons.set( icon.name, {
 				name: icon.name,
-				label: icon.label.replace( / \((?:solid|regular|brands)\)$/, '' ),
+				label: icon.label.replace( / \((?:solid|regular|brands|light|thin)\)$/, '' ),
 				styles: [],
 				searchLabels: [],
 			} );
@@ -28,6 +30,7 @@ export function groupCatalog( catalog ) {
 		const entry = icons.get( icon.name );
 		entry.styles = SUPPORTED_STYLES.filter( ( style ) => style === icon.style || entry.styles.includes( style ) );
 		entry.searchLabels.push( icon.label );
+		if ( typeof icon.searchTerms === 'string' ) { entry.searchLabels.push( icon.searchTerms ); }
 	}
 	return Array.from( icons.values() );
 }
@@ -46,7 +49,7 @@ function selectionStyle( icon, currentStyle ) {
 }
 
 export function resolveStyle( availableStyles, requestedStyle ) {
-	const requested = requestedStyle === 'regular' ? 'regular' : 'solid';
+	const requested = [ 'regular', 'light', 'thin' ].includes( requestedStyle ) ? requestedStyle : 'solid';
 	return availableStyles.includes( requested ) ? requested : availableStyles[ 0 ] ?? requested;
 }
 

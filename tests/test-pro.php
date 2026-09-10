@@ -1,0 +1,508 @@
+<?php
+/** Pro acquisition and delivery tests use synthetic service responses only. */
+require_once __DIR__ . '/MetadataTestCase.php';
+require_once __DIR__ . '/pro-fixture.php';
+
+class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Case {
+	private $api;
+	private $pro;
+	public function setUp(): void {
+		parent::setUp();
+		$this->use_default_release_channel();
+		delete_option( Better_Font_Awesome_Pro::OPTION );
+		$this->api = new Better_Font_Awesome_Pro_Fixture();
+		add_filter( 'pre_http_request', array( $this->api, 'response' ), 20, 3 );
+		$plugin    = $this->initialize_plugin( array( 'asset_delivery' => 'automatic' ) );
+		$this->pro = $plugin->get( 'pro' );
+	}
+	public function tearDown(): void {
+		remove_filter( 'pre_http_request', array( $this->api, 'response' ), 20 );
+		Better_Font_Awesome_Pro::cancel( true );
+		delete_option( Better_Font_Awesome_Pro::OPTION );
+		parent::tearDown();
+	}
+	private function complete() {
+		for ( $i = 0; $i < 90 && $this->pro->status()['pending']; $i++ ) {
+			$status = $this->pro->step( $this->pro->status()['operation'] );
+			$this->assertEmpty( $status['error'] );
+		}
+		$this->assertTrue( Better_Font_Awesome_Pro::state()['enabled'] );
+		$this->assertFalse( $this->pro->status()['connected'], 'Activation is confirmed only after a request initializes the Kit.' );
+		return Better_Font_Awesome_Pro::state()['active'];
+	}
+	public function test_immediate_bounded_connect_and_refresh_without_running_cron() {
+		$this->assertSame( 0, $this->api->requests );
+		$status = $this->pro->start( 'KIT_ID', 'SYNTHETIC-ACCOUNT-NOT-A-CREDENTIAL' );
+		$this->assertSame( 1, $this->api->requests );
+		$this->assertFalse( $status['connected'] );
+		$this->assertSame( 'metadata', $status['phase'] );
+		$active = $this->complete();
+		$this->assertCount( count( $this->api->rows ), $active['icons'] );
+		$this->assertSame( 5, count( $active['styles'] ) );
+		$this->assertSame( (int) ceil( count( $this->api->rows ) / 500 ) + 4, $this->api->requests );
+		$before = $this->api->requests;
+		$this->pro->start();
+		$this->assertSame( $before + 1, $this->api->requests );
+		$this->assertSame( $active, Better_Font_Awesome_Pro::state()['active'] );
+		$this->complete();
+	}
+	public function test_credentials_are_encrypted_non_autoloaded_and_never_in_status_or_html() {
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-ACCOUNT-NOT-A-CREDENTIAL' );
+		$state = wp_json_encode( Better_Font_Awesome_Pro::state() );
+		$this->assertStringNotContainsString( 'SYNTHETIC-ACCOUNT', $state );
+		$this->assertStringNotContainsString( 'SYNTHETIC-ACCESS', $state );
+		$this->assertStringNotContainsString( 'credential', wp_json_encode( $this->pro->status() ) );
+		$this->assertArrayNotHasKey( Better_Font_Awesome_Pro::OPTION, wp_load_alloptions() );
+		ob_start();
+		Better_Font_Awesome_Plugin::get_instance()->pro_settings();
+		$html = ob_get_clean();
+		$this->assertStringNotContainsString( 'SYNTHETIC-', $html );
+	}
+	/** @dataProvider failures */
+	public function test_partial_failed_and_unsupported_candidates_never_replace_active( $fault, $phase, $expected ) {
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$active = $this->complete();
+		$this->pro->start( 'REPLACEMENT' );
+		while ( $phase !== $this->pro->status()['phase'] ) {
+			$this->pro->step( $this->pro->status()['operation'] );
+		}
+		$this->api->fault = $fault;
+		$this->pro->step( $this->pro->status()['operation'] );
+		$this->assertSame( $expected, $this->pro->status()['error'] );
+		$this->assertSame( $active, Better_Font_Awesome_Pro::state()['active'] );
+		$this->assertStringNotContainsString( 'DO-NOT-EXPOSE', wp_json_encode( Better_Font_Awesome_Pro::state() ) );
+	}
+	public static function failures() {
+		return array(
+			array( 'service', 'icons', 'service' ),
+			array( 'auth', 'icons', 'auth' ),
+			array( 'unsupported', 'metadata', 'unsupported' ),
+			array( 'partial', 'icons', 'incomplete' ),
+			array( 'duplicate', 'icons', 'incomplete' ),
+			array( 'coverage', 'free-coverage', 'coverage' ),
+		);
+	}
+	public function test_revision_change_before_promotion_is_rejected() {
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		while ( 'verify' !== $this->pro->status()['phase'] ) {
+			$this->pro->step( $this->pro->status()['operation'] ); }
+		$this->api->revision = 'new-revision';
+		$this->pro->step( $this->pro->status()['operation'] );
+		$this->assertSame( 'revision', $this->pro->status()['error'] );
+		$this->assertArrayNotHasKey( 'active', Better_Font_Awesome_Pro::state() );
+	}
+	/** @dataProvider invalid_exchange */
+	public function test_invalid_permission_or_token_is_rejected_on_initial_exchange( $fault ) {
+		$this->api->fault = $fault;
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$this->assertSame( 'auth', $this->pro->status()['error'] );
+		$this->assertFalse( $this->pro->status()['pending'] );
+	}
+	public static function invalid_exchange() {
+		return array( array( 'scope' ), array( 'empty-token' ) );
+	}
+	public function test_replacement_cancellation_and_late_worker_cannot_resurrect_state() {
+		$first  = $this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$second = $this->pro->start( 'SECOND', 'SYNTHETIC-SECOND' );
+		$count  = $this->api->requests;
+		$this->pro->step( $first['operation'] );
+		$this->assertSame( $count, $this->api->requests );
+		$cancel = static function ( $response ) {
+			Better_Font_Awesome_Pro::cancel( true );
+			return $response;
+		};
+		add_filter( 'pre_http_request', $cancel, 30 );
+		$this->pro->step( $second['operation'] );
+		remove_filter( 'pre_http_request', $cancel, 30 );
+		$this->assertFalse( $this->pro->status()['pending'] );
+		$this->assertFalse( $this->pro->status()['connected'] );
+		$this->assertArrayNotHasKey( 'active', Better_Font_Awesome_Pro::state() );
+		$this->pro->worker( $second['operation'] );
+		foreach ( _get_cron_array() as $hooks ) {
+			$this->assertArrayNotHasKey( Better_Font_Awesome_Pro::HOOK, $hooks ); }
+	}
+	public function test_failed_reads_do_not_acquire_and_local_switch_cancels_work() {
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$this->complete();
+		$this->api->fault = 'auth';
+		$this->pro->start();
+		$count = $this->api->requests;
+		for ( $i = 0; $i < 5; $i++ ) {
+			$this->pro->status();
+			$this->pro->icons( array() );
+			$this->pro->schedule(); }
+		$this->assertSame( $count, $this->api->requests );
+		update_option( 'better-font-awesome_options', array( 'asset_delivery' => 'bundled-local' ) );
+		$this->assertWPError( $this->pro->start() );
+		$this->assertFalse( $this->pro->status()['pending'] );
+		$this->assertArrayHasKey( 'active', Better_Font_Awesome_Pro::state() );
+		$this->assertSame( $count, $this->api->requests );
+	}
+	public function test_transient_retry_is_bounded_and_shared_with_worker() {
+		$this->api->fault = 'service';
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$id = $this->pro->status()['operation'];
+		$this->pro->worker( $id );
+		$this->assertSame( 1, $this->api->requests, 'Backoff must prevent a request.' );
+		for ( $i = 0; $i < 4; $i++ ) {
+			$s                          = Better_Font_Awesome_Pro::state();
+			$s['candidate']['retry_at'] = 0;
+			update_option( Better_Font_Awesome_Pro::OPTION, $s, false );
+			$this->pro->worker( $id );
+		}
+		$this->assertSame( 5, $this->api->requests );
+		$this->assertFalse( $this->pro->status()['pending'] );
+		$this->pro->worker( $id );
+		$this->assertSame( 5, $this->api->requests );
+	}
+	public function test_earlier_matching_kit_owner_cannot_install_bfa_catalog() {
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$this->complete();
+		$controller = new Better_Font_Awesome_Pro();
+		$args       = $controller->initialization_args( array() );
+		$library    = new class() {
+			public function get_asset_delivery() {
+				return 'kit-css'; }
+			public function get_release_channel() {
+				return '7.x'; }
+			public function get_stylesheet_url() {
+				return 'https://kit.fontawesome.com/KIT_ID.css'; }
+		};
+		$controller->boot( $library, false );
+		$this->assertFalse( $controller->effective() );
+		$this->assertSame( array( 'earlier-owner' ), $controller->icons( array( 'earlier-owner' ) ) );
+		$this->assertWPError( $controller->start() );
+		$this->assertSame( 'kit-css', $args['asset_delivery'] );
+	}
+	public function test_pro_assets_styles_and_inheritance_are_paired_after_next_initialization() {
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$this->complete();
+		foreach ( array( Better_Font_Awesome_Plugin::class, Better_Font_Awesome_Library::class ) as $class ) {
+			$p = new ReflectionProperty( $class, 'instance' );
+			$p->setAccessible( true );
+			$p->setValue( null, null );
+		}
+		$plugin = Better_Font_Awesome_Plugin::get_instance();
+		$pro    = $plugin->get( 'pro' );
+		$this->assertTrue( $pro->effective() );
+		$library = $plugin->get( 'bfa_lib' );
+		$this->assertSame( 'https://kit.fontawesome.com/KIT_ID.css', $library->get_stylesheet_url() );
+		$block = $plugin->get( 'icon_block' );
+		$block->register();
+		foreach ( array(
+			'solid'   => 'fas',
+			'regular' => 'far',
+			'light'   => 'fal',
+			'thin'    => 'fat',
+		) as $style => $prefix ) {
+			update_option( 'better-font-awesome_options', array( 'default_block_icon_style' => $style ) );
+			$this->assertStringContainsString(
+				$prefix . ' fa-pro-fixture',
+				$this->render_icon(
+					$block,
+					array(
+						'iconName'  => 'pro-fixture',
+						'iconStyle' => 'site-default',
+					)
+				)
+			);
+		}
+		$this->assertStringContainsString( 'fas fa-pro-fixture', $this->render_icon( $block, array( 'iconName' => 'pro-fixture' ) ) );
+		$this->assertStringContainsString(
+			'far fa-pro-fixture',
+			$this->render_icon(
+				$block,
+				array(
+					'iconName'  => 'pro-fixture',
+					'iconStyle' => 'regular',
+				)
+			)
+		);
+		$this->assertStringContainsString(
+			'fab fa-github',
+			$this->render_icon(
+				$block,
+				array(
+					'iconName'  => 'github',
+					'iconStyle' => 'site-default',
+				)
+			)
+		);
+		$this->assertStringContainsString(
+			'fat fa-missing',
+			$this->render_icon(
+				$block,
+				array(
+					'iconName'  => 'missing',
+					'iconStyle' => 'thin',
+				)
+			)
+		);
+		$this->assertSame( array(), $library->get_stylesheet_url_v4_shim() ? array( 'bad' ) : array() );
+	}
+	/** @dataProvider authorization_cases */
+	public function test_ajax_rejects_bad_nonce_and_non_administrators_without_http( $role, $valid_nonce ) {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => $role ) ) );
+		$_POST    = array(
+			'operation' => 'connect',
+			'kit'       => 'KIT_ID',
+			'token'     => 'SYNTHETIC-SECRET',
+			'nonce'     => $valid_nonce ? wp_create_nonce( 'bfa-pro' ) : 'invalid',
+		);
+		$_REQUEST = $_POST;
+		$handler  = static function () {
+			return static function () {
+				throw new RuntimeException( 'terminated' );
+			};
+		};
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		add_filter( 'wp_die_ajax_handler', $handler );
+		ob_start();
+		try {
+			$this->pro->ajax();
+			$this->fail( 'Expected rejection' ); } catch ( RuntimeException $e ) {
+			$output = ob_get_clean(); } finally {
+				remove_filter( 'wp_die_ajax_handler', $handler );
+				remove_filter( 'wp_doing_ajax', '__return_true' ); }
+			$this->assertStringContainsString( 'not allowed', $output );
+			$this->assertSame( 0, $this->api->requests );
+			$this->assertEmpty( Better_Font_Awesome_Pro::state() );
+	}
+	public static function authorization_cases() {
+		return array( array( 'subscriber', true ), array( 'administrator', false ) ); }
+	public function test_interrupted_step_lease_can_expire_and_resume_without_partial_activation() {
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$id                           = $this->pro->status()['operation'];
+		$s                            = Better_Font_Awesome_Pro::state();
+		$s['candidate']['busy_until'] = time() + 600;
+		update_option( Better_Font_Awesome_Pro::OPTION, $s, false );
+		$this->pro->step( $id );
+		$this->assertSame( 1, $this->api->requests );
+		$s['candidate']['busy_until'] = time() - 1;
+		update_option( Better_Font_Awesome_Pro::OPTION, $s, false );
+		$this->pro->step( $id );
+		$this->assertSame( 2, $this->api->requests );
+		$this->assertFalse( $this->pro->status()['connected'] );
+		$this->complete();
+	}
+	public function test_cancellation_during_cron_publication_cannot_restore_event() {
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		wp_unschedule_hook( Better_Font_Awesome_Pro::HOOK );
+		$cancel = static function ( $event ) {
+			if ( Better_Font_Awesome_Pro::HOOK === $event->hook ) {
+				Better_Font_Awesome_Pro::cancel( true );
+			} return $event;
+		};
+		add_filter( 'schedule_event', $cancel );
+		$this->pro->schedule();
+		remove_filter( 'schedule_event', $cancel );
+		foreach ( _get_cron_array() as $hooks ) {
+			$this->assertArrayNotHasKey( Better_Font_Awesome_Pro::HOOK, $hooks ); }
+	}
+	public function test_multisite_does_not_reuse_another_sites_owner_or_credentials() {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Multisite-only isolation' ); }
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$original = Better_Font_Awesome_Pro::state();
+		switch_to_blog( self::factory()->blog->create() );
+		try {
+			$this->assertEmpty( Better_Font_Awesome_Pro::state() );
+			$this->assertWPError( $this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' ) ); } finally {
+			restore_current_blog(); }
+			$this->assertSame( $original, Better_Font_Awesome_Pro::state() );
+	}
+
+	public function test_deactivation_suspends_old_workers_and_reactivation_preserves_choice() {
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$active = $this->complete();
+		$this->pro->start();
+		$id = $this->pro->status()['operation'];
+		Better_Font_Awesome_Plugin::deactivate_metadata();
+		$count = $this->api->requests;
+		$this->pro->worker( $id );
+		$this->assertWPError( $this->pro->start() );
+		$this->assertSame( $count, $this->api->requests );
+		$this->assertSame( $active, Better_Font_Awesome_Pro::state()['active'] );
+		Better_Font_Awesome_Pro::reactivate();
+		$this->assertTrue( Better_Font_Awesome_Pro::state()['enabled'] );
+		$this->assertSame( $count, $this->api->requests );
+	}
+	public function test_light_thin_defaults_are_offered_only_when_available_but_saved_values_survive() {
+		$plugin = Better_Font_Awesome_Plugin::get_instance();
+		$this->assertSame( 'solid', $plugin->sanitize( array( 'default_block_icon_style' => 'thin' ) )['default_block_icon_style'] );
+		update_option( 'better-font-awesome_options', array( 'default_block_icon_style' => 'thin' ) );
+		$this->assertSame( 'thin', $plugin->sanitize( array( 'default_block_icon_style' => 'thin' ) )['default_block_icon_style'] );
+		ob_start();
+		$plugin->default_block_icon_style_callback();
+		$html = ob_get_clean();
+		$this->assertStringContainsString( 'saved, currently unavailable', $html );
+	}
+
+	public function test_expiring_access_token_renews_without_losing_pagination() {
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$id = $this->pro->status()['operation'];
+		$this->pro->step( $id );
+		$this->pro->step( $id );
+		$before                         = Better_Font_Awesome_Pro::state();
+		$before['candidate']['expires'] = time() - 1;
+		update_option( Better_Font_Awesome_Pro::OPTION, $before, false );
+		$count = $this->api->requests;
+		$this->pro->step( $id );
+		$after = Better_Font_Awesome_Pro::state();
+		$this->assertSame( $count + 1, $this->api->requests );
+		$this->assertSame( $before['candidate']['icons'], $after['candidate']['icons'] );
+		$this->assertSame( $before['candidate']['page'], $after['candidate']['page'] );
+		$this->complete();
+	}
+	public function test_admin_ajax_connect_starts_immediately_with_safe_status() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$_POST    = array(
+			'operation' => 'connect',
+			'kit'       => 'KIT_ID',
+			'token'     => 'SYNTHETIC-TOKEN',
+			'nonce'     => wp_create_nonce( 'bfa-pro' ),
+		);
+		$_REQUEST = $_POST;
+		$handler  = static function () {
+			return static function () {
+				throw new RuntimeException( 'done' );
+			};
+		};
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		add_filter( 'wp_die_ajax_handler', $handler );
+		ob_start();
+		try {
+			$this->pro->ajax();
+			$this->fail( 'Expected JSON termination' );
+		} catch ( RuntimeException $e ) {
+			$output = ob_get_clean();
+		} finally {
+			remove_filter( 'wp_doing_ajax', '__return_true' );
+				remove_filter( 'wp_die_ajax_handler', $handler );}
+		$this->assertSame( 1, $this->api->requests );
+		$this->assertTrue( json_decode( $output, true )['data']['pending'] );
+		$this->assertStringNotContainsString( 'SYNTHETIC-TOKEN', $output );
+		$this->assertStringNotContainsString( 'credential', $output );
+	}
+
+	public function test_filter_overridden_delivery_never_claims_connected_or_loops_activation() {
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$this->complete();
+		$controller = new Better_Font_Awesome_Pro();
+		$controller->initialization_args( array() );
+		$library = new class(){public function get_asset_delivery() {
+				return 'automatic';
+		} public function get_release_channel() {
+			return '7.x';
+		}};
+		$controller->boot( $library, true );
+		$status = $controller->status();
+		$this->assertFalse( $status['connected'] );
+		$this->assertFalse( $status['activationRequired'] );
+		$this->assertSame( 'ownership', $status['error'] );
+		$this->assertWPError( $controller->start() );
+	}
+
+	private function render_icon( $block, $attributes ) {
+		$type                  = $block->register();
+		$type->render_callback = array( $block, 'render' );
+		return render_block(
+			array(
+				'blockName'    => Better_Font_Awesome_Icon_Block::NAME,
+				'attrs'        => $attributes,
+				'innerBlocks'  => array(),
+				'innerHTML'    => '',
+				'innerContent' => array(),
+			)
+		);
+	}
+	public function test_real_earlier_singleton_with_matching_kit_keeps_its_catalog() {
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$this->complete();
+		foreach ( array( Better_Font_Awesome_Plugin::class, Better_Font_Awesome_Library::class ) as $class ) {
+			$p = new ReflectionProperty( $class, 'instance' );
+			$p->setAccessible( true );
+			$p->setValue( null, null );}
+		$earlier = Better_Font_Awesome_Library::get_instance(
+			array(
+				'asset_delivery'  => 'kit-css',
+				'kit_css_url'     => 'https://kit.fontawesome.com/KIT_ID.css',
+				'release_channel' => '7.x',
+			)
+		);
+		$plugin  = Better_Font_Awesome_Plugin::get_instance();
+		$this->assertSame( $earlier, $plugin->get( 'bfa_lib' ) );
+		$this->assertFalse( $plugin->get( 'pro' )->status()['allowed'] );
+		$this->assertFalse( $plugin->get( 'pro' )->effective() );
+		$this->assertNotContains( 'pro-fixture', array_column( $earlier->get_icons(), 'slug' ) );
+	}
+	public function test_active_service_failure_retries_next_day_without_ordinary_http() {
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$active = $this->complete();
+		$this->api->fault = 'service';
+		$this->pro->start();
+		$id = $this->pro->status()['operation'];
+		for ( $i = 0; $i < 4; $i++ ) {
+			$state = Better_Font_Awesome_Pro::state();
+			$state['candidate']['retry_at'] = 0;
+			update_option( Better_Font_Awesome_Pro::OPTION, $state, false );
+			$this->pro->worker( $id );
+		}
+		$count = $this->api->requests;
+		$this->pro->schedule();
+		$this->assertSame( $count, $this->api->requests );
+		$this->assertFalse( $this->pro->status()['pending'] );
+		$event = wp_next_scheduled( Better_Font_Awesome_Pro::HOOK, array( 'refresh-' . $active['generation'] ) );
+		$this->assertGreaterThanOrEqual( time() + DAY_IN_SECONDS - 5, $event );
+		$state = Better_Font_Awesome_Pro::state();
+		$state['candidate']['retry_at'] = 0;
+		update_option( Better_Font_Awesome_Pro::OPTION, $state, false );
+		$this->api->fault = '';
+		$this->pro->worker( 'refresh-' . $active['generation'] );
+		$this->assertSame( $count + 1, $this->api->requests );
+		$this->assertTrue( $this->pro->status()['pending'] );
+		$this->assertSame( $active, Better_Font_Awesome_Pro::state()['active'] );
+	}
+
+	public function test_corrupted_saved_credential_fails_closed_without_http() {
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$this->complete();
+		$state = Better_Font_Awesome_Pro::state();
+		$state['active']['credential'] = 'not-valid-authenticated-ciphertext';
+		update_option( Better_Font_Awesome_Pro::OPTION, $state, false );
+		$count = $this->api->requests;
+		$this->pro->start();
+		$this->assertSame( $count, $this->api->requests );
+		$this->assertSame( 'storage', $this->pro->status()['error'] );
+		$this->assertFalse( $this->pro->status()['pending'] );
+	}
+
+	public function test_malformed_revision_cannot_interrupt_error_handling() {
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$id = $this->pro->status()['operation'];
+		$this->pro->step( $id );
+		$this->api->revision = array( 'malformed' );
+		$this->pro->step( $id );
+		$this->assertSame( 'revision', $this->pro->status()['error'] );
+		$this->assertFalse( $this->pro->status()['pending'] );
+	}
+
+	public function test_network_lifecycle_leaves_other_network_connections_untouched() {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Multisite-only lifecycle' );
+		}
+		$other_network = self::factory()->network->create();
+		$other_site = self::factory()->blog->create( array( 'site_id' => $other_network ) );
+		$state = array( 'enabled' => true, 'active' => array( 'kit' => 'KIT_ID' ) );
+		update_option( Better_Font_Awesome_Pro::OPTION, $state, false );
+		update_blog_option( $other_site, Better_Font_Awesome_Pro::OPTION, $state );
+		Better_Font_Awesome_Plugin::deactivate_metadata( true );
+		$this->assertTrue( Better_Font_Awesome_Pro::state()['suspended'] );
+		$this->assertSame( $state, get_blog_option( $other_site, Better_Font_Awesome_Pro::OPTION ) );
+		Better_Font_Awesome_Plugin::activate( true );
+		$this->assertTrue( Better_Font_Awesome_Pro::state()['enabled'] );
+		$this->assertSame( $state, get_blog_option( $other_site, Better_Font_Awesome_Pro::OPTION ) );
+		$this->assertSame( 0, $this->api->requests );
+	}
+
+}

@@ -20,7 +20,7 @@
     "i18n": "sh bin/make-pot.sh",
     "lint": "sh bin/composer.sh exec phpcs --",
     "lint:fix": "sh bin/composer.sh exec phpcbf --",
-    "lint:js": "eslint src bin/build-block.mjs tests/js tests/e2e playwright.config.mjs eslint.config.mjs",
+    "lint:js": "eslint src js/pro-settings.js bin/build-block.mjs tests/js tests/e2e playwright.config.mjs eslint.config.mjs",
     "release": "npm run i18n && grunt release",
     "test": "npm run test:current",
     "test:current": "npm run env:run -- vendor/bin/phpunit -- -c phpunit.xml.dist",

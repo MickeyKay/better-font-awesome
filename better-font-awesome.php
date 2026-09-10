@@ -29,6 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-better-font-awesome-metadata-manager.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-better-font-awesome-pro.php';
 
 add_action( 'init', 'bfa_start', 5 );
 /**
@@ -105,6 +106,13 @@ class Better_Font_Awesome_Plugin {
 	 * @var Better_Font_Awesome_Icon_Block|null
 	 */
 	private $icon_block;
+
+	/**
+	 * Pro connection controller.
+	 *
+	 * @var Better_Font_Awesome_Pro|null
+	 */
+	private $pro;
 
 	/**
 	 * Plugin display name.
@@ -203,6 +211,7 @@ class Better_Font_Awesome_Plugin {
 		}
 
 		// Initialize the Better Font Awesome Library.
+		$this->pro = new Better_Font_Awesome_Pro();
 		$this->initialize_better_font_awesome_library( $this->options );
 		if ( $this->metadata_manager ) {
 			$this->metadata_manager->set_library( $this->bfa_lib );
@@ -210,7 +219,7 @@ class Better_Font_Awesome_Plugin {
 		}
 
 		// Register the native dynamic icon block without changing shortcodes.
-		$this->icon_block = new Better_Font_Awesome_Icon_Block( $this->bfa_lib );
+		$this->icon_block = new Better_Font_Awesome_Icon_Block( $this->bfa_lib, $this->pro->effective() );
 		$this->icon_block->boot();
 
 		// Load the plugin text domain.
@@ -451,6 +460,14 @@ class Better_Font_Awesome_Plugin {
 			'load_tinymce_plugin' => true,
 		);
 
+		$args                = $this->pro->initialization_args( $args );
+		$owns_initialization = false;
+		$capture_owner       = static function ( $channel ) use ( &$owns_initialization ) {
+			$owns_initialization = true;
+			return $channel;
+		};
+		add_filter( 'bfa_font_awesome_release_channel', $capture_owner, PHP_INT_MAX );
+
 		if ( $this->metadata_manager ) {
 			$release_channel                       = '';
 			$capture_channel                       = static function ( $channel ) use ( &$release_channel ) {
@@ -467,10 +484,12 @@ class Better_Font_Awesome_Plugin {
 		try {
 			$this->bfa_lib = Better_Font_Awesome_Library::get_instance( $args );
 		} finally {
+			remove_filter( 'bfa_font_awesome_release_channel', $capture_owner, PHP_INT_MAX );
 			if ( isset( $capture_channel ) ) {
 				remove_filter( 'bfa_font_awesome_release_channel', $capture_channel, PHP_INT_MAX );
 			}
 		}
+		$this->pro->boot( $this->bfa_lib, $owns_initialization );
 	}
 
 	/**
@@ -515,6 +534,7 @@ class Better_Font_Awesome_Plugin {
 				</p>
 				<div class="bfa-ajax-response-holder"></div>
 			</form>
+			<?php $this->pro_settings(); ?>
 		</div>
 		<?php
 	}
@@ -661,8 +681,8 @@ class Better_Font_Awesome_Plugin {
 		}
 
 		$options = array(
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The strict allowlist sanitizer returns only solid or regular, including for non-scalar input.
-			'default_block_icon_style' => self::sanitize_default_block_icon_style( isset( $_POST['default_block_icon_style'] ) ? wp_unslash( $_POST['default_block_icon_style'] ) : self::get_default_block_icon_style() ),
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The strict style sanitizer gates new defaults against the effective catalog, including for non-scalar input.
+			'default_block_icon_style' => $this->sanitize_default_setting( isset( $_POST['default_block_icon_style'] ) ? wp_unslash( $_POST['default_block_icon_style'] ) : self::get_default_block_icon_style() ),
 			'asset_delivery'           => self::sanitize_asset_delivery( isset( $_POST['asset_delivery'] ) ? sanitize_key( wp_unslash( $_POST['asset_delivery'] ) ) : 'automatic' ),
 			'include_v4_shim'          => isset( $_POST['include_v4_shim'] ) && (bool) absint( wp_unslash( $_POST['include_v4_shim'] ) ),
 			'remove_existing_fa'       => isset( $_POST['remove_existing_fa'] ) && (bool) absint( wp_unslash( $_POST['remove_existing_fa'] ) ),
@@ -688,6 +708,21 @@ class Better_Font_Awesome_Plugin {
 			return;
 		}
 
+		if ( is_multisite() && $network_wide ) {
+			foreach ( get_sites(
+				array(
+					'fields'     => 'ids',
+					'number'     => 0,
+					'network_id' => get_current_network_id(),
+				)
+			) as $site ) {
+				switch_to_blog( (int) $site );
+				Better_Font_Awesome_Pro::reactivate();
+				restore_current_blog();
+			}
+		} else {
+			Better_Font_Awesome_Pro::reactivate();
+		}
 		Better_Font_Awesome_Metadata_Manager::activate( $network_wide, self::$instance ? self::$instance->bfa_lib : null );
 	}
 
@@ -698,6 +733,21 @@ class Better_Font_Awesome_Plugin {
 	 */
 	public static function deactivate_metadata( $network_wide = false ) {
 		Better_Font_Awesome_Metadata_Manager::deactivate( $network_wide );
+		if ( is_multisite() && $network_wide ) {
+			foreach ( get_sites(
+				array(
+					'fields'     => 'ids',
+					'number'     => 0,
+					'network_id' => get_current_network_id(),
+				)
+			) as $site ) {
+				switch_to_blog( (int) $site );
+				Better_Font_Awesome_Pro::cancel( false, true );
+				restore_current_blog();
+			}
+		} else {
+			Better_Font_Awesome_Pro::cancel( false, true );
+		}
 	}
 
 	/**
@@ -706,7 +756,12 @@ class Better_Font_Awesome_Plugin {
 	 * @since  0.10.0
 	 */
 	public function version_callback() {
-		echo wp_kses_post( "<code>{$this->bfa_lib->get_version()}</code>" );
+		if ( 'kit-css' === $this->effective_asset_delivery() && ( ! $this->pro || ! $this->pro->effective() ) ) {
+			esc_html_e( 'Kit version is managed by its initializer.', 'better-font-awesome' );
+			return;
+		}
+		$version = $this->pro && $this->pro->effective() ? $this->pro->status()['version'] : $this->bfa_lib->get_version();
+		echo '<code>' . esc_html( $version ) . '</code>';
 	}
 
 	/**
@@ -744,7 +799,7 @@ class Better_Font_Awesome_Plugin {
 	 * @return string Supported default style.
 	 */
 	public static function sanitize_default_block_icon_style( $value ) {
-		return 'regular' === $value ? 'regular' : 'solid';
+		return in_array( $value, array( 'regular', 'light', 'thin' ), true ) ? $value : 'solid';
 	}
 
 	/**
@@ -757,14 +812,43 @@ class Better_Font_Awesome_Plugin {
 		return self::sanitize_default_block_icon_style( is_array( $options ) ? ( $options['default_block_icon_style'] ?? 'solid' ) : 'solid' );
 	}
 
+	/**
+	 * Reject new unavailable defaults, preserving an already-saved selection.
+	 *
+	 * @param mixed $value Submitted style.
+	 * @return string Supported or retained default.
+	 */
+	private function sanitize_default_setting( $value ) {
+		$style = self::sanitize_default_block_icon_style( $value );
+		if ( in_array( $style, array( 'solid', 'regular' ), true ) || self::get_default_block_icon_style() === $style ) {
+			return $style;
+		}
+		return $this->pro && $this->pro->effective() && in_array( $style, $this->pro->status()['styles'], true ) ? $style : 'solid';
+	}
+
 	/** Output the site default selector. */
 	public function default_block_icon_style_callback() {
 		$selected = self::get_default_block_icon_style();
 		printf( '<select id="default_block_icon_style" name="%s[default_block_icon_style]" aria-describedby="bfa-default-style-help">', esc_attr( $this->option_name ) );
-		foreach ( array(
+		$styles = array(
 			'solid'   => __( 'Solid', 'better-font-awesome' ),
 			'regular' => __( 'Regular', 'better-font-awesome' ),
-		) as $value => $label ) {
+		);
+		if ( $this->pro && $this->pro->effective() ) {
+			foreach ( array(
+				'light' => __( 'Light', 'better-font-awesome' ),
+				'thin'  => __( 'Thin', 'better-font-awesome' ),
+			) as $style => $label ) {
+				if ( in_array( $style, $this->pro->status()['styles'], true ) ) {
+					$styles[ $style ] = $label;
+				}
+			}
+		}
+		if ( ! isset( $styles[ $selected ] ) ) {
+			/* translators: %s: saved icon style. */
+			$styles[ $selected ] = sprintf( __( '%s (saved, currently unavailable)', 'better-font-awesome' ), ucfirst( $selected ) );
+		}
+		foreach ( $styles as $value => $label ) {
 			printf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $value ), selected( $selected, $value, false ), esc_html( $label ) );
 		}
 		echo '</select><p class="description" id="bfa-default-style-help">';
@@ -789,7 +873,9 @@ class Better_Font_Awesome_Plugin {
 		$effective = $this->effective_asset_delivery();
 		$messages  = array();
 
-		if ( ! in_array( $effective, array( 'automatic', 'bundled-local' ), true ) ) {
+		if ( 'kit-css' === $effective ) {
+			$messages[] = __( 'Hosted Pro is active. Selecting local delivery pauses Pro and preserves the saved connection and content. Unchecking local restores automatic Free; Refresh Kit reactivates Pro.', 'better-font-awesome' );
+		} elseif ( ! in_array( $effective, array( 'automatic', 'bundled-local' ), true ) ) {
 			$messages[] = __( 'This Font Awesome configuration is unsupported. Local files require Font Awesome 7 Free.', 'better-font-awesome' );
 		} elseif ( $requested !== $effective ) {
 			$messages[] = 'bundled-local' === $requested
@@ -829,6 +915,40 @@ class Better_Font_Awesome_Plugin {
 			}
 			echo '</div>';
 		}
+	}
+
+	/** WordPress-native, separate connection controls with no secret values rendered. */
+	public function pro_settings() {
+		$status = $this->pro->status();
+		wp_enqueue_script( 'bfa-pro-settings', plugins_url( 'js/pro-settings.js', __FILE__ ), array( 'wp-i18n' ), self::VERSION . '-' . md5_file( __DIR__ . '/js/pro-settings.js' ), true );
+		wp_set_script_translations( 'bfa-pro-settings', 'better-font-awesome', __DIR__ . '/languages' );
+		wp_localize_script(
+			'bfa-pro-settings',
+			'bfaPro',
+			array(
+				'url'   => admin_url( 'admin-ajax.php' ),
+				'nonce' => wp_create_nonce( 'bfa-pro' ),
+			)
+		);
+		?>
+		<h2><?php esc_html_e( 'Hosted Font Awesome Pro Kit', 'better-font-awesome' ); ?></h2>
+		<p><?php esc_html_e( 'Use an existing v7 Pro By Style Kit with Web Fonts, CSS-only embedding and compatibility enabled. Include Classic Solid, Regular and Brands; Light and Thin are optional. Your account token needs Read Kits Data permission.', 'better-font-awesome' ); ?></p>
+		<p><?php esc_html_e( 'Hosted Pro loads CSS and fonts from Font Awesome in visitors’ browsers and editors. This is separate from local Free delivery. BFA does not manage your subscription, domains or Kit configuration.', 'better-font-awesome' ); ?></p>
+		<form id="bfa-pro-form" autocomplete="off">
+			<p><label for="bfa-pro-kit"><?php esc_html_e( 'Kit identifier', 'better-font-awesome' ); ?></label><br><input id="bfa-pro-kit" type="text" value="<?php echo esc_attr( $status['kit'] ); ?>" aria-describedby="bfa-pro-kit-help"></p>
+			<p id="bfa-pro-kit-help"><?php esc_html_e( 'For https://kit.fontawesome.com/KIT_ID.css, enter KIT_ID.', 'better-font-awesome' ); ?></p>
+			<p><label for="bfa-pro-token"><?php esc_html_e( 'Account API token', 'better-font-awesome' ); ?></label><br><input id="bfa-pro-token" type="password" autocomplete="new-password" spellcheck="false" aria-describedby="bfa-pro-token-help"></p>
+			<p id="bfa-pro-token-help"><?php esc_html_e( 'Leave blank to reuse the saved token. Tokens stay on your server, encrypted using WordPress salts. Changing those salts requires reconnecting.', 'better-font-awesome' ); ?></p>
+			<p>
+			<button type="submit" class="button button-primary"><?php esc_html_e( 'Connect Kit', 'better-font-awesome' ); ?></button>
+			<button type="button" class="button" data-pro-action="refresh"><?php esc_html_e( 'Refresh Kit', 'better-font-awesome' ); ?></button>
+			<button type="button" class="button" data-pro-action="pause"><?php esc_html_e( 'Use automatic Free', 'better-font-awesome' ); ?></button>
+			<button type="button" class="button" data-pro-action="disconnect"><?php esc_html_e( 'Disconnect and forget Kit', 'better-font-awesome' ); ?></button>
+			</p>
+			<p><?php esc_html_e( 'Disconnect removes the saved token, catalog and pending work. Switching to Free preserves the saved connection. Neither action changes saved icon names or styles; unavailable Pro icons may be blank.', 'better-font-awesome' ); ?></p>
+			<p id="bfa-pro-status" role="status" aria-live="polite"></p>
+		</form>
+		<?php
 	}
 
 	/**
@@ -882,7 +1002,7 @@ class Better_Font_Awesome_Plugin {
 			$new_input['hide_admin_notices'] = absint( $input['hide_admin_notices'] );
 		}
 
-		$new_input['default_block_icon_style'] = self::sanitize_default_block_icon_style( $input['default_block_icon_style'] ?? self::get_default_block_icon_style() );
+		$new_input['default_block_icon_style'] = $this->sanitize_default_setting( $input['default_block_icon_style'] ?? self::get_default_block_icon_style() );
 		$new_input['asset_delivery']           = self::sanitize_asset_delivery( $input['asset_delivery'] ?? 'automatic' );
 
 		return $new_input;

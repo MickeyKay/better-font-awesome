@@ -16,11 +16,11 @@ const catalog = [
 	{ label: 'Coffee (solid)', name: 'coffee', style: 'solid' },
 ];
 
-test( 'derives unique Free styles from the active catalog in control order', () => {
+test( 'derives unique Classic styles from the active catalog in control order', () => {
 	const icons = [ 'regular', 'light', 'solid', 'thin', 'regular', 'sharp', 'duotone' ]
 		.map( ( style ) => ( { name: 'heart', style } ) );
-	assert.deepEqual( getAvailableStyles( icons, 'heart' ), [ 'solid', 'regular' ] );
-	assert.deepEqual( getAvailableStyles( icons.slice( 0, 2 ), 'heart' ), [ 'regular' ] );
+	assert.deepEqual( getAvailableStyles( icons, 'heart' ), [ 'solid', 'regular', 'light', 'thin' ] );
+	assert.deepEqual( getAvailableStyles( icons.slice( 0, 2 ), 'heart' ), [ 'regular', 'light' ] );
 } );
 
 test( 'offers only the catalog style for single-style and brand icons', () => {
@@ -37,7 +37,7 @@ test( 'offers only the catalog style for single-style and brand icons', () => {
 test( 'does not invent styles for missing icons, empty catalogs, or unsupported styles', () => {
 	assert.deepEqual( getAvailableStyles( catalog, 'missing' ), [] );
 	assert.deepEqual( getAvailableStyles( [], 'heart' ), [] );
-	assert.deepEqual( getAvailableStyles( [ { name: 'heart', style: 'light' } ], 'heart' ), [] );
+	assert.deepEqual( getAvailableStyles( [ { name: 'heart', style: 'sharp' } ], 'heart' ), [] );
 	assert.deepEqual( getAvailableStyles( catalog, '' ), [] );
 } );
 
@@ -52,7 +52,7 @@ const fullCatalog = [
 const icons = groupCatalog( fullCatalog );
 
 test( 'groups supported catalog rows by name with base labels and unique counts', () => {
-	const input = [ ...fullCatalog, fullCatalog[ 0 ], { label: 'Pro (light)', name: 'pro', style: 'light' } ];
+	const input = [ ...fullCatalog, fullCatalog[ 0 ], { label: 'Unsupported (duotone)', name: 'pro', style: 'duotone' } ];
 	const before = structuredClone( input );
 	const grouped = groupCatalog( input );
 	assert.equal( grouped.length, 4 );
@@ -172,4 +172,17 @@ test( 'inherited previews resolve independently for each icon and preserve inten
 	assert.equal( resolveStyle( [ 'solid', 'brands' ], 'regular' ), 'solid' );
 	assert.equal( resolveStyle( [ 'regular', 'brands' ], 'solid' ), 'regular' );
 	assert.equal( resolveStyle( [ 'solid', 'regular' ], 'brands' ), 'solid' );
+} );
+
+
+test( 'Classic Light and Thin preserve inherited, explicit and unavailable selections', () => {
+ const catalog = groupCatalog( [ 'solid', 'regular', 'light', 'thin' ].map( style => ( { name: 'pro-fixture', label: `Fixture (${ style })`, style } ) ) );
+ for ( const style of [ 'light', 'thin' ] ) {
+  assert.equal( buildCatalogOptions( catalog, '', 'pro-fixture', 'site-default', 100, style )[ 0 ].style, style );
+  assert.equal( buildCatalogOptions( catalog, '', 'pro-fixture', style )[ 0 ].style, style );
+  assert.equal( resolveStyle( [ 'regular' ], style ), 'regular' );
+  assert.equal( resolveStyle( [], style ), style );
+ }
+ assert.equal( styleClass( 'thin' ), 'fat' );
+ assert.equal( styleClass( 'light' ), 'fal' );
 } );
