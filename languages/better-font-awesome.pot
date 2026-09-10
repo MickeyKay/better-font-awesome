@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-10T23:26:44+00:00\n"
+"POT-Creation-Date: 2026-09-10T23:31:03+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: better-font-awesome\n"
@@ -254,8 +254,8 @@ msgid "Kit"
 msgstr ""
 
 #: better-font-awesome.php:994
-#: js/pro-settings.js:153
-#: js/pro-settings.js:166
+#: js/pro-settings.js:157
+#: js/pro-settings.js:170
 msgid "Choose a kit"
 msgstr ""
 
@@ -283,67 +283,89 @@ msgstr ""
 msgid "Font Awesome metadata refresh could not be scheduled."
 msgstr ""
 
-#. translators: 1: selected version, 2: Kit license, 3: rendering technology, 4: supported configuration requirements.
-#: includes/class-better-font-awesome-pro.php:267
-#, php-format
-msgid "Configuration: %1$s, %2$s, %3$s. %4$s"
-msgstr ""
-
 #. translators: 1: Font Awesome version, 2: supported Classic styles.
-#: includes/class-better-font-awesome-pro.php:274
+#: includes/class-better-font-awesome-pro.php:271
 #, php-format
 msgid "Pro %1$s, Web Fonts, By Style, compatibility enabled. Classic styles: %2$s."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:856
+#: includes/class-better-font-awesome-pro.php:297
+msgid "Publish this kit in Font Awesome before connecting."
+msgstr ""
+
+#: includes/class-better-font-awesome-pro.php:300
+msgid "Choose a Pro kit for hosted Pro delivery."
+msgstr ""
+
+#: includes/class-better-font-awesome-pro.php:303
+msgid "Set the kit technology to Web Fonts."
+msgstr ""
+
+#: includes/class-better-font-awesome-pro.php:306
+msgid "Set the kit version to 7.x or a specific v7 release."
+msgstr ""
+
+#: includes/class-better-font-awesome-pro.php:309
+msgid "Use By Style selection for this kit."
+msgstr ""
+
+#: includes/class-better-font-awesome-pro.php:312
+msgid "Enable older version compatibility for this kit."
+msgstr ""
+
+#: includes/class-better-font-awesome-pro.php:314
+msgid "This kit has unsupported styles or configuration. See Kit details for requirements."
+msgstr ""
+
+#: includes/class-better-font-awesome-pro.php:881
 msgid "Pro connection is unavailable. Use automatic Free first and ensure BFA owns Font Awesome 7 initialization."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:857
+#: includes/class-better-font-awesome-pro.php:882
 msgid "Choose a kit from the current account list."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:858
+#: includes/class-better-font-awesome-pro.php:883
 msgid "Kit selection expired or is unsupported. Refresh the kit list and choose a supported kit."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:859
+#: includes/class-better-font-awesome-pro.php:884
 msgid "Authorization failed. Check your account token and Read Kits Data permission, then reconnect."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:860
+#: includes/class-better-font-awesome-pro.php:885
 msgid "Secure token storage is unavailable. Check OpenSSL and the WordPress authentication salts, then reconnect."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:861
+#: includes/class-better-font-awesome-pro.php:886
 msgid "Font Awesome is temporarily unavailable. The working catalog is unchanged."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:862
+#: includes/class-better-font-awesome-pro.php:887
 msgid "Use a published v7 Pro By Style Web Fonts kit with compatibility and Classic Solid, Regular and Brands. Only Classic Light and Thin may also be selected."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:863
+#: includes/class-better-font-awesome-pro.php:888
 msgid "The kit changed during preparation. The working catalog is unchanged. Refresh kit to try again."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:864
+#: includes/class-better-font-awesome-pro.php:889
 msgid "The kit catalog was incomplete or inconsistent. The working catalog is unchanged."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:865
+#: includes/class-better-font-awesome-pro.php:890
 msgid "The kit is missing required Free icons. Check the included styles before reconnecting."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:866
+#: includes/class-better-font-awesome-pro.php:891
 msgid "Preparation expired. Connect or Refresh kit to start again."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:867
+#: includes/class-better-font-awesome-pro.php:892
 msgid "Another connection action won. Reload this page to see its status."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:875
+#: includes/class-better-font-awesome-pro.php:900
 msgid "You are not allowed to change this connection."
 msgstr ""
 
@@ -386,76 +408,88 @@ msgstr ""
 msgid "Connected: %s."
 msgstr ""
 
+#: js/pro-settings.js:113
+msgid "This kit is unsupported. See Kit details for requirements."
+msgstr ""
+
 #: js/pro-settings.js:120
 #: src/edit.js:72
 msgid "Brands"
 msgstr ""
 
-#: js/pro-settings.js:122
-msgid "Icons"
-msgstr ""
-
-#: js/pro-settings.js:123
-msgid "Technology"
-msgstr ""
-
-#: js/pro-settings.js:123
-msgid "Web fonts"
-msgstr ""
-
-#: js/pro-settings.js:124
-msgid "Version"
-msgstr ""
-
-#: js/pro-settings.js:125
-msgid "Older version compatibility"
-msgstr ""
-
-#: js/pro-settings.js:125
-msgid "Enabled"
+#: js/pro-settings.js:121
+msgid "Unknown"
 msgstr ""
 
 #: js/pro-settings.js:126
+msgid "Icons"
+msgstr ""
+
+#: js/pro-settings.js:127
+msgid "Technology"
+msgstr ""
+
+#: js/pro-settings.js:127
+msgid "Web fonts"
+msgstr ""
+
+#: js/pro-settings.js:128
+msgid "Version"
+msgstr ""
+
+#: js/pro-settings.js:129
+msgid "Older version compatibility"
+msgstr ""
+
+#: js/pro-settings.js:129
+msgid "Enabled"
+msgstr ""
+
+#: js/pro-settings.js:129
+msgid "Disabled"
+msgstr ""
+
+#: js/pro-settings.js:131
 msgid "Classic styles"
 msgstr ""
 
-#: js/pro-settings.js:169
+#: js/pro-settings.js:173
 msgid "Unnamed kit"
 msgstr ""
 
 #. translators: %s: Kit name.
-#: js/pro-settings.js:178
+#: js/pro-settings.js:182
 #, js-format
 msgid "%s (unsupported)"
 msgstr ""
 
-#: js/pro-settings.js:192
+#: js/pro-settings.js:196
 msgid "No kits found. Create one in Font Awesome, then refresh."
 msgstr ""
 
 #. translators: %s: Kit name.
-#: js/pro-settings.js:196
+#: js/pro-settings.js:200
 #, js-format
 msgid "%s (active)"
 msgstr ""
 
-#: js/pro-settings.js:206
+#: js/pro-settings.js:210
 msgid "Refreshing kits..."
 msgstr ""
 
-#: js/pro-settings.js:206
+#: js/pro-settings.js:210
 msgid "Connecting..."
 msgstr ""
 
-#: js/pro-settings.js:213
+#: js/pro-settings.js:217
 msgid "Could not connect. Please try again."
 msgstr ""
 
-#: js/pro-settings.js:248
+#: js/pro-settings.js:252
 msgid "Delete the saved token and disconnect the kit? Saved icons will not be changed."
 msgstr ""
 
-#: js/pro-settings.js:290
+#: js/pro-settings.js:294
 msgid "Save Settings to switch off local delivery before setting up a hosted kit."
 msgstr ""
 

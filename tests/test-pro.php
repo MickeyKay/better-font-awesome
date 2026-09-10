@@ -602,10 +602,11 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		$this->assertCount( 4, $account['kits'] );
 		$this->assertSame( 'BFA staging', $account['kits'][0]['name'] );
 		$this->assertSame( $account['kits'][0]['name'], $account['kits'][1]['name'] );
-		$this->assertSame( array( 'version', 'styles' ), array_keys( $account['kits'][0]['details'] ) );
+		$this->assertSame( array( 'version', 'styles', 'license', 'technology', 'compatibility' ), array_keys( $account['kits'][0]['details'] ) );
 		$this->assertMatchesRegularExpression( '/^7\./', $account['kits'][0]['details']['version'] );
 		$this->assertSame( array( 'brands', 'light', 'regular', 'solid', 'thin' ), $account['kits'][0]['details']['styles'] );
-		$this->assertSame( array(), $account['kits'][2]['details'] );
+		$this->assertSame( 'svg', $account['kits'][2]['details']['technology'] );
+		$this->assertSame( 'Set the kit technology to Web Fonts.', $account['kits'][2]['reason'] );
 		$this->assertStringContainsString( 'Classic styles:', $account['kits'][0]['summary'] );
 		$this->assertStringNotContainsString( 'still need validation', $account['kits'][0]['summary'] );
 		$this->assertFalse( $account['kits'][2]['supported'] );
@@ -703,7 +704,19 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		$this->assertCount( 1, $account['kits'] );
 		$this->assertFalse( $account['kits'][0]['supported'] );
 		$this->assertStringContainsString( 'Use a published v7', $account['kits'][0]['summary'] );
+		$this->assertNotEmpty( $account['kits'][0]['reason'] );
 		$this->assertSame( 2, $this->api->requests );
+	}
+	public function test_unsupported_latest_kit_has_display_details_and_specific_guidance() {
+		$this->api->kits = array( array( 'token' => 'LATEST', 'version' => 'latest' ) );
+		$account = $this->pro->find_kits( 'SYNTHETIC-TOKEN' );
+		$this->assertFalse( $account['kits'][0]['supported'] );
+		$this->assertSame( 'latest', $account['kits'][0]['details']['version'] );
+		$this->assertSame( 'pro', $account['kits'][0]['details']['license'] );
+		$this->assertSame( 'webfonts', $account['kits'][0]['details']['technology'] );
+		$this->assertSame( 'Set the kit version to 7.x or a specific v7 release.', $account['kits'][0]['reason'] );
+		$this->assertSame( 2, $this->api->requests );
+		$this->assertArrayNotHasKey( 'candidate', Better_Font_Awesome_Pro::state() );
 	}
 	public static function discovery_configurations() {
 		return array(
@@ -711,6 +724,7 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 			array( array( 'licenseSelected' => 'free' ) ),
 			array( array( 'technologySelected' => 'svg' ) ),
 			array( array( 'version' => '6.x' ) ),
+			array( array( 'version' => 'latest' ) ),
 			array( array( 'subsetType' => 'CUSTOM' ) ),
 			array( array( 'shimEnabled' => false ) ),
 			array( array( 'familyStylesPaginated' => array( 'totalPageCount' => 2, 'familyStyles' => array() ) ) ),

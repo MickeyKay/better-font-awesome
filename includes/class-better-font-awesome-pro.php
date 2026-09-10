@@ -258,18 +258,15 @@ class Better_Font_Awesome_Pro {
 				'id'        => $id,
 				'name'      => is_string( $row['name'] ?? null ) ? sanitize_text_field( $row['name'] ) : '',
 				'supported' => ! is_wp_error( $meta ),
-				'details'   => is_wp_error( $meta ) ? array() : array(
-					'version' => $meta['version'],
-					'styles'  => array_keys( $meta['counts'] ),
+				'reason'    => is_wp_error( $meta ) ? $this->unsupported_reason( $row ) : '',
+				'details'   => array(
+					'version'       => is_wp_error( $meta ) ? ( is_string( $row['version'] ?? null ) ? sanitize_text_field( $row['version'] ) : '' ) : $meta['version'],
+					'styles'        => is_wp_error( $meta ) ? array() : array_keys( $meta['counts'] ),
+					'license'       => in_array( $row['licenseSelected'] ?? null, array( 'pro', 'free' ), true ) ? $row['licenseSelected'] : '',
+					'technology'    => in_array( $row['technologySelected'] ?? null, array( 'webfonts', 'svg' ), true ) ? $row['technologySelected'] : '',
+					'compatibility' => is_bool( $row['shimEnabled'] ?? null ) ? $row['shimEnabled'] : null,
 				),
-				'summary'   => is_wp_error( $meta ) ? sprintf(
-					/* translators: 1: selected version, 2: Kit license, 3: rendering technology, 4: supported configuration requirements. */
-					__( 'Configuration: %1$s, %2$s, %3$s. %4$s', 'better-font-awesome' ),
-					is_string( $row['version'] ?? null ) ? sanitize_text_field( $row['version'] ) : '?',
-					is_string( $row['licenseSelected'] ?? null ) ? sanitize_text_field( $row['licenseSelected'] ) : '?',
-					is_string( $row['technologySelected'] ?? null ) ? sanitize_text_field( $row['technologySelected'] ) : '?',
-					self::message( 'unsupported' )
-				) : sprintf(
+				'summary'   => is_wp_error( $meta ) ? self::message( 'unsupported' ) : sprintf(
 					/* translators: 1: Font Awesome version, 2: supported Classic styles. */
 					__( 'Pro %1$s, Web Fonts, By Style, compatibility enabled. Classic styles: %2$s.', 'better-font-awesome' ),
 					$meta['version'],
@@ -287,6 +284,34 @@ class Better_Font_Awesome_Pro {
 			return $this->error( 'changed' );
 		}
 		return $this->account_status();
+	}
+
+	/**
+	 * Concise display guidance only; validate_kit() remains the eligibility authority.
+	 *
+	 * @param array $kit Selected vendor configuration.
+	 * @return string First actionable configuration issue, or general guidance.
+	 */
+	private function unsupported_reason( $kit ) {
+		if ( 'published' !== ( $kit['status'] ?? '' ) ) {
+			return __( 'Publish this kit in Font Awesome before connecting.', 'better-font-awesome' );
+		}
+		if ( 'pro' !== ( $kit['licenseSelected'] ?? '' ) ) {
+			return __( 'Choose a Pro kit for hosted Pro delivery.', 'better-font-awesome' );
+		}
+		if ( 'webfonts' !== ( $kit['technologySelected'] ?? '' ) ) {
+			return __( 'Set the kit technology to Web Fonts.', 'better-font-awesome' );
+		}
+		if ( ! is_string( $kit['version'] ?? null ) || ! preg_match( '/\A7\.(?:x|[0-9]+\.[0-9]+)\z/', $kit['version'] ) ) {
+			return __( 'Set the kit version to 7.x or a specific v7 release.', 'better-font-awesome' );
+		}
+		if ( 'AUTO' !== ( $kit['subsetType'] ?? '' ) ) {
+			return __( 'Use By Style selection for this kit.', 'better-font-awesome' );
+		}
+		if ( true !== ( $kit['shimEnabled'] ?? false ) ) {
+			return __( 'Enable older version compatibility for this kit.', 'better-font-awesome' );
+		}
+		return __( 'This kit has unsupported styles or configuration. See Kit details for requirements.', 'better-font-awesome' );
 	}
 
 	/**

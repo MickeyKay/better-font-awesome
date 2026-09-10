@@ -110,21 +110,25 @@
 		select.disabled = connecting || needsFreeSave() || ! account.authorized || ! account.kits.length;
 		retry.disabled = connecting || needsFreeSave();
 		showDetails( kit );
-		warning.textContent = kit && ! kit.supported ? kit.summary : '';
+		warning.textContent = kit && ! kit.supported ? kit.reason || __( 'This kit is unsupported. See Kit details for requirements.', 'better-font-awesome' ) : '';
 	}
 	function showDetails( kit ) {
 		// Older saved discovery lists can use the validated active snapshot, without HTTP.
 		const data = kit?.details || ( kit?.id === activeKit?.id ? activeKit : null );
 		facts.replaceChildren();
-		if ( kit?.supported && data?.version && Array.isArray( data.styles ) ) {
+		if ( data && Array.isArray( data.styles ) ) {
 			const styles = { solid: __( 'Solid', 'better-font-awesome' ), regular: __( 'Regular', 'better-font-awesome' ), light: __( 'Light', 'better-font-awesome' ), thin: __( 'Thin', 'better-font-awesome' ), brands: __( 'Brands', 'better-font-awesome' ) };
+			const unknown = __( 'Unknown', 'better-font-awesome' );
+			const license = data.license ?? ( kit.supported ? 'pro' : '' );
+			const technology = data.technology ?? ( kit.supported ? 'webfonts' : '' );
+			const compatibility = data.compatibility ?? ( kit.supported ? true : null );
 			const rows = [
-				[ __( 'Icons', 'better-font-awesome' ), 'Pro' ],
-				[ __( 'Technology', 'better-font-awesome' ), __( 'Web fonts', 'better-font-awesome' ) ],
-				[ __( 'Version', 'better-font-awesome' ), data.version ],
-				[ __( 'Older version compatibility', 'better-font-awesome' ), __( 'Enabled', 'better-font-awesome' ) ],
-				[ __( 'Classic styles', 'better-font-awesome' ), Object.keys( styles ).filter( style => data.styles.includes( style ) ).map( style => styles[ style ] ).join( ', ' ) ],
+				[ __( 'Icons', 'better-font-awesome' ), { pro: 'Pro', free: 'Free' }[ license ] || unknown ],
+				[ __( 'Technology', 'better-font-awesome' ), { webfonts: __( 'Web fonts', 'better-font-awesome' ), svg: 'SVG' }[ technology ] || unknown ],
+				[ __( 'Version', 'better-font-awesome' ), data.version || unknown ],
+				[ __( 'Older version compatibility', 'better-font-awesome' ), compatibility === null ? unknown : ( compatibility ? __( 'Enabled', 'better-font-awesome' ) : __( 'Disabled', 'better-font-awesome' ) ) ],
 			];
+			if ( kit.supported ) { rows.push( [ __( 'Classic styles', 'better-font-awesome' ), Object.keys( styles ).filter( style => data.styles.includes( style ) ).map( style => styles[ style ] ).join( ', ' ) ] ); }
 			rows.forEach( ( [ label, value ] ) => {
 				const row = document.createElement( 'div' );
 				const term = document.createElement( 'dt' );
@@ -136,7 +140,7 @@
 			} );
 		}
 		facts.hidden = ! facts.childElementCount;
-		summary.textContent = kit?.supported && facts.hidden ? kit.summary : '';
+		summary.textContent = kit && ( ! kit.supported || facts.hidden ) ? kit.summary : '';
 		summary.hidden = ! summary.textContent;
 		detailsToggle.hidden = facts.hidden && summary.hidden;
 		details.hidden = detailsToggle.hidden || detailsToggle.getAttribute( 'aria-expanded' ) !== 'true';
