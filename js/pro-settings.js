@@ -11,6 +11,16 @@
 	const connect = document.getElementById( 'bfa-pro-connect' );
 	const accountStatus = document.getElementById( 'bfa-pro-account-status' );
 	const summary = document.getElementById( 'bfa-pro-kit-help' );
+	const provider = document.getElementById( 'bfa-provider' );
+	const panel = document.getElementById( 'bfa-pro-panel' );
+	const saved = document.getElementById( 'bfa-pro-saved' );
+	const entry = document.getElementById( 'bfa-pro-token-entry' );
+	const cancelToken = document.getElementById( 'bfa-pro-cancel-token' );
+	const kitControls = document.getElementById( 'bfa-pro-kit-controls' );
+	const refreshKits = document.getElementById( 'bfa-pro-refresh-kits' );
+	const spinner = document.getElementById( 'bfa-pro-spinner' );
+	let editingToken = false;
+	let hasSavedToken = false;
 	let discovery = 0;
 	let account = { id: '', kits: [] };
 	let generation = 0;
@@ -31,13 +41,14 @@
 	}
 	async function run( operation, data = {} ) {
 		const mine = ++generation;
+		const accountGeneration = discovery;
 		clearTimeout( timer );
 		selectionChanged();
 		status.textContent = __( 'Preparing Kit connection...', 'better-font-awesome' );
 		try {
 			const state = await send( operation, data );
 			if ( mine !== generation ) { return; }
-			if ( state.account && discovery === 0 ) { showAccount( state.account ); }
+			if ( state.account && accountGeneration === discovery && ! editingToken ) { showAccount( state.account ); }
 			if ( state.pending ) {
 				// translators: 1: current catalog page, 2: total pages.
 				status.textContent = state.message || ( state.pages ? sprintf( __( 'Preparing Pro icons: page %1$d of %2$d.', 'better-font-awesome' ), state.page, state.pages ) : __( 'Validating Kit and preparing Pro icons...', 'better-font-awesome' ) );
@@ -52,7 +63,7 @@
 				const connection = state.connected ? sprintf( __( 'Connected: %1$s. Font Awesome %2$s. Styles: %3$s.', 'better-font-awesome' ), state.kitName || state.kit, state.version, state.styles.join( ', ' ) ) : __( 'Pro is inactive. The effective Free delivery setting applies.', 'better-font-awesome' );
 				status.textContent = state.connected ? [ connection, state.message ].filter( Boolean ).join( ' ' ) : state.message || connection;
 				selectionChanged();
-				if ( [ 'pause', 'disconnect' ].includes( operation ) ) { window.location.reload(); }
+				if ( operation === 'disconnect' ) { window.location.reload(); }
 			}
 		} catch ( error ) {
 			if ( mine === generation ) {
@@ -63,7 +74,7 @@
 	}
 	function selectionChanged() {
 		const kit = account.kits.find( ( item ) => item.id === select.value );
-		connect.disabled = ! kit?.supported;
+		connect.disabled = ! kit?.supported || needsFreeSave();
 		summary.textContent = kit?.summary || __( 'Choose a Kit, then click Connect Kit to validate its catalog and activate it.', 'better-font-awesome' );
 	}
 	function clearChoices() {
@@ -73,6 +84,9 @@
 		selectionChanged();
 	}
 	function showAccount( value ) {
+		editingToken = false;
+		hasSavedToken = value.saved;
+		tokenControls();
 		clearChoices();
 		account = value;
 		account.kits.forEach( ( kit ) => {
@@ -93,12 +107,13 @@
 		select.disabled = ! account.authorized || ! account.kits.length;
 		accountStatus.textContent = account.authorized ? ( account.kits.length ? __( 'Account authorized. Choose a Kit to connect.', 'better-font-awesome' ) : __( 'Account authorized, but no Kits were found. Create a Kit in Font Awesome, then Find Kits again.', 'better-font-awesome' ) ) : ( account.saved ? __( 'A token is saved. Find Kits to refresh the available list.', 'better-font-awesome' ) : __( 'Enter an API token, then Find Kits. Account authorization does not activate a Kit.', 'better-font-awesome' ) );
 	}
-	async function findKits() {
+	async function findKits( reuseSaved = false ) {
 		const mine = ++discovery;
-		const value = token.value;
+		const value = reuseSaved ? '' : token.value;
 		token.value = '';
 		clearChoices();
 		find.setAttribute( 'aria-busy', 'true' );
+		spinner.classList.add( 'is-active' );
 		accountStatus.textContent = __( 'Finding Kits...', 'better-font-awesome' );
 		try {
 			const state = await send( 'find', { token: value } );
@@ -109,16 +124,18 @@
 				accountStatus.textContent = ( error.message || __( 'Could not find Kits.', 'better-font-awesome' ) ) + ' ' + __( 'The active connection is unchanged. Check the token and try Find Kits again.', 'better-font-awesome' );
 			}
 		} finally {
-			if ( mine === discovery ) { find.setAttribute( 'aria-busy', 'false' ); }
+			if ( mine === discovery ) { find.setAttribute( 'aria-busy', 'false' ); spinner.classList.remove( 'is-active' ); }
 		}
 	}
 	token.addEventListener( 'input', () => {
 		++discovery;
 		clearChoices();
 		find.setAttribute( 'aria-busy', 'false' );
+		spinner.classList.remove( 'is-active' );
 		accountStatus.textContent = __( 'Token changed. Find Kits again before choosing a Kit.', 'better-font-awesome' );
 	} );
-	find.addEventListener( 'click', findKits );
+	find.addEventListener( 'click', () => findKits() );
+	refreshKits.addEventListener( 'click', () => findKits( true ) );
 	select.addEventListener( 'change', selectionChanged );
 	token.addEventListener( 'keydown', ( event ) => {
 		if ( event.key === 'Enter' ) { event.preventDefault(); findKits(); }
@@ -128,7 +145,62 @@
 		if ( ! connect.disabled ) { run( 'connect', { kit: select.value, id: account.id } ); }
 	} );
 	form.querySelectorAll( '[data-pro-action]' ).forEach( ( button ) => {
-		button.addEventListener( 'click', () => run( button.dataset.proAction ) );
+		button.addEventListener( 'click', () => {
+			if ( button.dataset.proAction === 'disconnect' && ! window.confirm( __( 'Delete the saved token and disconnect the Kit? Saved icons will not be changed.', 'better-font-awesome' ) ) ) { return; }
+			run( button.dataset.proAction );
+		} );
 	} );
+	function tokenControls() {
+		saved.hidden = ! hasSavedToken || editingToken;
+		entry.hidden = hasSavedToken && ! editingToken;
+		cancelToken.hidden = ! hasSavedToken;
+		kitControls.hidden = ! hasSavedToken || editingToken;
+		document.getElementById( 'bfa-pro-delete-help' ).hidden = ! hasSavedToken;
+	}
+	document.getElementById( 'bfa-pro-update-token' ).addEventListener( 'click', () => {
+		editingToken = true;
+		tokenControls();
+		token.focus();
+	} );
+	cancelToken.addEventListener( 'click', () => {
+		++discovery;
+		editingToken = false;
+		token.value = '';
+		spinner.classList.remove( 'is-active' );
+		find.setAttribute( 'aria-busy', 'false' );
+		tokenControls();
+		run( 'status' );
+		document.getElementById( 'bfa-pro-update-token' ).focus();
+	} );
+	function selectedProvider() { return provider.value; }
+	function needsFreeSave() { return selectedProvider() === 'kit-css' && provider.dataset.saved === 'bundled-local'; }
+	function providerChanged() {
+		const mode = selectedProvider();
+		panel.hidden = mode !== 'kit-css';
+		document.querySelectorAll( '.bfa-free-setting' ).forEach( row => { row.hidden = mode === 'kit-css'; } );
+		document.getElementById( 'asset_delivery' ).checked = mode === 'bundled-local';
+		document.getElementById( 'bfa-provider-input' ).value = mode;
+		token.disabled = needsFreeSave();
+		find.disabled = needsFreeSave();
+		refreshKits.disabled = needsFreeSave();
+		form.querySelector( '[data-pro-action="refresh"]' ).disabled = needsFreeSave();
+		document.getElementById( 'bfa-provider-help' ).textContent = needsFreeSave() ? __( 'Save Settings to switch off local delivery before setting up a hosted Kit.', 'better-font-awesome' ) : __( 'Choose a source, then save settings. A Kit activates only after Connect Kit succeeds.', 'better-font-awesome' );
+		selectionChanged();
+	}
+	if ( window.location.hash === '#bfa-kit' ) { provider.value = 'kit-css'; }
+	window.addEventListener( 'hashchange', () => {
+		if ( window.location.hash === '#bfa-kit' ) { provider.value = 'kit-css'; providerChanged(); }
+	} );
+	provider.addEventListener( 'change', () => {
+		history.replaceState( null, '', window.location.pathname + window.location.search + ( selectedProvider() === 'kit-css' ? '#bfa-kit' : '' ) );
+		providerChanged();
+	} );
+	document.addEventListener( 'bfa:settings-saved', event => {
+		if ( event.detail.provider !== provider.dataset.saved ) { window.location.reload(); }
+	} );
+	tokenControls();
+	const deliveryStatus = document.getElementById( 'bfa-delivery-status' );
+	if ( deliveryStatus ) { provider.parentElement.append( deliveryStatus ); }
+	providerChanged();
 	run( 'status' );
 }() );

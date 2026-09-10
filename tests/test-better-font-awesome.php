@@ -206,7 +206,7 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 	}
 
 	/** @dataProvider delivery_submissions */
-	public function test_administrator_can_save_checkbox_settings_with_valid_nonce( $submitted = 'automatic', $expected = 'automatic' ) {
+	public function test_administrator_can_save_checkbox_settings_with_valid_nonce( $submitted = 'automatic', $expected = 'automatic', $provider = null ) {
 		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
 
 		wp_set_current_user( $user_id );
@@ -217,6 +217,9 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 			'remove_existing_fa' => '0',
 			'hide_admin_notices' => '1',
 		);
+		if ( null !== $provider ) {
+			$_POST['provider_method'] = $provider;
+		}
 		if ( null === $submitted ) {
 			unset( $_POST['asset_delivery'] );
 		}
@@ -242,6 +245,27 @@ class Better_Font_Awesome_Test extends WP_UnitTestCase {
 				'hide_admin_notices' => true,
 			),
 			get_option( $this->bfa->get( 'option_name' ) )
+		);
+	}
+
+	/** @dataProvider provider_submissions */
+	public function test_ajax_provider_save_preserves_paused_connection( $provider, $delivery, $enabled ) {
+		$state = array( 'enabled' => true, 'active' => array( 'test' => 'saved catalog' ), 'account' => array( 'test' => 'saved authorization' ) );
+		update_option( Better_Font_Awesome_Pro::OPTION, $state, false );
+		$this->test_administrator_can_save_checkbox_settings_with_valid_nonce( 'bundled-local', $delivery, $provider );
+		$after = Better_Font_Awesome_Pro::state();
+		$this->assertSame( $enabled, $after['enabled'] );
+		$this->assertSame( $state['active'], $after['active'] );
+		$this->assertSame( $state['account'], $after['account'] );
+		delete_option( Better_Font_Awesome_Pro::OPTION );
+	}
+
+	public static function provider_submissions() {
+		return array(
+			array( 'automatic', 'automatic', false ),
+			array( 'bundled-local', 'bundled-local', false ),
+			array( 'kit-css', 'automatic', true ),
+			array( 'unknown', 'bundled-local', false ),
 		);
 	}
 

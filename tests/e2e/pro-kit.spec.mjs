@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import fs from 'node:fs';
 
-const settings = '/wp-admin/options-general.php?page=better-font-awesome';
+const settings = '/wp-admin/options-general.php?page=better-font-awesome#bfa-kit';
 const font = fs.readFileSync( new URL( '../../vendor/mickey-kay/better-font-awesome-library/inc/font-awesome-7-fallback/webfonts/fa-solid-900.woff2', import.meta.url ) );
 const css = `@font-face{font-family:BFA-Synthetic-Pro;src:url(https://ka-p.fontawesome.com/synthetic.woff2) format('woff2');font-weight:100 900;font-style:normal;font-display:block}.fa,.fas,.far,.fal,.fat,.fab{font-family:BFA-Synthetic-Pro!important}.fa,.fas{font-weight:900}.far,.fab{font-weight:400}.fal{font-weight:300}.fat{font-weight:100}.fa:before,.fas:before,.far:before,.fal:before,.fat:before,.fab:before{content:'\\f024'}`;
 
@@ -17,6 +17,16 @@ async function fixture( page, fault = '', enabled = true ) {
 	await page.getByLabel( 'Full-sized synthetic catalog' ).check();
 	await page.locator( 'select[name="fault"]' ).selectOption( fault );
 	await page.getByRole( 'button', { name: 'Save fixture' } ).click();
+}
+async function saveProvider( page, value ) {
+	const changed = await page.locator( '#bfa-provider' ).getAttribute( 'data-saved' ) !== value;
+	await page.locator( '#bfa-provider' ).selectOption( value );
+	if ( changed ) {
+		await Promise.all( [ page.waitForEvent( 'load' ), page.getByRole( 'button', { name: 'Save Settings', exact: true } ).click() ] );
+	} else {
+		await page.getByRole( 'button', { name: 'Save Settings', exact: true } ).click();
+		await expect( page.locator( '.bfa-ajax-response-holder' ) ).toContainText( 'Settings saved.' );
+	}
 }
 async function expectKit( frame ) {
 	const links = frame.locator( 'link[href^="https://kit.fontawesome.com/KIT_ID.css"]' );
@@ -36,22 +46,21 @@ test( 'bounded Pro Connect and Refresh, all editors, saved styles, local switch 
 	await context.route( 'https://ka-p.fontawesome.com/**', route => blockFont ? route.abort() : route.fulfill( { contentType: 'font/woff2', headers: { 'access-control-allow-origin': '*' }, body: font } ) );
 	context.on( 'request', request => { if ( request.url().includes( 'fontawesome.com' ) ) { requests.push( { host: new URL( request.url() ).host, type: request.resourceType(), auth: Boolean( request.headers().authorization ) } ); } } );
 	await context.route( /^https:\/\/(?:cdnjs\.cloudflare\.com|cdn\.jsdelivr\.net|use\.fontawesome\.com)\//, route => route.abort() );
+	page.on( 'dialog', dialog => dialog.accept() );
 	await login( page );
 	await fixture( page );
 	await page.goto( settings );
-	await page.getByLabel( 'Serve Font Awesome locally', { exact: true } ).uncheck();
-	await page.getByText( 'Save Settings', { exact: true } ).click();
-	await expect( page.locator( '.bfa-ajax-response-holder' ) ).toContainText( 'Settings saved.' );
-	await page.reload();
-	await page.getByLabel( 'Account API token', { exact: true } ).fill( 'SYNTHETIC-NOT-A-CREDENTIAL' );
+	await saveProvider( page, 'automatic' );
+	await page.goto( settings );
+	await page.getByLabel( 'API Key', { exact: true } ).fill( 'SYNTHETIC-NOT-A-CREDENTIAL' );
 	await page.getByRole( 'button', { name: 'Find Kits', exact: true } ).click();
 	await expect( page.locator( '#bfa-pro-account-status' ) ).toContainText( 'Account authorized.' );
-	await page.getByLabel( 'Choose a Kit', { exact: true } ).selectOption( 'KIT_ID' );
+	await page.getByLabel( 'Kit', { exact: true } ).selectOption( 'KIT_ID' );
 	const started = Date.now();
 	await page.getByRole( 'button', { name: 'Connect Kit', exact: true } ).click();
 	await expect( page.locator( '#bfa-pro-status' ) ).toContainText( 'Connected:', { timeout: 60000 } );
 	const connectMs = Date.now() - started;
-	await expect( page.getByLabel( 'Account API token', { exact: true } ) ).toHaveValue( '' );
+	await expect( page.getByLabel( 'API Key', { exact: true } ) ).toHaveValue( '' );
 	await expectKit( page );
 	await expect( page.locator( '#default_block_icon_style option[value="thin"]' ) ).toHaveCount( 1 );
 	await page.locator( '#default_block_icon_style' ).selectOption( 'thin' );
@@ -117,12 +126,12 @@ test( 'bounded Pro Connect and Refresh, all editors, saved styles, local switch 
 	}
 	await fixture( page, 'auth' );
 	await page.goto( settings );
-	await page.getByRole( 'button', { name: 'Refresh Kit', exact: true } ).click();
+	await page.getByRole( 'button', { name: 'Refresh active Kit', exact: true } ).click();
 	await expect( page.locator( '#bfa-pro-status' ) ).toContainText( 'Authorization failed' );
 	await expectKit( page );
 	await fixture( page );
 	await page.goto( settings );
-	await page.getByRole( 'button', { name: 'Refresh Kit', exact: true } ).click();
+	await page.getByRole( 'button', { name: 'Refresh active Kit', exact: true } ).click();
 	await expect( page.locator( '#bfa-pro-status' ) ).toContainText( 'Connected:', { timeout: 60000 } );
 	// Block delivery without changing account state. Markup/configuration survives.
 	blockCss = true;
@@ -138,17 +147,15 @@ test( 'bounded Pro Connect and Refresh, all editors, saved styles, local switch 
 	blockFont = false;
 	expect( requests.every( request => ! request.auth && request.type !== 'script' ) ).toBe( true );
 	await page.goto( settings );
-	await page.getByLabel( 'Serve Font Awesome locally', { exact: true } ).check();
-	await page.getByText( 'Save Settings', { exact: true } ).click();
-	await expect( page.locator( '.bfa-ajax-response-holder' ) ).toContainText( 'Settings saved.' );
+	await saveProvider( page, 'bundled-local' );
 	requests.length = 0;
 	await page.reload();
 	await expect( page.locator( 'link[href*="kit.fontawesome.com"]' ) ).toHaveCount( 0 );
 	expect( requests ).toEqual( [] );
-	await page.getByRole( 'button', { name: 'Use automatic Free', exact: true } ).click();
-	await expect( page.getByLabel( 'Serve Font Awesome locally', { exact: true } ) ).not.toBeChecked();
+	await saveProvider( page, 'automatic' );
+	await page.goto( settings );
 	await expect( page.locator( '#bfa-pro-status' ) ).toContainText( 'Pro is inactive.' );
-	await page.getByRole( 'button', { name: 'Disconnect and forget Kit', exact: true } ).click();
+	await page.getByRole( 'button', { name: 'Delete token', exact: true } ).click();
 	await expect( page.locator( '#bfa-pro-account-status' ) ).toContainText( 'Enter an API token', { timeout: 15000 } );
 	await fixture( page, '', false );
 	const evidence = testInfo.outputPath( 'synthetic-performance.json' );
@@ -159,19 +166,20 @@ test( 'bounded Pro Connect and Refresh, all editors, saved styles, local switch 
 test( 'token-first onboarding: names, keyboard selection, retry, stale responses and preserved connection', async ( { page, context } ) => {
 	test.setTimeout( 120000 );
 	await context.route( /https:\/\/(?:kit|ka-p|use)\.fontawesome\.com\//, route => route.abort() );
+	page.on( 'dialog', dialog => dialog.accept() );
 	await login( page );
 	await fixture( page );
 	await page.goto( settings );
-	const token = page.getByLabel( 'Account API token', { exact: true } );
-	const select = page.getByRole( 'combobox', { name: 'Choose a Kit', exact: true } );
+	const token = page.getByLabel( 'API Key', { exact: true } );
+	const select = page.getByRole( 'combobox', { name: 'Kit', exact: true } );
 	const find = page.getByRole( 'button', { name: 'Find Kits', exact: true } );
 	const connect = page.getByRole( 'button', { name: 'Connect Kit', exact: true } );
 	const accountStatus = page.locator( '#bfa-pro-account-status' );
 	await expect( token ).toHaveAttribute( 'type', 'password' );
 	await expect( page.getByRole( 'link', { name: 'Get an API token from Font Awesome (opens in a new tab)' } ) ).toHaveAttribute( 'href', 'https://fontawesome.com/account#api-tokens' );
 	await expect( accountStatus ).toHaveAttribute( 'role', 'status' );
-	await expect( select ).toHaveAttribute( 'aria-describedby', 'bfa-pro-kit-help' );
-	await expect( connect ).toBeDisabled();
+	await expect( page.locator( '#bfa-pro-kit' ) ).toHaveAttribute( 'aria-describedby', 'bfa-pro-kit-help' );
+	await expect( page.locator( '#bfa-pro-connect' ) ).toBeDisabled();
 	const operations = [];
 	const responses = [];
 	page.on( 'request', request => {
@@ -180,10 +188,27 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	page.on( 'response', async response => {
 		if ( response.url().includes( 'admin-ajax.php' ) ) { responses.push( await response.text().catch( () => '' ) ); }
 	} );
+	// Provider previews only toggle relevant controls, without server acquisition.
+	await expect( page.locator( '#include_v4_shim' ) ).toBeHidden();
+	await expect( page.locator( '#default_block_icon_style' ) ).toBeVisible();
+	await page.getByRole( 'combobox', { name: 'Font Awesome source' } ).selectOption( 'automatic' );
+	await expect( page.locator( '#bfa-pro-panel' ) ).toBeHidden();
+	await expect( page.locator( '#include_v4_shim' ) ).toBeVisible();
+	await page.getByRole( 'combobox', { name: 'Font Awesome source' } ).selectOption( 'kit-css' );
+	expect( operations ).not.toContain( 'find' );
+	expect( operations ).not.toContain( 'connect' );
 	await token.fill( 'SYNTHETIC-NOT-A-CREDENTIAL' );
 	await token.press( 'Enter' );
 	await expect( accountStatus ).toContainText( 'Account authorized.' );
 	await expect( select ).toHaveValue( '' );
+	await expect( page.getByText( 'API token saved', { exact: true } ) ).toBeVisible();
+	await expect( token ).toBeHidden();
+	await page.screenshot( { path: test.info().outputPath( 'saved-token-settings.png' ), fullPage: true } );
+	await page.getByRole( 'button', { name: 'Update token', exact: true } ).click();
+	await token.fill( 'SYNTHETIC-CANCELLED-EDIT' );
+	await page.getByRole( 'button', { name: 'Cancel', exact: true } ).click();
+	await expect( token ).toHaveValue( '' );
+	await expect( token ).toBeHidden();
 	await expect( select.locator( 'option' ) ).toHaveText( [ 'Choose a Kit', 'BFA staging (KIT_ID)', 'BFA staging (SECOND)', 'SVG Kit (unsupported)', 'Unnamed Kit (UNNAMED)' ] );
 	await expect( connect ).toBeDisabled();
 	expect( operations ).not.toContain( 'connect' );
@@ -197,6 +222,8 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	await expect( select ).toHaveValue( 'KIT_ID' );
 	await expect( connect ).toBeEnabled();
 	await select.press( 'Tab' );
+	await expect( page.getByRole( 'button', { name: 'Refresh Kits', exact: true } ) ).toBeFocused();
+	await page.keyboard.press( 'Tab' );
 	await expect( connect ).toBeFocused();
 	await connect.press( 'Enter' );
 	await expect( page.locator( '#bfa-pro-status' ) ).toContainText( 'Connected: BFA staging.', { timeout: 60000 } );
@@ -204,6 +231,7 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	// Failed replacement discovery does not alter the active Kit or its assets.
 	await fixture( page, 'auth' );
 	await page.goto( settings );
+	await page.getByRole( 'button', { name: 'Update token', exact: true } ).click();
 	await token.fill( 'SYNTHETIC-BAD-REPLACEMENT' );
 	await find.click();
 	await expect( accountStatus ).toContainText( 'Authorization failed.' );
@@ -211,7 +239,7 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	await expect( page.locator( 'link[href^="https://kit.fontawesome.com/KIT_ID.css"]' ) ).toHaveCount( 1 );
 	await fixture( page, 'empty-account' );
 	await page.goto( settings );
-	await find.click();
+	await page.getByRole( 'button', { name: 'Refresh Kits', exact: true } ).click();
 	await expect( accountStatus ).toContainText( 'no Kits were found' );
 	await expect( select ).toBeDisabled();
 	await expect( connect ).toBeDisabled();
@@ -233,9 +261,11 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 		await gate;
 		await route.fulfill( { response, json: body, headers: { 'x-bfa-old-response': 'yes' } } );
 	} );
-	await find.click();
+	await page.getByRole( 'button', { name: 'Refresh Kits', exact: true } ).click();
+	await expect( page.locator( '#bfa-pro-spinner' ) ).toHaveClass( /is-active/ );
 	await expect( accountStatus ).toHaveText( 'Finding Kits...' );
 	await ready;
+	await page.getByRole( 'button', { name: 'Update token', exact: true } ).click();
 	await token.fill( 'SYNTHETIC-NEW-AUTHORIZATION' );
 	await find.click();
 	await expect( accountStatus ).toContainText( 'Account authorized.' );
@@ -247,7 +277,7 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	await expect( token ).toHaveValue( '' );
 	expect( responses.join( '' ) ).not.toMatch( /SYNTHETIC-(?:NOT-A-CREDENTIAL|BAD-REPLACEMENT|NEW-AUTHORIZATION)|credential|access_token/ );
 	expect( await page.evaluate( () => JSON.stringify( window.bfaPro ) ) ).not.toMatch( /token|credential/i );
-	await page.getByRole( 'button', { name: 'Disconnect and forget Kit', exact: true } ).click();
+	await page.getByRole( 'button', { name: 'Delete token', exact: true } ).click();
 	await expect( accountStatus ).toContainText( 'Enter an API token', { timeout: 15000 } );
 	await fixture( page, '', false );
 } );

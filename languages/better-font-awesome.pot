@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-10T20:36:59+00:00\n"
+"POT-Creation-Date: 2026-09-10T21:40:41+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: better-font-awesome\n"
@@ -67,187 +67,216 @@ msgstr ""
 msgid "Back to the plugins page &rarr;"
 msgstr ""
 
-#: better-font-awesome.php:533
+#: better-font-awesome.php:536
 msgid "Save Settings"
 msgstr ""
 
-#: better-font-awesome.php:563
+#: better-font-awesome.php:565
 msgid "Font Awesome version"
 msgstr ""
 
-#: better-font-awesome.php:571
+#: better-font-awesome.php:574
 msgid "Default block icon style"
 msgstr ""
 
-#: better-font-awesome.php:580
+#: better-font-awesome.php:583
 msgid "Serve Font Awesome locally"
 msgstr ""
 
-#: better-font-awesome.php:589
+#: better-font-awesome.php:595
 msgid "Include v4 CSS shim"
 msgstr ""
 
-#: better-font-awesome.php:595
+#: better-font-awesome.php:602
 msgid "Include the Font Awesome v4 CSS shim to support legacy icons (<a href=\"https://fontawesome.com/how-to-use/on-the-web/setup/upgrading-from-version-4#name-changes\" target=\"_blank\">more details</a>)."
 msgstr ""
 
-#: better-font-awesome.php:601
+#: better-font-awesome.php:608
 msgid "Remove existing Font Awesome"
 msgstr ""
 
-#: better-font-awesome.php:607
+#: better-font-awesome.php:614
 msgid "Attempt to remove Font Awesome CSS and shortcodes added by other plugins and themes."
 msgstr ""
 
-#: better-font-awesome.php:613
+#: better-font-awesome.php:620
 msgid "Hide admin notices"
 msgstr ""
 
-#: better-font-awesome.php:619
+#: better-font-awesome.php:626
 msgid "Hide the default admin warnings that are shown when API and CDN errors occur."
 msgstr ""
 
-#: better-font-awesome.php:669
+#: better-font-awesome.php:676
 msgid "You are not allowed to change these settings."
 msgstr ""
 
-#: better-font-awesome.php:677
+#: better-font-awesome.php:684
 msgid "Settings were not saved due to a missing nonce. Refresh the page and try again."
 msgstr ""
 
-#: better-font-awesome.php:696
+#: better-font-awesome.php:711
 msgid "Settings saved."
 msgstr ""
 
-#: better-font-awesome.php:760
+#: better-font-awesome.php:775
 msgid "Kit version is managed by its initializer."
 msgstr ""
 
-#: better-font-awesome.php:774
+#: better-font-awesome.php:789
 msgid "Background updates are disabled for the effective delivery configuration."
 msgstr ""
 
 #. translators: placeholder is the numeric current version number.
-#: better-font-awesome.php:782
+#: better-font-awesome.php:797
 #, php-format
 msgid "%s (The plugin automatically uses the latest version of Font Awesome, and checks for updates at this frequency)"
 msgstr ""
 
-#: better-font-awesome.php:834
+#: better-font-awesome.php:849
 #: src/edit.js:70
 msgid "Solid"
 msgstr ""
 
-#: better-font-awesome.php:835
+#: better-font-awesome.php:850
 #: src/edit.js:71
 msgid "Regular"
 msgstr ""
 
-#: better-font-awesome.php:839
+#: better-font-awesome.php:854
 #: src/edit.js:73
 msgid "Light"
 msgstr ""
 
-#: better-font-awesome.php:840
+#: better-font-awesome.php:855
 #: src/edit.js:74
 msgid "Thin"
 msgstr ""
 
 #. translators: %s: saved icon style.
-#: better-font-awesome.php:849
+#: better-font-awesome.php:864
 #, php-format
 msgid "%s (saved, currently unavailable)"
 msgstr ""
 
-#: better-font-awesome.php:855
+#: better-font-awesome.php:870
 msgid "Sets the style for icon blocks that use the site default. You can override it in each block’s settings."
 msgstr ""
 
-#: better-font-awesome.php:877
+#: better-font-awesome.php:892
 msgid "Hosted Pro is active. Selecting local delivery pauses Pro and preserves the saved connection and content. Unchecking local restores automatic Free; Refresh Kit reactivates Pro."
 msgstr ""
 
-#: better-font-awesome.php:879
+#: better-font-awesome.php:894
 msgid "This Font Awesome configuration is unsupported. Local files require Font Awesome 7 Free."
 msgstr ""
 
-#: better-font-awesome.php:882
+#: better-font-awesome.php:897
 msgid "Local delivery is not active because another plugin, theme, or filter controls Font Awesome."
 msgstr ""
 
-#: better-font-awesome.php:883
+#: better-font-awesome.php:898
 msgid "Local delivery is active because another plugin, theme, or filter controls Font Awesome."
 msgstr ""
 
-#: better-font-awesome.php:888
+#: better-font-awesome.php:903
 msgid "Local icon files are unavailable. Reinstall Better Font Awesome."
 msgstr ""
 
 #. translators: 1: local Font Awesome version, 2: previously downloaded Font Awesome version.
-#: better-font-awesome.php:896
+#: better-font-awesome.php:911
 #, php-format
 msgid "Local files use Font Awesome %1$s; your previously downloaded version is %2$s. Newer icons may be unavailable."
 msgstr ""
 
-#: better-font-awesome.php:909
+#: better-font-awesome.php:924
 msgid "Load icons from your site instead of a third-party CDN. New icons arrive through plugin updates."
 msgstr ""
 
-#: better-font-awesome.php:933
-msgid "Hosted Font Awesome Pro Kit"
-msgstr ""
-
-#: better-font-awesome.php:934
-msgid "Use an existing v7 Pro By Style Kit with Web Fonts, CSS-only embedding and compatibility enabled. Include Classic Solid, Regular and Brands; Light and Thin are optional. Your account token needs Read Kits Data permission."
-msgstr ""
-
-#: better-font-awesome.php:935
-msgid "Hosted Pro loads CSS and fonts from Font Awesome in visitors’ browsers and editors. This is separate from local Free delivery. BFA does not manage your subscription, domains or Kit configuration."
-msgstr ""
-
-#: better-font-awesome.php:937
-msgid "Account API token"
-msgstr ""
-
-#: better-font-awesome.php:938
-msgid "Leave blank to reuse the saved token. Tokens stay encrypted on your server. Changing WordPress salts requires entering the token again."
-msgstr ""
-
-#: better-font-awesome.php:938
-msgid "Get an API token from Font Awesome (opens in a new tab)"
-msgstr ""
-
-#: better-font-awesome.php:939
-msgid "Find Kits"
-msgstr ""
-
-#: better-font-awesome.php:941
-#: js/pro-settings.js:71
-msgid "Choose a Kit"
-msgstr ""
-
-#: better-font-awesome.php:942
-msgid "Find Kits to authorize your account, then choose a Kit. No Kit is connected until you click Connect Kit and validation succeeds."
-msgstr ""
-
 #: better-font-awesome.php:944
-msgid "Connect Kit"
+msgid "Font Awesome source"
 msgstr ""
 
-#: better-font-awesome.php:945
-msgid "Refresh Kit"
-msgstr ""
-
-#: better-font-awesome.php:946
-msgid "Use automatic Free"
-msgstr ""
-
-#: better-font-awesome.php:947
-msgid "Disconnect and forget Kit"
+#: better-font-awesome.php:948
+msgid "Automatic Free (CDN)"
 msgstr ""
 
 #: better-font-awesome.php:949
-msgid "Disconnect removes the saved token, catalog and pending work. Switching to Free preserves the saved connection. Neither action changes saved icon names or styles; unavailable Pro icons may be blank."
+msgid "Local Free"
+msgstr ""
+
+#: better-font-awesome.php:950
+msgid "Hosted Pro Kit"
+msgstr ""
+
+#: better-font-awesome.php:956
+#: js/pro-settings.js:187
+msgid "Choose a source, then save settings. A Kit activates only after Connect Kit succeeds."
+msgstr ""
+
+#: better-font-awesome.php:975
+msgid "Hosted Pro Kit settings"
+msgstr ""
+
+#: better-font-awesome.php:978
+msgid "API Key"
+msgstr ""
+
+#: better-font-awesome.php:980
+msgid "API token saved"
+msgstr ""
+
+#: better-font-awesome.php:981
+msgid "Update token"
+msgstr ""
+
+#: better-font-awesome.php:982
+msgid "Delete token"
+msgstr ""
+
+#: better-font-awesome.php:986
+msgid "Find Kits"
+msgstr ""
+
+#: better-font-awesome.php:987
+msgid "Cancel"
+msgstr ""
+
+#: better-font-awesome.php:988
+msgid "Use Read Kits Data permission. Your token stays encrypted on this server."
+msgstr ""
+
+#: better-font-awesome.php:988
+msgid "Get an API token from Font Awesome (opens in a new tab)"
+msgstr ""
+
+#: better-font-awesome.php:991
+msgid "Deleting the token also disconnects the Kit and removes its saved catalog. Saved icon names and styles are unchanged."
+msgstr ""
+
+#: better-font-awesome.php:993
+msgid "Kit"
+msgstr ""
+
+#: better-font-awesome.php:994
+#: js/pro-settings.js:82
+msgid "Choose a Kit"
+msgstr ""
+
+#: better-font-awesome.php:995
+msgid "Refresh Kits"
+msgstr ""
+
+#: better-font-awesome.php:997
+msgid "Connect Kit"
+msgstr ""
+
+#: better-font-awesome.php:998
+msgid "Refresh active Kit"
+msgstr ""
+
+#: better-font-awesome.php:1000
+msgid "Use a v7 Pro By Style Web Fonts Kit with compatibility and Classic Solid, Regular and Brands. Light and Thin are optional. CSS and fonts load from Font Awesome, not locally."
 msgstr ""
 
 #: includes/class-better-font-awesome-metadata-manager.php:282
@@ -318,87 +347,95 @@ msgstr ""
 msgid "You are not allowed to change this connection."
 msgstr ""
 
-#: js/pro-settings.js:27
-#: js/pro-settings.js:59
+#: js/pro-settings.js:37
+#: js/pro-settings.js:70
 msgid "Connection interrupted. Reload to resume or start again."
 msgstr ""
 
-#: js/pro-settings.js:28
+#: js/pro-settings.js:38
 msgid "Connection request failed. Reload to resume."
 msgstr ""
 
-#: js/pro-settings.js:36
+#: js/pro-settings.js:47
 msgid "Preparing Kit connection..."
 msgstr ""
 
 #. translators: 1: current catalog page, 2: total pages.
-#: js/pro-settings.js:43
+#: js/pro-settings.js:54
 #, js-format
 msgid "Preparing Pro icons: page %1$d of %2$d."
 msgstr ""
 
-#: js/pro-settings.js:43
+#: js/pro-settings.js:54
 msgid "Validating Kit and preparing Pro icons..."
 msgstr ""
 
-#: js/pro-settings.js:48
+#: js/pro-settings.js:59
 msgid "Activating Pro icons..."
 msgstr ""
 
 #. translators: 1: active Kit name, 2: Font Awesome version, 3: comma-separated styles.
-#: js/pro-settings.js:52
+#: js/pro-settings.js:63
 #, js-format
 msgid "Connected: %1$s. Font Awesome %2$s. Styles: %3$s."
 msgstr ""
 
-#: js/pro-settings.js:52
+#: js/pro-settings.js:63
 msgid "Pro is inactive. The effective Free delivery setting applies."
 msgstr ""
 
-#: js/pro-settings.js:67
+#: js/pro-settings.js:78
 msgid "Choose a Kit, then click Connect Kit to validate its catalog and activate it."
 msgstr ""
 
-#: js/pro-settings.js:79
+#: js/pro-settings.js:93
 msgid "Unnamed Kit"
 msgstr ""
 
 #. translators: %s: Kit name.
-#: js/pro-settings.js:88
+#: js/pro-settings.js:102
 #, js-format
 msgid "%s (unsupported)"
 msgstr ""
 
-#: js/pro-settings.js:94
+#: js/pro-settings.js:108
 msgid "Account authorized. Choose a Kit to connect."
 msgstr ""
 
-#: js/pro-settings.js:94
+#: js/pro-settings.js:108
 msgid "Account authorized, but no Kits were found. Create a Kit in Font Awesome, then Find Kits again."
 msgstr ""
 
-#: js/pro-settings.js:94
+#: js/pro-settings.js:108
 msgid "A token is saved. Find Kits to refresh the available list."
 msgstr ""
 
-#: js/pro-settings.js:94
+#: js/pro-settings.js:108
 msgid "Enter an API token, then Find Kits. Account authorization does not activate a Kit."
 msgstr ""
 
-#: js/pro-settings.js:102
+#: js/pro-settings.js:117
 msgid "Finding Kits..."
 msgstr ""
 
-#: js/pro-settings.js:109
+#: js/pro-settings.js:124
 msgid "Could not find Kits."
 msgstr ""
 
-#: js/pro-settings.js:109
+#: js/pro-settings.js:124
 msgid "The active connection is unchanged. Check the token and try Find Kits again."
 msgstr ""
 
-#: js/pro-settings.js:119
+#: js/pro-settings.js:135
 msgid "Token changed. Find Kits again before choosing a Kit."
+msgstr ""
+
+#: js/pro-settings.js:149
+msgid "Delete the saved token and disconnect the Kit? Saved icons will not be changed."
+msgstr ""
+
+#: js/pro-settings.js:187
+msgid "Save Settings to switch off local delivery before setting up a hosted Kit."
 msgstr ""
 
 #. translators: %d is the number of unique selectable Free icons.

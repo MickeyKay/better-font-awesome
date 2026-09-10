@@ -555,7 +555,8 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		$this->assertSame( '', $account['kits'][3]['name'] );
 		$this->assertSame( 2, $this->api->requests );
 		$this->assertCount( 1, $this->api->queries );
-		$this->assertStringNotContainsString( 'iconVariantsPaginated', $this->api->queries[0] );
+		$this->assertStringContainsString( 'iconVariantsPaginated(pageSize:1){totalIconVariantCount}', $this->api->queries[0] );
+		$this->assertStringNotContainsString( 'iconVariants{', $this->api->queries[0] );
 		$this->assertStringNotContainsString( 'icons{', $this->api->queries[0] );
 		$this->assertArrayNotHasKey( 'candidate', Better_Font_Awesome_Pro::state() );
 		$this->assertFalse( $this->pro->status()['connected'] );
@@ -671,6 +672,35 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		$this->assertCount( 4, $account['kits'] );
 		$this->assertSame( 2, $this->api->requests );
 		$this->assertArrayNotHasKey( 'candidate', Better_Font_Awesome_Pro::state() );
+	}
+
+	public function test_full_style_counts_do_not_require_a_curated_only_subset() {
+		$account = $this->pro->find_kits( 'SYNTHETIC-TOKEN' );
+		$this->assertTrue( $account['kits'][0]['supported'] );
+		$this->pro->start( 'KIT_ID', '', $account['id'] );
+		$active = $this->complete();
+		$this->assertCount( count( $this->api->rows ), $active['icons'] );
+	}
+	/** @dataProvider provider_choices */
+	public function test_provider_save_preserves_saved_authorization_and_hidden_options( $provider, $enabled ) {
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$active = $this->complete();
+		$this->pro->find_kits( 'SYNTHETIC-TOKEN' );
+		$credential = Better_Font_Awesome_Pro::state()['account']['credential'];
+		$plugin = Better_Font_Awesome_Plugin::get_instance();
+		$count = $this->api->requests;
+		$options = $plugin->sanitize( array( 'provider_method' => $provider, 'include_v4_shim' => 1, 'remove_existing_fa' => 1, 'hide_admin_notices' => 1 ) );
+		$this->assertSame( $enabled, Better_Font_Awesome_Pro::state()['enabled'] );
+		$this->assertSame( $active, Better_Font_Awesome_Pro::state()['active'] );
+		$this->assertSame( $credential, Better_Font_Awesome_Pro::state()['account']['credential'] );
+		$this->assertSame( 1, $options['include_v4_shim'] );
+		$this->assertSame( 1, $options['remove_existing_fa'] );
+		$this->assertSame( 'bundled-local' === $provider ? 'bundled-local' : 'automatic', $options['asset_delivery'] );
+		$this->assertArrayNotHasKey( 'provider_method', $options );
+		$this->assertSame( $count, $this->api->requests );
+	}
+	public static function provider_choices() {
+		return array( array( 'automatic', false ), array( 'bundled-local', false ), array( 'kit-css', true ) );
 	}
 
 }

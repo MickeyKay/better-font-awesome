@@ -523,18 +523,20 @@ class Better_Font_Awesome_Plugin {
 		?>
 		<div class="wrap bfa-settings">
 			<h2><?php echo esc_html( $this->plugin_display_name ); ?></h2>
+			<?php $this->provider_settings(); ?>
+			<?php $this->pro_settings(); ?>
 			<form method="post" action="options.php" id="bfa-settings-form">
 			<?php
+				printf( '<input type="hidden" id="bfa-provider-input" name="%s[provider_method]" value="">', esc_attr( $this->option_name ) );
 				// This prints out all hidden setting fields.
 				settings_fields( self::SLUG );
 				do_settings_sections( self::SLUG );
 			?>
 				<p>
-					<span class="button-primary bfa-save-settings-button"><?php esc_html_e( 'Save Settings', 'better-font-awesome' ); ?></span> <img class="bfa-loading-gif" src="<?php echo esc_attr( includes_url() . 'images/spinner.gif' ); ?>" />
+					<button type="button" class="button button-primary bfa-save-settings-button"><?php esc_html_e( 'Save Settings', 'better-font-awesome' ); ?></button> <img class="bfa-loading-gif" src="<?php echo esc_attr( includes_url() . 'images/spinner.gif' ); ?>" />
 				</p>
 				<div class="bfa-ajax-response-holder"></div>
 			</form>
-			<?php $this->pro_settings(); ?>
 		</div>
 		<?php
 	}
@@ -563,7 +565,8 @@ class Better_Font_Awesome_Plugin {
 			__( 'Font Awesome version', 'better-font-awesome' ), // Title.
 			array( $this, 'version_callback' ), // Callback.
 			self::SLUG, // Page.
-			'settings_section_primary' // Section.
+			'settings_section_primary', // Section.
+			array( 'class' => 'bfa-free-setting' )
 		);
 
 		add_settings_field(
@@ -581,7 +584,10 @@ class Better_Font_Awesome_Plugin {
 			array( $this, 'asset_delivery_callback' ),
 			self::SLUG,
 			'settings_section_primary',
-			array( 'label_for' => 'asset_delivery' )
+			array(
+				'label_for' => 'asset_delivery',
+				'class'     => 'bfa-hidden-delivery',
+			)
 		);
 
 		add_settings_field(
@@ -592,6 +598,7 @@ class Better_Font_Awesome_Plugin {
 			'settings_section_primary',
 			array(
 				'id'          => 'include_v4_shim',
+				'class'       => 'bfa-free-setting',
 				'description' => __( 'Include the Font Awesome v4 CSS shim to support legacy icons (<a href="https://fontawesome.com/how-to-use/on-the-web/setup/upgrading-from-version-4#name-changes" target="_blank">more details</a>).', 'better-font-awesome' ),
 			)
 		);
@@ -635,7 +642,7 @@ class Better_Font_Awesome_Plugin {
 				self::SLUG . '-admin',
 				plugin_dir_url( __FILE__ ) . 'css/admin.css',
 				array(),
-				self::VERSION
+				self::VERSION . '-' . md5_file( __DIR__ . '/css/admin.css' )
 			);
 
 			// Invalidate cached settings handlers when packages share a plugin version.
@@ -688,6 +695,14 @@ class Better_Font_Awesome_Plugin {
 			'remove_existing_fa'       => isset( $_POST['remove_existing_fa'] ) && (bool) absint( wp_unslash( $_POST['remove_existing_fa'] ) ),
 			'hide_admin_notices'       => isset( $_POST['hide_admin_notices'] ) && (bool) absint( wp_unslash( $_POST['hide_admin_notices'] ) ),
 		);
+
+		$provider = isset( $_POST['provider_method'] ) && is_string( $_POST['provider_method'] ) ? sanitize_key( wp_unslash( $_POST['provider_method'] ) ) : '';
+		if ( in_array( $provider, array( 'automatic', 'bundled-local' ), true ) && Better_Font_Awesome_Pro::state() && ! Better_Font_Awesome_Pro::cancel() ) {
+			wp_die( esc_html( Better_Font_Awesome_Pro::message( 'changed' ) ), '', array( 'response' => 409 ) );
+		}
+		if ( in_array( $provider, array( 'automatic', 'bundled-local', 'kit-css' ), true ) ) {
+			$options['asset_delivery'] = self::sanitize_asset_delivery( $provider );
+		}
 
 		// Sanitize and update the options.
 		update_option( $this->option_name, $options );
@@ -917,6 +932,33 @@ class Better_Font_Awesome_Plugin {
 		}
 	}
 
+	/** First settings control: presentation choice, applied only by Save or Connect. */
+	public function provider_settings() {
+		$state = Better_Font_Awesome_Pro::state();
+		$mode  = self::sanitize_asset_delivery( $this->options['asset_delivery'] ?? 'automatic' );
+		if ( 'automatic' === $mode && ! empty( $state['enabled'] ) ) {
+			$mode = 'kit-css';
+		}
+		?>
+		<table class="form-table" role="presentation"><tbody><tr>
+			<th scope="row"><label for="bfa-provider"><?php esc_html_e( 'Font Awesome source', 'better-font-awesome' ); ?></label></th>
+			<td><select id="bfa-provider" data-saved="<?php echo esc_attr( $mode ); ?>" aria-describedby="bfa-provider-help">
+			<?php
+			foreach ( array(
+				'automatic'     => __( 'Automatic Free (CDN)', 'better-font-awesome' ),
+				'bundled-local' => __( 'Local Free', 'better-font-awesome' ),
+				'kit-css'       => __( 'Hosted Pro Kit', 'better-font-awesome' ),
+			) as $value => $label ) :
+				?>
+				<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $mode, $value ); ?>><?php echo esc_html( $label ); ?></option>
+			<?php endforeach; ?>
+			</select>
+			<p id="bfa-provider-help" class="description" role="status"><?php esc_html_e( 'Choose a source, then save settings. A Kit activates only after Connect Kit succeeds.', 'better-font-awesome' ); ?></p>
+			</td>
+		</tr></tbody></table>
+		<?php
+	}
+
 	/** WordPress-native, separate connection controls with no secret values rendered. */
 	public function pro_settings() {
 		wp_enqueue_script( 'bfa-pro-settings', plugins_url( 'js/pro-settings.js', __FILE__ ), array( 'wp-i18n' ), self::VERSION . '-' . md5_file( __DIR__ . '/js/pro-settings.js' ), true );
@@ -930,25 +972,35 @@ class Better_Font_Awesome_Plugin {
 			)
 		);
 		?>
-		<h2><?php esc_html_e( 'Hosted Font Awesome Pro Kit', 'better-font-awesome' ); ?></h2>
-		<p><?php esc_html_e( 'Use an existing v7 Pro By Style Kit with Web Fonts, CSS-only embedding and compatibility enabled. Include Classic Solid, Regular and Brands; Light and Thin are optional. Your account token needs Read Kits Data permission.', 'better-font-awesome' ); ?></p>
-		<p><?php esc_html_e( 'Hosted Pro loads CSS and fonts from Font Awesome in visitors’ browsers and editors. This is separate from local Free delivery. BFA does not manage your subscription, domains or Kit configuration.', 'better-font-awesome' ); ?></p>
+		<section id="bfa-pro-panel" hidden aria-label="<?php esc_attr_e( 'Hosted Pro Kit settings', 'better-font-awesome' ); ?>">
 		<form id="bfa-pro-form" autocomplete="off">
-			<p><label for="bfa-pro-token"><?php esc_html_e( 'Account API token', 'better-font-awesome' ); ?></label><br><input id="bfa-pro-token" type="password" autocomplete="new-password" spellcheck="false" aria-describedby="bfa-pro-token-help"></p>
-			<p id="bfa-pro-token-help"><?php esc_html_e( 'Leave blank to reuse the saved token. Tokens stay encrypted on your server. Changing WordPress salts requires entering the token again.', 'better-font-awesome' ); ?> <a href="https://fontawesome.com/account#api-tokens" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Get an API token from Font Awesome (opens in a new tab)', 'better-font-awesome' ); ?></a></p>
-			<p><button id="bfa-pro-find" type="button" class="button"><?php esc_html_e( 'Find Kits', 'better-font-awesome' ); ?></button></p>
-			<p id="bfa-pro-account-status" role="status" aria-live="polite" aria-atomic="true"></p>
-			<p><label for="bfa-pro-kit"><?php esc_html_e( 'Choose a Kit', 'better-font-awesome' ); ?></label><br><select id="bfa-pro-kit" aria-describedby="bfa-pro-kit-help" disabled><option value=""><?php esc_html_e( 'Choose a Kit', 'better-font-awesome' ); ?></option></select></p>
-			<p id="bfa-pro-kit-help" role="status" aria-live="polite" aria-atomic="true"><?php esc_html_e( 'Find Kits to authorize your account, then choose a Kit. No Kit is connected until you click Connect Kit and validation succeeds.', 'better-font-awesome' ); ?></p>
-			<p>
-			<button id="bfa-pro-connect" type="submit" class="button button-primary" disabled><?php esc_html_e( 'Connect Kit', 'better-font-awesome' ); ?></button>
-			<button type="button" class="button" data-pro-action="refresh"><?php esc_html_e( 'Refresh Kit', 'better-font-awesome' ); ?></button>
-			<button type="button" class="button" data-pro-action="pause"><?php esc_html_e( 'Use automatic Free', 'better-font-awesome' ); ?></button>
-			<button type="button" class="button" data-pro-action="disconnect"><?php esc_html_e( 'Disconnect and forget Kit', 'better-font-awesome' ); ?></button>
-			</p>
-			<p><?php esc_html_e( 'Disconnect removes the saved token, catalog and pending work. Switching to Free preserves the saved connection. Neither action changes saved icon names or styles; unavailable Pro icons may be blank.', 'better-font-awesome' ); ?></p>
+			<table class="form-table" role="presentation"><tbody>
+			<tr><th scope="row"><label for="bfa-pro-token"><?php esc_html_e( 'API Key', 'better-font-awesome' ); ?></label></th><td>
+			<div id="bfa-pro-saved" hidden>
+				<span class="bfa-token-saved"><span class="dashicons dashicons-yes-alt" aria-hidden="true"></span> <?php esc_html_e( 'API token saved', 'better-font-awesome' ); ?></span>
+				<button id="bfa-pro-update-token" type="button" class="button"><?php esc_html_e( 'Update token', 'better-font-awesome' ); ?></button>
+				<button type="button" class="button" data-pro-action="disconnect" aria-describedby="bfa-pro-delete-help"><?php esc_html_e( 'Delete token', 'better-font-awesome' ); ?></button>
+			</div>
+			<div id="bfa-pro-token-entry">
+				<input id="bfa-pro-token" class="regular-text" type="password" autocomplete="new-password" spellcheck="false" aria-describedby="bfa-pro-token-help">
+				<button id="bfa-pro-find" type="button" class="button button-primary"><?php esc_html_e( 'Find Kits', 'better-font-awesome' ); ?></button>
+				<button id="bfa-pro-cancel-token" type="button" class="button" hidden><?php esc_html_e( 'Cancel', 'better-font-awesome' ); ?></button>
+				<p id="bfa-pro-token-help"><?php esc_html_e( 'Use Read Kits Data permission. Your token stays encrypted on this server.', 'better-font-awesome' ); ?> <a href="https://fontawesome.com/account#api-tokens" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Get an API token from Font Awesome (opens in a new tab)', 'better-font-awesome' ); ?></a></p>
+			</div>
+			<p class="bfa-discovery-status"><span id="bfa-pro-spinner" class="spinner" aria-hidden="true"></span><span id="bfa-pro-account-status" role="status" aria-live="polite" aria-atomic="true"></span></p>
+			<p id="bfa-pro-delete-help" class="description" hidden><?php esc_html_e( 'Deleting the token also disconnects the Kit and removes its saved catalog. Saved icon names and styles are unchanged.', 'better-font-awesome' ); ?></p>
+			</td></tr>
+			<tr id="bfa-pro-kit-controls"><th scope="row"><label for="bfa-pro-kit"><?php esc_html_e( 'Kit', 'better-font-awesome' ); ?></label></th><td>
+				<select id="bfa-pro-kit" aria-describedby="bfa-pro-kit-help" disabled><option value=""><?php esc_html_e( 'Choose a Kit', 'better-font-awesome' ); ?></option></select>
+				<button id="bfa-pro-refresh-kits" type="button" class="button"><?php esc_html_e( 'Refresh Kits', 'better-font-awesome' ); ?></button>
+				<p id="bfa-pro-kit-help" role="status" aria-live="polite" aria-atomic="true"></p>
+				<p><button id="bfa-pro-connect" type="submit" class="button button-primary" disabled><?php esc_html_e( 'Connect Kit', 'better-font-awesome' ); ?></button>
+				<button type="button" class="button" data-pro-action="refresh"><?php esc_html_e( 'Refresh active Kit', 'better-font-awesome' ); ?></button></p>
 			<p id="bfa-pro-status" role="status" aria-live="polite" aria-atomic="true"></p>
+			<p class="description"><?php esc_html_e( 'Use a v7 Pro By Style Web Fonts Kit with compatibility and Classic Solid, Regular and Brands. Light and Thin are optional. CSS and fonts load from Font Awesome, not locally.', 'better-font-awesome' ); ?></p>
+			</td></tr></tbody></table>
 		</form>
+		</section>
 		<?php
 	}
 
@@ -1005,6 +1057,14 @@ class Better_Font_Awesome_Plugin {
 
 		$new_input['default_block_icon_style'] = $this->sanitize_default_setting( $input['default_block_icon_style'] ?? self::get_default_block_icon_style() );
 		$new_input['asset_delivery']           = self::sanitize_asset_delivery( $input['asset_delivery'] ?? 'automatic' );
+		$provider                              = $input['provider_method'] ?? '';
+		if ( in_array( $provider, array( 'automatic', 'bundled-local', 'kit-css' ), true ) ) {
+			if ( 'kit-css' !== $provider && Better_Font_Awesome_Pro::state() && ! Better_Font_Awesome_Pro::cancel() ) {
+				add_settings_error( $this->option_name, 'provider_changed', Better_Font_Awesome_Pro::message( 'changed' ) );
+				return get_option( $this->option_name, array() );
+			}
+			$new_input['asset_delivery'] = self::sanitize_asset_delivery( $provider );
+		}
 
 		return $new_input;
 	}

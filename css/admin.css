@@ -34,3 +34,33 @@
 	text-align: center;
 	box-sizing: border-box;
 }
+
+/* Keep provider setup within native WordPress settings controls. */
+.bfa-settings [hidden],
+.bfa-settings .bfa-hidden-delivery {
+	display: none !important;
+}
+
+.bfa-token-saved {
+	margin-right: 12px;
+}
+
+.bfa-token-saved .dashicons {
+	color: #008a20;
+	vertical-align: middle;
+}
+
+.bfa-discovery-status .spinner {
+	display: none;
+	float: none;
+	margin: 0 8px 0 0;
+	vertical-align: middle;
+}
+
+.bfa-discovery-status .spinner.is-active {
+	display: inline-block;
+}
+
+#bfa-pro-kit {
+	max-width: 100%;
+}

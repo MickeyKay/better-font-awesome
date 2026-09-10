@@ -105,7 +105,8 @@ class Better_Font_Awesome_Pro_Fixture {
 							'style'  => $style,
 							'prefix' => Better_Font_Awesome_Pro::STYLES[ $style ],
 						),
-						'only'        => array( 'totalIconVariantCount' => $count ),
+						'only'        => null,
+						'iconVariantsPaginated' => array( 'totalIconVariantCount' => $count ),
 					); }
 				$meta['familyStylesPaginated'] = array(
 					'totalPageCount' => 1,

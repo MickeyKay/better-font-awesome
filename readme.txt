@@ -58,11 +58,11 @@ You can also use Font Awesome classes in HTML or CSS. Unlike shortcodes, HTML cl
 
 == Automatic icon updates and built-in fallback ==
 
-Font Awesome Free CSS, fonts, and icon data ship with the plugin, so icons render immediately after activation. With **Serve Font Awesome locally** unchecked (the default), a scheduled task checks for the latest compatible release in the background and uses it only after validation. If a check is delayed or fails, the last validated release or built-in fallback stays active.
+Font Awesome Free CSS, fonts, and icon data ship with the plugin, so icons render immediately after activation. With **Automatic Free (CDN)** selected (the default), a scheduled task checks for the latest compatible release in the background and uses it only after validation. If a check is delayed or fails, the last validated release or built-in fallback stays active.
 
 = Optional local delivery =
 
-Under **Settings > Better Font Awesome**, check **Serve Font Awesome locally** to serve the bundled Font Awesome 7 Free catalog, CSS, compatibility styles, and fonts from your site. This mode disables BFA background metadata and asset-validation requests. New icons arrive through plugin updates. It never falls back to third-party assets if bundled files are unavailable.
+Under **Settings > Better Font Awesome**, select **Local Free** and save settings to serve the bundled Font Awesome 7 Free catalog, CSS, compatibility styles, and fonts from your site. This mode disables BFA background metadata and asset-validation requests. New icons arrive through plugin updates. It never falls back to third-party assets if bundled files are unavailable.
 
 The bundled catalog may be older than a previously adopted automatic release. Icons introduced after the bundled version will not render until a plugin update includes them or you switch back to automatic delivery. Existing content and stored metadata are preserved; switching back reuses valid metadata and schedules a background check when needed. Settings saving does not wait for remote metadata. A refresh already running when the setting changes cannot be retroactively canceled.
 
@@ -83,13 +83,13 @@ If a theme or another plugin also loads Font Awesome, go to **Settings > Better 
 
 = Does Better Font Awesome support Font Awesome Pro? =
 
-You can connect an existing v7 Pro By Style Kit under **Settings > Better Font Awesome**. Use Web Fonts, CSS-only embedding, compatibility, and Classic Solid, Regular and Brands, with optional Light and Thin. Enter an account API token with Read Kits Data permission, click Find Kits, then choose a named Kit and click Connect Kit. Finding Kits authorizes the account without activating a Kit or fetching its icon catalog. A blank token reuses saved authorization when refreshing the Kit list. Connect and Refresh Kit prepare icons immediately with progress, even when WP-Cron is disabled. Automatic Free remains the default. Pro requires hosted delivery; local Pro hosting, SVG Kits, other families, By Icon Kits and custom uploads are not supported.
+You can connect an existing v7 Pro By Style Kit by choosing **Hosted Pro Kit** in the first **Font Awesome source** dropdown under **Settings > Better Font Awesome**. Only relevant delivery controls appear. Use Web Fonts, CSS-only embedding, compatibility, and Classic Solid, Regular and Brands, with optional Light and Thin. Enter an account API token with Read Kits Data permission, click Find Kits, then choose a named Kit and click Connect Kit. Finding Kits authorizes the account without activating a Kit or fetching its icon catalog. **API token saved** confirms storage. Use **Update token**, **Cancel**, **Refresh Kits**, or **Delete token** to manage authorization. Refresh Kits reuses the saved token without exposing it. Connect and Refresh active Kit prepare icons immediately with progress, even when WP-Cron is disabled. Automatic Free remains the default. Pro requires hosted delivery; local Pro hosting, SVG Kits, other families, By Icon Kits and custom uploads are not supported.
 
 = Do visitors download fonts from another service? =
 
-Check **Serve Font Awesome locally** to keep BFA's bundled CSS and fonts on your site, subject to your site's URL-rewriting infrastructure. In automatic mode, the packaged fallback also loads from your site. If the plugin validates and adopts a newer compatible release, visitors' browsers may load that release's selected CSS and font files from cdnjs.
+Select **Local Free** and save settings to keep BFA's bundled CSS and fonts on your site, subject to your site's URL-rewriting infrastructure. In automatic mode, the packaged fallback also loads from your site. If the plugin validates and adopts a newer compatible release, visitors' browsers may load that release's selected CSS and font files from cdnjs.
 
-Hosted Pro loads CSS and fonts from Font Awesome. Selecting local Free pauses Pro while preserving the saved connection. Unchecking local restores automatic Free; Refresh Kit reactivates Pro. Disconnect forgets the token and catalog. Saved icon identities remain unchanged, but unavailable Pro icons may be blank. Cached metadata cannot guarantee entitlement or hosted asset availability.
+Hosted Pro loads CSS and fonts from Font Awesome. Selecting Local Free or Automatic Free and saving pauses Pro while preserving the saved connection. Choosing Hosted Pro Kit reveals connection controls; Connect Kit or Refresh active Kit validates and activates Pro. Delete token confirms and forgets the token and catalog. Saved icon identities remain unchanged, but unavailable Pro icons may be blank. Cached metadata cannot guarantee entitlement or hosted asset availability.
 
 = Will existing Font Awesome 4 and 5 content keep working? =
 

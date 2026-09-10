@@ -501,7 +501,7 @@ class Better_Font_Awesome_Pro {
 	 * @return string Fixed projection, without icon catalogs or domains.
 	 */
 	private function meta_fields() {
-		return 'status licenseSelected technologySelected version release{version} kitRevision subsetType shimEnabled familyStylesPaginated(pageSize:50){totalPageCount familyStyles{familyStyle{family style prefix} only{totalIconVariantCount}}}';
+		return 'status licenseSelected technologySelected version release{version} kitRevision subsetType shimEnabled familyStylesPaginated(pageSize:50){totalPageCount familyStyles{familyStyle{family style prefix} iconVariantsPaginated(pageSize:1){totalIconVariantCount}}}';
 	}
 
 	/**
@@ -523,7 +523,7 @@ class Better_Font_Awesome_Pro {
 		foreach ( $kit['familyStylesPaginated']['familyStyles'] ?? array() as $row ) {
 			$f     = $row['familyStyle'] ?? array();
 			$style = $f['style'] ?? '';
-			$count = $row['only']['totalIconVariantCount'] ?? 0;
+			$count = $row['iconVariantsPaginated']['totalIconVariantCount'] ?? 0;
 			if ( ! is_string( $style ) || 'classic' !== ( $f['family'] ?? '' ) || ! isset( self::STYLES[ $style ] ) ||
 				( $f['prefix'] ?? '' ) !== self::STYLES[ $style ] || isset( $counts[ $style ] ) || ! is_int( $count ) || 1 > $count ) {
 				return $this->error( 'unsupported' );
