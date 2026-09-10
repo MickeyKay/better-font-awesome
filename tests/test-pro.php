@@ -664,4 +664,13 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		$this->assertStringNotContainsString( 'untrusted', wp_json_encode( $this->pro->account_status() ) );
 	}
 
+	public function test_discovery_encodes_empty_graphql_variables_as_an_object() {
+		$account = $this->pro->find_kits( 'SYNTHETIC-TOKEN' );
+		$this->assertNotWPError( $account, 'The service rejects variables:[] before processing a Kit query.' );
+		$this->assertTrue( $account['authorized'] );
+		$this->assertCount( 4, $account['kits'] );
+		$this->assertSame( 2, $this->api->requests );
+		$this->assertArrayNotHasKey( 'candidate', Better_Font_Awesome_Pro::state() );
+	}
+
 }

@@ -72,6 +72,14 @@ class Better_Font_Awesome_Pro_Fixture {
 				'scopes'       => 'scope' === $this->fault ? array( 'public' ) : array( 'public', 'kits_read' ),
 			);
 		} else {
+			// The real GraphQL endpoint rejects an empty JSON array for variables.
+			$envelope = json_decode( $args['body'] );
+			if ( isset( $envelope->variables ) && ! is_object( $envelope->variables ) ) {
+				return array(
+					'response' => array( 'code' => 400 ),
+					'body' => wp_json_encode( array( 'errors' => array( array( 'message' => 'Variables must be a map.' ) ) ) ),
+				);
+			}
 			$request = json_decode( $args['body'], true );
 			$q       = $request['query'];
 			$this->queries[] = $q;

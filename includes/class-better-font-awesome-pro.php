@@ -459,7 +459,7 @@ class Better_Font_Awesome_Pro {
 				'body'                => '' === $query ? '{}' : wp_json_encode(
 					array(
 						'query'     => $query,
-						'variables' => $variables,
+						'variables' => (object) $variables,
 					)
 				),
 			)
