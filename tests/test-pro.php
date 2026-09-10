@@ -603,7 +603,7 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		$this->assertSame( 'BFA staging', $account['kits'][0]['name'] );
 		$this->assertSame( $account['kits'][0]['name'], $account['kits'][1]['name'] );
 		$this->assertSame( array( 'version', 'styles', 'license', 'technology', 'compatibility' ), array_keys( $account['kits'][0]['details'] ) );
-		$this->assertMatchesRegularExpression( '/^7\./', $account['kits'][0]['details']['version'] );
+		$this->assertSame( 'v7 latest (7.3.1)', $account['kits'][0]['details']['version'] );
 		$this->assertSame( array( 'brands', 'light', 'regular', 'solid', 'thin' ), $account['kits'][0]['details']['styles'] );
 		$this->assertSame( 'svg', $account['kits'][2]['details']['technology'] );
 		$this->assertSame( 'Set the kit technology to Web Fonts.', $account['kits'][2]['reason'] );
@@ -708,15 +708,33 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		$this->assertSame( 2, $this->api->requests );
 	}
 	public function test_unsupported_latest_kit_has_display_details_and_specific_guidance() {
-		$this->api->kits = array( array( 'token' => 'LATEST', 'version' => 'latest' ) );
+		$this->api->kits = array( array( 'token' => 'LATEST', 'version' => 'latest', 'release' => array( 'version' => '5.15.4' ) ) );
 		$account = $this->pro->find_kits( 'SYNTHETIC-TOKEN' );
 		$this->assertFalse( $account['kits'][0]['supported'] );
-		$this->assertSame( 'latest', $account['kits'][0]['details']['version'] );
+		$this->assertSame( 'v5 latest (5.15.4)', $account['kits'][0]['details']['version'] );
 		$this->assertSame( 'pro', $account['kits'][0]['details']['license'] );
 		$this->assertSame( 'webfonts', $account['kits'][0]['details']['technology'] );
 		$this->assertSame( 'Set the kit version to 7.x or a specific v7 release.', $account['kits'][0]['reason'] );
 		$this->assertSame( 2, $this->api->requests );
 		$this->assertArrayNotHasKey( 'candidate', Better_Font_Awesome_Pro::state() );
+	}
+	/** @dataProvider kit_version_labels */
+	public function test_kit_version_display_uses_resolved_release_without_guessing( $selected, $resolved, $expected ) {
+		$this->api->kits = array( array( 'token' => 'DISPLAY', 'technologySelected' => 'svg', 'version' => $selected, 'release' => array( 'version' => $resolved ) ) );
+		$account = $this->pro->find_kits( 'SYNTHETIC-TOKEN' );
+		$this->assertSame( $expected, $account['kits'][0]['details']['version'] );
+		$this->assertFalse( $account['kits'][0]['supported'] );
+		$this->assertSame( 2, $this->api->requests );
+	}
+	public static function kit_version_labels() {
+		return array(
+			array( 'latest', '5.15.4', 'v5 latest (5.15.4)' ),
+			array( '7.x', '7.3.1', 'v7 latest (7.3.1)' ),
+			array( '6.x', '6.7.2', 'v6 latest (6.7.2)' ),
+			array( '5.15.4', '5.15.4', '5.15.4' ),
+			array( 'latest', null, 'latest' ),
+			array( 'latest', 'invalid', 'latest' ),
+		);
 	}
 	public static function discovery_configurations() {
 		return array(

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-10T23:31:03+00:00\n"
+"POT-Creation-Date: 2026-09-10T23:34:55+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: better-font-awesome\n"
@@ -289,83 +289,89 @@ msgstr ""
 msgid "Pro %1$s, Web Fonts, By Style, compatibility enabled. Classic styles: %2$s."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:297
+#. translators: 1: selected major version, 2: resolved release version.
+#: includes/class-better-font-awesome-pro.php:305
+#, php-format
+msgid "v%1$s latest (%2$s)"
+msgstr ""
+
+#: includes/class-better-font-awesome-pro.php:321
 msgid "Publish this kit in Font Awesome before connecting."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:300
+#: includes/class-better-font-awesome-pro.php:324
 msgid "Choose a Pro kit for hosted Pro delivery."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:303
+#: includes/class-better-font-awesome-pro.php:327
 msgid "Set the kit technology to Web Fonts."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:306
+#: includes/class-better-font-awesome-pro.php:330
 msgid "Set the kit version to 7.x or a specific v7 release."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:309
+#: includes/class-better-font-awesome-pro.php:333
 msgid "Use By Style selection for this kit."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:312
+#: includes/class-better-font-awesome-pro.php:336
 msgid "Enable older version compatibility for this kit."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:314
+#: includes/class-better-font-awesome-pro.php:338
 msgid "This kit has unsupported styles or configuration. See Kit details for requirements."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:881
+#: includes/class-better-font-awesome-pro.php:905
 msgid "Pro connection is unavailable. Use automatic Free first and ensure BFA owns Font Awesome 7 initialization."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:882
+#: includes/class-better-font-awesome-pro.php:906
 msgid "Choose a kit from the current account list."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:883
+#: includes/class-better-font-awesome-pro.php:907
 msgid "Kit selection expired or is unsupported. Refresh the kit list and choose a supported kit."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:884
+#: includes/class-better-font-awesome-pro.php:908
 msgid "Authorization failed. Check your account token and Read Kits Data permission, then reconnect."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:885
+#: includes/class-better-font-awesome-pro.php:909
 msgid "Secure token storage is unavailable. Check OpenSSL and the WordPress authentication salts, then reconnect."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:886
+#: includes/class-better-font-awesome-pro.php:910
 msgid "Font Awesome is temporarily unavailable. The working catalog is unchanged."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:887
+#: includes/class-better-font-awesome-pro.php:911
 msgid "Use a published v7 Pro By Style Web Fonts kit with compatibility and Classic Solid, Regular and Brands. Only Classic Light and Thin may also be selected."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:888
+#: includes/class-better-font-awesome-pro.php:912
 msgid "The kit changed during preparation. The working catalog is unchanged. Refresh kit to try again."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:889
+#: includes/class-better-font-awesome-pro.php:913
 msgid "The kit catalog was incomplete or inconsistent. The working catalog is unchanged."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:890
+#: includes/class-better-font-awesome-pro.php:914
 msgid "The kit is missing required Free icons. Check the included styles before reconnecting."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:891
+#: includes/class-better-font-awesome-pro.php:915
 msgid "Preparation expired. Connect or Refresh kit to start again."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:892
+#: includes/class-better-font-awesome-pro.php:916
 msgid "Another connection action won. Reload this page to see its status."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:900
+#: includes/class-better-font-awesome-pro.php:924
 msgid "You are not allowed to change this connection."
 msgstr ""
 

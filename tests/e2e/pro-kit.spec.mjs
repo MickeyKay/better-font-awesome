@@ -261,7 +261,7 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	await select.selectOption( 'SVG_KIT' );
 	await expect( page.locator( '#bfa-pro-kit-warning' ) ).toHaveText( 'Set the kit technology to Web Fonts.' );
 	await page.getByRole( 'button', { name: 'Kit details', exact: true } ).click();
-	await expect( page.locator( '#bfa-pro-kit-facts dd' ) ).toHaveText( [ 'Pro', 'SVG', '7.x', 'Enabled' ] );
+	await expect( page.locator( '#bfa-pro-kit-facts dd' ) ).toHaveText( [ 'Pro', 'SVG', 'v7 latest (7.3.1)', 'Enabled' ] );
 	await expect( page.locator( '#bfa-pro-kit-help' ) ).toContainText( 'Use a published v7' );
 	await page.screenshot( { path: test.info().outputPath( 'unsupported-kit-details.png' ), fullPage: true } );
 	await expect( retry ).toBeHidden();

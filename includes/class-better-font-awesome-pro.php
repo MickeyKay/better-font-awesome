@@ -260,7 +260,7 @@ class Better_Font_Awesome_Pro {
 				'supported' => ! is_wp_error( $meta ),
 				'reason'    => is_wp_error( $meta ) ? $this->unsupported_reason( $row ) : '',
 				'details'   => array(
-					'version'       => is_wp_error( $meta ) ? ( is_string( $row['version'] ?? null ) ? sanitize_text_field( $row['version'] ) : '' ) : $meta['version'],
+					'version'       => $this->kit_version_label( $row ),
 					'styles'        => is_wp_error( $meta ) ? array() : array_keys( $meta['counts'] ),
 					'license'       => in_array( $row['licenseSelected'] ?? null, array( 'pro', 'free' ), true ) ? $row['licenseSelected'] : '',
 					'technology'    => in_array( $row['technologySelected'] ?? null, array( 'webfonts', 'svg' ), true ) ? $row['technologySelected'] : '',
@@ -284,6 +284,30 @@ class Better_Font_Awesome_Pro {
 			return $this->error( 'changed' );
 		}
 		return $this->account_status();
+	}
+
+	/**
+	 * Describe symbolic versions using the already-fetched resolved release.
+	 *
+	 * @param array $kit Vendor kit configuration.
+	 * @return string Display-only version label.
+	 */
+	private function kit_version_label( $kit ) {
+		$selected = is_string( $kit['version'] ?? null ) ? sanitize_text_field( $kit['version'] ) : '';
+		$resolved = $kit['release']['version'] ?? '';
+		if ( ! is_string( $resolved ) || ! preg_match( '/\A([0-9]+)\.[0-9]+\.[0-9]+\z/', $resolved, $release ) ) {
+			return $selected;
+		}
+		if ( 'latest' === $selected || preg_match( '/\A[0-9]+\.x\z/', $selected ) ) {
+			$major = 'latest' === $selected ? $release[1] : strtok( $selected, '.' );
+			return sprintf(
+				/* translators: 1: selected major version, 2: resolved release version. */
+				__( 'v%1$s latest (%2$s)', 'better-font-awesome' ),
+				$major,
+				$resolved
+			);
+		}
+		return $selected;
 	}
 
 	/**
