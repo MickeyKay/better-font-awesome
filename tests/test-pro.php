@@ -39,13 +39,54 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		$active = $this->complete();
 		$this->assertCount( count( $this->api->rows ), $active['icons'] );
 		$this->assertSame( 5, count( $active['styles'] ) );
-		$this->assertSame( (int) ceil( count( $this->api->rows ) / 500 ) + 4, $this->api->requests );
+		$this->assertSame( (int) ceil( count( $this->api->rows ) / 16000 ) + 4, $this->api->requests );
 		$before = $this->api->requests;
 		$this->pro->start();
 		$this->assertSame( $before + 1, $this->api->requests );
 		$this->assertSame( $active, Better_Font_Awesome_Pro::state()['active'] );
 		$this->complete();
 	}
+	public function test_full_sized_catalog_uses_one_catalog_request_and_four_validation_requests() {
+		$this->api->expand();
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$active = $this->complete();
+		$this->assertCount( count( $this->api->rows ), $active['icons'] );
+		$this->assertSame( 5, $this->api->requests );
+		$queries = array_filter( $this->api->queries, static function ( $query ) { return false !== strpos( $query, 'p1:iconVariantsPaginated' ); } );
+		$this->assertCount( 1, $queries );
+		$this->assertStringContainsString( 'p32:iconVariantsPaginated(page:32,pageSize:500)', reset( $queries ) );
+		$this->assertStringNotContainsString( 'p33:', reset( $queries ) );
+	}
+
+	public function test_large_catalog_continues_after_32_pages_without_repeating_or_skipping_icons() {
+		$this->api->expand();
+		for ( $i = 0; $i < 1000; ++$i ) {
+			$this->api->rows[] = array( 'name' => 'extra-' . $i, 'familyStyle' => array( 'family' => 'classic', 'style' => 'solid', 'prefix' => 'fas' ) );
+		}
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$active = $this->complete();
+		$this->assertCount( count( $this->api->rows ), $active['icons'] );
+		$this->assertSame( 6, $this->api->requests );
+		$this->assertTrue( $active['icons']['extra-999:solid'] );
+	}
+
+	public function test_in_progress_single_page_candidate_resumes_with_batched_pages() {
+		$this->api->expand();
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$this->pro->step( $this->pro->status()['operation'] );
+		$state = Better_Font_Awesome_Pro::state();
+		$state['candidate']['page'] = 2;
+		foreach ( array_slice( $this->api->rows, 0, 500 ) as $row ) {
+			$style = $row['familyStyle']['style'];
+			$state['candidate']['icons'][ $row['name'] . ':' . $style ] = true;
+			$state['candidate']['counts'][ $style ] = ( $state['candidate']['counts'][ $style ] ?? 0 ) + 1;
+		}
+		update_option( Better_Font_Awesome_Pro::OPTION, $state, false );
+		$active = $this->complete();
+		$this->assertCount( count( $this->api->rows ), $active['icons'] );
+		$this->assertSame( 5, $this->api->requests );
+	}
+
 	public function test_credentials_are_encrypted_non_autoloaded_and_never_in_status_or_html() {
 		$this->pro->start( 'KIT_ID', 'SYNTHETIC-ACCOUNT-NOT-A-CREDENTIAL' );
 		$state = wp_json_encode( Better_Font_Awesome_Pro::state() );
@@ -66,10 +107,15 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		while ( $phase !== $this->pro->status()['phase'] ) {
 			$this->pro->step( $this->pro->status()['operation'] );
 		}
+		$before = Better_Font_Awesome_Pro::state()['candidate'];
 		$this->api->fault = $fault;
 		$this->pro->step( $this->pro->status()['operation'] );
 		$this->assertSame( $expected, $this->pro->status()['error'] );
 		$this->assertSame( $active, Better_Font_Awesome_Pro::state()['active'] );
+		$after = Better_Font_Awesome_Pro::state()['candidate'];
+		$this->assertSame( $before['icons'], $after['icons'], 'A failed batch must not save partial pages.' );
+		$this->assertSame( $before['counts'], $after['counts'] );
+		$this->assertSame( $before['page'], $after['page'] );
 		$this->assertStringNotContainsString( 'DO-NOT-EXPOSE', wp_json_encode( Better_Font_Awesome_Pro::state() ) );
 	}
 	public static function failures() {
@@ -78,6 +124,9 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 			array( 'auth', 'icons', 'auth' ),
 			array( 'unsupported', 'metadata', 'unsupported' ),
 			array( 'partial', 'icons', 'incomplete' ),
+			array( 'missing-batch-page', 'icons', 'incomplete' ),
+			array( 'wrong-batch-page', 'icons', 'incomplete' ),
+			array( 'cross-page-duplicate', 'icons', 'incomplete' ),
 			array( 'duplicate', 'icons', 'incomplete' ),
 			array( 'coverage', 'free-coverage', 'coverage' ),
 		);

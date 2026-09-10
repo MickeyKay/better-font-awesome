@@ -619,15 +619,17 @@ class Better_Font_Awesome_Pro {
 			);
 		}
 		if ( 'icons' === $c['phase'] ) {
-			$query = 'query($kit:String!,$page:Int!){me{kit(token:$kit){kitRevision release{version} iconVariantsPaginated(page:$page,pageSize:500){page totalPageCount totalIconVariantCount iconVariants{name familyStyle{family style prefix}}}}}}';
-			$data  = $this->request(
-				$token,
-				$query,
-				array(
-					'kit'  => $c['kit'],
-					'page' => $c['page'],
-				)
-			);
+			$total = array_sum( $c['meta']['counts'] );
+			$pages = (int) ceil( $total / 500 );
+			// Keep each 500-variant page, but share transport across at most 16,000 variants.
+			// This bounds query complexity and response size without 32 WordPress round trips.
+			$last   = min( $pages, $c['page'] + 31 );
+			$fields = '';
+			for ( $page = $c['page']; $page <= $last; ++$page ) {
+				$fields .= 'p' . $page . ':iconVariantsPaginated(page:' . $page . ',pageSize:500){page totalPageCount totalIconVariantCount iconVariants{name familyStyle{family style prefix}}}';
+			}
+			$query = 'query($kit:String!){me{kit(token:$kit){kitRevision release{version} ' . $fields . '}}}';
+			$data  = $this->request( $token, $query, array( 'kit' => $c['kit'] ) );
 			if ( is_wp_error( $data ) ) {
 				return $data;
 			}
@@ -635,35 +637,36 @@ class Better_Font_Awesome_Pro {
 			if ( ( ! is_string( $kit['kitRevision'] ?? null ) && ! is_int( $kit['kitRevision'] ?? null ) ) || (string) $kit['kitRevision'] !== $c['meta']['revision'] || ( $kit['release']['version'] ?? '' ) !== $c['meta']['version'] ) {
 				return $this->error( 'revision' );
 			}
-			$p     = $kit['iconVariantsPaginated'] ?? array();
-			$total = array_sum( $c['meta']['counts'] );
-			$pages = (int) ceil( $total / 500 );
-			if ( ( $p['page'] ?? 0 ) !== $c['page'] || ( $p['totalPageCount'] ?? 0 ) !== $pages ||
-				( $p['totalIconVariantCount'] ?? 0 ) !== $total || ! is_array( $p['iconVariants'] ?? null ) ||
-				count( $p['iconVariants'] ) !== min( 500, $total - 500 * ( $c['page'] - 1 ) ) ) {
-				return $this->error( 'incomplete' );
-			}
-			foreach ( $p['iconVariants'] as $row ) {
-				$name  = $row['name'] ?? '';
-				$f     = $row['familyStyle'] ?? array();
-				$style = $f['style'] ?? '';
-				if ( ! is_string( $name ) || ! preg_match( '/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/', $name ) || 150 < strlen( $name ) ||
-					! is_string( $style ) || 'classic' !== ( $f['family'] ?? '' ) || ! isset( $c['meta']['counts'][ $style ] ) ||
-					( $f['prefix'] ?? '' ) !== self::STYLES[ $style ] || isset( $c['icons'][ $name . ':' . $style ] ) ) {
+			for ( $page = $c['page']; $page <= $last; ++$page ) {
+				$p = $kit[ 'p' . $page ] ?? array();
+				if ( ( $p['page'] ?? 0 ) !== $page || ( $p['totalPageCount'] ?? 0 ) !== $pages ||
+					( $p['totalIconVariantCount'] ?? 0 ) !== $total || ! is_array( $p['iconVariants'] ?? null ) ||
+					count( $p['iconVariants'] ) !== min( 500, $total - 500 * ( $page - 1 ) ) ) {
 					return $this->error( 'incomplete' );
 				}
-				$c['icons'][ $name . ':' . $style ] = true;
-				$c['counts'][ $style ]              = ( $c['counts'][ $style ] ?? 0 ) + 1;
+				foreach ( $p['iconVariants'] as $row ) {
+					$name  = $row['name'] ?? '';
+					$f     = $row['familyStyle'] ?? array();
+					$style = $f['style'] ?? '';
+					if ( ! is_string( $name ) || ! preg_match( '/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/', $name ) || 150 < strlen( $name ) ||
+						! is_string( $style ) || 'classic' !== ( $f['family'] ?? '' ) || ! isset( $c['meta']['counts'][ $style ] ) ||
+						( $f['prefix'] ?? '' ) !== self::STYLES[ $style ] || isset( $c['icons'][ $name . ':' . $style ] ) ) {
+						return $this->error( 'incomplete' );
+					}
+					$c['icons'][ $name . ':' . $style ] = true;
+					$c['counts'][ $style ]              = ( $c['counts'][ $style ] ?? 0 ) + 1;
+				}
 			}
 			$c['pages'] = $pages;
-			if ( $c['page'] === $pages ) {
+			if ( $last === $pages ) {
 				ksort( $c['counts'] );
 				if ( $c['counts'] !== $c['meta']['counts'] ) {
 					return $this->error( 'incomplete' );
 				}
+				$c['page']  = $last;
 				$c['phase'] = 'free-coverage';
 			} else {
-				++$c['page'];
+				$c['page'] = $last + 1;
 			}
 			return $c;
 		}

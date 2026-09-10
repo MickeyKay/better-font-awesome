@@ -124,17 +124,21 @@ class Better_Font_Awesome_Pro_Fixture {
 				}
 
 			} elseif ( false !== strpos( $q, 'iconVariantsPaginated' ) ) {
-				$rows = array_slice( $this->rows, ( $vars['page'] - 1 ) * 500, 500 );
-				if ( 'partial' === $this->fault ) {
-					array_pop( $rows ); }
-				if ( 'duplicate' === $this->fault ) {
-					$rows[1] = $rows[0]; }
-				$meta['iconVariantsPaginated'] = array(
-					'page'                  => $vars['page'],
-					'totalPageCount'        => (int) ceil( count( $this->rows ) / 500 ),
-					'totalIconVariantCount' => count( $this->rows ),
-					'iconVariants'          => $rows,
-				);
+				preg_match_all( '/p([0-9]+):iconVariantsPaginated\(page:([0-9]+),pageSize:500\)/', $q, $matches, PREG_SET_ORDER );
+				foreach ( $matches as $match ) {
+					$page = (int) $match[2];
+					$rows = array_slice( $this->rows, ( $page - 1 ) * 500, 500 );
+					if ( 'partial' === $this->fault ) { array_pop( $rows ); }
+					if ( 'duplicate' === $this->fault ) { $rows[1] = $rows[0]; }
+					if ( 'missing-batch-page' === $this->fault && 2 === $page ) { continue; }
+					if ( 'cross-page-duplicate' === $this->fault && 2 === $page ) { $rows[0] = $this->rows[0]; }
+					$meta[ 'p' . $match[1] ] = array(
+						'page'                  => 'wrong-batch-page' === $this->fault && 2 === $page ? 1 : $page,
+						'totalPageCount'        => (int) ceil( count( $this->rows ) / 500 ),
+						'totalIconVariantCount' => count( $this->rows ),
+						'iconVariants'          => $rows,
+					);
+				}
 				$body                          = array( 'data' => array( 'me' => array( 'kit' => $meta ) ) );
 			} else {
 				$free = $this->free;
