@@ -283,8 +283,8 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 		return { left: box.left, right: box.right, iconGap: label.left - icon.right };
 	} ) );
 	for ( const action of actionSpacing ) { expect( action.iconGap ).toBeCloseTo( 4, 0 ); }
-	expect( actionSpacing[ 1 ].left - actionSpacing[ 0 ].right ).toBeCloseTo( 12, 0 );
-	expect( actionSpacing[ 2 ].left - actionSpacing[ 1 ].right ).toBeCloseTo( 12, 0 );
+	expect( actionSpacing[ 1 ].left - actionSpacing[ 0 ].right ).toBeCloseTo( 20, 0 );
+	expect( actionSpacing[ 2 ].left - actionSpacing[ 1 ].right ).toBeCloseTo( 20, 0 );
 	const beforeDetails = operations.length;
 	const selectBox = await select.boundingBox();
 	const toggleBox = await details.boundingBox();
