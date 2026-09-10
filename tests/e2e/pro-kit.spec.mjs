@@ -56,10 +56,22 @@ test( 'bounded Pro Connect and Refresh, all editors, saved styles, local switch 
 	await page.getByRole( 'button', { name: 'Connect account', exact: true } ).click();
 	await expect( page.getByText( 'API token saved', { exact: true } ) ).toBeVisible();
 	let failFirstSelection = true;
+	const progressSeen = new Set();
+	let expectedProgress = '';
 	await page.route( '**/admin-ajax.php', async route => {
-		if ( failFirstSelection && new URLSearchParams( route.request().postData() ).get( 'operation' ) === 'connect' ) {
+		const operation = new URLSearchParams( route.request().postData() ).get( 'operation' );
+		if ( failFirstSelection && operation === 'connect' ) {
 			failFirstSelection = false;
 			await route.fulfill( { status: 400, json: { success: false, data: { message: 'Synthetic connection interruption.' } } } );
+		} else if ( [ 'connect', 'step' ].includes( operation ) ) {
+			if ( operation === 'step' && expectedProgress ) {
+				await expect( page.locator( '#bfa-pro-status' ) ).toHaveText( expectedProgress );
+				progressSeen.add( expectedProgress );
+			}
+			const response = await route.fetch();
+			const result = await response.json();
+			expectedProgress = { icons: 'Loading Pro icons...', 'free-coverage': 'Checking icon compatibility...', verify: 'Verifying Kit...' }[ result.data?.phase ] || '';
+			await route.fulfill( { response } );
 		} else { await route.continue(); }
 	} );
 	const started = Date.now();
@@ -71,6 +83,7 @@ test( 'bounded Pro Connect and Refresh, all editors, saved styles, local switch 
 	await retry.press( 'Enter' );
 	await expect( page.locator( '#bfa-pro-status' ) ).toContainText( 'Connected:', { timeout: 60000 } );
 	const connectMs = Date.now() - started;
+	expect( [ ...progressSeen ] ).toEqual( [ 'Loading Pro icons...', 'Checking icon compatibility...', 'Verifying Kit...' ] );
 	await expect( page.getByLabel( 'API Key', { exact: true } ) ).toHaveValue( '' );
 	await expectKit( page );
 	await expect( page.locator( '#default_block_icon_style option[value="thin"]' ) ).toHaveCount( 1 );

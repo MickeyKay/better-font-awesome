@@ -66,8 +66,12 @@
 			kitSpinner.classList.toggle( 'is-active', Boolean( state.pending || state.activationRequired ) );
 			if ( state.account && accountGeneration === discovery && ! editingToken ) { showAccount( state.account ); }
 			if ( state.pending ) {
-				// translators: 1: current catalog page, 2: total pages.
-				status.textContent = state.message || ( state.pages ? sprintf( __( 'Preparing Pro icons: page %1$d of %2$d.', 'better-font-awesome' ), state.page, state.pages ) : __( 'Validating Kit and preparing Pro icons...', 'better-font-awesome' ) );
+				const progress = {
+					icons: __( 'Loading Pro icons...', 'better-font-awesome' ),
+					'free-coverage': __( 'Checking icon compatibility...', 'better-font-awesome' ),
+					verify: __( 'Verifying Kit...', 'better-font-awesome' ),
+				};
+				status.textContent = state.message || progress[ state.phase ] || __( 'Validating Kit...', 'better-font-awesome' );
 				// Polling remains bounded and can resume after a reload, without WP-Cron.
 				const delay = Math.max( 250, Math.min( 30000, ( state.retryAt * 1000 ) - Date.now() ) );
 				timer = setTimeout( () => run( 'step', { id: state.operation } ), delay );
