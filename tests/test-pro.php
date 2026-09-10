@@ -505,4 +505,42 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		$this->assertSame( 0, $this->api->requests );
 	}
 
+	public function test_cancellation_sees_a_connection_created_after_cached_absence() {
+		$this->assertSame( array(), Better_Font_Awesome_Pro::state() );
+		// Simulate another request creating the record after this request cached absence.
+		global $wpdb;
+		$wpdb->insert( $wpdb->options, array(
+			'option_name' => Better_Font_Awesome_Pro::OPTION,
+			'option_value' => maybe_serialize( array( 'enabled' => true, 'active' => array( 'kit' => 'EXISTING' ), 'candidate' => array( 'id' => 'concurrent' ) ) ),
+			'autoload' => 'no',
+		) );
+		$this->assertTrue( Better_Font_Awesome_Pro::cancel() );
+		$this->assertFalse( Better_Font_Awesome_Pro::state()['enabled'] );
+		$this->assertEmpty( Better_Font_Awesome_Pro::state()['candidate'] );
+		$this->assertSame( array( 'kit' => 'EXISTING' ), Better_Font_Awesome_Pro::state()['active'] ?? null );
+	}
+
+	public function test_initial_insert_cannot_overwrite_a_concurrent_connection() {
+		$inserted = false;
+		$concurrent = array( 'enabled' => true, 'active' => array( 'kit' => 'EXISTING' ) );
+		$interleave = static function ( $query ) use ( &$inserted, $concurrent ) {
+			if ( ! $inserted && 0 === strpos( ltrim( $query ), 'INSERT' ) && false !== strpos( $query, Better_Font_Awesome_Pro::OPTION ) ) {
+				$inserted = true;
+				global $wpdb;
+				$wpdb->insert( $wpdb->options, array( 'option_name' => Better_Font_Awesome_Pro::OPTION, 'option_value' => maybe_serialize( $concurrent ), 'autoload' => 'no' ) );
+			}
+			return $query;
+		};
+		add_filter( 'query', $interleave );
+		try {
+			$result = $this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		} finally {
+			remove_filter( 'query', $interleave );
+		}
+		$this->assertTrue( $inserted );
+		$this->assertWPError( $result );
+		$this->assertSame( $concurrent, Better_Font_Awesome_Pro::state() );
+		$this->assertSame( 0, $this->api->requests );
+	}
+
 }

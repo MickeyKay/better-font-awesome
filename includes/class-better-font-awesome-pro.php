@@ -68,6 +68,11 @@ class Better_Font_Awesome_Pro {
 	public static function state() {
 		// This non-autoloaded option is also the cross-request cancellation fence.
 		wp_cache_delete( self::OPTION, 'options' );
+		$absent = wp_cache_get( 'notoptions', 'options' );
+		if ( is_array( $absent ) && isset( $absent[ self::OPTION ] ) ) {
+			unset( $absent[ self::OPTION ] );
+			wp_cache_set( 'notoptions', $absent, 'options' );
+		}
 		$state = get_option( self::OPTION, array() );
 		return is_array( $state ) ? $state : array();
 	}
@@ -676,12 +681,15 @@ class Better_Font_Awesome_Pro {
 	 * @return bool Whether the replacement won.
 	 */
 	private function swap( $old, $replacement ) {
-		if ( array() === $old && false === get_option( self::OPTION, false ) ) {
-			return add_option( self::OPTION, $replacement, '', false );
-		}
 		global $wpdb;
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- An atomic comparison prevents older workers from activating or resurrecting canceled work.
-		$changed = $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value = %s", maybe_serialize( $replacement ), self::OPTION, maybe_serialize( $old ) ) );
+		if ( array() === $old && false === get_option( self::OPTION, false ) ) {
+			// add_option() can upsert after a concurrent insert; the initial lease must not.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Insert only if absent; never overwrite a concurrently created connection.
+			$changed = $wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %s, %s)", self::OPTION, maybe_serialize( $replacement ), 'no' ) );
+		} else {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- An atomic comparison prevents older workers from activating or resurrecting canceled work.
+			$changed = $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value = %s", maybe_serialize( $replacement ), self::OPTION, maybe_serialize( $old ) ) );
+		}
 		wp_cache_delete( self::OPTION, 'options' );
 		return 1 === $changed;
 	}
