@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-10T21:40:41+00:00\n"
+"POT-Creation-Date: 2026-09-10T22:02:18+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: better-font-awesome\n"
@@ -210,8 +210,8 @@ msgid "Hosted Pro Kit"
 msgstr ""
 
 #: better-font-awesome.php:956
-#: js/pro-settings.js:187
-msgid "Choose a source, then save settings. A Kit activates only after Connect Kit succeeds."
+#: js/pro-settings.js:203
+msgid "CSS and fonts load from Font Awesome."
 msgstr ""
 
 #: better-font-awesome.php:975
@@ -234,49 +234,45 @@ msgstr ""
 msgid "Delete token"
 msgstr ""
 
-#: better-font-awesome.php:986
-msgid "Find Kits"
+#: better-font-awesome.php:987
+msgid "Connect account"
 msgstr ""
 
-#: better-font-awesome.php:987
+#: better-font-awesome.php:988
 msgid "Cancel"
 msgstr ""
 
-#: better-font-awesome.php:988
+#: better-font-awesome.php:991
 msgid "Use Read Kits Data permission. Your token stays encrypted on this server."
 msgstr ""
 
-#: better-font-awesome.php:988
-msgid "Get an API token from Font Awesome (opens in a new tab)"
+#: better-font-awesome.php:991
+msgid "Get an API token"
 msgstr ""
 
 #: better-font-awesome.php:991
-msgid "Deleting the token also disconnects the Kit and removes its saved catalog. Saved icon names and styles are unchanged."
-msgstr ""
-
-#: better-font-awesome.php:993
-msgid "Kit"
+msgid " (opens in a new tab)"
 msgstr ""
 
 #: better-font-awesome.php:994
-#: js/pro-settings.js:82
-msgid "Choose a Kit"
+msgid "Kit"
 msgstr ""
 
-#: better-font-awesome.php:995
-msgid "Refresh Kits"
+#: better-font-awesome.php:996
+#: js/pro-settings.js:92
+msgid "Choose a Kit"
 msgstr ""
 
 #: better-font-awesome.php:997
 msgid "Connect Kit"
 msgstr ""
 
-#: better-font-awesome.php:998
-msgid "Refresh active Kit"
+#: better-font-awesome.php:999
+msgid "Refresh Kits"
 msgstr ""
 
 #: better-font-awesome.php:1000
-msgid "Use a v7 Pro By Style Web Fonts Kit with compatibility and Classic Solid, Regular and Brands. Light and Thin are optional. CSS and fonts load from Font Awesome, not locally."
+msgid "Refresh active Kit"
 msgstr ""
 
 #: includes/class-better-font-awesome-metadata-manager.php:282
@@ -304,7 +300,7 @@ msgid "Choose a Kit from the current account list."
 msgstr ""
 
 #: includes/class-better-font-awesome-pro.php:851
-msgid "Kit selection expired or is unsupported. Find Kits again and choose a supported Kit."
+msgid "Kit selection expired or is unsupported. Refresh the Kit list and choose a supported Kit."
 msgstr ""
 
 #: includes/class-better-font-awesome-pro.php:852
@@ -347,94 +343,70 @@ msgstr ""
 msgid "You are not allowed to change this connection."
 msgstr ""
 
-#: js/pro-settings.js:37
-#: js/pro-settings.js:70
+#: js/pro-settings.js:41
+#: js/pro-settings.js:80
 msgid "Connection interrupted. Reload to resume or start again."
 msgstr ""
 
-#: js/pro-settings.js:38
+#: js/pro-settings.js:42
 msgid "Connection request failed. Reload to resume."
 msgstr ""
 
-#: js/pro-settings.js:47
-msgid "Preparing Kit connection..."
+#: js/pro-settings.js:53
+msgid "Working..."
 msgstr ""
 
 #. translators: 1: current catalog page, 2: total pages.
-#: js/pro-settings.js:54
+#: js/pro-settings.js:63
 #, js-format
 msgid "Preparing Pro icons: page %1$d of %2$d."
 msgstr ""
 
-#: js/pro-settings.js:54
+#: js/pro-settings.js:63
 msgid "Validating Kit and preparing Pro icons..."
 msgstr ""
 
-#: js/pro-settings.js:59
+#: js/pro-settings.js:68
 msgid "Activating Pro icons..."
 msgstr ""
 
-#. translators: 1: active Kit name, 2: Font Awesome version, 3: comma-separated styles.
-#: js/pro-settings.js:63
+#. translators: %s: active Kit name.
+#: js/pro-settings.js:72
 #, js-format
-msgid "Connected: %1$s. Font Awesome %2$s. Styles: %3$s."
+msgid "Connected: %s."
 msgstr ""
 
-#: js/pro-settings.js:63
-msgid "Pro is inactive. The effective Free delivery setting applies."
-msgstr ""
-
-#: js/pro-settings.js:78
-msgid "Choose a Kit, then click Connect Kit to validate its catalog and activate it."
-msgstr ""
-
-#: js/pro-settings.js:93
+#: js/pro-settings.js:103
 msgid "Unnamed Kit"
 msgstr ""
 
 #. translators: %s: Kit name.
-#: js/pro-settings.js:102
+#: js/pro-settings.js:112
 #, js-format
 msgid "%s (unsupported)"
 msgstr ""
 
-#: js/pro-settings.js:108
-msgid "Account authorized. Choose a Kit to connect."
+#: js/pro-settings.js:119
+msgid "No Kits found. Create one in Font Awesome, then refresh."
 msgstr ""
 
-#: js/pro-settings.js:108
-msgid "Account authorized, but no Kits were found. Create a Kit in Font Awesome, then Find Kits again."
+#: js/pro-settings.js:129
+msgid "Refreshing Kits..."
 msgstr ""
 
-#: js/pro-settings.js:108
-msgid "A token is saved. Find Kits to refresh the available list."
+#: js/pro-settings.js:129
+msgid "Connecting..."
 msgstr ""
 
-#: js/pro-settings.js:108
-msgid "Enter an API token, then Find Kits. Account authorization does not activate a Kit."
+#: js/pro-settings.js:136
+msgid "Could not connect. Please try again."
 msgstr ""
 
-#: js/pro-settings.js:117
-msgid "Finding Kits..."
-msgstr ""
-
-#: js/pro-settings.js:124
-msgid "Could not find Kits."
-msgstr ""
-
-#: js/pro-settings.js:124
-msgid "The active connection is unchanged. Check the token and try Find Kits again."
-msgstr ""
-
-#: js/pro-settings.js:135
-msgid "Token changed. Find Kits again before choosing a Kit."
-msgstr ""
-
-#: js/pro-settings.js:149
+#: js/pro-settings.js:161
 msgid "Delete the saved token and disconnect the Kit? Saved icons will not be changed."
 msgstr ""
 
-#: js/pro-settings.js:187
+#: js/pro-settings.js:203
 msgid "Save Settings to switch off local delivery before setting up a hosted Kit."
 msgstr ""
 

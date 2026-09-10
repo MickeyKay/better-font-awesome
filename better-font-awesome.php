@@ -953,7 +953,7 @@ class Better_Font_Awesome_Plugin {
 				<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $mode, $value ); ?>><?php echo esc_html( $label ); ?></option>
 			<?php endforeach; ?>
 			</select>
-			<p id="bfa-provider-help" class="description" role="status"><?php esc_html_e( 'Choose a source, then save settings. A Kit activates only after Connect Kit succeeds.', 'better-font-awesome' ); ?></p>
+			<p id="bfa-provider-help" class="description" role="status"><?php esc_html_e( 'CSS and fonts load from Font Awesome.', 'better-font-awesome' ); ?></p>
 			</td>
 		</tr></tbody></table>
 		<?php
@@ -976,28 +976,30 @@ class Better_Font_Awesome_Plugin {
 		<form id="bfa-pro-form" autocomplete="off">
 			<table class="form-table" role="presentation"><tbody>
 			<tr><th scope="row"><label for="bfa-pro-token"><?php esc_html_e( 'API Key', 'better-font-awesome' ); ?></label></th><td>
-			<div id="bfa-pro-saved" hidden>
+			<div id="bfa-pro-saved" class="bfa-controls" hidden>
 				<span class="bfa-token-saved"><span class="dashicons dashicons-yes-alt" aria-hidden="true"></span> <?php esc_html_e( 'API token saved', 'better-font-awesome' ); ?></span>
-				<button id="bfa-pro-update-token" type="button" class="button"><?php esc_html_e( 'Update token', 'better-font-awesome' ); ?></button>
-				<button type="button" class="button" data-pro-action="disconnect" aria-describedby="bfa-pro-delete-help"><?php esc_html_e( 'Delete token', 'better-font-awesome' ); ?></button>
+				<button id="bfa-pro-update-token" type="button" class="button-link bfa-action"><span class="dashicons dashicons-edit" aria-hidden="true"></span> <?php esc_html_e( 'Update token', 'better-font-awesome' ); ?></button>
+				<button type="button" class="button-link bfa-action" data-pro-action="disconnect"><span class="dashicons dashicons-trash" aria-hidden="true"></span> <?php esc_html_e( 'Delete token', 'better-font-awesome' ); ?></button>
 			</div>
 			<div id="bfa-pro-token-entry">
+				<div class="bfa-controls">
 				<input id="bfa-pro-token" class="regular-text" type="password" autocomplete="new-password" spellcheck="false" aria-describedby="bfa-pro-token-help">
-				<button id="bfa-pro-find" type="button" class="button button-primary"><?php esc_html_e( 'Find Kits', 'better-font-awesome' ); ?></button>
+				<button id="bfa-pro-find" type="button" class="button button-primary"><?php esc_html_e( 'Connect account', 'better-font-awesome' ); ?></button>
 				<button id="bfa-pro-cancel-token" type="button" class="button" hidden><?php esc_html_e( 'Cancel', 'better-font-awesome' ); ?></button>
-				<p id="bfa-pro-token-help"><?php esc_html_e( 'Use Read Kits Data permission. Your token stays encrypted on this server.', 'better-font-awesome' ); ?> <a href="https://fontawesome.com/account#api-tokens" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Get an API token from Font Awesome (opens in a new tab)', 'better-font-awesome' ); ?></a></p>
+				<span id="bfa-pro-discovery-feedback" class="bfa-feedback"><span id="bfa-pro-spinner" class="spinner" aria-hidden="true"></span><span id="bfa-pro-account-status" role="status" aria-live="polite" aria-atomic="true"></span></span>
+				</div>
+				<p id="bfa-pro-token-help" class="description"><?php esc_html_e( 'Use Read Kits Data permission. Your token stays encrypted on this server.', 'better-font-awesome' ); ?> <a href="https://fontawesome.com/account#api-tokens" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Get an API token', 'better-font-awesome' ); ?><span class="dashicons dashicons-external" aria-hidden="true"></span><span class="screen-reader-text"><?php esc_html_e( ' (opens in a new tab)', 'better-font-awesome' ); ?></span></a></p>
 			</div>
-			<p class="bfa-discovery-status"><span id="bfa-pro-spinner" class="spinner" aria-hidden="true"></span><span id="bfa-pro-account-status" role="status" aria-live="polite" aria-atomic="true"></span></p>
-			<p id="bfa-pro-delete-help" class="description" hidden><?php esc_html_e( 'Deleting the token also disconnects the Kit and removes its saved catalog. Saved icon names and styles are unchanged.', 'better-font-awesome' ); ?></p>
 			</td></tr>
 			<tr id="bfa-pro-kit-controls"><th scope="row"><label for="bfa-pro-kit"><?php esc_html_e( 'Kit', 'better-font-awesome' ); ?></label></th><td>
+				<div class="bfa-controls">
 				<select id="bfa-pro-kit" aria-describedby="bfa-pro-kit-help" disabled><option value=""><?php esc_html_e( 'Choose a Kit', 'better-font-awesome' ); ?></option></select>
-				<button id="bfa-pro-refresh-kits" type="button" class="button"><?php esc_html_e( 'Refresh Kits', 'better-font-awesome' ); ?></button>
-				<p id="bfa-pro-kit-help" role="status" aria-live="polite" aria-atomic="true"></p>
-				<p><button id="bfa-pro-connect" type="submit" class="button button-primary" disabled><?php esc_html_e( 'Connect Kit', 'better-font-awesome' ); ?></button>
-				<button type="button" class="button" data-pro-action="refresh"><?php esc_html_e( 'Refresh active Kit', 'better-font-awesome' ); ?></button></p>
-			<p id="bfa-pro-status" role="status" aria-live="polite" aria-atomic="true"></p>
-			<p class="description"><?php esc_html_e( 'Use a v7 Pro By Style Web Fonts Kit with compatibility and Classic Solid, Regular and Brands. Light and Thin are optional. CSS and fonts load from Font Awesome, not locally.', 'better-font-awesome' ); ?></p>
+				<button id="bfa-pro-connect" type="submit" class="button button-primary" disabled><?php esc_html_e( 'Connect Kit', 'better-font-awesome' ); ?></button>
+				<span id="bfa-pro-kit-feedback" class="bfa-feedback"><span id="bfa-pro-kit-spinner" class="spinner" aria-hidden="true"></span><span id="bfa-pro-status" role="status" aria-live="polite" aria-atomic="true"></span></span>
+				<button id="bfa-pro-refresh-kits" type="button" class="button-link bfa-action"><span class="dashicons dashicons-update" aria-hidden="true"></span> <?php esc_html_e( 'Refresh Kits', 'better-font-awesome' ); ?></button>
+				<button type="button" class="button-link bfa-action" data-pro-action="refresh" hidden><span class="dashicons dashicons-update" aria-hidden="true"></span> <?php esc_html_e( 'Refresh active Kit', 'better-font-awesome' ); ?></button>
+				</div>
+				<p id="bfa-pro-kit-help" class="description" role="status" aria-live="polite" aria-atomic="true"></p>
 			</td></tr></tbody></table>
 		</form>
 		</section>

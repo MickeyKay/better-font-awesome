@@ -50,17 +50,51 @@
 	vertical-align: middle;
 }
 
-.bfa-discovery-status .spinner {
+.bfa-feedback .spinner {
 	display: none;
 	float: none;
 	margin: 0 8px 0 0;
 	vertical-align: middle;
 }
 
-.bfa-discovery-status .spinner.is-active {
+.bfa-feedback .spinner.is-active {
 	display: inline-block;
 }
 
 #bfa-pro-kit {
 	max-width: 100%;
+}
+
+.bfa-controls {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px 12px;
+	min-height: 32px;
+}
+
+.bfa-feedback {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.bfa-settings button.bfa-action {
+	text-decoration: none;
+}
+
+.bfa-settings button.bfa-action:hover {
+	text-decoration: underline;
+}
+
+.bfa-action .dashicons,
+#bfa-pro-token-help .dashicons {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+	vertical-align: text-bottom;
+}
+
+#bfa-pro-kit-help:empty {
+	display: none;
 }

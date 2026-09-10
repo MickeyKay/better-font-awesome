@@ -848,7 +848,7 @@ class Better_Font_Awesome_Pro {
 		$messages = array(
 			'ownership'   => __( 'Pro connection is unavailable. Use automatic Free first and ensure BFA owns Font Awesome 7 initialization.', 'better-font-awesome' ),
 			'kit'         => __( 'Choose a Kit from the current account list.', 'better-font-awesome' ),
-			'selection'   => __( 'Kit selection expired or is unsupported. Find Kits again and choose a supported Kit.', 'better-font-awesome' ),
+			'selection'   => __( 'Kit selection expired or is unsupported. Refresh the Kit list and choose a supported Kit.', 'better-font-awesome' ),
 			'auth'        => __( 'Authorization failed. Check your account token and Read Kits Data permission, then reconnect.', 'better-font-awesome' ),
 			'storage'     => __( 'Secure token storage is unavailable. Check OpenSSL and the WordPress authentication salts, then reconnect.', 'better-font-awesome' ),
 			'service'     => __( 'Font Awesome is temporarily unavailable. The working catalog is unchanged.', 'better-font-awesome' ),

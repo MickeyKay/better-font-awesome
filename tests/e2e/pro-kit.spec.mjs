@@ -53,8 +53,8 @@ test( 'bounded Pro Connect and Refresh, all editors, saved styles, local switch 
 	await saveProvider( page, 'automatic' );
 	await page.goto( settings );
 	await page.getByLabel( 'API Key', { exact: true } ).fill( 'SYNTHETIC-NOT-A-CREDENTIAL' );
-	await page.getByRole( 'button', { name: 'Find Kits', exact: true } ).click();
-	await expect( page.locator( '#bfa-pro-account-status' ) ).toContainText( 'Account authorized.' );
+	await page.getByRole( 'button', { name: 'Connect account', exact: true } ).click();
+	await expect( page.getByText( 'API token saved', { exact: true } ) ).toBeVisible();
 	await page.getByLabel( 'Kit', { exact: true } ).selectOption( 'KIT_ID' );
 	const started = Date.now();
 	await page.getByRole( 'button', { name: 'Connect Kit', exact: true } ).click();
@@ -154,9 +154,9 @@ test( 'bounded Pro Connect and Refresh, all editors, saved styles, local switch 
 	expect( requests ).toEqual( [] );
 	await saveProvider( page, 'automatic' );
 	await page.goto( settings );
-	await expect( page.locator( '#bfa-pro-status' ) ).toContainText( 'Pro is inactive.' );
+	await expect( page.locator( '#bfa-pro-status' ) ).toHaveText( '' );
 	await page.getByRole( 'button', { name: 'Delete token', exact: true } ).click();
-	await expect( page.locator( '#bfa-pro-account-status' ) ).toContainText( 'Enter an API token', { timeout: 15000 } );
+	await expect( page.getByLabel( 'API Key', { exact: true } ) ).toBeVisible( { timeout: 15000 } );
 	await fixture( page, '', false );
 	const evidence = testInfo.outputPath( 'synthetic-performance.json' );
 	fs.writeFileSync( evidence, JSON.stringify( { connectMs, payloadBytes, pickerMs, realProAssets: false } ) );
@@ -172,11 +172,11 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	await page.goto( settings );
 	const token = page.getByLabel( 'API Key', { exact: true } );
 	const select = page.getByRole( 'combobox', { name: 'Kit', exact: true } );
-	const find = page.getByRole( 'button', { name: 'Find Kits', exact: true } );
+	const find = page.getByRole( 'button', { name: 'Connect account', exact: true } );
 	const connect = page.getByRole( 'button', { name: 'Connect Kit', exact: true } );
 	const accountStatus = page.locator( '#bfa-pro-account-status' );
 	await expect( token ).toHaveAttribute( 'type', 'password' );
-	await expect( page.getByRole( 'link', { name: 'Get an API token from Font Awesome (opens in a new tab)' } ) ).toHaveAttribute( 'href', 'https://fontawesome.com/account#api-tokens' );
+	await expect( page.getByRole( 'link', { name: 'Get an API token (opens in a new tab)' } ) ).toHaveAttribute( 'href', 'https://fontawesome.com/account#api-tokens' );
 	await expect( accountStatus ).toHaveAttribute( 'role', 'status' );
 	await expect( page.locator( '#bfa-pro-kit' ) ).toHaveAttribute( 'aria-describedby', 'bfa-pro-kit-help' );
 	await expect( page.locator( '#bfa-pro-connect' ) ).toBeDisabled();
@@ -197,10 +197,30 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	await page.getByRole( 'combobox', { name: 'Font Awesome source' } ).selectOption( 'kit-css' );
 	expect( operations ).not.toContain( 'find' );
 	expect( operations ).not.toContain( 'connect' );
+	await expect( accountStatus ).toHaveText( '' );
+	await expect( page.locator( '#bfa-pro-status' ) ).toHaveText( '' );
+	await expect( page.locator( '[data-pro-action="refresh"]' ) ).toBeHidden();
+	let releaseInitial;
+	const initialGate = new Promise( resolve => { releaseInitial = resolve; } );
+	const holdInitial = async route => {
+		if ( new URLSearchParams( route.request().postData() ).get( 'operation' ) === 'find' ) { await initialGate; }
+		await route.continue();
+	};
+	await page.route( '**/admin-ajax.php', holdInitial );
 	await token.fill( 'SYNTHETIC-NOT-A-CREDENTIAL' );
+	const beforeLoading = await token.boundingBox();
 	await token.press( 'Enter' );
-	await expect( accountStatus ).toContainText( 'Account authorized.' );
+	await expect( accountStatus ).toHaveText( 'Connecting...' );
+	await expect( page.locator( '#bfa-pro-spinner' ) ).toHaveClass( /is-active/ );
+	const loading = await accountStatus.boundingBox();
+	expect( Math.abs( loading.y + loading.height / 2 - beforeLoading.y - beforeLoading.height / 2 ) ).toBeLessThan( 5 );
+	await page.screenshot( { path: test.info().outputPath( 'inline-account-loading.png' ) } );
+	releaseInitial();
+
+	await expect( page.getByText( 'API token saved', { exact: true } ) ).toBeVisible();
+	await page.unroute( '**/admin-ajax.php', holdInitial );
 	await expect( select ).toHaveValue( '' );
+	await expect( accountStatus ).toHaveText( '' );
 	await expect( page.getByText( 'API token saved', { exact: true } ) ).toBeVisible();
 	await expect( token ).toBeHidden();
 	await page.screenshot( { path: test.info().outputPath( 'saved-token-settings.png' ), fullPage: true } );
@@ -222,8 +242,7 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	await expect( select ).toHaveValue( 'KIT_ID' );
 	await expect( connect ).toBeEnabled();
 	await select.press( 'Tab' );
-	await expect( page.getByRole( 'button', { name: 'Refresh Kits', exact: true } ) ).toBeFocused();
-	await page.keyboard.press( 'Tab' );
+
 	await expect( connect ).toBeFocused();
 	await connect.press( 'Enter' );
 	await expect( page.locator( '#bfa-pro-status' ) ).toContainText( 'Connected: BFA staging.', { timeout: 60000 } );
@@ -240,7 +259,7 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	await fixture( page, 'empty-account' );
 	await page.goto( settings );
 	await page.getByRole( 'button', { name: 'Refresh Kits', exact: true } ).click();
-	await expect( accountStatus ).toContainText( 'no Kits were found' );
+	await expect( accountStatus ).toContainText( 'No Kits found.' );
 	await expect( select ).toBeDisabled();
 	await expect( connect ).toBeDisabled();
 	await fixture( page );
@@ -263,12 +282,13 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	} );
 	await page.getByRole( 'button', { name: 'Refresh Kits', exact: true } ).click();
 	await expect( page.locator( '#bfa-pro-spinner' ) ).toHaveClass( /is-active/ );
-	await expect( accountStatus ).toHaveText( 'Finding Kits...' );
+	await expect( accountStatus ).toHaveText( 'Refreshing Kits...' );
+	expect( await page.locator( '#bfa-pro-refresh-kits' ).evaluate( el => el.nextElementSibling.id ) ).toBe( 'bfa-pro-discovery-feedback' );
 	await ready;
 	await page.getByRole( 'button', { name: 'Update token', exact: true } ).click();
 	await token.fill( 'SYNTHETIC-NEW-AUTHORIZATION' );
 	await find.click();
-	await expect( accountStatus ).toContainText( 'Account authorized.' );
+	await expect( page.getByText( 'API token saved', { exact: true } ) ).toBeVisible();
 	const oldResponse = page.waitForResponse( response => response.headers()[ 'x-bfa-old-response' ] === 'yes' );
 	releaseOld();
 	await ( await oldResponse ).finished();
@@ -278,6 +298,6 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	expect( responses.join( '' ) ).not.toMatch( /SYNTHETIC-(?:NOT-A-CREDENTIAL|BAD-REPLACEMENT|NEW-AUTHORIZATION)|credential|access_token/ );
 	expect( await page.evaluate( () => JSON.stringify( window.bfaPro ) ) ).not.toMatch( /token|credential/i );
 	await page.getByRole( 'button', { name: 'Delete token', exact: true } ).click();
-	await expect( accountStatus ).toContainText( 'Enter an API token', { timeout: 15000 } );
+	await expect( token ).toBeVisible( { timeout: 15000 } );
 	await fixture( page, '', false );
 } );
