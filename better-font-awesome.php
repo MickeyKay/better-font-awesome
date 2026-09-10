@@ -12,7 +12,7 @@
  * Plugin Name:       Better Font Awesome
  * Plugin URI:        https://github.com/MickeyKay/better-font-awesome
  * Description:       Add Font Awesome 7 Free icons with a native WordPress block, shortcodes, a Classic Editor picker, automatic icon updates, and legacy support.
- * Version:           3.1.0
+ * Version:           3.2.0
  * Author:            Mickey Kay
  * Author URI:        https://mickeykay.me/
  * License:           GPLv2+
@@ -68,7 +68,7 @@ class Better_Font_Awesome_Plugin {
 	 *
 	 * @var    string
 	 */
-	const VERSION = '3.1.0';
+	const VERSION = '3.2.0';
 
 	/**
 	 * The Better Font Awesome Library object.
