@@ -944,7 +944,7 @@ class Better_Font_Awesome_Plugin {
 			<?php
 			foreach ( array(
 				'automatic'     => __( 'Automatic Free (CDN)', 'better-font-awesome' ),
-				'bundled-local' => __( 'Free (local, no CDN)', 'better-font-awesome' ),
+				'bundled-local' => __( 'Local Free (no CDN)', 'better-font-awesome' ),
 				'kit-css'       => __( 'Hosted Pro kit', 'better-font-awesome' ),
 			) as $value => $label ) :
 				?>

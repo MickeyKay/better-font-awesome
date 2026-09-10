@@ -212,7 +212,7 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	page.on( 'response', async response => {
 		if ( response.url().includes( 'admin-ajax.php' ) ) { responses.push( await response.text().catch( () => '' ) ); }
 	} );
-	await expect( page.locator( '#bfa-provider option[value="bundled-local"]' ) ).toHaveText( 'Free (local, no CDN)' );
+	await expect( page.locator( '#bfa-provider option[value="bundled-local"]' ) ).toHaveText( 'Local Free (no CDN)' );
 	// Provider previews only toggle relevant controls, without server acquisition.
 	await expect( page.locator( '#include_v4_shim' ) ).toBeHidden();
 	await expect( page.locator( '#default_block_icon_style' ) ).toBeVisible();
