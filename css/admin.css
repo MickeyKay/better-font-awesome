@@ -79,7 +79,16 @@
 	gap: 4px;
 }
 
+/* Idle live regions remain accessible without adding extra gaps between controls. */
+.bfa-feedback:not(:has(.spinner.is-active)):has(> :last-child:empty),
+.bfa-feedback:has(> .screen-reader-text) {
+	position: absolute;
+}
+
 .bfa-settings button.bfa-action {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
 	text-decoration: none;
 }
 

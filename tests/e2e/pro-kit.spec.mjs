@@ -276,6 +276,15 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	await expect( page.locator( '#bfa-pro-status' ) ).toHaveClass( /screen-reader-text/ );
 	await expect( page.locator( '#bfa-pro-kit-details' ) ).toBeHidden();
 	const details = page.getByRole( 'button', { name: 'Kit details', exact: true } );
+	const actionSpacing = await page.locator( '#bfa-pro-refresh-kits, [data-pro-action="refresh"], #bfa-pro-kit-details-toggle' ).evaluateAll( actions => actions.map( action => {
+		const box = action.getBoundingClientRect();
+		const icon = action.querySelector( '.dashicons' ).getBoundingClientRect();
+		const label = action.querySelector( '.bfa-action-label' ).getBoundingClientRect();
+		return { left: box.left, right: box.right, iconGap: label.left - icon.right };
+	} ) );
+	for ( const action of actionSpacing ) { expect( action.iconGap ).toBeCloseTo( 4, 0 ); }
+	expect( actionSpacing[ 1 ].left - actionSpacing[ 0 ].right ).toBeCloseTo( 12, 0 );
+	expect( actionSpacing[ 2 ].left - actionSpacing[ 1 ].right ).toBeCloseTo( 12, 0 );
 	const beforeDetails = operations.length;
 	const selectBox = await select.boundingBox();
 	const toggleBox = await details.boundingBox();
