@@ -993,12 +993,13 @@ class Better_Font_Awesome_Plugin {
 			</td></tr>
 			<tr id="bfa-pro-kit-controls"><th scope="row"><label for="bfa-pro-kit"><?php esc_html_e( 'Kit', 'better-font-awesome' ); ?></label></th><td>
 				<div class="bfa-controls">
-				<select id="bfa-pro-kit" aria-describedby="bfa-pro-kit-help" disabled><option value=""><?php esc_html_e( 'Choose a Kit', 'better-font-awesome' ); ?></option></select>
-				<button id="bfa-pro-connect" type="submit" class="button button-primary" disabled><?php esc_html_e( 'Connect Kit', 'better-font-awesome' ); ?></button>
+				<select id="bfa-pro-kit" aria-describedby="bfa-pro-selection-help bfa-pro-kit-help" disabled><option value=""><?php esc_html_e( 'Choose a Kit', 'better-font-awesome' ); ?></option></select>
+				<button id="bfa-pro-retry" type="button" class="button-link bfa-action" hidden><span class="dashicons dashicons-update" aria-hidden="true"></span> <?php esc_html_e( 'Retry connection', 'better-font-awesome' ); ?></button>
 				<span id="bfa-pro-kit-feedback" class="bfa-feedback"><span id="bfa-pro-kit-spinner" class="spinner" aria-hidden="true"></span><span id="bfa-pro-status" role="status" aria-live="polite" aria-atomic="true"></span></span>
 				<button id="bfa-pro-refresh-kits" type="button" class="button-link bfa-action"><span class="dashicons dashicons-update" aria-hidden="true"></span> <?php esc_html_e( 'Refresh Kits', 'better-font-awesome' ); ?></button>
 				<button type="button" class="button-link bfa-action" data-pro-action="refresh" hidden><span class="dashicons dashicons-update" aria-hidden="true"></span> <?php esc_html_e( 'Refresh active Kit', 'better-font-awesome' ); ?></button>
 				</div>
+				<span id="bfa-pro-selection-help" class="screen-reader-text"><?php esc_html_e( 'Selecting a Kit starts its connection.', 'better-font-awesome' ); ?></span>
 				<p id="bfa-pro-kit-help" class="description" role="status" aria-live="polite" aria-atomic="true"></p>
 			</td></tr></tbody></table>
 		</form>

@@ -55,9 +55,20 @@ test( 'bounded Pro Connect and Refresh, all editors, saved styles, local switch 
 	await page.getByLabel( 'API Key', { exact: true } ).fill( 'SYNTHETIC-NOT-A-CREDENTIAL' );
 	await page.getByRole( 'button', { name: 'Connect account', exact: true } ).click();
 	await expect( page.getByText( 'API token saved', { exact: true } ) ).toBeVisible();
-	await page.getByLabel( 'Kit', { exact: true } ).selectOption( 'KIT_ID' );
+	let failFirstSelection = true;
+	await page.route( '**/admin-ajax.php', async route => {
+		if ( failFirstSelection && new URLSearchParams( route.request().postData() ).get( 'operation' ) === 'connect' ) {
+			failFirstSelection = false;
+			await route.fulfill( { status: 400, json: { success: false, data: { message: 'Synthetic connection interruption.' } } } );
+		} else { await route.continue(); }
+	} );
 	const started = Date.now();
-	await page.getByRole( 'button', { name: 'Connect Kit', exact: true } ).click();
+	await page.getByLabel( 'Kit', { exact: true } ).selectOption( 'KIT_ID' );
+	await expect( page.locator( '#bfa-pro-status' ) ).toHaveText( 'Synthetic connection interruption.' );
+	const retry = page.getByRole( 'button', { name: 'Retry connection', exact: true } );
+	await expect( retry ).toBeVisible();
+	await retry.focus();
+	await retry.press( 'Enter' );
 	await expect( page.locator( '#bfa-pro-status' ) ).toContainText( 'Connected:', { timeout: 60000 } );
 	const connectMs = Date.now() - started;
 	await expect( page.getByLabel( 'API Key', { exact: true } ) ).toHaveValue( '' );
@@ -173,13 +184,13 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	const token = page.getByLabel( 'API Key', { exact: true } );
 	const select = page.getByRole( 'combobox', { name: 'Kit', exact: true } );
 	const find = page.getByRole( 'button', { name: 'Connect account', exact: true } );
-	const connect = page.getByRole( 'button', { name: 'Connect Kit', exact: true } );
+	const retry = page.getByRole( 'button', { name: 'Retry connection', exact: true } );
 	const accountStatus = page.locator( '#bfa-pro-account-status' );
 	await expect( token ).toHaveAttribute( 'type', 'password' );
 	await expect( page.getByRole( 'link', { name: 'Get an API token (opens in a new tab)' } ) ).toHaveAttribute( 'href', 'https://fontawesome.com/account#api-tokens' );
 	await expect( accountStatus ).toHaveAttribute( 'role', 'status' );
-	await expect( page.locator( '#bfa-pro-kit' ) ).toHaveAttribute( 'aria-describedby', 'bfa-pro-kit-help' );
-	await expect( page.locator( '#bfa-pro-connect' ) ).toBeDisabled();
+	await expect( page.locator( '#bfa-pro-kit' ) ).toHaveAttribute( 'aria-describedby', 'bfa-pro-selection-help bfa-pro-kit-help' );
+	await expect( page.getByRole( 'button', { name: 'Connect Kit', exact: true } ) ).toHaveCount( 0 );
 	const operations = [];
 	const responses = [];
 	page.on( 'request', request => {
@@ -230,25 +241,33 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	await expect( token ).toHaveValue( '' );
 	await expect( token ).toBeHidden();
 	await expect( select.locator( 'option' ) ).toHaveText( [ 'Choose a Kit', 'BFA staging (KIT_ID)', 'BFA staging (SECOND)', 'SVG Kit (unsupported)', 'Unnamed Kit (UNNAMED)' ] );
-	await expect( connect ).toBeDisabled();
+	await expect( retry ).toBeHidden();
 	expect( operations ).not.toContain( 'connect' );
 	expect( operations ).not.toContain( 'step' );
 	await select.selectOption( 'SVG_KIT' );
 	await expect( page.locator( '#bfa-pro-kit-help' ) ).toContainText( 'Use a published v7 Pro By Style Web Fonts Kit' );
-	await expect( connect ).toBeDisabled();
+	await expect( retry ).toBeHidden();
+	expect( operations ).not.toContain( 'connect' );
 	await select.focus();
 	// Native select type-ahead works on both macOS and Linux Chromium.
 	await select.press( 'b' );
 	await expect( select ).toHaveValue( 'KIT_ID' );
-	await expect( connect ).toBeEnabled();
-	await select.press( 'Tab' );
-
-	await expect( connect ).toBeFocused();
-	await connect.press( 'Enter' );
+	await expect( select ).toBeDisabled();
+	expect( operations.filter( operation => operation === 'connect' ) ).toHaveLength( 1 );
 	await expect( page.locator( '#bfa-pro-status' ) ).toContainText( 'Connected: BFA staging.', { timeout: 60000 } );
 	await expect( token ).toHaveValue( '' );
-	// Failed replacement discovery does not alter the active Kit or its assets.
+	// Failed selection/retry keeps the active Kit; unsupported choices issue no request.
 	await fixture( page, 'auth' );
+	await page.goto( settings );
+	const beforeReplacement = operations.filter( operation => operation === 'connect' ).length;
+	await select.selectOption( 'SECOND' );
+	await expect( page.locator( '#bfa-pro-status' ) ).toContainText( 'Authorization failed.' );
+	await expect( retry ).toBeVisible();
+	await expect( page.locator( 'link[href^="https://kit.fontawesome.com/KIT_ID.css"]' ) ).toHaveCount( 1 );
+	await retry.click();
+	await expect( retry ).toBeVisible();
+	expect( operations.filter( operation => operation === 'connect' ) ).toHaveLength( beforeReplacement + 2 );
+	// Failed replacement discovery does not alter the active Kit or its assets.
 	await page.goto( settings );
 	await page.getByRole( 'button', { name: 'Update token', exact: true } ).click();
 	await token.fill( 'SYNTHETIC-BAD-REPLACEMENT' );
@@ -261,7 +280,7 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	await page.getByRole( 'button', { name: 'Refresh Kits', exact: true } ).click();
 	await expect( accountStatus ).toContainText( 'No Kits found.' );
 	await expect( select ).toBeDisabled();
-	await expect( connect ).toBeDisabled();
+	await expect( retry ).toBeHidden();
 	await fixture( page );
 	await page.goto( settings );
 	// Delay the old browser response while a newer token completes discovery.
@@ -295,6 +314,7 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	await expect( select.locator( 'option' ) ).toHaveText( [ 'Choose a Kit', 'BFA staging (KIT_ID)', 'BFA staging (SECOND)', 'SVG Kit (unsupported)', 'Unnamed Kit (UNNAMED)' ] );
 	await expect( select ).toHaveValue( '' );
 	await expect( token ).toHaveValue( '' );
+	expect( operations.filter( operation => operation === 'connect' ) ).toHaveLength( beforeReplacement + 2 );
 	expect( responses.join( '' ) ).not.toMatch( /SYNTHETIC-(?:NOT-A-CREDENTIAL|BAD-REPLACEMENT|NEW-AUTHORIZATION)|credential|access_token/ );
 	expect( await page.evaluate( () => JSON.stringify( window.bfaPro ) ) ).not.toMatch( /token|credential/i );
 	await page.getByRole( 'button', { name: 'Delete token', exact: true } ).click();

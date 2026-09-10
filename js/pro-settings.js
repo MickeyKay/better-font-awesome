@@ -8,7 +8,7 @@
 	const token = document.getElementById( 'bfa-pro-token' );
 	const find = document.getElementById( 'bfa-pro-find' );
 	const select = document.getElementById( 'bfa-pro-kit' );
-	const connect = document.getElementById( 'bfa-pro-connect' );
+	const retry = document.getElementById( 'bfa-pro-retry' );
 	const accountStatus = document.getElementById( 'bfa-pro-account-status' );
 	const summary = document.getElementById( 'bfa-pro-kit-help' );
 	const provider = document.getElementById( 'bfa-provider' );
@@ -28,6 +28,8 @@
 	let discovery = 0;
 	let account = { id: '', kits: [] };
 	let generation = 0;
+	let connecting = false;
+	let retryAction;
 	let timer;
 	async function send( operation, data = {} ) {
 		const controller = new AbortController();
@@ -47,6 +49,9 @@
 		const mine = ++generation;
 		const accountGeneration = discovery;
 		clearTimeout( timer );
+		retry.hidden = true;
+		if ( [ 'connect', 'refresh' ].includes( operation ) ) { retryAction = { operation, data }; }
+		connecting = operation !== 'status';
 		selectionChanged();
 		if ( operation !== 'status' ) {
 			kitSpinner.classList.add( 'is-active' );
@@ -55,6 +60,8 @@
 		try {
 			const state = await send( operation, data );
 			if ( mine !== generation ) { return; }
+			connecting = Boolean( state.pending || state.activationRequired );
+			selectionChanged();
 			refreshActive.hidden = ! state.kit;
 			kitSpinner.classList.toggle( 'is-active', Boolean( state.pending || state.activationRequired ) );
 			if ( state.account && accountGeneration === discovery && ! editingToken ) { showAccount( state.account ); }
@@ -71,11 +78,14 @@
 				// translators: %s: active Kit name.
 				const connection = state.connected ? sprintf( __( 'Connected: %s.', 'better-font-awesome' ), state.kitName || state.kit ) : '';
 				status.textContent = state.connected ? [ connection, state.message ].filter( Boolean ).join( ' ' ) : state.message || connection;
+				retry.hidden = ! state.error || ! retryAction;
 				selectionChanged();
 				if ( operation === 'disconnect' ) { window.location.reload(); }
 			}
 		} catch ( error ) {
 			if ( mine === generation ) {
+				connecting = false;
+				retry.hidden = ! retryAction;
 				kitSpinner.classList.remove( 'is-active' );
 				status.textContent = error.message || __( 'Connection interrupted. Reload to resume or start again.', 'better-font-awesome' );
 				selectionChanged();
@@ -84,10 +94,13 @@
 	}
 	function selectionChanged() {
 		const kit = account.kits.find( ( item ) => item.id === select.value );
-		connect.disabled = ! kit?.supported || needsFreeSave();
+		select.disabled = connecting || needsFreeSave() || ! account.authorized || ! account.kits.length;
+		retry.disabled = connecting || needsFreeSave();
 		summary.textContent = kit?.summary || '';
 	}
 	function clearChoices() {
+		retryAction = undefined;
+		retry.hidden = true;
 		account = { id: '', kits: [] };
 		select.replaceChildren( new Option( __( 'Choose a Kit', 'better-font-awesome' ), '' ) );
 		select.disabled = true;
@@ -114,7 +127,7 @@
 			// Unsupported options remain selectable; the linked summary explains why.
 			select.add( new Option( label, kit.id ) );
 		} );
-		select.disabled = ! account.authorized || ! account.kits.length;
+		selectionChanged();
 		if ( account.saved ) { refreshKits.after( feedback ); }
 		accountStatus.textContent = account.authorized && ! account.kits.length ? __( 'No Kits found. Create one in Font Awesome, then refresh.', 'better-font-awesome' ) : '';
 	}
@@ -148,13 +161,22 @@
 	} );
 	find.addEventListener( 'click', () => findKits() );
 	refreshKits.addEventListener( 'click', () => findKits( true ) );
-	select.addEventListener( 'change', selectionChanged );
+	select.addEventListener( 'change', () => {
+		selectionChanged();
+		const kit = account.kits.find( item => item.id === select.value );
+		if ( kit?.supported && ! select.disabled ) {
+			select.after( kitFeedback );
+			run( 'connect', { kit: kit.id, id: account.id } );
+		}
+	} );
+	retry.addEventListener( 'click', () => {
+		if ( retryAction && ! retry.disabled ) { run( retryAction.operation, retryAction.data ); }
+	} );
 	token.addEventListener( 'keydown', ( event ) => {
 		if ( event.key === 'Enter' ) { event.preventDefault(); findKits(); }
 	} );
 	form.addEventListener( 'submit', ( event ) => {
 		event.preventDefault();
-		if ( ! connect.disabled ) { connect.after( kitFeedback ); run( 'connect', { kit: select.value, id: account.id } ); }
 	} );
 	form.querySelectorAll( '[data-pro-action]' ).forEach( ( button ) => {
 		button.addEventListener( 'click', () => {
