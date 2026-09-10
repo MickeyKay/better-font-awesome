@@ -212,6 +212,7 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	page.on( 'response', async response => {
 		if ( response.url().includes( 'admin-ajax.php' ) ) { responses.push( await response.text().catch( () => '' ) ); }
 	} );
+	await expect( page.locator( '#bfa-provider option[value="bundled-local"]' ) ).toHaveText( 'Free (local, no CDN)' );
 	// Provider previews only toggle relevant controls, without server acquisition.
 	await expect( page.locator( '#include_v4_shim' ) ).toBeHidden();
 	await expect( page.locator( '#default_block_icon_style' ) ).toBeVisible();
@@ -273,13 +274,24 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	await expect( page.locator( '#bfa-provider-help' ) ).toBeHidden();
 	await expect( page.locator( '#bfa-delivery-status' ) ).toHaveCount( 0 );
 	await expect( page.locator( '#bfa-pro-status' ) ).toHaveClass( /screen-reader-text/ );
-	await expect( page.locator( '#bfa-pro-kit-help' ) ).toBeHidden();
-	const details = page.locator( '#bfa-pro-kit-details summary' );
+	await expect( page.locator( '#bfa-pro-kit-details' ) ).toBeHidden();
+	const details = page.getByRole( 'button', { name: 'Kit details', exact: true } );
+	const beforeDetails = operations.length;
+	const selectBox = await select.boundingBox();
+	const toggleBox = await details.boundingBox();
+	expect( Math.abs( selectBox.y + selectBox.height / 2 - toggleBox.y - toggleBox.height / 2 ) ).toBeLessThan( 5 );
+	await expect( details ).toHaveAttribute( 'aria-controls', 'bfa-pro-kit-details' );
 	await details.focus();
 	await details.press( 'Enter' );
-	await expect( page.locator( '#bfa-pro-kit-help' ) ).toBeVisible();
-	await details.press( 'Enter' );
-	await expect( page.locator( '#bfa-pro-kit-help' ) ).toBeHidden();
+	await expect( page.locator( '#bfa-pro-kit-details' ) ).toBeVisible();
+	await expect( details ).toHaveAttribute( 'aria-expanded', 'true' );
+	await expect( page.locator( '#bfa-pro-kit-facts dt' ) ).toHaveText( [ 'Icons', 'Technology', 'Version', 'Older version compatibility', 'Classic styles' ] );
+	await expect( page.locator( '#bfa-pro-kit-facts dd' ) ).toHaveText( [ 'Pro', 'Web fonts', /7\./, 'Enabled', 'Solid, Regular, Light, Thin, Brands' ] );
+	await page.screenshot( { path: test.info().outputPath( 'kit-details-expanded.png' ), fullPage: true } );
+	await details.press( 'Space' );
+	await expect( page.locator( '#bfa-pro-kit-details' ) ).toBeHidden();
+	await expect( details ).toHaveAttribute( 'aria-expanded', 'false' );
+	expect( operations ).toHaveLength( beforeDetails );
 	const refreshList = page.getByRole( 'button', { name: 'Refresh kits', exact: true } );
 	await refreshList.hover();
 	await expect( refreshList ).toHaveCSS( 'text-decoration-line', 'none' );

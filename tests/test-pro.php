@@ -602,6 +602,10 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		$this->assertCount( 4, $account['kits'] );
 		$this->assertSame( 'BFA staging', $account['kits'][0]['name'] );
 		$this->assertSame( $account['kits'][0]['name'], $account['kits'][1]['name'] );
+		$this->assertSame( array( 'version', 'styles' ), array_keys( $account['kits'][0]['details'] ) );
+		$this->assertMatchesRegularExpression( '/^7\./', $account['kits'][0]['details']['version'] );
+		$this->assertSame( array( 'brands', 'light', 'regular', 'solid', 'thin' ), $account['kits'][0]['details']['styles'] );
+		$this->assertSame( array(), $account['kits'][2]['details'] );
 		$this->assertStringContainsString( 'Classic styles:', $account['kits'][0]['summary'] );
 		$this->assertStringNotContainsString( 'still need validation', $account['kits'][0]['summary'] );
 		$this->assertFalse( $account['kits'][2]['supported'] );

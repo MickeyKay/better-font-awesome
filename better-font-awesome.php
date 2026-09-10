@@ -944,7 +944,7 @@ class Better_Font_Awesome_Plugin {
 			<?php
 			foreach ( array(
 				'automatic'     => __( 'Automatic Free (CDN)', 'better-font-awesome' ),
-				'bundled-local' => __( 'Local Free', 'better-font-awesome' ),
+				'bundled-local' => __( 'Free (local, no CDN)', 'better-font-awesome' ),
 				'kit-css'       => __( 'Hosted Pro kit', 'better-font-awesome' ),
 			) as $value => $label ) :
 				?>
@@ -996,10 +996,11 @@ class Better_Font_Awesome_Plugin {
 				<span id="bfa-pro-kit-feedback" class="bfa-feedback"><span id="bfa-pro-kit-spinner" class="spinner" aria-hidden="true"></span><span id="bfa-pro-status" role="status" aria-live="polite" aria-atomic="true"></span></span>
 				<button id="bfa-pro-refresh-kits" type="button" class="button-link bfa-action"><span class="dashicons dashicons-update" aria-hidden="true"></span> <span class="bfa-action-label"><?php esc_html_e( 'Refresh kits', 'better-font-awesome' ); ?></span></button>
 				<button type="button" class="button-link bfa-action" data-pro-action="refresh" hidden><span class="dashicons dashicons-update" aria-hidden="true"></span> <span class="bfa-action-label"><?php esc_html_e( 'Refresh active kit', 'better-font-awesome' ); ?></span></button>
+				<button id="bfa-pro-kit-details-toggle" type="button" class="button-link bfa-action" aria-expanded="false" aria-controls="bfa-pro-kit-details" hidden><span class="dashicons dashicons-arrow-right-alt2" aria-hidden="true"></span> <span class="bfa-action-label"><?php esc_html_e( 'Kit details', 'better-font-awesome' ); ?></span></button>
 				</div>
 				<span id="bfa-pro-selection-help" class="screen-reader-text"><?php esc_html_e( 'Selecting a kit starts its connection.', 'better-font-awesome' ); ?></span>
 				<p id="bfa-pro-kit-warning" class="description" role="status" aria-live="polite" aria-atomic="true"></p>
-				<details id="bfa-pro-kit-details" hidden><summary><?php esc_html_e( 'Kit details', 'better-font-awesome' ); ?></summary><p id="bfa-pro-kit-help" class="description"></p></details>
+				<div id="bfa-pro-kit-details" hidden><dl id="bfa-pro-kit-facts"></dl><p id="bfa-pro-kit-help" class="description" hidden></p></div>
 			</td></tr></tbody></table>
 		</form>
 		</section>

@@ -12,6 +12,8 @@
 	const accountStatus = document.getElementById( 'bfa-pro-account-status' );
 	const summary = document.getElementById( 'bfa-pro-kit-help' );
 	const details = document.getElementById( 'bfa-pro-kit-details' );
+	const detailsToggle = document.getElementById( 'bfa-pro-kit-details-toggle' );
+	const facts = document.getElementById( 'bfa-pro-kit-facts' );
 	const warning = document.getElementById( 'bfa-pro-kit-warning' );
 	const provider = document.getElementById( 'bfa-provider' );
 	const panel = document.getElementById( 'bfa-pro-panel' );
@@ -65,7 +67,7 @@
 			const state = await send( operation, data );
 			if ( mine !== generation ) { return; }
 			connecting = Boolean( state.pending || state.activationRequired );
-			activeKit = state.connected ? { id: state.kit, name: state.kitName || state.kit } : null;
+			activeKit = state.connected ? { id: state.kit, name: state.kitName || state.kit, version: state.version, styles: state.styles } : null;
 			status.classList.toggle( 'screen-reader-text', Boolean( state.connected && ! connecting && ! state.message ) );
 			selectionChanged();
 			refreshActive.hidden = ! state.kit;
@@ -107,10 +109,43 @@
 		const kit = account.kits.find( ( item ) => item.id === select.value );
 		select.disabled = connecting || needsFreeSave() || ! account.authorized || ! account.kits.length;
 		retry.disabled = connecting || needsFreeSave();
-		summary.textContent = kit?.supported ? kit.summary : '';
-		details.hidden = ! summary.textContent;
+		showDetails( kit );
 		warning.textContent = kit && ! kit.supported ? kit.summary : '';
 	}
+	function showDetails( kit ) {
+		// Older saved discovery lists can use the validated active snapshot, without HTTP.
+		const data = kit?.details || ( kit?.id === activeKit?.id ? activeKit : null );
+		facts.replaceChildren();
+		if ( kit?.supported && data?.version && Array.isArray( data.styles ) ) {
+			const styles = { solid: __( 'Solid', 'better-font-awesome' ), regular: __( 'Regular', 'better-font-awesome' ), light: __( 'Light', 'better-font-awesome' ), thin: __( 'Thin', 'better-font-awesome' ), brands: __( 'Brands', 'better-font-awesome' ) };
+			const rows = [
+				[ __( 'Icons', 'better-font-awesome' ), 'Pro' ],
+				[ __( 'Technology', 'better-font-awesome' ), __( 'Web fonts', 'better-font-awesome' ) ],
+				[ __( 'Version', 'better-font-awesome' ), data.version ],
+				[ __( 'Older version compatibility', 'better-font-awesome' ), __( 'Enabled', 'better-font-awesome' ) ],
+				[ __( 'Classic styles', 'better-font-awesome' ), Object.keys( styles ).filter( style => data.styles.includes( style ) ).map( style => styles[ style ] ).join( ', ' ) ],
+			];
+			rows.forEach( ( [ label, value ] ) => {
+				const row = document.createElement( 'div' );
+				const term = document.createElement( 'dt' );
+				const definition = document.createElement( 'dd' );
+				term.textContent = label;
+				definition.textContent = value;
+				row.append( term, definition );
+				facts.append( row );
+			} );
+		}
+		facts.hidden = ! facts.childElementCount;
+		summary.textContent = kit?.supported && facts.hidden ? kit.summary : '';
+		summary.hidden = ! summary.textContent;
+		detailsToggle.hidden = facts.hidden && summary.hidden;
+		details.hidden = detailsToggle.hidden || detailsToggle.getAttribute( 'aria-expanded' ) !== 'true';
+	}
+	detailsToggle.addEventListener( 'click', () => {
+		const expanded = detailsToggle.getAttribute( 'aria-expanded' ) !== 'true';
+		detailsToggle.setAttribute( 'aria-expanded', String( expanded ) );
+		details.hidden = ! expanded;
+	} );
 	function clearChoices() {
 		retryAction = undefined;
 		retry.hidden = true;
@@ -191,7 +226,7 @@
 	find.addEventListener( 'click', () => findKits() );
 	refreshKits.addEventListener( 'click', () => findKits( true ) );
 	select.addEventListener( 'change', () => {
-		details.open = false;
+		detailsToggle.setAttribute( 'aria-expanded', 'false' );
 		selectionChanged();
 		const kit = account.kits.find( item => item.id === select.value );
 		if ( kit?.supported && ! select.disabled ) {

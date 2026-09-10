@@ -258,6 +258,10 @@ class Better_Font_Awesome_Pro {
 				'id'        => $id,
 				'name'      => is_string( $row['name'] ?? null ) ? sanitize_text_field( $row['name'] ) : '',
 				'supported' => ! is_wp_error( $meta ),
+				'details'   => is_wp_error( $meta ) ? array() : array(
+					'version' => $meta['version'],
+					'styles'  => array_keys( $meta['counts'] ),
+				),
 				'summary'   => is_wp_error( $meta ) ? sprintf(
 					/* translators: 1: selected version, 2: Kit license, 3: rendering technology, 4: supported configuration requirements. */
 					__( 'Configuration: %1$s, %2$s, %3$s. %4$s', 'better-font-awesome' ),

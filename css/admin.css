@@ -101,16 +101,35 @@
 }
 
 #bfa-pro-kit-details {
-	margin-top: 8px;
-	max-width: 600px;
+	margin-top: 12px;
+	max-width: 560px;
 }
 
-#bfa-pro-kit-details summary {
-	width: fit-content;
-	cursor: pointer;
-	color: #2271b1;
+#bfa-pro-kit-facts {
+	margin: 0;
+	border: 1px solid #c3c4c7;
+	background: #fff;
 }
 
-#bfa-pro-kit-details summary:hover {
-	color: #135e96;
+#bfa-pro-kit-facts > div {
+	display: grid;
+	grid-template-columns: minmax(100px, 2fr) 3fr;
+	gap: 12px;
+	padding: 9px 12px;
+}
+
+#bfa-pro-kit-facts > div + div {
+	border-top: 1px solid #dcdcde;
+}
+
+#bfa-pro-kit-facts dt {
+	font-weight: 600;
+}
+
+#bfa-pro-kit-facts dd {
+	margin: 0;
+}
+
+#bfa-pro-kit-details-toggle[aria-expanded="true"] .dashicons {
+	transform: rotate(90deg);
 }
