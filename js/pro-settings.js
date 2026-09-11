@@ -28,7 +28,7 @@
 	const kitSpinner = document.getElementById( 'bfa-pro-kit-spinner' );
 	const refreshActive = form.querySelector( '[data-pro-action="refresh"]' );
 	let editingToken = false;
-	let hasSavedToken = false;
+	let hasSavedToken = form.dataset.tokenSaved === '1';
 	let discovery = 0;
 	let account = { id: '', kits: [] };
 	let activeKit = null;
@@ -59,7 +59,11 @@
 		if ( operation === 'disconnect-kit' ) { retryAction = undefined; }
 		connecting = operation !== 'status';
 		selectionChanged();
-		if ( operation !== 'status' ) {
+		if ( operation === 'disconnect-kit' ) {
+			kitSpinner.classList.remove( 'is-active' );
+			status.classList.add( 'screen-reader-text' );
+			status.textContent = __( 'Disconnecting kit...', 'better-font-awesome' );
+		} else if ( operation !== 'status' ) {
 			status.classList.remove( 'screen-reader-text' );
 			kitSpinner.classList.add( 'is-active' );
 			if ( operation !== 'step' ) { status.textContent = __( 'Working...', 'better-font-awesome' ); }
@@ -115,6 +119,7 @@
 		describeProvider();
 		const kit = account.kits.find( ( item ) => item.id === select.value ) || ( activeKit && select.value === activeKit.id ? { ...activeKit, supported: true, details: activeKit } : null );
 		select.disabled = connecting || needsFreeSave() || ( ! activeKit && ( ! account.authorized || ! account.kits.length ) );
+		select.setAttribute( 'aria-busy', String( connecting ) );
 		retry.disabled = connecting || needsFreeSave();
 		showDetails( kit );
 		warning.textContent = kit && ! kit.supported ? kit.reason || __( 'This kit is unsupported. See Kit details for requirements.', 'better-font-awesome' ) : '';
@@ -305,8 +310,8 @@
 	}
 	function describeProvider() {
 		const descriptions = {
-			automatic: __( 'Loads free icons from a CDN using your selected version.', 'better-font-awesome' ),
-			'bundled-local': __( 'Serves the bundled free icons from your own site. No CDN requests.', 'better-font-awesome' ),
+			automatic: __( 'Loads free icons from a CDN and automatically updates to the latest version.', 'better-font-awesome' ),
+			'bundled-local': __( 'Serves bundled free icons from your site. No CDN requests or automatic icon updates.', 'better-font-awesome' ),
 			'kit-css': activeKit ? __( 'Loads icons from Font Awesome using your Pro subscription and kit.', 'better-font-awesome' ) : __( 'Connect your Font Awesome Pro kit. Until connected, free icons load from the CDN.', 'better-font-awesome' ),
 		};
 		document.getElementById( 'bfa-provider-help' ).textContent = needsFreeSave() ? __( 'Save Settings to switch off local delivery before setting up a hosted kit.', 'better-font-awesome' ) : descriptions[ selectedProvider() ];

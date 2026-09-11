@@ -959,6 +959,8 @@ class Better_Font_Awesome_Plugin {
 
 	/** WordPress-native, separate connection controls with no secret values rendered. */
 	public function pro_settings() {
+		$has_saved_token = ! empty( ( new Better_Font_Awesome_Pro() )->account_status()['saved'] );
+		$kit_active      = $this->pro && $this->pro->effective();
 		wp_enqueue_script( 'bfa-pro-settings', plugins_url( 'js/pro-settings.js', __FILE__ ), array( 'wp-i18n' ), self::VERSION . '-' . md5_file( __DIR__ . '/js/pro-settings.js' ), true );
 		wp_set_script_translations( 'bfa-pro-settings', 'better-font-awesome', __DIR__ . '/languages' );
 		wp_localize_script(
@@ -970,16 +972,16 @@ class Better_Font_Awesome_Plugin {
 			)
 		);
 		?>
-		<section id="bfa-pro-panel" hidden aria-label="<?php esc_attr_e( 'Hosted Pro kit settings', 'better-font-awesome' ); ?>">
-		<form id="bfa-pro-form" autocomplete="off">
+		<section id="bfa-pro-panel" <?php echo $kit_active ? '' : 'hidden'; ?> aria-label="<?php esc_attr_e( 'Hosted Pro kit settings', 'better-font-awesome' ); ?>">
+		<form id="bfa-pro-form" autocomplete="off" data-token-saved="<?php echo $has_saved_token ? '1' : '0'; ?>">
 			<table class="form-table" role="presentation"><tbody>
 			<tr><th scope="row"><label for="bfa-pro-token"><?php esc_html_e( 'API Key', 'better-font-awesome' ); ?></label></th><td>
-			<div id="bfa-pro-saved" class="bfa-controls" hidden>
+			<div id="bfa-pro-saved" class="bfa-controls" <?php echo $has_saved_token ? '' : 'hidden'; ?>>
 				<span class="bfa-token-saved"><span class="dashicons dashicons-yes-alt" aria-hidden="true"></span> <?php esc_html_e( 'API token saved', 'better-font-awesome' ); ?></span>
 				<button id="bfa-pro-update-token" type="button" class="button-link bfa-action"><span class="dashicons dashicons-edit" aria-hidden="true"></span> <span class="bfa-action-label"><?php esc_html_e( 'Update token', 'better-font-awesome' ); ?></span></button>
 				<button type="button" class="button-link bfa-action" data-pro-action="disconnect"><span class="dashicons dashicons-trash" aria-hidden="true"></span> <span class="bfa-action-label"><?php esc_html_e( 'Delete token', 'better-font-awesome' ); ?></span></button>
 			</div>
-			<div id="bfa-pro-token-entry">
+			<div id="bfa-pro-token-entry" <?php echo $has_saved_token ? 'hidden' : ''; ?>>
 				<div class="bfa-controls">
 				<input id="bfa-pro-token" class="regular-text" type="password" autocomplete="new-password" spellcheck="false" aria-describedby="bfa-pro-token-help">
 				<button id="bfa-pro-find" type="button" class="button button-primary"><?php esc_html_e( 'Connect account', 'better-font-awesome' ); ?></button>
@@ -989,7 +991,7 @@ class Better_Font_Awesome_Plugin {
 				<p id="bfa-pro-token-help" class="description"><?php esc_html_e( 'Use Read Kits Data permission. Your token stays encrypted on this server.', 'better-font-awesome' ); ?> <a href="https://fontawesome.com/account#api-tokens" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Get an API token', 'better-font-awesome' ); ?><span class="dashicons dashicons-external" aria-hidden="true"></span><span class="screen-reader-text"><?php esc_html_e( ' (opens in a new tab)', 'better-font-awesome' ); ?></span></a></p>
 			</div>
 			</td></tr>
-			<tr id="bfa-pro-kit-controls"><th scope="row"><label for="bfa-pro-kit"><?php esc_html_e( 'Kit', 'better-font-awesome' ); ?></label></th><td>
+			<tr id="bfa-pro-kit-controls" <?php echo $has_saved_token ? '' : 'hidden'; ?>><th scope="row"><label for="bfa-pro-kit"><?php esc_html_e( 'Kit', 'better-font-awesome' ); ?></label></th><td>
 				<div class="bfa-controls">
 				<select id="bfa-pro-kit" aria-describedby="bfa-pro-selection-help bfa-pro-kit-warning" disabled><option value=""><?php esc_html_e( 'No kit selected', 'better-font-awesome' ); ?></option></select>
 				<button id="bfa-pro-retry" type="button" class="button-link bfa-action" hidden><span class="dashicons dashicons-update" aria-hidden="true"></span> <span class="bfa-action-label"><?php esc_html_e( 'Retry connection', 'better-font-awesome' ); ?></span></button>

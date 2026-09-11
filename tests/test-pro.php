@@ -165,6 +165,25 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		$this->assertTrue( $this->pro->account_status()['authorized'] );
 		$this->assertArrayNotHasKey( 'active', Better_Font_Awesome_Pro::state() );
 	}
+	public function test_settings_render_saved_token_visibility_without_http() {
+		$plugin = Better_Font_Awesome_Plugin::get_instance();
+		ob_start();
+		$plugin->pro_settings();
+		$empty = ob_get_clean();
+		$this->assertStringContainsString( 'data-token-saved="0"', $empty );
+		$this->assertMatchesRegularExpression( '/id="bfa-pro-kit-controls" hidden/', $empty );
+		$this->pro->find_kits( 'SYNTHETIC-TOKEN' );
+		$requests = $this->api->requests;
+		ob_start();
+		$plugin->pro_settings();
+		$saved = ob_get_clean();
+		$this->assertStringContainsString( 'data-token-saved="1"', $saved );
+		$this->assertMatchesRegularExpression( '/id="bfa-pro-token-entry" hidden/', $saved );
+		$this->assertDoesNotMatchRegularExpression( '/id="bfa-pro-kit-controls"[^>]*hidden/', $saved );
+		$this->assertDoesNotMatchRegularExpression( '/id="bfa-pro-saved"[^>]*hidden/', $saved );
+		$this->assertStringNotContainsString( 'SYNTHETIC-', $saved );
+		$this->assertSame( $requests, $this->api->requests );
+	}
 	public function test_credentials_are_encrypted_non_autoloaded_and_never_in_status_or_html() {
 		$this->pro->start( 'KIT_ID', 'SYNTHETIC-ACCOUNT-NOT-A-CREDENTIAL' );
 		$state = wp_json_encode( Better_Font_Awesome_Pro::state() );

@@ -218,10 +218,10 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	await expect( page.locator( '#default_block_icon_style' ) ).toBeVisible();
 	await page.getByRole( 'combobox', { name: 'Font Awesome source' } ).selectOption( 'automatic' );
 	await expect( page.locator( '#bfa-pro-panel' ) ).toBeHidden();
-	await expect( page.locator( '#bfa-provider-help' ) ).toHaveText( 'Loads free icons from a CDN using your selected version.' );
+	await expect( page.locator( '#bfa-provider-help' ) ).toHaveText( 'Loads free icons from a CDN and automatically updates to the latest version.' );
 	await expect( page.locator( '#include_v4_shim' ) ).toBeVisible();
 	await page.locator( '#bfa-provider' ).selectOption( 'bundled-local' );
-	await expect( page.locator( '#bfa-provider-help' ) ).toHaveText( 'Serves the bundled free icons from your own site. No CDN requests.' );
+	await expect( page.locator( '#bfa-provider-help' ) ).toHaveText( 'Serves bundled free icons from your site. No CDN requests or automatic icon updates.' );
 	await page.getByRole( 'combobox', { name: 'Font Awesome source' } ).selectOption( 'kit-css' );
 	expect( operations ).not.toContain( 'find' );
 	expect( operations ).not.toContain( 'connect' );
@@ -317,6 +317,26 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	await expect( refreshList.locator( '.bfa-action-label' ) ).toHaveCSS( 'text-decoration-line', 'underline' );
 	await expect( refreshList.locator( '.dashicons' ) ).toHaveCSS( 'text-decoration-line', 'none' );
 	await page.screenshot( { path: test.info().outputPath( 'active-kit-settings.png' ), fullPage: true } );
+	// Activation reload must keep saved-token/kit rows visible before AJAX status arrives.
+	let releaseStatus;
+	const statusGate = new Promise( resolve => { releaseStatus = resolve; } );
+	const holdStatus = async route => {
+		if ( new URLSearchParams( route.request().postData() ).get( 'operation' ) === 'status' ) { await statusGate; }
+		await route.continue();
+	};
+	await page.route( '**/admin-ajax.php', holdStatus );
+	await page.reload();
+	await expect( page.locator( '#bfa-pro-kit-controls' ) ).toBeVisible();
+	await expect( page.getByText( 'API token saved', { exact: true } ) ).toBeVisible();
+	await expect( token ).toBeHidden();
+	await expect( select ).toBeDisabled();
+	const waitingRow = await page.locator( '#bfa-pro-kit-controls' ).boundingBox();
+	releaseStatus();
+	await expect( select ).toHaveValue( 'KIT_ID' );
+	await expect( select ).toBeEnabled();
+	const readyRow = await page.locator( '#bfa-pro-kit-controls' ).boundingBox();
+	expect( readyRow.y ).toBeCloseTo( waitingRow.y, 0 );
+	await page.unroute( '**/admin-ajax.php', holdStatus );
 	const connectedRequests = operations.filter( operation => operation === 'connect' ).length;
 	await refreshList.click();
 	await expect( page.locator( '#bfa-pro-spinner' ) ).not.toHaveClass( /is-active/ );
@@ -388,13 +408,22 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	const discoveriesBeforeDisconnect = operations.filter( operation => operation === 'find' ).length;
 	await expect( page.locator( '#bfa-pro-kit-details' ) ).toBeHidden();
 	// A failed unset restores the active selection and keeps its assets.
+	let releaseDisconnect;
+	const disconnectGate = new Promise( resolve => { releaseDisconnect = resolve; } );
 	const failDisconnect = async route => {
 		if ( new URLSearchParams( route.request().postData() ).get( 'operation' ) === 'disconnect-kit' ) {
+			await disconnectGate;
 			await route.fulfill( { status: 500, json: { success: false, data: { message: 'Synthetic disconnect failure.' } } } );
 		} else { await route.continue(); }
 	};
 	await page.route( '**/admin-ajax.php', failDisconnect );
 	await select.selectOption( '' );
+	await expect( select ).toBeDisabled();
+	await expect( select ).toHaveAttribute( 'aria-busy', 'true' );
+	await expect( page.locator( '#bfa-pro-kit-spinner' ) ).not.toHaveClass( /is-active/ );
+	await expect( page.locator( '#bfa-pro-status' ) ).toHaveClass( /screen-reader-text/ );
+	await expect( page.locator( '#bfa-pro-status' ) ).toHaveText( 'Disconnecting kit...' );
+	releaseDisconnect();
 	await expect( page.locator( '#bfa-pro-status' ) ).toHaveText( 'Synthetic disconnect failure.' );
 	await expect( retry ).toBeHidden();
 	await expect( select ).toHaveValue( 'KIT_ID' );
