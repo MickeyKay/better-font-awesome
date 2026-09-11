@@ -141,12 +141,12 @@
 
 /* A fitted vector avoids the font chevron's extra horizontal side bearings. */
 .bfa-details-caret {
-	width: 8px;
-	height: 12px;
+	width: 6px;
+	height: 9px;
 	flex: none;
 	fill: none;
 	stroke: currentColor;
-	stroke-width: 2;
+	stroke-width: 1.5;
 	stroke-linecap: round;
 	stroke-linejoin: round;
 }

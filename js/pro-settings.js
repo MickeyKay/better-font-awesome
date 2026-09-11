@@ -14,7 +14,6 @@
 	const details = document.getElementById( 'bfa-pro-kit-details' );
 	const detailsToggle = document.getElementById( 'bfa-pro-kit-details-toggle' );
 	const facts = document.getElementById( 'bfa-pro-kit-facts' );
-	const disconnectKit = document.getElementById( 'bfa-pro-disconnect-kit' );
 	const warning = document.getElementById( 'bfa-pro-kit-warning' );
 	const provider = document.getElementById( 'bfa-provider' );
 	const panel = document.getElementById( 'bfa-pro-panel' );
@@ -57,6 +56,7 @@
 		clearTimeout( timer );
 		retry.hidden = true;
 		if ( [ 'connect', 'refresh' ].includes( operation ) ) { retryAction = { operation, data }; }
+		if ( operation === 'disconnect-kit' ) { retryAction = undefined; }
 		connecting = operation !== 'status';
 		selectionChanged();
 		if ( operation !== 'status' ) {
@@ -102,6 +102,7 @@
 		} catch ( error ) {
 			if ( mine === generation ) {
 				connecting = false;
+				if ( operation === 'disconnect-kit' && activeKit ) { select.value = activeKit.id; }
 				retry.hidden = ! retryAction;
 				kitSpinner.classList.remove( 'is-active' );
 				status.classList.remove( 'screen-reader-text' );
@@ -112,11 +113,8 @@
 	}
 	function selectionChanged() {
 		const kit = account.kits.find( ( item ) => item.id === select.value ) || ( activeKit && select.value === activeKit.id ? { ...activeKit, supported: true, details: activeKit } : null );
-		select.options[ 0 ].disabled = Boolean( activeKit );
-		select.disabled = connecting || needsFreeSave() || ! account.authorized || ! account.kits.length;
+		select.disabled = connecting || needsFreeSave() || ( ! activeKit && ( ! account.authorized || ! account.kits.length ) );
 		retry.disabled = connecting || needsFreeSave();
-		disconnectKit.hidden = ! activeKit || select.value !== activeKit.id;
-		disconnectKit.disabled = connecting || needsFreeSave();
 		showDetails( kit );
 		warning.textContent = kit && ! kit.supported ? kit.reason || __( 'This kit is unsupported. See Kit details for requirements.', 'better-font-awesome' ) : '';
 	}
@@ -162,7 +160,7 @@
 		retryAction = undefined;
 		retry.hidden = true;
 		account = { id: '', kits: [] };
-		select.replaceChildren( new Option( __( 'Choose a kit', 'better-font-awesome' ), '' ) );
+		select.replaceChildren( new Option( __( 'No kit selected', 'better-font-awesome' ), '' ) );
 		if ( activeKit ) {
 			select.add( new Option( activeLabel( activeKit.name ), activeKit.id, false, true ) );
 		}
@@ -175,7 +173,7 @@
 		hasSavedToken = value.saved;
 		tokenControls();
 		clearChoices();
-		select.replaceChildren( new Option( __( 'Choose a kit', 'better-font-awesome' ), '' ) );
+		select.replaceChildren( new Option( __( 'No kit selected', 'better-font-awesome' ), '' ) );
 		account = value;
 		account.kits.forEach( ( kit ) => {
 			let label = kit.name || __( 'Unnamed kit', 'better-font-awesome' );
@@ -241,7 +239,10 @@
 		detailsToggle.setAttribute( 'aria-expanded', 'false' );
 		selectionChanged();
 		const kit = account.kits.find( item => item.id === select.value );
-		if ( kit?.supported && ! select.disabled ) {
+		if ( ! select.value && activeKit && ! select.disabled ) {
+			select.after( kitFeedback );
+			run( 'disconnect-kit' );
+		} else if ( kit?.supported && ! select.disabled ) {
 			select.after( kitFeedback );
 			run( 'connect', { kit: kit.id, id: account.id } );
 		}
@@ -299,7 +300,12 @@
 		find.disabled = needsFreeSave();
 		refreshKits.disabled = needsFreeSave();
 		form.querySelector( '[data-pro-action="refresh"]' ).disabled = needsFreeSave();
-		document.getElementById( 'bfa-provider-help' ).textContent = needsFreeSave() ? __( 'Save Settings to switch off local delivery before setting up a hosted kit.', 'better-font-awesome' ) : '';
+		const descriptions = {
+			automatic: __( 'Loads free icons from a CDN using your selected version.', 'better-font-awesome' ),
+			'bundled-local': __( 'Serves the bundled free icons from your own site. No CDN requests.', 'better-font-awesome' ),
+			'kit-css': __( 'Loads icons from Font Awesome using your Pro subscription and kit.', 'better-font-awesome' ),
+		};
+		document.getElementById( 'bfa-provider-help' ).textContent = needsFreeSave() ? __( 'Save Settings to switch off local delivery before setting up a hosted kit.', 'better-font-awesome' ) : descriptions[ mode ];
 		selectionChanged();
 	}
 	if ( window.location.hash === '#bfa-kit' ) { provider.value = 'kit-css'; }

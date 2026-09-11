@@ -943,9 +943,9 @@ class Better_Font_Awesome_Plugin {
 			<td><select id="bfa-provider" data-saved="<?php echo esc_attr( $mode ); ?>" aria-describedby="bfa-provider-help">
 			<?php
 			foreach ( array(
-				'automatic'     => __( 'Automatic Free (CDN)', 'better-font-awesome' ),
-				'bundled-local' => __( 'Local Free (no CDN)', 'better-font-awesome' ),
-				'kit-css'       => __( 'Hosted Pro kit', 'better-font-awesome' ),
+				'automatic'     => __( 'Free icons (CDN)', 'better-font-awesome' ),
+				'bundled-local' => __( 'Free icons (no CDN)', 'better-font-awesome' ),
+				'kit-css'       => __( 'Pro icons (your kit)', 'better-font-awesome' ),
 			) as $value => $label ) :
 				?>
 				<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $mode, $value ); ?>><?php echo esc_html( $label ); ?></option>
@@ -991,15 +991,14 @@ class Better_Font_Awesome_Plugin {
 			</td></tr>
 			<tr id="bfa-pro-kit-controls"><th scope="row"><label for="bfa-pro-kit"><?php esc_html_e( 'Kit', 'better-font-awesome' ); ?></label></th><td>
 				<div class="bfa-controls">
-				<select id="bfa-pro-kit" aria-describedby="bfa-pro-selection-help bfa-pro-kit-warning" disabled><option value=""><?php esc_html_e( 'Choose a kit', 'better-font-awesome' ); ?></option></select>
+				<select id="bfa-pro-kit" aria-describedby="bfa-pro-selection-help bfa-pro-kit-warning" disabled><option value=""><?php esc_html_e( 'No kit selected', 'better-font-awesome' ); ?></option></select>
 				<button id="bfa-pro-retry" type="button" class="button-link bfa-action" hidden><span class="dashicons dashicons-update" aria-hidden="true"></span> <span class="bfa-action-label"><?php esc_html_e( 'Retry connection', 'better-font-awesome' ); ?></span></button>
 				<span id="bfa-pro-kit-feedback" class="bfa-feedback"><span id="bfa-pro-kit-spinner" class="spinner" aria-hidden="true"></span><span id="bfa-pro-status" role="status" aria-live="polite" aria-atomic="true"></span></span>
 				<button id="bfa-pro-refresh-kits" type="button" class="button-link bfa-action"><span class="dashicons dashicons-update" aria-hidden="true"></span> <span class="bfa-action-label"><?php esc_html_e( 'Refresh kits', 'better-font-awesome' ); ?></span></button>
 				<button type="button" class="button-link bfa-action" data-pro-action="refresh" hidden><span class="dashicons dashicons-update" aria-hidden="true"></span> <span class="bfa-action-label"><?php esc_html_e( 'Refresh active kit', 'better-font-awesome' ); ?></span></button>
-				<button id="bfa-pro-disconnect-kit" type="button" class="button-link bfa-action" data-pro-action="disconnect-kit" hidden><span class="dashicons dashicons-dismiss" aria-hidden="true"></span> <span class="bfa-action-label"><?php esc_html_e( 'Disconnect kit', 'better-font-awesome' ); ?></span></button>
 				<button id="bfa-pro-kit-details-toggle" type="button" class="button-link bfa-action" aria-expanded="false" aria-controls="bfa-pro-kit-details" hidden><svg class="bfa-details-caret" viewBox="0 0 8 12" aria-hidden="true" focusable="false"><path class="bfa-caret-closed" d="M1 1 7 6 1 11"/><path class="bfa-caret-open" d="m1 4 3 4 3-4"/></svg> <span class="bfa-action-label"><?php esc_html_e( 'Kit details', 'better-font-awesome' ); ?></span></button>
 				</div>
-				<span id="bfa-pro-selection-help" class="screen-reader-text"><?php esc_html_e( 'Selecting a kit starts its connection.', 'better-font-awesome' ); ?></span>
+				<span id="bfa-pro-selection-help" class="screen-reader-text"><?php esc_html_e( 'Selecting a kit connects it immediately. No kit selected disconnects it and keeps your saved token.', 'better-font-awesome' ); ?></span>
 				<p id="bfa-pro-kit-warning" class="description" role="status" aria-live="polite" aria-atomic="true"></p>
 				<div id="bfa-pro-kit-details" hidden>
 					<dl id="bfa-pro-kit-facts"></dl><p id="bfa-pro-kit-help" class="description" hidden></p>
