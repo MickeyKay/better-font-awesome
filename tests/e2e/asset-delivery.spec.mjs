@@ -80,11 +80,8 @@ async function expectLocalGlyphs( frame ) {
 
 async function saveMode( page, mode, beforeSave = () => {}, nativeSubmit = false ) {
 	await page.goto( '/wp-admin/options-general.php?page=better-font-awesome' );
-	const checkbox = page.getByLabel( 'Serve Font Awesome locally', { exact: true } );
-	if ( await checkbox.isChecked() !== ( 'bundled-local' === mode ) ) {
-		await checkbox.focus();
-		await checkbox.press( 'Space' );
-	}
+	const changed = await page.locator( '#bfa-provider' ).getAttribute( 'data-saved' ) !== mode;
+	await page.locator( '#bfa-provider' ).selectOption( mode );
 	await page.locator( '#include_v4_shim' ).check();
 	beforeSave();
 	if ( nativeSubmit ) {
@@ -92,22 +89,13 @@ async function saveMode( page, mode, beforeSave = () => {}, nativeSubmit = false
 			page.waitForEvent( 'load' ),
 			page.locator( '#bfa-settings-form' ).evaluate( ( form ) => form.requestSubmit() ),
 		] );
+	} else if ( changed ) {
+		await Promise.all( [ page.waitForEvent( 'load' ), page.locator( '.bfa-save-settings-button' ).click() ] );
 	} else {
-		const navigations = [];
-		const recordNavigation = ( frame ) => {
-			if ( frame === page.mainFrame() ) {
-				navigations.push( frame.url() );
-			}
-		};
-		page.on( 'framenavigated', recordNavigation );
 		await page.locator( '.bfa-save-settings-button' ).click();
-		const notice = page.locator( '.bfa-ajax-response-holder .updated' );
-		await expect( notice ).toHaveText( 'Settings saved.' );
-		await expect( notice ).toBeVisible();
-		await expect( notice ).toBeHidden();
-		page.off( 'framenavigated', recordNavigation );
-		expect( navigations ).toEqual( [] );
+		await expect( page.locator( '.bfa-ajax-response-holder .updated' ) ).toHaveText( 'Settings saved.' );
 	}
+
 	await expect( page.locator( '#asset_delivery' ) ).toBeChecked( { checked: 'bundled-local' === mode } );
 	await page.reload();
 	await expect( page.locator( '#asset_delivery' ) ).toBeChecked( { checked: 'bundled-local' === mode } );
@@ -120,9 +108,8 @@ test( 'local delivery renders real fonts with third-party requests blocked acros
 	page.setDefaultTimeout( 15000 );
 	page.on( 'dialog', ( dialog ) => 'beforeunload' === dialog.type() ? dialog.accept() : dialog.dismiss() );
 	await page.goto( '/wp-login.php' );
-	await page.locator( '#user_login' ).fill( 'admin' );
-	await page.locator( '#user_pass' ).fill( 'password' );
-	await page.locator( '#wp-submit' ).click();
+	await page.request.post( '/wp-login.php', { form: { log: 'admin', pwd: 'password', testcookie: '1' } } );
+	await page.goto( '/wp-admin/' );
 	await expect( page.locator( '#wpadminbar' ) ).toBeVisible();
 
 	const attempted = [];

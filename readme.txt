@@ -30,11 +30,11 @@ A built-in fallback means icons work immediately. Better Font Awesome automatica
 
 = Native Icon block =
 
-In the Block Editor, insert the **Font Awesome Icon** block. Choose an icon once in the Icon picker, then select an available Free style in the Style control. Use WordPress controls for font size, text color, margin, padding, and left, center, or right alignment. Add an accessible label when the icon communicates meaning, or leave it empty for a decorative icon.
+In the Block Editor, insert the **Font Awesome Icon** block. Choose an icon once in the Icon picker, then select an available family/style in the Appearance control. Use WordPress controls for font size, text color, margin, padding, and left, center, or right alignment. Add an accessible label when the icon communicates meaning, or leave it empty for a decorative icon.
 
-Set **Default block icon style** to Solid or Regular under **Settings > Better Font Awesome**. New blocks added through the standard inserter follow **Site default**. Existing icons retain their styling unless you explicitly choose **Site default**; individual blocks can override it with an available style.
+Set **Default icon appearance** to Classic - Solid, Classic - Regular, or an available connected-kit appearance under **Settings > Better Font Awesome**. New blocks added through the standard inserter follow **Site default**. Existing icons retain their styling unless you explicitly choose **Site default**; individual blocks can override it with an available style.
 
-If the default style is unavailable for an icon, the block uses Solid, then Regular, then Brands, choosing the first available style. Brand-only icons stay Brands. The Style control shows the effective style. Missing icons and unavailable explicitly saved styles keep their saved selections until you change them.
+If the default appearance is unavailable for an icon, the block tries the Classic styles first, then an available non-Classic appearance. Brand-only icons stay Brands. The Appearance control shows the effective style. Missing icons and unavailable explicitly saved styles keep their saved selections until you change them.
 
 Changing the default updates inherited icons without rewriting posts. Refresh page caches and reopen an already open editor to see the change. If you downgrade to an older BFA version, inherited styles render as Solid. Choose explicit supported styles before downgrading if their appearance must stay the same.
 
@@ -58,11 +58,11 @@ You can also use Font Awesome classes in HTML or CSS. Unlike shortcodes, HTML cl
 
 == Automatic icon updates and built-in fallback ==
 
-Font Awesome Free CSS, fonts, and icon data ship with the plugin, so icons render immediately after activation. With **Serve Font Awesome locally** unchecked (the default), a scheduled task checks for the latest compatible release in the background and uses it only after validation. If a check is delayed or fails, the last validated release or built-in fallback stays active.
+Font Awesome Free CSS, fonts, and icon data ship with the plugin, so icons render immediately after activation. With **Automatic Free (CDN)** selected (the default), a scheduled task checks for the latest compatible release in the background and uses it only after validation. If a check is delayed or fails, the last validated release or built-in fallback stays active.
 
 = Optional local delivery =
 
-Under **Settings > Better Font Awesome**, check **Serve Font Awesome locally** to serve the bundled Font Awesome 7 Free catalog, CSS, compatibility styles, and fonts from your site. This mode disables BFA background metadata and asset-validation requests. New icons arrive through plugin updates. It never falls back to third-party assets if bundled files are unavailable.
+Under **Settings > Better Font Awesome**, select **Local Free** and save settings to serve the bundled Font Awesome 7 Free catalog, CSS, compatibility styles, and fonts from your site. This mode disables BFA background metadata and asset-validation requests. New icons arrive through plugin updates. It never falls back to third-party assets if bundled files are unavailable.
 
 The bundled catalog may be older than a previously adopted automatic release. Icons introduced after the bundled version will not render until a plugin update includes them or you switch back to automatic delivery. Existing content and stored metadata are preserved; switching back reuses valid metadata and schedules a background check when needed. Settings saving does not wait for remote metadata. A refresh already running when the setting changes cannot be retroactively canceled.
 
@@ -70,7 +70,7 @@ The settings page reports the effective delivery mode. If a theme, plugin, or in
 
 == Compatibility and conflicts ==
 
-Established Font Awesome 4 and 5 shortcode names and classes are supported through compatible aliases and styles, plus an optional Font Awesome 4 CSS shim. Font Awesome Pro and a separate Font Awesome 6 channel are not provided.
+Established Font Awesome 4 and 5 shortcode names and classes are supported through compatible aliases and styles, plus an optional Font Awesome 4 CSS shim. Hosted v7 Pro Kits are available as an optional connection. A separate Font Awesome 6 channel is not provided.
 
 If a theme or another plugin also loads Font Awesome, go to **Settings > Better Font Awesome** and enable **Remove existing Font Awesome**. This can reduce duplicate or conflicting styles, but no automatic conflict tool can cover every theme or plugin integration.
 
@@ -83,11 +83,13 @@ If a theme or another plugin also loads Font Awesome, go to **Settings > Better 
 
 = Does Better Font Awesome support Font Awesome Pro? =
 
-No. Better Font Awesome supports Font Awesome Free.
+You can connect an existing v7 Pro By Style Kit by choosing **Font Awesome kit** in the first **Font Awesome source** dropdown under **Settings > Better Font Awesome**. Only relevant delivery controls appear. Use Web Fonts, CSS-only embedding, compatibility, and Classic Solid, Regular and Brands, with optional Light, Thin and official non-Classic families. Choose a combined family/style Appearance per block or as the site default. Enter an account API token with Read Kits Data permission, click Connect account, then select a named Kit to start connecting it. Connecting the account authorizes the account without activating a Kit or fetching its icon catalog. **API token saved** confirms storage. Use **Update token**, **Cancel**, **Refresh Kits**, or **Delete token** to manage authorization. Refresh Kits reuses the saved token without exposing it. Connect and Refresh active Kit prepare icons immediately with progress, even when WP-Cron is disabled. Automatic Free remains the default. Pro requires hosted delivery; local Pro hosting, SVG Kits, unknown families, By Icon Kits and custom uploads are not supported.
 
 = Do visitors download fonts from another service? =
 
-Check **Serve Font Awesome locally** to keep BFA's bundled CSS and fonts on your site, subject to your site's URL-rewriting infrastructure. In automatic mode, the packaged fallback also loads from your site. If the plugin validates and adopts a newer compatible release, visitors' browsers may load that release's selected CSS and font files from cdnjs.
+Select **Local (no CDN)** and save settings to keep BFA's bundled CSS and fonts on your site, subject to your site's URL-rewriting infrastructure. In automatic mode, the packaged fallback also loads from your site. If the plugin validates and adopts a newer compatible release, visitors' browsers may load that release's selected CSS and font files from cdnjs.
+
+Hosted Pro loads CSS and fonts from Font Awesome. Selecting Local Free or Automatic Free and saving pauses Pro while preserving the saved connection. Choosing Font Awesome kit reveals connection controls; selecting a Kit or using Refresh active Kit validates and activates Pro. Delete token confirms and forgets the token and catalog. Saved icon identities remain unchanged, but unavailable Pro icons may be blank. Cached metadata cannot guarantee entitlement or hosted asset availability.
 
 = Will existing Font Awesome 4 and 5 content keep working? =
 
@@ -102,6 +104,7 @@ Enable **Remove existing Font Awesome** under **Settings > Better Font Awesome**
 Better Font Awesome works immediately from its built-in Font Awesome Free fallback. In automatic mode, it uses the following external services for background updates or for assets from a newer validated release. Effective local mode makes no BFA/BFAL requests to these services. Other site components and site CDN infrastructure remain outside this setting. No Font Awesome account or API token is required for the Free channel.
 
 * **Font Awesome GraphQL API** (`https://api.fontawesome.com`) - an asynchronous server-side WP-Cron worker requests the latest public compatible Font Awesome Free release version, icon names, aliases, families, and styles. Review the [Font Awesome terms of service](https://fontawesome.com/tos) and [privacy policy](https://fontawesome.com/privacy).
+* **Optional hosted Pro Kits** (`https://kit.fontawesome.com`, including imported CSS/fonts from `https://ka-p.fontawesome.com`) - browsers request hosted assets only when Pro is explicitly active. Explicit Connect/Refresh steps and scheduled refresh send server-side account/bearer credentials to `https://api.fontawesome.com/token` and the Kit-scoped GraphQL API for selected configuration and icon metadata. Tokens are encrypted on your server, never sent to editor configuration. Font Awesome domain restrictions, licensing and usage limits apply. BFA does not change your account or redistribute Pro assets. See the [Kit documentation](https://docs.fontawesome.com/web/setup/use-kit), [Pro license](https://fontawesome.com/license), [terms](https://fontawesome.com/tos) and [privacy policy](https://fontawesome.com/privacy).
 * **npm registry** (`https://registry.npmjs.org/%40fortawesome%2Ffontawesome-free/{version}`) - when Font Awesome reports a newer candidate, the same background worker confirms that exact official Free package version, name, and license. Review the [npm terms](https://docs.npmjs.com/policies/terms) and [privacy notice](https://docs.npmjs.com/policies/privacy).
 * **cdnjs asset service** (`https://cdnjs.cloudflare.com/ajax/libs/font-awesome/{version}/`) - the background worker downloads an allowlisted set of exact-version CSS and WOFF2 files for validation. BFAL does not call a separate cdnjs catalog API. After a newer release passes every check, visitors' browsers may request its selected CSS and referenced font files from this host. Review the [cdnjs service information](https://cdnjs.com/about), [Cloudflare website terms](https://www.cloudflare.com/website-terms/), and [Cloudflare privacy policy](https://www.cloudflare.com/privacypolicy/).
 * **jsDelivr asset service** (`https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@{version}/`) - the background worker independently downloads the same allowlisted files and requires their bytes to match cdnjs. BFA does not select jsDelivr as the browser runtime host. Review the [jsDelivr terms and policies](https://www.jsdelivr.com/terms).
@@ -109,7 +112,7 @@ Better Font Awesome works immediately from its built-in Font Awesome Free fallba
 
 Normal frontend, administrator, REST, editor, settings, shortcode, picker, and getter requests do not perform BFA or BFAL metadata discovery or candidate asset-validation HTTP. Separately, WordPress core may fetch a registered external editor stylesheet while constructing Block Editor assets; that core behavior is not a BFA or BFAL metadata-validation request.
 
-Server-side provider requests expose ordinary connection data such as the server IP address, requested URL and version, timing, and HTTP headers. WordPress's default HTTP user agent may include the WordPress version and site URL. Browser asset requests can expose ordinary connection data such as the visitor's IP address, user agent, referring page, and requested asset. BFA does not add post content, user content, Font Awesome credentials, or an API token to these requests. In automatic mode, if discovery, publication, transport, or validation fails, BFA continues using the packaged fallback or validated last-known-good release.
+Server-side provider requests expose ordinary connection data such as the server IP address, requested URL and version, timing, and HTTP headers. WordPress's default HTTP user agent may include the WordPress version and site URL. Browser asset requests can expose ordinary connection data such as the visitor's IP address, user agent, referring page, and requested asset. BFA does not send post or user content to these services. Credentials are used only for the explicit or scheduled server-side Pro API work described above, never browser asset requests or the Free update path. In automatic mode, if discovery, publication, transport, or validation fails, BFA continues using the packaged fallback or validated last-known-good release.
 
 == Support ==
 

@@ -1004,9 +1004,9 @@ test( 'unique Icon picker and Free Style control synchronize, undo, persist, and
 	} );
 	const original = await readIconAttributes( page, clientId );
 	const iconControl = page.getByLabel( 'Icon', { exact: true } );
-	const styleControl = page.getByRole( 'combobox', { name: 'Style', exact: true } );
+	const styleControl = page.getByRole( 'combobox', { name: 'Appearance', exact: true } );
 	const labelControl = page.getByLabel( 'Accessible label', { exact: true } );
-	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Solid)', 'Solid', 'Regular' ] );
+	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Classic - Solid)', 'Classic - Solid', 'Classic - Regular' ] );
 	await expect( styleControl ).toHaveValue( 'solid' );
 	const catalogLabel = ( name ) => page.evaluate( ( name ) =>
 		window.bfaBlockEditor.icons.find( ( icon ) => icon.name === name ).label.replace( / \((?:solid|regular|brands)\)$/, '' ), name );
@@ -1033,12 +1033,12 @@ test( 'unique Icon picker and Free Style control synchronize, undo, persist, and
 	// Style-labelled queries find unique icons without changing the saved style.
 	await iconControl.fill( 'regular' );
 	await iconControl.press( 'Escape' );
-	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Solid)', 'Solid', 'Regular' ] );
+	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Classic - Solid)', 'Classic - Solid', 'Classic - Regular' ] );
 	await labelControl.focus();
 	await labelControl.press( 'Shift+Tab' );
 	await expect( styleControl ).toBeFocused();
-	// Native select type-ahead works in Chromium on both macOS and Linux.
-	await styleControl.press( 'r' );
+	// Native type-ahead includes the family prefix in the combined label.
+	await styleControl.pressSequentially( 'Classic - R' );
 	await styleControl.press( 'Tab' );
 	await expect( labelControl ).toBeFocused();
 	await expect( styleControl ).toHaveValue( 'regular' );
@@ -1069,7 +1069,7 @@ test( 'unique Icon picker and Free Style control synchronize, undo, persist, and
 	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Brands)', 'Brands' ] );
 	await chooseIcon( 'arrow-right', 'solid' );
 	await expect( styleControl ).toBeEnabled();
-	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Solid)', 'Solid' ] );
+	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Classic - Solid)', 'Classic - Solid' ] );
 	await chooseIcon( 'heart', 'solid' );
 	await expect( styleControl ).toBeEnabled();
 	await styleControl.selectOption( 'regular' );
@@ -1108,8 +1108,8 @@ test( 'unique Icon picker and Free Style control synchronize, undo, persist, and
 test( 'Free Style control preserves unavailable selections until an explicit choice', async ( { page } ) => {
 	const clientId = await openStyleEditor( page, { iconName: 'heart', iconStyle: 'solid', label: 'Keep me', iconJustification: 'center' } );
 	const original = await readIconAttributes( page, clientId );
-	const styleControl = page.getByRole( 'combobox', { name: 'Style', exact: true } );
-	const unavailable = page.getByText( 'This icon or style is unavailable in the current catalog.', { exact: true } );
+	const styleControl = page.getByRole( 'combobox', { name: 'Appearance', exact: true } );
+	const unavailable = page.getByText( 'This icon or appearance is unavailable in the current catalog.', { exact: true } );
 	for ( const selection of [
 		{ iconName: 'not-in-the-catalog', iconStyle: 'solid' },
 		{ iconName: 'github', iconStyle: 'regular' },
@@ -1171,7 +1171,7 @@ test( 'catalog changes and missing icons preserve saved content until explicit r
 	const clientId = await openStyleEditor( page, { iconName: 'not-in-the-catalog', iconStyle: 'legacy-style', label: 'Keep me', iconJustification: 'right' } );
 	const original = await readIconAttributes( page, clientId );
 	const iconControl = page.getByLabel( 'Icon', { exact: true } );
-	const styleControl = page.getByRole( 'combobox', { name: 'Style', exact: true } );
+	const styleControl = page.getByRole( 'combobox', { name: 'Appearance', exact: true } );
 	await expect( styleControl ).toHaveValue( 'legacy-style' );
 	const catalog = await page.evaluate( () => window.bfaBlockEditor.icons );
 	await page.evaluate( () => { window.bfaBlockEditor.icons = []; } );
@@ -1198,7 +1198,7 @@ test( 'catalog changes and missing icons preserve saved content until explicit r
 
 async function saveDefaultStyle( page, style, standardForm = false ) {
 	await page.goto( '/wp-admin/options-general.php?page=better-font-awesome' );
-	await page.getByLabel( 'Default block icon style', { exact: true } ).selectOption( style );
+	await page.getByLabel( 'Default icon appearance', { exact: true } ).selectOption( style );
 	if ( standardForm ) {
 		await Promise.all( [
 			page.waitForURL( /settings-updated=true/ ),
@@ -1209,7 +1209,7 @@ async function saveDefaultStyle( page, style, standardForm = false ) {
 		await expect( page.locator( '.bfa-ajax-response-holder' ) ).toContainText( 'Settings saved.' );
 		await page.reload();
 	}
-	await expect( page.getByLabel( 'Default block icon style', { exact: true } ) ).toHaveValue( style );
+	await expect( page.getByLabel( 'Default icon appearance', { exact: true } ) ).toHaveValue( style );
 }
 
 test( 'site default insertion, inheritance, overrides, and saved legacy blocks retain their intent', async ( { page } ) => {
@@ -1228,14 +1228,14 @@ test( 'site default insertion, inheritance, overrides, and saved legacy blocks r
 			window.wp.data.dispatch( 'core/edit-post' ).openGeneralSidebar( 'edit-post/block' );
 			return block.clientId;
 		} );
-		const styleControl = page.getByRole( 'combobox', { name: 'Style', exact: true } );
+		const styleControl = page.getByRole( 'combobox', { name: 'Appearance', exact: true } );
 		const iconControl = page.getByLabel( 'Icon', { exact: true } );
 		await expect( styleControl ).toHaveValue( 'site-default' );
-		await expect( styleControl.locator( 'option:checked' ) ).toHaveText( 'Site default (Regular)' );
+		await expect( styleControl.locator( 'option:checked' ) ).toHaveText( 'Site default (Classic - Regular)' );
 		for ( const [ label, name, prefix, effective ] of [
-			[ 'Arrow Right', 'arrow-right', 'fas', 'Solid' ],
+			[ 'Arrow Right', 'arrow-right', 'fas', 'Classic - Solid' ],
 			[ 'Github', 'github', 'fab', 'Brands' ],
-			[ 'Heart', 'heart', 'far', 'Regular' ],
+			[ 'Heart', 'heart', 'far', 'Classic - Regular' ],
 		] ) {
 			await iconControl.fill( label );
 			const result = page.getByRole( 'listbox' ).getByRole( 'option', { name: label, exact: true } );
@@ -1296,7 +1296,7 @@ test( 'site default insertion, inheritance, overrides, and saved legacy blocks r
 			window.wp.data.dispatch( 'core/block-editor' ).selectBlock( block.clientId );
 		} );
 		await expect( styleControl ).toHaveValue( 'site-default' );
-		await expect( styleControl.locator( 'option:checked' ) ).toHaveText( 'Site default (Solid)' );
+		await expect( styleControl.locator( 'option:checked' ) ).toHaveText( 'Site default (Classic - Solid)' );
 		await test.info().attach( 'site-default-selector', { body: await page.screenshot(), contentType: 'image/png' } );
 	} finally {
 		await saveDefaultStyle( page, 'solid' );
@@ -1308,7 +1308,7 @@ test( 'inherited blocks preserve intent when their active catalog becomes unavai
 	const before = await readIconAttributes( page, clientId );
 	const catalog = await page.evaluate( () => window.bfaBlockEditor.icons );
 	const iconControl = page.getByLabel( 'Icon', { exact: true } );
-	const styleControl = page.getByRole( 'combobox', { name: 'Style', exact: true } );
+	const styleControl = page.getByRole( 'combobox', { name: 'Appearance', exact: true } );
 	await page.evaluate( () => { window.bfaBlockEditor.icons = []; } );
 	await iconControl.fill( 'Heart' );
 	await expect( styleControl ).toBeDisabled();

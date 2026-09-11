@@ -115,6 +115,10 @@ class Better_Font_Awesome_Metadata_Manager {
 			return 'automatic' === self::effective_asset_delivery( $this->library );
 		}
 
+		$pro = class_exists( 'Better_Font_Awesome_Pro' ) ? Better_Font_Awesome_Pro::state() : array();
+		if ( ! empty( $pro['enabled'] ) && ! empty( $pro['active'] ) ) {
+			return false;
+		}
 		$options = maybe_unserialize( get_option( 'better-font-awesome_options', array() ) );
 		return ! is_array( $options ) || 'bundled-local' !== ( $options['asset_delivery'] ?? 'automatic' );
 	}

@@ -46,6 +46,12 @@ export default function Edit( { attributes, setAttributes } ) {
 	const [ filterValue, setFilterValue ] = useState( '' );
 	const catalog = getCatalog();
 	const siteDefault = window.bfaBlockEditor?.defaultIconStyle ?? 'solid';
+	/* translators: %d is the number of unique selectable Free icons. */
+	let catalogHelp = __( 'Search all %d available Font Awesome Free icons.', 'better-font-awesome' );
+	if ( window.bfaBlockEditor?.proCatalog ) {
+		/* translators: %d is the number of unique selectable Kit icons. */
+		catalogHelp = __( 'Search all %d available Font Awesome Kit icons.', 'better-font-awesome' );
+	}
 	const inherited = iconStyle === 'site-default';
 	const icons = useMemo( () => groupCatalog( catalog ), [ catalog ] );
 	const options = useMemo( () => {
@@ -64,6 +70,9 @@ export default function Edit( { attributes, setAttributes } ) {
 		solid: __( 'Solid', 'better-font-awesome' ),
 		regular: __( 'Regular', 'better-font-awesome' ),
 		brands: __( 'Brands', 'better-font-awesome' ),
+		light: __( 'Light', 'better-font-awesome' ),
+		thin: __( 'Thin', 'better-font-awesome' ),
+		...( window.bfaBlockEditor?.appearanceLabels ?? {} ),
 	};
 	const styleAvailable = availableStyles.includes( effectiveStyle );
 	const styleOptions = availableStyles.map( ( style ) => ( {
@@ -137,19 +146,12 @@ export default function Edit( { attributes, setAttributes } ) {
 								onChange={ onSelectIcon }
 								onFilterValueChange={ setFilterValue }
 								__experimentalRenderItem={ renderIconOption }
-								help={ sprintf(
-									/* translators: %d is the number of unique selectable icons. */
-									__(
-										'Search all %d available Font Awesome Free icons.',
-										'better-font-awesome'
-									),
-									icons.length
-								) }
+								help={ sprintf( catalogHelp, icons.length ) }
 							/>
 						</div>
 						<SelectControl
 							__nextHasNoMarginBottom
-							label={ __( 'Style', 'better-font-awesome' ) }
+							label={ __( 'Appearance', 'better-font-awesome' ) }
 							value={ iconStyle }
 							options={ styleOptions }
 							disabled={ availableStyles.length === 0 }
@@ -159,7 +161,7 @@ export default function Edit( { attributes, setAttributes } ) {
 								}
 							} }
 							help={ ! styleAvailable && __(
-								'This icon or style is unavailable in the current catalog.',
+								'This icon or appearance is unavailable in the current catalog.',
 								'better-font-awesome'
 							) }
 						/>

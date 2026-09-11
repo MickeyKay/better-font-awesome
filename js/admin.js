@@ -26,6 +26,7 @@
 			data = {
 				'action': 'bfa_save_options',
 				'default_block_icon_style': $bfaSettingsForm.find( '#default_block_icon_style' ).val(),
+				'provider_method': $( '#bfa-provider' ).val(),
 				'asset_delivery': $bfaSettingsForm.find( '#asset_delivery' ).is( ':checked' ) ? 'bundled-local' : 'automatic',
 				'bfa_nonce': nonce,
 				'include_v4_shim': include_v4_shim,
@@ -42,6 +43,7 @@
 
 				if ('success' == status) {
 					message = response;
+					document.dispatchEvent( new CustomEvent( 'bfa:settings-saved', { detail: { provider: data.provider_method } } ) );
 					messageClass = 'updated';
 				} else {
 					message = response.responseText;

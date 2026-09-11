@@ -34,3 +34,135 @@
 	text-align: center;
 	box-sizing: border-box;
 }
+
+/* Keep provider setup within native WordPress settings controls. */
+.bfa-settings [hidden],
+.bfa-settings .bfa-hidden-delivery {
+	display: none !important;
+}
+
+.bfa-token-saved {
+	margin-right: 12px;
+}
+
+.bfa-token-saved .dashicons {
+	color: #008a20;
+	vertical-align: middle;
+}
+
+.bfa-feedback .spinner {
+	display: none;
+	float: none;
+	margin: 0 8px 0 0;
+	vertical-align: middle;
+}
+
+.bfa-feedback .spinner.is-active {
+	display: inline-block;
+}
+
+#bfa-pro-kit {
+	max-width: 100%;
+}
+
+.bfa-controls {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px 20px;
+	min-height: 32px;
+}
+
+.bfa-feedback {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+/* Idle live regions remain accessible without adding extra gaps between controls. */
+.bfa-feedback:not(:has(.spinner.is-active)):has(> :last-child:empty),
+.bfa-feedback:has(> .screen-reader-text) {
+	position: absolute;
+}
+
+.bfa-settings button.bfa-action {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	text-decoration: none;
+}
+
+.bfa-settings button.bfa-action:hover .bfa-action-label {
+	text-decoration: underline;
+}
+
+.bfa-action .dashicons,
+#bfa-pro-token-help .dashicons {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+	vertical-align: text-bottom;
+}
+
+#bfa-pro-kit-warning:empty,
+#bfa-provider-help:empty {
+	display: none;
+}
+
+#bfa-pro-kit-details {
+	margin-top: 12px;
+	max-width: 560px;
+}
+
+#bfa-pro-kit-facts {
+	margin: 0;
+	border: 1px solid #c3c4c7;
+	background: #fff;
+}
+
+#bfa-pro-kit-facts > div {
+	display: grid;
+	grid-template-columns: minmax(100px, 2fr) 3fr;
+	gap: 12px;
+	padding: 9px 12px;
+}
+
+#bfa-pro-kit-facts > div + div {
+	border-top: 1px solid #dcdcde;
+}
+
+#bfa-pro-kit-facts dt {
+	font-weight: 600;
+}
+
+#bfa-pro-kit-facts dd ul,
+#bfa-pro-kit-facts dd li {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+#bfa-pro-kit-facts dd {
+	margin: 0;
+}
+
+/* A fitted vector avoids the font chevron's extra horizontal side bearings. */
+.bfa-details-caret {
+	width: 6px;
+	height: 9px;
+	flex: none;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.5;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.bfa-caret-open,
+#bfa-pro-kit-details-toggle[aria-expanded="true"] .bfa-caret-closed {
+	display: none;
+}
+
+#bfa-pro-kit-details-toggle[aria-expanded="true"] .bfa-caret-open {
+	display: inline;
+}

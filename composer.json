@@ -4,7 +4,7 @@
     "license": "GPL-2.0-or-later",
     "require": {
         "php": ">=7.4",
-        "mickey-kay/better-font-awesome-library": "3.1.0"
+        "mickey-kay/better-font-awesome-library": "dev-master#23646b105bf2d07b2650186ab46307c789dfd0cf"
     },
     "require-dev": {
         "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
