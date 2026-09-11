@@ -343,6 +343,44 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	await expect( select ).toHaveValue( 'KIT_ID' );
 	expect( operations.filter( operation => operation === 'connect' ) ).toHaveLength( connectedRequests );
 	await expect( token ).toHaveValue( '' );
+	// Refresh uses the same dropdown-adjacent progress through every acquisition phase.
+	await details.click();
+	await expect( page.locator( '#bfa-pro-kit-details' ) ).toBeVisible();
+	let releaseRefresh;
+	const refreshGate = new Promise( resolve => { releaseRefresh = resolve; } );
+	const refreshPhases = new Set();
+	const checkRefresh = async route => {
+		const operation = new URLSearchParams( route.request().postData() ).get( 'operation' );
+		if ( operation === 'refresh' ) { await refreshGate; }
+		if ( [ 'refresh', 'step' ].includes( operation ) ) {
+			await expect( page.locator( '#bfa-pro-kit + #bfa-pro-kit-feedback' ) ).toHaveCount( 1 );
+			await expect( page.locator( '#bfa-pro-kit-spinner' ) ).toHaveClass( /is-active/ );
+			await expect( page.locator( '#bfa-pro-status' ) ).not.toHaveClass( /screen-reader-text/ );
+			await expect( page.locator( '[data-pro-action="refresh"]' ) ).toBeDisabled();
+			const response = await route.fetch();
+			const result = await response.json();
+			if ( result.data?.pending ) { refreshPhases.add( result.data.phase ); }
+			await route.fulfill( { response } );
+		} else { await route.continue(); }
+	};
+	await page.route( '**/admin-ajax.php', checkRefresh );
+	await page.getByRole( 'button', { name: 'Refresh active kit', exact: true } ).click();
+	await expect( select ).toBeDisabled();
+	await expect( select ).toHaveValue( 'KIT_ID' );
+	await expect( details ).toHaveAttribute( 'aria-expanded', 'false' );
+	await expect( page.locator( '#bfa-pro-kit-details' ) ).toBeHidden();
+	await expect( page.locator( '#bfa-pro-kit + #bfa-pro-kit-feedback' ) ).toHaveCount( 1 );
+	const refreshingSelect = await select.boundingBox();
+	const refreshingFeedback = await page.locator( '#bfa-pro-kit-feedback' ).boundingBox();
+	expect( Math.abs( refreshingSelect.y + refreshingSelect.height / 2 - refreshingFeedback.y - refreshingFeedback.height / 2 ) ).toBeLessThan( 5 );
+	await page.screenshot( { path: test.info().outputPath( 'refresh-kit-loading.png' ), fullPage: true } );
+	releaseRefresh();
+	await expect( select ).toBeEnabled( { timeout: 60000 } );
+	await expect( page.locator( '#bfa-pro-status' ) ).toContainText( 'Connected:' );
+	await expect( page.locator( '#bfa-pro-kit-spinner' ) ).not.toHaveClass( /is-active/ );
+	await expect( page.locator( '[data-pro-action="refresh"]' ) ).toBeEnabled();
+	expect( [ ...refreshPhases ] ).toEqual( [ 'metadata', 'icons', 'free-coverage', 'verify' ] );
+	await page.unroute( '**/admin-ajax.php', checkRefresh );
 	// Failed selection/retry keeps the active Kit; unsupported choices issue no request.
 	await fixture( page, 'auth' );
 	await page.goto( settings );

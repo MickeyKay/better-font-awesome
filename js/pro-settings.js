@@ -54,6 +54,9 @@
 		const mine = ++generation;
 		const accountGeneration = discovery;
 		clearTimeout( timer );
+		if ( operation !== 'disconnect' ) { select.after( kitFeedback ); }
+		if ( [ 'connect', 'refresh' ].includes( operation ) ) { detailsToggle.setAttribute( 'aria-expanded', 'false' ); }
+		if ( operation === 'refresh' && activeKit ) { select.value = activeKit.id; }
 		retry.hidden = true;
 		if ( [ 'connect', 'refresh' ].includes( operation ) ) { retryAction = { operation, data }; }
 		if ( operation === 'disconnect-kit' ) { retryAction = undefined; }
@@ -121,6 +124,7 @@
 		select.disabled = connecting || needsFreeSave() || ( ! activeKit && ( ! account.authorized || ! account.kits.length ) );
 		select.setAttribute( 'aria-busy', String( connecting ) );
 		retry.disabled = connecting || needsFreeSave();
+		refreshActive.disabled = connecting || needsFreeSave();
 		showDetails( kit );
 		warning.textContent = kit && ! kit.supported ? kit.reason || __( 'This kit is unsupported. See Kit details for requirements.', 'better-font-awesome' ) : '';
 	}
@@ -246,10 +250,8 @@
 		selectionChanged();
 		const kit = account.kits.find( item => item.id === select.value );
 		if ( ! select.value && activeKit && ! select.disabled ) {
-			select.after( kitFeedback );
 			run( 'disconnect-kit' );
 		} else if ( kit?.supported && ! select.disabled ) {
-			select.after( kitFeedback );
 			run( 'connect', { kit: kit.id, id: account.id } );
 		}
 	} );
@@ -265,7 +267,7 @@
 	form.querySelectorAll( '[data-pro-action]' ).forEach( ( button ) => {
 		button.addEventListener( 'click', () => {
 			if ( button.dataset.proAction === 'disconnect' && ! window.confirm( __( 'Delete the saved token and disconnect the kit? Saved icons will not be changed.', 'better-font-awesome' ) ) ) { return; }
-			button.after( kitFeedback );
+			if ( button.dataset.proAction === 'disconnect' ) { button.after( kitFeedback ); }
 			run( button.dataset.proAction );
 		} );
 	} );
