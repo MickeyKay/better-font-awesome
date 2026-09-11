@@ -1,6 +1,6 @@
 <?php
 /**
- * One hosted Classic Pro Kit: private acquisition and atomic activation.
+ * One hosted Pro Kit: private acquisition and atomic activation.
  *
  * @package Better_Font_Awesome
  */
@@ -121,7 +121,25 @@ class Better_Font_Awesome_Pro {
 		if ( $this->effective() ) {
 			add_filter( 'bfa_icon_array', array( $this, 'icons' ), 20 );
 		}
+		if ( $owner ) {
+			add_filter( 'do_shortcode_tag', array( $this, 'shortcode_appearance' ), 10, 3 ); }
 		$this->schedule();
+	}
+
+	/**
+	 * Extend only this library's shortcode; never intercept another shortcode owner.
+	 *
+	 * @param string       $output Rendered shortcode.
+	 * @param string       $tag Shortcode tag.
+	 * @param array|string $atts Original attributes.
+	 * @return string Rendered icon.
+	 */
+	public function shortcode_appearance( $output, $tag, $atts ) {
+		global $shortcode_tags;
+		if ( 'icon' !== $tag || ! is_array( $atts ) || ( $shortcode_tags[ $tag ] ?? null ) !== array( $this->library, 'render_shortcode' ) ) {
+			return $output;
+		}
+		return Better_Font_Awesome_Appearance::apply( $output, $atts['style'] ?? '' );
 	}
 
 	/**
@@ -168,7 +186,7 @@ class Better_Font_Awesome_Pro {
 					'slug'        => $name,
 					'style'       => $style,
 					'title'       => ( $label[0] ?? ucwords( str_replace( '-', ' ', $name ) ) ) . ' (' . $style . ')',
-					'base_class'  => self::STYLES[ $style ] . ' fa-' . $name,
+					'base_class'  => Better_Font_Awesome_Appearance::DEFINITIONS[ $style ][2] . ' fa-' . $name,
 					'searchTerms' => $label[1] ?? $name,
 				);
 			}
@@ -267,10 +285,10 @@ class Better_Font_Awesome_Pro {
 					'compatibility' => is_bool( $row['shimEnabled'] ?? null ) ? $row['shimEnabled'] : null,
 				),
 				'summary'   => is_wp_error( $meta ) ? self::message( 'unsupported' ) : sprintf(
-					/* translators: 1: Font Awesome version, 2: supported Classic styles. */
-					__( 'Pro %1$s, Web Fonts, By Style, compatibility enabled. Classic styles: %2$s.', 'better-font-awesome' ),
+					/* translators: 1: Font Awesome version, 2: supported family/style appearances. */
+					__( 'Pro %1$s, Web Fonts, By Style, compatibility enabled. Appearances: %2$s.', 'better-font-awesome' ),
 					$meta['version'],
-					implode( ', ', array_keys( $meta['counts'] ) )
+					implode( ', ', array_intersect_key( Better_Font_Awesome_Appearance::labels(), $meta['counts'] ) )
 				),
 			);
 		}
@@ -575,15 +593,15 @@ class Better_Font_Awesome_Pro {
 		$counts = array();
 		foreach ( $kit['familyStylesPaginated']['familyStyles'] ?? array() as $row ) {
 			$f     = $row['familyStyle'] ?? array();
-			$style = $f['style'] ?? '';
+			$style = Better_Font_Awesome_Appearance::identity( $f['family'] ?? '', $f['style'] ?? '' );
 			$count = $row['iconVariantsPaginated']['totalIconVariantCount'] ?? 0;
-			if ( ! is_string( $style ) || 'classic' !== ( $f['family'] ?? '' ) || ! isset( self::STYLES[ $style ] ) ||
-				( $f['prefix'] ?? '' ) !== self::STYLES[ $style ] || isset( $counts[ $style ] ) || ! is_int( $count ) || 1 > $count ) {
+			if ( '' === $style ||
+				( $f['prefix'] ?? '' ) !== ( Better_Font_Awesome_Appearance::DEFINITIONS[ $style ][2] ?? '' ) || isset( $counts[ $style ] ) || ! is_int( $count ) || 1 > $count ) {
 				return $this->error( 'unsupported' );
 			}
 			$counts[ $style ] = $count;
 		}
-		if ( ! isset( $counts['solid'], $counts['regular'], $counts['brands'] ) || 40000 < array_sum( $counts ) ) {
+		if ( ! isset( $counts['solid'], $counts['regular'], $counts['brands'] ) || 100000 < array_sum( $counts ) ) {
 			return $this->error( 'unsupported' );
 		}
 		ksort( $counts );
@@ -700,10 +718,10 @@ class Better_Font_Awesome_Pro {
 				foreach ( $p['iconVariants'] as $row ) {
 					$name  = $row['name'] ?? '';
 					$f     = $row['familyStyle'] ?? array();
-					$style = $f['style'] ?? '';
+					$style = Better_Font_Awesome_Appearance::identity( $f['family'] ?? '', $f['style'] ?? '' );
 					if ( ! is_string( $name ) || ! preg_match( '/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/', $name ) || 150 < strlen( $name ) ||
-						! is_string( $style ) || 'classic' !== ( $f['family'] ?? '' ) || ! isset( $c['meta']['counts'][ $style ] ) ||
-						( $f['prefix'] ?? '' ) !== self::STYLES[ $style ] || isset( $c['icons'][ $name . ':' . $style ] ) ) {
+						'' === $style || ! isset( $c['meta']['counts'][ $style ] ) ||
+						( $f['prefix'] ?? '' ) !== ( Better_Font_Awesome_Appearance::DEFINITIONS[ $style ][2] ?? '' ) || isset( $c['icons'][ $name . ':' . $style ] ) ) {
 						return $this->error( 'incomplete' );
 					}
 					$c['icons'][ $name . ':' . $style ] = true;
@@ -738,9 +756,9 @@ class Better_Font_Awesome_Pro {
 				return $this->error( 'incomplete' );
 			}
 			foreach ( $row['familyStylesByLicense']['free'] as $f ) {
-				$style = $f['style'] ?? '';
-				$key   = $row['id'] . ':' . ( is_string( $style ) ? $style : '' );
-				if ( ! is_string( $style ) || 'classic' !== ( $f['family'] ?? '' ) || ! isset( $c['icons'][ $key ] ) ) {
+				$style = Better_Font_Awesome_Appearance::identity( $f['family'] ?? '', $f['style'] ?? '' );
+				$key   = $row['id'] . ':' . $style;
+				if ( '' === $style || 'classic' !== ( $f['family'] ?? '' ) || ! isset( $c['icons'][ $key ] ) ) {
 					return $this->error( 'coverage' );
 				}
 				$aliases = $row['aliases']['names'] ?? array();
@@ -923,7 +941,7 @@ class Better_Font_Awesome_Pro {
 			'auth'        => __( 'Authorization failed. Check your account token and Read Kits Data permission, then reconnect.', 'better-font-awesome' ),
 			'storage'     => __( 'Secure token storage is unavailable. Check OpenSSL and the WordPress authentication salts, then reconnect.', 'better-font-awesome' ),
 			'service'     => __( 'Font Awesome is temporarily unavailable. The working catalog is unchanged.', 'better-font-awesome' ),
-			'unsupported' => __( 'Use a published v7 Pro By Style Web Fonts kit with compatibility and Classic Solid, Regular and Brands. Only Classic Light and Thin may also be selected.', 'better-font-awesome' ),
+			'unsupported' => __( 'Use a published v7 Pro By Style Web Fonts kit with compatibility and Classic Solid, Regular and Brands. Additional official v7 families and styles may also be selected. Custom icons are not supported.', 'better-font-awesome' ),
 			'revision'    => __( 'The kit changed during preparation. The working catalog is unchanged. Refresh kit to try again.', 'better-font-awesome' ),
 			'incomplete'  => __( 'The kit catalog was incomplete or inconsistent. The working catalog is unchanged.', 'better-font-awesome' ),
 			'coverage'    => __( 'The kit is missing required Free icons. Check the included styles before reconnecting.', 'better-font-awesome' ),

@@ -28,12 +28,6 @@ class Better_Font_Awesome_Icon_Block {
 	 */
 	private const STYLE_HANDLE = 'bfa-icon-block-style';
 
-	/**
-	 * Supported Font Awesome 5 Free styles.
-	 *
-	 * @var string[]
-	 */
-	private const STYLES = array( 'brands', 'regular', 'solid', 'light', 'thin' );
 
 	/**
 	 * Supported icon positions within the block wrapper.
@@ -181,7 +175,7 @@ class Better_Font_Awesome_Icon_Block {
 		if ( 'site-default' === $style ) {
 			$style = $this->resolve_default_style( $name );
 		}
-		if ( ! in_array( $style, self::STYLES, true ) ) {
+		if ( ! Better_Font_Awesome_Appearance::valid( $style ) ) {
 			$style = 'solid';
 		}
 		if ( ! in_array( $justification, self::JUSTIFICATIONS, true ) ) {
@@ -204,6 +198,7 @@ class Better_Font_Awesome_Icon_Block {
 			)
 		);
 
+		$icon                        = Better_Font_Awesome_Appearance::apply( $icon, $style );
 		$wrapper_attributes          = $accessibility;
 		$wrapper_attributes['class'] = 'items-justified-' . $justification;
 
@@ -225,7 +220,7 @@ class Better_Font_Awesome_Icon_Block {
 		$requested = Better_Font_Awesome_Plugin::get_default_block_icon_style();
 		$this->get_editor_catalog();
 		$available = $this->styles_by_name[ $name ] ?? array();
-		foreach ( array_unique( array( $requested, 'solid', 'regular', 'brands', 'light', 'thin' ) ) as $style ) {
+		foreach ( array_unique( array_merge( array( $requested ), array_keys( Better_Font_Awesome_Appearance::DEFINITIONS ) ) ) as $style ) {
 			if ( in_array( $style, $available, true ) ) {
 				return $style;
 			}
@@ -255,7 +250,7 @@ class Better_Font_Awesome_Icon_Block {
 			$name  = is_string( $icon['slug'] ) ? sanitize_key( $icon['slug'] ) : '';
 			$style = is_string( $icon['style'] ) ? sanitize_key( $icon['style'] ) : '';
 			$label = is_string( $icon['title'] ) ? sanitize_text_field( $icon['title'] ) : '';
-			if ( '' === $name || '' === $label || ! in_array( $style, self::STYLES, true ) ) {
+			if ( '' === $name || '' === $label || ! Better_Font_Awesome_Appearance::valid( $style ) ) {
 				continue;
 			}
 
@@ -297,9 +292,11 @@ class Better_Font_Awesome_Icon_Block {
 			$handle,
 			'bfaBlockEditor',
 			array(
-				'icons'            => $this->get_editor_catalog(),
-				'proCatalog'       => $this->pro_catalog,
-				'defaultIconStyle' => Better_Font_Awesome_Plugin::get_default_block_icon_style(),
+				'icons'             => $this->get_editor_catalog(),
+				'proCatalog'        => $this->pro_catalog,
+				'defaultIconStyle'  => Better_Font_Awesome_Plugin::get_default_block_icon_style(),
+				'appearanceClasses' => Better_Font_Awesome_Appearance::classes(),
+				'appearanceLabels'  => Better_Font_Awesome_Appearance::labels(),
 			)
 		);
 		wp_set_script_translations( $handle, 'better-font-awesome', dirname( __DIR__ ) . '/languages' );

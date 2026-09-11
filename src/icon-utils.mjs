@@ -6,29 +6,31 @@ const STYLE_CLASSES = {
 	thin: 'fat',
 };
 const SUPPORTED_STYLES = [ 'solid', 'regular', 'brands', 'light', 'thin' ];
+const supportedStyles = () => [ ...SUPPORTED_STYLES, ...Object.keys( globalThis.bfaBlockEditor?.appearanceClasses ?? {} ).filter( style => ! SUPPORTED_STYLES.includes( style ) ) ];
 
 export function getAvailableStyles( catalog, iconName ) {
-	return SUPPORTED_STYLES.filter( ( style ) =>
+	return supportedStyles().filter( ( style ) =>
 		catalog.some( ( icon ) => icon.name === iconName && icon.style === style )
 	);
 }
 
 export function groupCatalog( catalog ) {
 	const icons = new Map();
+	const styles = supportedStyles();
 	for ( const icon of catalog ) {
-		if ( ! SUPPORTED_STYLES.includes( icon.style ) ) {
+		if ( ! styles.includes( icon.style ) ) {
 			continue;
 		}
 		if ( ! icons.has( icon.name ) ) {
 			icons.set( icon.name, {
 				name: icon.name,
-				label: icon.label.replace( / \((?:solid|regular|brands|light|thin)\)$/, '' ),
+				label: icon.label.replace( / \([a-z-]+\)$/, '' ),
 				styles: [],
 				searchLabels: [],
 			} );
 		}
 		const entry = icons.get( icon.name );
-		entry.styles = SUPPORTED_STYLES.filter( ( style ) => style === icon.style || entry.styles.includes( style ) );
+		entry.styles = styles.filter( ( style ) => style === icon.style || entry.styles.includes( style ) );
 		entry.searchLabels.push( icon.label );
 		if ( typeof icon.searchTerms === 'string' ) { entry.searchLabels.push( icon.searchTerms ); }
 	}
@@ -49,7 +51,7 @@ function selectionStyle( icon, currentStyle ) {
 }
 
 export function resolveStyle( availableStyles, requestedStyle ) {
-	const requested = [ 'regular', 'light', 'thin' ].includes( requestedStyle ) ? requestedStyle : 'solid';
+	const requested = requestedStyle !== 'brands' && supportedStyles().includes( requestedStyle ) ? requestedStyle : 'solid';
 	return availableStyles.includes( requested ) ? requested : availableStyles[ 0 ] ?? requested;
 }
 
@@ -83,5 +85,5 @@ export function buildCatalogOptions( catalog, filterValue, selectedName, current
 }
 
 export function styleClass( style ) {
-	return STYLE_CLASSES[ style ] ?? STYLE_CLASSES.solid;
+	return globalThis.bfaBlockEditor?.appearanceClasses?.[ style ] ?? STYLE_CLASSES[ style ] ?? STYLE_CLASSES.solid;
 }

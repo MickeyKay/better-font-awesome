@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-11T17:49:06+00:00\n"
+"POT-Creation-Date: 2026-09-11T18:08:12+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: better-font-awesome\n"
@@ -21,8 +21,8 @@ msgstr ""
 #. Plugin Name of the plugin
 #: better-font-awesome-library.php:1679
 #: better-font-awesome.php
-#: better-font-awesome.php:279
-#: better-font-awesome.php:336
+#: better-font-awesome.php:280
+#: better-font-awesome.php:337
 msgid "Better Font Awesome"
 msgstr ""
 
@@ -59,324 +59,329 @@ msgstr ""
 msgid "https://mickeykay.me/"
 msgstr ""
 
-#: better-font-awesome.php:337
+#: better-font-awesome.php:338
 msgid "It appears that Better Font Awesome is missing it's <a href=\"https://github.com/MickeyKay/better-font-awesome-library\" target=\"_blank\">core library</a>, which typically occurs when cloning the Git repository and failing to run <code>composer install</code>. Please refer to the plugin's <a href=\"https://github.com/MickeyKay/better-font-awesome\" target=\"_blank\">installation instructions</a> for details on how to properly install Better Font Awesome via Git. If you installed from within WordPress, or via the wordpress.org repo, then chances are the install failed and you can try again. If the issue persists, please create a new topic on the plugin's <a href=\"http://wordpress.org/support/plugin/better-font-awesome\" target=\"_blank\">support forum</a> or file an issue on the <a href=\"https://github.com/MickeyKay/better-font-awesome/issues\" target=\"_blank\">Github repo</a>."
 msgstr ""
 
-#: better-font-awesome.php:338
+#: better-font-awesome.php:339
 msgid "Back to the plugins page &rarr;"
 msgstr ""
 
-#: better-font-awesome.php:536
+#: better-font-awesome.php:537
 msgid "Save Settings"
 msgstr ""
 
-#: better-font-awesome.php:565
+#: better-font-awesome.php:566
 msgid "Font Awesome version"
 msgstr ""
 
-#: better-font-awesome.php:574
-msgid "Default block icon style"
+#: better-font-awesome.php:575
+msgid "Default icon appearance"
 msgstr ""
 
-#: better-font-awesome.php:583
+#: better-font-awesome.php:584
 msgid "Serve Font Awesome locally"
 msgstr ""
 
-#: better-font-awesome.php:595
+#: better-font-awesome.php:596
 msgid "Include v4 CSS shim"
 msgstr ""
 
-#: better-font-awesome.php:602
+#: better-font-awesome.php:603
 msgid "Include the Font Awesome v4 CSS shim to support legacy icons (<a href=\"https://fontawesome.com/how-to-use/on-the-web/setup/upgrading-from-version-4#name-changes\" target=\"_blank\">more details</a>)."
 msgstr ""
 
-#: better-font-awesome.php:608
+#: better-font-awesome.php:609
 msgid "Remove existing Font Awesome"
 msgstr ""
 
-#: better-font-awesome.php:614
+#: better-font-awesome.php:615
 msgid "Attempt to remove Font Awesome CSS and shortcodes added by other plugins and themes."
 msgstr ""
 
-#: better-font-awesome.php:620
+#: better-font-awesome.php:621
 msgid "Hide admin notices"
 msgstr ""
 
-#: better-font-awesome.php:626
+#: better-font-awesome.php:627
 msgid "Hide the default admin warnings that are shown when API and CDN errors occur."
 msgstr ""
 
-#: better-font-awesome.php:676
+#: better-font-awesome.php:677
 msgid "You are not allowed to change these settings."
 msgstr ""
 
-#: better-font-awesome.php:684
+#: better-font-awesome.php:685
 msgid "Settings were not saved due to a missing nonce. Refresh the page and try again."
 msgstr ""
 
-#: better-font-awesome.php:711
+#: better-font-awesome.php:712
 msgid "Settings saved."
 msgstr ""
 
-#: better-font-awesome.php:775
+#: better-font-awesome.php:776
 msgid "Kit version is managed by its initializer."
 msgstr ""
 
-#: better-font-awesome.php:789
+#: better-font-awesome.php:790
 msgid "Background updates are disabled for the effective delivery configuration."
 msgstr ""
 
 #. translators: placeholder is the numeric current version number.
-#: better-font-awesome.php:797
+#: better-font-awesome.php:798
 #, php-format
 msgid "%s (The plugin automatically uses the latest version of Font Awesome, and checks for updates at this frequency)"
 msgstr ""
 
-#: better-font-awesome.php:849
-#: js/pro-settings.js:132
-#: src/edit.js:70
-msgid "Solid"
-msgstr ""
-
-#: better-font-awesome.php:850
-#: js/pro-settings.js:132
-#: src/edit.js:71
-msgid "Regular"
-msgstr ""
-
-#: better-font-awesome.php:854
-#: js/pro-settings.js:132
-#: src/edit.js:73
-msgid "Light"
-msgstr ""
-
-#: better-font-awesome.php:855
-#: js/pro-settings.js:132
-#: src/edit.js:74
-msgid "Thin"
-msgstr ""
-
 #. translators: %s: saved icon style.
-#: better-font-awesome.php:864
+#: better-font-awesome.php:854
 #, php-format
 msgid "%s (saved, currently unavailable)"
 msgstr ""
 
-#: better-font-awesome.php:870
-msgid "Sets the style for icon blocks that use the site default. You can override it in each block’s settings."
+#: better-font-awesome.php:860
+msgid "Sets the appearance for icon blocks that use the site default. You can override it in each block’s settings."
 msgstr ""
 
-#: better-font-awesome.php:892
+#: better-font-awesome.php:882
 msgid "This Font Awesome configuration is unsupported. Local files require Font Awesome 7 Free."
 msgstr ""
 
-#: better-font-awesome.php:895
+#: better-font-awesome.php:885
 msgid "Local delivery is not active because another plugin, theme, or filter controls Font Awesome."
 msgstr ""
 
-#: better-font-awesome.php:896
+#: better-font-awesome.php:886
 msgid "Local delivery is active because another plugin, theme, or filter controls Font Awesome."
 msgstr ""
 
-#: better-font-awesome.php:901
+#: better-font-awesome.php:891
 msgid "Local icon files are unavailable. Reinstall Better Font Awesome."
 msgstr ""
 
 #. translators: 1: local Font Awesome version, 2: previously downloaded Font Awesome version.
-#: better-font-awesome.php:909
+#: better-font-awesome.php:899
 #, php-format
 msgid "Local files use Font Awesome %1$s; your previously downloaded version is %2$s. Newer icons may be unavailable."
 msgstr ""
 
-#: better-font-awesome.php:922
+#: better-font-awesome.php:912
 msgid "Load icons from your site instead of a third-party CDN. New icons arrive through plugin updates."
 msgstr ""
 
-#: better-font-awesome.php:942
+#: better-font-awesome.php:932
 msgid "Font Awesome source"
 msgstr ""
 
-#: better-font-awesome.php:946
+#: better-font-awesome.php:936
 msgid "CDN"
 msgstr ""
 
-#: better-font-awesome.php:947
+#: better-font-awesome.php:937
 msgid "Local (no CDN)"
 msgstr ""
 
-#: better-font-awesome.php:948
+#: better-font-awesome.php:938
 msgid "Font Awesome kit"
 msgstr ""
 
-#: better-font-awesome.php:975
+#: better-font-awesome.php:966
 msgid "Hosted Pro kit settings"
 msgstr ""
 
-#: better-font-awesome.php:978
+#: better-font-awesome.php:969
 msgid "API Key"
 msgstr ""
 
-#: better-font-awesome.php:980
+#: better-font-awesome.php:971
 msgid "API token saved"
 msgstr ""
 
-#: better-font-awesome.php:981
+#: better-font-awesome.php:972
 msgid "Update token"
 msgstr ""
 
-#: better-font-awesome.php:982
+#: better-font-awesome.php:973
 msgid "Delete token"
 msgstr ""
 
-#: better-font-awesome.php:987
+#: better-font-awesome.php:978
 msgid "Connect account"
 msgstr ""
 
-#: better-font-awesome.php:988
+#: better-font-awesome.php:979
 msgid "Cancel"
 msgstr ""
 
-#: better-font-awesome.php:991
+#: better-font-awesome.php:982
 msgid "Use Read Kits Data permission. Your token stays encrypted on this server."
 msgstr ""
 
-#: better-font-awesome.php:991
+#: better-font-awesome.php:982
 msgid "Get an API token"
 msgstr ""
 
-#: better-font-awesome.php:991
+#: better-font-awesome.php:982
 msgid " (opens in a new tab)"
 msgstr ""
 
-#: better-font-awesome.php:994
+#: better-font-awesome.php:985
 msgid "Kit"
 msgstr ""
 
-#: better-font-awesome.php:996
-#: js/pro-settings.js:169
-#: js/pro-settings.js:182
+#: better-font-awesome.php:987
+#: js/pro-settings.js:173
+#: js/pro-settings.js:186
 msgid "No kit selected"
 msgstr ""
 
-#: better-font-awesome.php:997
+#: better-font-awesome.php:988
 msgid "Retry connection"
 msgstr ""
 
-#: better-font-awesome.php:999
+#: better-font-awesome.php:990
 msgid "Refresh kits"
 msgstr ""
 
-#: better-font-awesome.php:1000
+#: better-font-awesome.php:991
 msgid "Refresh active kit"
 msgstr ""
 
-#: better-font-awesome.php:1001
+#: better-font-awesome.php:992
 msgid "Kit details"
 msgstr ""
 
-#: better-font-awesome.php:1003
+#: better-font-awesome.php:994
 msgid "Selecting a kit connects it immediately. No kit selected disconnects it and keeps your saved token."
+msgstr ""
+
+#: includes/class-better-font-awesome-appearance.php:97
+#: src/edit.js:70
+msgid "Solid"
+msgstr ""
+
+#: includes/class-better-font-awesome-appearance.php:98
+#: src/edit.js:71
+msgid "Regular"
+msgstr ""
+
+#: includes/class-better-font-awesome-appearance.php:99
+#: src/edit.js:72
+msgid "Brands"
+msgstr ""
+
+#: includes/class-better-font-awesome-appearance.php:100
+#: src/edit.js:73
+msgid "Light"
+msgstr ""
+
+#: includes/class-better-font-awesome-appearance.php:101
+#: src/edit.js:74
+msgid "Thin"
+msgstr ""
+
+#: includes/class-better-font-awesome-appearance.php:102
+msgid "Semibold"
 msgstr ""
 
 #: includes/class-better-font-awesome-metadata-manager.php:282
 msgid "Font Awesome metadata refresh could not be scheduled."
 msgstr ""
 
-#. translators: 1: Font Awesome version, 2: supported Classic styles.
-#: includes/class-better-font-awesome-pro.php:271
+#. translators: 1: Font Awesome version, 2: supported family/style appearances.
+#: includes/class-better-font-awesome-pro.php:289
 #, php-format
-msgid "Pro %1$s, Web Fonts, By Style, compatibility enabled. Classic styles: %2$s."
+msgid "Pro %1$s, Web Fonts, By Style, compatibility enabled. Appearances: %2$s."
 msgstr ""
 
 #. translators: 1: selected major version, 2: resolved release version.
-#: includes/class-better-font-awesome-pro.php:305
+#: includes/class-better-font-awesome-pro.php:323
 #, php-format
 msgid "v%1$s latest (%2$s)"
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:321
+#: includes/class-better-font-awesome-pro.php:339
 msgid "Publish this kit in Font Awesome before connecting."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:324
+#: includes/class-better-font-awesome-pro.php:342
 msgid "Choose a Pro kit for hosted Pro delivery."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:327
+#: includes/class-better-font-awesome-pro.php:345
 msgid "Set the kit technology to Web Fonts."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:330
+#: includes/class-better-font-awesome-pro.php:348
 msgid "Set the kit version to 7.x or a specific v7 release."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:333
+#: includes/class-better-font-awesome-pro.php:351
 msgid "Use By Style selection for this kit."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:336
+#: includes/class-better-font-awesome-pro.php:354
 msgid "Enable older version compatibility for this kit."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:338
+#: includes/class-better-font-awesome-pro.php:356
 msgid "This kit has unsupported styles or configuration. See Kit details for requirements."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:920
+#: includes/class-better-font-awesome-pro.php:938
 msgid "Pro connection is unavailable. Use automatic Free first and ensure BFA owns Font Awesome 7 initialization."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:921
+#: includes/class-better-font-awesome-pro.php:939
 msgid "Choose a kit from the current account list."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:922
+#: includes/class-better-font-awesome-pro.php:940
 msgid "Kit selection expired or is unsupported. Refresh the kit list and choose a supported kit."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:923
+#: includes/class-better-font-awesome-pro.php:941
 msgid "Authorization failed. Check your account token and Read Kits Data permission, then reconnect."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:924
+#: includes/class-better-font-awesome-pro.php:942
 msgid "Secure token storage is unavailable. Check OpenSSL and the WordPress authentication salts, then reconnect."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:925
+#: includes/class-better-font-awesome-pro.php:943
 msgid "Font Awesome is temporarily unavailable. The working catalog is unchanged."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:926
-msgid "Use a published v7 Pro By Style Web Fonts kit with compatibility and Classic Solid, Regular and Brands. Only Classic Light and Thin may also be selected."
+#: includes/class-better-font-awesome-pro.php:944
+msgid "Use a published v7 Pro By Style Web Fonts kit with compatibility and Classic Solid, Regular and Brands. Additional official v7 families and styles may also be selected. Custom icons are not supported."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:927
+#: includes/class-better-font-awesome-pro.php:945
 msgid "The kit changed during preparation. The working catalog is unchanged. Refresh kit to try again."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:928
+#: includes/class-better-font-awesome-pro.php:946
 msgid "The kit catalog was incomplete or inconsistent. The working catalog is unchanged."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:929
+#: includes/class-better-font-awesome-pro.php:947
 msgid "The kit is missing required Free icons. Check the included styles before reconnecting."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:930
+#: includes/class-better-font-awesome-pro.php:948
 msgid "Preparation expired. Connect or Refresh kit to start again."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:931
+#: includes/class-better-font-awesome-pro.php:949
 msgid "Another connection action won. Reload this page to see its status."
 msgstr ""
 
-#: includes/class-better-font-awesome-pro.php:939
+#: includes/class-better-font-awesome-pro.php:957
 msgid "You are not allowed to change this connection."
 msgstr ""
 
 #: js/pro-settings.js:48
-#: js/pro-settings.js:113
+#: js/pro-settings.js:116
 msgid "Connection interrupted. Reload to resume or start again."
 msgstr ""
 
@@ -384,138 +389,133 @@ msgstr ""
 msgid "Connection request failed. Reload to resume."
 msgstr ""
 
-#: js/pro-settings.js:65
+#: js/pro-settings.js:68
 msgid "Disconnecting kit..."
 msgstr ""
 
-#: js/pro-settings.js:69
+#: js/pro-settings.js:72
 msgid "Working..."
 msgstr ""
 
-#: js/pro-settings.js:83
+#: js/pro-settings.js:86
 msgid "Loading Pro icons..."
 msgstr ""
 
-#: js/pro-settings.js:84
+#: js/pro-settings.js:87
 msgid "Checking icon compatibility..."
 msgstr ""
 
-#: js/pro-settings.js:85
+#: js/pro-settings.js:88
 msgid "Verifying kit..."
 msgstr ""
 
-#: js/pro-settings.js:87
+#: js/pro-settings.js:90
 msgid "Validating kit..."
 msgstr ""
 
-#: js/pro-settings.js:92
+#: js/pro-settings.js:95
 msgid "Activating Pro icons..."
 msgstr ""
 
 #. translators: %s: active Kit name.
-#: js/pro-settings.js:96
+#: js/pro-settings.js:99
 #, js-format
 msgid "Connected: %s."
 msgstr ""
 
-#: js/pro-settings.js:125
+#: js/pro-settings.js:129
 msgid "This kit is unsupported. See Kit details for requirements."
 msgstr ""
 
-#: js/pro-settings.js:132
-#: src/edit.js:72
-msgid "Brands"
-msgstr ""
-
-#: js/pro-settings.js:133
+#: js/pro-settings.js:137
 msgid "Unknown"
 msgstr ""
 
-#: js/pro-settings.js:138
+#: js/pro-settings.js:142
 msgid "Icons"
 msgstr ""
 
-#: js/pro-settings.js:139
+#: js/pro-settings.js:143
 msgid "Technology"
 msgstr ""
 
-#: js/pro-settings.js:139
+#: js/pro-settings.js:143
 msgid "Web fonts"
 msgstr ""
 
-#: js/pro-settings.js:140
+#: js/pro-settings.js:144
 msgid "Version"
 msgstr ""
 
-#: js/pro-settings.js:141
+#: js/pro-settings.js:145
 msgid "Older version compatibility"
 msgstr ""
 
-#: js/pro-settings.js:141
+#: js/pro-settings.js:145
 msgid "Enabled"
 msgstr ""
 
-#: js/pro-settings.js:141
+#: js/pro-settings.js:145
 msgid "Disabled"
 msgstr ""
 
-#: js/pro-settings.js:143
-msgid "Classic styles"
+#: js/pro-settings.js:147
+msgid "Appearances"
 msgstr ""
 
-#: js/pro-settings.js:185
+#: js/pro-settings.js:189
 msgid "Unnamed kit"
 msgstr ""
 
 #. translators: %s: Kit name.
-#: js/pro-settings.js:194
+#: js/pro-settings.js:198
 #, js-format
 msgid "%s (unsupported)"
 msgstr ""
 
-#: js/pro-settings.js:208
+#: js/pro-settings.js:212
 msgid "No kits found. Create one in Font Awesome, then refresh."
 msgstr ""
 
 #. translators: %s: Kit name.
-#: js/pro-settings.js:212
+#: js/pro-settings.js:216
 #, js-format
 msgid "%s (active)"
 msgstr ""
 
-#: js/pro-settings.js:222
+#: js/pro-settings.js:226
 msgid "Refreshing kits..."
 msgstr ""
 
-#: js/pro-settings.js:222
+#: js/pro-settings.js:226
 msgid "Connecting..."
 msgstr ""
 
-#: js/pro-settings.js:229
+#: js/pro-settings.js:233
 msgid "Could not connect. Please try again."
 msgstr ""
 
-#: js/pro-settings.js:267
+#: js/pro-settings.js:269
 msgid "Delete the saved token and disconnect the kit? Saved icons will not be changed."
 msgstr ""
 
-#: js/pro-settings.js:313
+#: js/pro-settings.js:315
 msgid "Loads free icons from a CDN and automatically updates to the latest version."
 msgstr ""
 
-#: js/pro-settings.js:314
+#: js/pro-settings.js:316
 msgid "Serves bundled free icons from your site. No CDN requests or automatic icon updates."
 msgstr ""
 
-#: js/pro-settings.js:315
+#: js/pro-settings.js:317
 msgid "Loads icons from Font Awesome using your Pro subscription and kit."
 msgstr ""
 
-#: js/pro-settings.js:315
+#: js/pro-settings.js:317
 msgid "Connect your Font Awesome Pro kit. Until connected, free icons load from the CDN."
 msgstr ""
 
-#: js/pro-settings.js:317
+#: js/pro-settings.js:319
 msgid "Save Settings to switch off local delivery before setting up a hosted kit."
 msgstr ""
 
@@ -532,47 +532,47 @@ msgid "Search all %d available Font Awesome Kit icons."
 msgstr ""
 
 #. translators: %s is the effective icon style, including any fallback.
-#: src/edit.js:84
+#: src/edit.js:85
 #, js-format
 msgid "Site default (%s)"
 msgstr ""
 
-#: src/edit.js:86
+#: src/edit.js:87
 msgid "Site default (icon unavailable)"
 msgstr ""
 
 #. translators: %s is the saved icon style.
-#: src/edit.js:93
+#: src/edit.js:94
 #, js-format
 msgid "Unavailable (%s)"
 msgstr ""
 
-#: src/edit.js:127
+#: src/edit.js:128
 msgid "Icon settings"
 msgstr ""
 
-#: src/edit.js:142
+#: src/edit.js:143
 msgid "Icon"
 msgstr ""
 
-#: src/edit.js:153
-msgid "Style"
+#: src/edit.js:154
+msgid "Appearance"
 msgstr ""
 
-#: src/edit.js:162
-msgid "This icon or style is unavailable in the current catalog."
+#: src/edit.js:163
+msgid "This icon or appearance is unavailable in the current catalog."
 msgstr ""
 
-#: src/edit.js:168
+#: src/edit.js:169
 msgid "Accessible label"
 msgstr ""
 
-#: src/edit.js:171
+#: src/edit.js:172
 msgid "Leave empty when the icon is decorative."
 msgstr ""
 
 #. translators: %s is the selected icon label.
-#: src/edit.js:187
+#: src/edit.js:188
 #, js-format
 msgid "Font Awesome icon: %s"
 msgstr ""

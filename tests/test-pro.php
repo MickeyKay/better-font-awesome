@@ -20,6 +20,9 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		Better_Font_Awesome_Pro::cancel( true );
 		delete_option( Better_Font_Awesome_Pro::OPTION );
 		parent::tearDown();
+		// PHPUnit retains test instances; release large synthetic catalogs between cases.
+		$this->api = null;
+		$this->pro = null;
 	}
 	private function complete() {
 		for ( $i = 0; $i < 90 && $this->pro->status()['pending']; $i++ ) {
@@ -29,6 +32,90 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		$this->assertTrue( Better_Font_Awesome_Pro::state()['enabled'] );
 		$this->assertFalse( $this->pro->status()['connected'], 'Activation is confirmed only after a request initializes the Kit.' );
 		return Better_Font_Awesome_Pro::state()['active'];
+	}
+	public function test_family_catalog_distinguishes_every_official_appearance() {
+		$this->api->families();
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$active = $this->complete();
+		foreach ( Better_Font_Awesome_Appearance::DEFINITIONS as $key => $definition ) {
+			if ( 'brands' !== $key ) { $this->assertArrayHasKey( 'pro-fixture:' . $key, $active['icons'] ); }
+			$this->assertContains( $key, $active['styles'] );
+		}
+		$this->assertSame( count( $this->api->rows ), count( $active['icons'] ) );
+	}
+	public function test_family_catalog_above_old_limit_uses_bounded_groups() {
+		$this->api->expand();
+		$rows = $this->api->rows;
+		foreach ( $rows as $row ) {
+			if ( 'brands' === $row['familyStyle']['style'] ) { continue; }
+			foreach ( array( 'duotone', 'sharp-duotone' ) as $family ) {
+				$variant = $row;
+				$key = Better_Font_Awesome_Appearance::identity( $family, $row['familyStyle']['style'] );
+				$variant['familyStyle']['family'] = $family;
+				$variant['familyStyle']['prefix'] = Better_Font_Awesome_Appearance::DEFINITIONS[ $key ][2];
+				$this->api->rows[] = $variant;
+			}
+		}
+		$this->assertGreaterThan( 40000, count( $this->api->rows ) );
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$active = $this->complete();
+		$this->assertCount( count( $this->api->rows ), $active['icons'] );
+		$this->assertSame( 7, $this->api->requests, 'Three catalog groups plus authorization and validation.' );
+		$this->assertArrayHasKey( 'pro-fixture:sharp-duotone-thin', $active['icons'] );
+	}
+	public function test_family_catalog_ceiling_rejects_before_icon_acquisition() {
+		$this->api->expand();
+		$this->api->rows = array_merge( ...array_fill( 0, 7, $this->api->rows ) );
+		$this->assertGreaterThan( 100000, count( $this->api->rows ) );
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$result = $this->pro->step( $this->pro->status()['operation'] );
+		$this->assertSame( 'unsupported', $result['error'] );
+		$this->assertSame( 2, $this->api->requests );
+		$this->assertEmpty( Better_Font_Awesome_Pro::state()['active'] ?? null );
+	}
+	public function test_family_rendering_preserves_classic_and_explicit_missing_appearances() {
+		$this->api->families();
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$this->complete();
+		foreach ( array( Better_Font_Awesome_Plugin::class, Better_Font_Awesome_Library::class ) as $class ) {
+			$p = new ReflectionProperty( $class, 'instance' ); $p->setAccessible( true ); $p->setValue( null, null );
+		}
+		$plugin = Better_Font_Awesome_Plugin::get_instance();
+		$library = $plugin->get( 'bfa_lib' );
+		$library->add_icon_shortcode();
+		$block = $plugin->get( 'icon_block' ); $block->register();
+		$before = $this->api->requests;
+		foreach ( Better_Font_Awesome_Appearance::DEFINITIONS as $key => $definition ) {
+			$html = do_shortcode( '[icon name="pro-fixture" style="' . $key . '" class="spin" title="safe"]' );
+			$tag = new WP_HTML_Tag_Processor( $html ); $tag->next_tag();
+			$this->assertTrue( $tag->has_class( $definition[2] ), $key );
+			$this->assertTrue( $tag->has_class( 'fa-pro-fixture' ) );
+			$this->assertTrue( $tag->has_class( 'fa-spin' ) );
+			$this->assertSame( 'safe', $tag->get_attribute( 'title' ) );
+			$rendered = $this->render_icon( $block, array( 'iconName' => 'pro-fixture', 'iconStyle' => $key ) );
+			$this->assertStringContainsString( $definition[2], $rendered );
+		}
+		update_option( 'better-font-awesome_options', array( 'default_block_icon_style' => 'duotone-solid' ) );
+		$this->assertStringContainsString( 'fad', $this->render_icon( $block, array( 'iconName' => 'pro-fixture', 'iconStyle' => 'site-default' ) ) );
+		$this->assertStringContainsString( 'fas fa-pro-fixture', $this->render_icon( $block, array( 'iconName' => 'pro-fixture', 'iconStyle' => 'solid' ) ) );
+		$this->assertSame( $before, $this->api->requests );
+		$this->assertSame( 'duotone-solid', $plugin->sanitize( array( 'default_block_icon_style' => 'duotone-solid' ) )['default_block_icon_style'] );
+		$this->assertSame( 'solid', $plugin->sanitize( array( 'default_block_icon_style' => 'unknown-solid' ) )['default_block_icon_style'] );
+		// A different shortcode owner remains authoritative, even with matching markup.
+		add_shortcode( 'icon', static function () { return '<i class="fa fa-other-owner"></i>'; } );
+		$this->assertSame( '<i class="fa fa-other-owner"></i>', do_shortcode( '[icon name="pro-fixture" style="duotone-solid"]' ) );
+		$library->add_icon_shortcode();
+		// Explicit appearances retain identity after assets become unavailable.
+		$this->assertStringContainsString( 'fad', Better_Font_Awesome_Appearance::apply( '<i class="fa fa-missing"></i>', 'duotone-solid' ) );
+		$this->assertSame( '<i class="fa fa-missing"></i>', Better_Font_Awesome_Appearance::apply( '<i class="fa fa-missing"></i>', 'custom-solid' ) );
+	}
+	public function test_unrecognized_family_or_wrong_prefix_is_rejected_without_replacing_catalog() {
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' ); $active = $this->complete();
+		$this->api->rows[] = array( 'name' => 'pro-fixture', 'familyStyle' => array( 'family' => 'duotone', 'style' => 'solid', 'prefix' => 'fas' ) );
+		$this->pro->start(); $result = $this->pro->step( $this->pro->status()['operation'] );
+		$this->assertSame( 'unsupported', $result['error'] );
+		$this->assertSame( $active, Better_Font_Awesome_Pro::state()['active'] );
+		$this->assertSame( '', Better_Font_Awesome_Appearance::identity( 'kit', 'solid' ) );
 	}
 	public function test_immediate_bounded_connect_and_refresh_without_running_cron() {
 		$this->assertSame( 0, $this->api->requests );
@@ -704,7 +791,7 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		$this->assertSame( array( 'brands', 'light', 'regular', 'solid', 'thin' ), $account['kits'][0]['details']['styles'] );
 		$this->assertSame( 'svg', $account['kits'][2]['details']['technology'] );
 		$this->assertSame( 'Set the kit technology to Web Fonts.', $account['kits'][2]['reason'] );
-		$this->assertStringContainsString( 'Classic styles:', $account['kits'][0]['summary'] );
+		$this->assertStringContainsString( 'Appearances:', $account['kits'][0]['summary'] );
 		$this->assertStringNotContainsString( 'still need validation', $account['kits'][0]['summary'] );
 		$this->assertFalse( $account['kits'][2]['supported'] );
 		$this->assertNotEmpty( $account['kits'][2]['summary'] );

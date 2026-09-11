@@ -29,6 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-better-font-awesome-metadata-manager.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-better-font-awesome-appearance.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-better-font-awesome-pro.php';
 
 add_action( 'init', 'bfa_start', 5 );
@@ -571,7 +572,7 @@ class Better_Font_Awesome_Plugin {
 
 		add_settings_field(
 			'default_block_icon_style',
-			__( 'Default block icon style', 'better-font-awesome' ),
+			__( 'Default icon appearance', 'better-font-awesome' ),
 			array( $this, 'default_block_icon_style_callback' ),
 			self::SLUG,
 			'settings_section_primary',
@@ -814,7 +815,7 @@ class Better_Font_Awesome_Plugin {
 	 * @return string Supported default style.
 	 */
 	public static function sanitize_default_block_icon_style( $value ) {
-		return in_array( $value, array( 'regular', 'light', 'thin' ), true ) ? $value : 'solid';
+		return Better_Font_Awesome_Appearance::valid( $value ) && 'brands' !== $value ? $value : 'solid';
 	}
 
 	/**
@@ -845,29 +846,18 @@ class Better_Font_Awesome_Plugin {
 	public function default_block_icon_style_callback() {
 		$selected = self::get_default_block_icon_style();
 		printf( '<select id="default_block_icon_style" name="%s[default_block_icon_style]" aria-describedby="bfa-default-style-help">', esc_attr( $this->option_name ) );
-		$styles = array(
-			'solid'   => __( 'Solid', 'better-font-awesome' ),
-			'regular' => __( 'Regular', 'better-font-awesome' ),
-		);
-		if ( $this->pro && $this->pro->effective() ) {
-			foreach ( array(
-				'light' => __( 'Light', 'better-font-awesome' ),
-				'thin'  => __( 'Thin', 'better-font-awesome' ),
-			) as $style => $label ) {
-				if ( in_array( $style, $this->pro->status()['styles'], true ) ) {
-					$styles[ $style ] = $label;
-				}
-			}
-		}
+		$labels    = Better_Font_Awesome_Appearance::labels();
+		$available = $this->pro && $this->pro->effective() ? $this->pro->status()['styles'] : array( 'solid', 'regular' );
+		$styles    = array_intersect_key( $labels, array_fill_keys( array_diff( $available, array( 'brands' ) ), true ) );
 		if ( ! isset( $styles[ $selected ] ) ) {
 			/* translators: %s: saved icon style. */
-			$styles[ $selected ] = sprintf( __( '%s (saved, currently unavailable)', 'better-font-awesome' ), ucfirst( $selected ) );
+			$styles[ $selected ] = sprintf( __( '%s (saved, currently unavailable)', 'better-font-awesome' ), $labels[ $selected ] ?? $selected );
 		}
 		foreach ( $styles as $value => $label ) {
 			printf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $value ), selected( $selected, $value, false ), esc_html( $label ) );
 		}
 		echo '</select><p class="description" id="bfa-default-style-help">';
-		esc_html_e( 'Sets the style for icon blocks that use the site default. You can override it in each block’s settings.', 'better-font-awesome' );
+		esc_html_e( 'Sets the appearance for icon blocks that use the site default. You can override it in each block’s settings.', 'better-font-awesome' );
 		echo '</p>';
 	}
 
@@ -967,8 +957,9 @@ class Better_Font_Awesome_Plugin {
 			'bfa-pro-settings',
 			'bfaPro',
 			array(
-				'url'   => admin_url( 'admin-ajax.php' ),
-				'nonce' => wp_create_nonce( 'bfa-pro' ),
+				'url'              => admin_url( 'admin-ajax.php' ),
+				'nonce'            => wp_create_nonce( 'bfa-pro' ),
+				'appearanceLabels' => Better_Font_Awesome_Appearance::labels(),
 			)
 		);
 		?>

@@ -186,3 +186,23 @@ test( 'Classic Light and Thin preserve inherited, explicit and unavailable selec
  assert.equal( styleClass( 'thin' ), 'fat' );
  assert.equal( styleClass( 'light' ), 'fal' );
 } );
+
+
+test( 'family appearances remain distinct and inheritance uses only available variants', () => {
+	globalThis.bfaBlockEditor = { appearanceClasses: { 'duotone-solid': 'fad', 'sharp-duotone-thin': 'fasdt', 'utility-semibold': 'fausb' } };
+	try {
+		const catalog = [
+			{ name: 'camera', label: 'Camera (solid)', style: 'solid' },
+			{ name: 'camera', label: 'Camera (duotone-solid)', style: 'duotone-solid' },
+			{ name: 'camera', label: 'Camera (sharp-duotone-thin)', style: 'sharp-duotone-thin' },
+			{ name: 'heart', label: 'Heart (regular)', style: 'regular' },
+		];
+		assert.deepEqual( getAvailableStyles( catalog, 'camera' ), [ 'solid', 'duotone-solid', 'sharp-duotone-thin' ] );
+		assert.equal( groupCatalog( catalog ).length, 2 );
+		assert.equal( resolveStyle( getAvailableStyles( catalog, 'camera' ), 'duotone-solid' ), 'duotone-solid' );
+		assert.equal( resolveStyle( getAvailableStyles( catalog, 'heart' ), 'duotone-solid' ), 'regular' );
+		assert.equal( resolveStyle( [], 'duotone-solid' ), 'duotone-solid' );
+		assert.equal( styleClass( 'utility-semibold' ), 'fausb' );
+		assert.deepEqual( selectIcon( groupCatalog( catalog ), 'heart', 'camera', 'site-default' ), { iconName: 'heart', iconStyle: 'site-default' } );
+	} finally { delete globalThis.bfaBlockEditor; }
+} );

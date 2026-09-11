@@ -30,6 +30,13 @@ class Better_Font_Awesome_Pro_Fixture {
 			);
 		}
 	}
+	public function families() {
+		foreach ( Better_Font_Awesome_Appearance::DEFINITIONS as $definition ) {
+			if ( 'classic' !== $definition[0] ) {
+				$this->rows[] = array( 'name' => 'pro-fixture', 'familyStyle' => array( 'family' => $definition[0], 'style' => $definition[1], 'prefix' => $definition[2] ) );
+			}
+		}
+	}
 	public function expand() {
 		$names  = array();
 		$brands = array();
@@ -84,7 +91,14 @@ class Better_Font_Awesome_Pro_Fixture {
 			$q       = $request['query'];
 			$this->queries[] = $q;
 			$vars    = $request['variables'];
-			$counts  = array_count_values( array_column( array_column( $this->rows, 'familyStyle' ), 'style' ) );
+			$counts = array();
+			$definitions = array();
+			foreach ( $this->rows as $row ) {
+				$f = $row['familyStyle'];
+				$key = $f['family'] . ':' . $f['style'];
+				$counts[ $key ] = ( $counts[ $key ] ?? 0 ) + 1;
+				$definitions[ $key ] = $f;
+			}
 			$meta    = array(
 				'name'              => 'BFA staging',
 				'kitRevision'        => $this->revision,
@@ -100,11 +114,7 @@ class Better_Font_Awesome_Pro_Fixture {
 				$styles = array();
 				foreach ( $counts as $style => $count ) {
 					$styles[] = array(
-						'familyStyle' => array(
-							'family' => 'classic',
-							'style'  => $style,
-							'prefix' => Better_Font_Awesome_Pro::STYLES[ $style ],
-						),
+						'familyStyle' => $definitions[ $style ],
 						'only'        => null,
 						'iconVariantsPaginated' => array( 'totalIconVariantCount' => $count ),
 					); }

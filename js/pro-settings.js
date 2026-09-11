@@ -133,7 +133,7 @@
 		const data = kit?.details || ( kit?.id === activeKit?.id ? activeKit : null );
 		facts.replaceChildren();
 		if ( data && Array.isArray( data.styles ) ) {
-			const styles = { solid: __( 'Solid', 'better-font-awesome' ), regular: __( 'Regular', 'better-font-awesome' ), light: __( 'Light', 'better-font-awesome' ), thin: __( 'Thin', 'better-font-awesome' ), brands: __( 'Brands', 'better-font-awesome' ) };
+			const styles = bfaPro.appearanceLabels;
 			const unknown = __( 'Unknown', 'better-font-awesome' );
 			const license = data.license ?? ( kit.supported ? 'pro' : '' );
 			const technology = data.technology ?? ( kit.supported ? 'webfonts' : '' );
@@ -144,7 +144,7 @@
 				[ __( 'Version', 'better-font-awesome' ), data.version || unknown ],
 				[ __( 'Older version compatibility', 'better-font-awesome' ), compatibility === null ? unknown : ( compatibility ? __( 'Enabled', 'better-font-awesome' ) : __( 'Disabled', 'better-font-awesome' ) ) ],
 			];
-			if ( kit.supported ) { rows.push( [ __( 'Classic styles', 'better-font-awesome' ), Object.keys( styles ).filter( style => data.styles.includes( style ) ).map( style => styles[ style ] ).join( ', ' ) ] ); }
+			if ( kit.supported ) { rows.push( [ __( 'Appearances', 'better-font-awesome' ), Object.keys( styles ).filter( style => data.styles.includes( style ) ).map( style => styles[ style ] ).join( ', ' ) ] ); }
 			rows.forEach( ( [ label, value ] ) => {
 				const row = document.createElement( 'div' );
 				const term = document.createElement( 'dt' );

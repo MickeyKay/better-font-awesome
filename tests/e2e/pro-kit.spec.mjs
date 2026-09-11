@@ -11,10 +11,11 @@ async function login( page ) {
 	await page.goto( '/wp-admin/' );
 	await expect( page.locator( '#wpadminbar' ) ).toBeVisible();
 }
-async function fixture( page, fault = '', enabled = true ) {
+async function fixture( page, fault = '', enabled = true, families = false ) {
 	await page.goto( '/wp-admin/tools.php?page=bfa-pro-fixture' );
 	await page.getByLabel( 'Enable synthetic API' ).setChecked( enabled );
 	await page.getByLabel( 'Full-sized synthetic catalog' ).check();
+	await page.getByLabel( 'All official families' ).setChecked( families );
 	await page.locator( 'select[name="fault"]' ).selectOption( fault );
 	await page.getByRole( 'button', { name: 'Save fixture' } ).click();
 }
@@ -106,8 +107,8 @@ test( 'bounded Pro Connect and Refresh, all editors, saved styles, local switch 
 		wp.data.dispatch( 'core/block-editor' ).selectBlock( wp.data.select( 'core/block-editor' ).getBlocks()[ 0 ].clientId );
 		wp.data.dispatch( 'core/edit-post' ).openGeneralSidebar( 'edit-post/block' );
 	} );
-	const styleControl = page.getByRole( 'combobox', { name: 'Style', exact: true } );
-	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Thin)', 'Solid', 'Regular', 'Light', 'Thin' ] );
+	const styleControl = page.getByRole( 'combobox', { name: 'Appearance', exact: true } );
+	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Classic / Thin)', 'Classic / Solid', 'Classic / Regular', 'Classic / Light', 'Classic / Thin' ] );
 	await expect( page.getByText( /Search all \d+ available Font Awesome Kit icons\./ ) ).toBeVisible();
 	for ( const style of [ 'thin', 'light', 'solid' ] ) {
 		await styleControl.selectOption( style );
@@ -304,8 +305,8 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	await details.press( 'Enter' );
 	await expect( page.locator( '#bfa-pro-kit-details' ) ).toBeVisible();
 	await expect( details ).toHaveAttribute( 'aria-expanded', 'true' );
-	await expect( page.locator( '#bfa-pro-kit-facts dt' ) ).toHaveText( [ 'Icons', 'Technology', 'Version', 'Older version compatibility', 'Classic styles' ] );
-	await expect( page.locator( '#bfa-pro-kit-facts dd' ) ).toHaveText( [ 'Pro', 'Web fonts', /7\./, 'Enabled', 'Solid, Regular, Light, Thin, Brands' ] );
+	await expect( page.locator( '#bfa-pro-kit-facts dt' ) ).toHaveText( [ 'Icons', 'Technology', 'Version', 'Older version compatibility', 'Appearances' ] );
+	await expect( page.locator( '#bfa-pro-kit-facts dd' ) ).toHaveText( [ 'Pro', 'Web fonts', /7\./, 'Enabled', 'Classic / Solid, Classic / Regular, Brands, Classic / Light, Classic / Thin' ] );
 	await page.screenshot( { path: test.info().outputPath( 'kit-details-expanded.png' ), fullPage: true } );
 	await details.press( 'Space' );
 	await expect( page.locator( '#bfa-pro-kit-details' ) ).toBeHidden();
@@ -490,5 +491,83 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	expect( await page.evaluate( () => JSON.stringify( window.bfaPro ) ) ).not.toMatch( /token|credential/i );
 	await page.getByRole( 'button', { name: 'Delete token', exact: true } ).click();
 	await expect( token ).toBeVisible( { timeout: 15000 } );
+	await fixture( page, '', false );
+} );
+
+test( 'family appearances: defaults, iframe, saved rendering and Classic/hybrid insertion', async ( { page, context } ) => {
+	test.setTimeout( 120000 );
+	// Public Free font stands in for transport only; this does not prove real Pro glyphs.
+	const familyCss = css + '.fad,.fasdt,.fausb{font-family:BFA-Synthetic-Pro!important}.fad:before,.fasdt:before,.fausb:before{content:"\\f024"}';
+	await context.route( 'https://kit.fontawesome.com/**', route => route.fulfill( { contentType: 'text/css', headers: { 'access-control-allow-origin': '*' }, body: familyCss } ) );
+	await context.route( 'https://ka-p.fontawesome.com/**', route => route.fulfill( { contentType: 'font/woff2', headers: { 'access-control-allow-origin': '*' }, body: font } ) );
+	page.on( 'dialog', dialog => dialog.accept() );
+	await login( page );
+	await fixture( page, '', true, true );
+	await page.goto( settings );
+	await page.getByLabel( 'API Key', { exact: true } ).fill( 'SYNTHETIC-NOT-A-CREDENTIAL' );
+	await page.getByRole( 'button', { name: 'Connect account', exact: true } ).click();
+	await expect( page.getByText( 'API token saved', { exact: true } ) ).toBeVisible();
+	await page.getByLabel( 'Kit', { exact: true } ).selectOption( 'KIT_ID' );
+	await expect( page.locator( '#bfa-pro-status' ) ).toContainText( 'Connected:', { timeout: 60000 } );
+	const defaults = page.getByRole( 'combobox', { name: 'Default icon appearance', exact: true } );
+	await expect( defaults.locator( 'option[value="duotone-solid"]' ) ).toHaveText( 'Duotone / Solid' );
+	await expect( defaults.locator( 'option[value="utility-semibold"]' ) ).toHaveText( 'Utility / Semibold' );
+	await defaults.selectOption( 'duotone-solid' );
+	await page.getByText( 'Save Settings', { exact: true } ).click();
+	await expect( page.locator( '.bfa-ajax-response-holder' ) ).toContainText( 'Settings saved.' );
+	await page.goto( '/wp-admin/post-new.php?post_type=bfa_iframe_test' );
+	await page.waitForFunction( () => window.wp?.blocks?.getBlockType( 'better-font-awesome/icon' ) );
+	await page.evaluate( () => {
+		wp.data.dispatch( 'core/editor' ).editPost( { title: 'Synthetic family acceptance' } );
+		wp.data.dispatch( 'core/block-editor' ).resetBlocks( [ 'site-default', 'solid', 'duotone-solid', 'sharp-duotone-thin', 'utility-semibold' ].map( iconStyle => wp.blocks.createBlock( 'better-font-awesome/icon', { iconName: 'pro-fixture', iconStyle } ) ) );
+	} );
+	const canvas = page.frameLocator( 'iframe[name="editor-canvas"]' );
+	await expect( canvas.locator( '.fad.fa-pro-fixture' ) ).toHaveCount( 2 );
+	await expect( canvas.locator( '.fas.fa-pro-fixture' ) ).toHaveCount( 1 );
+	await expect( canvas.locator( '.fasdt.fa-pro-fixture' ) ).toHaveCount( 1 );
+	await expect( canvas.locator( '.fausb.fa-pro-fixture' ) ).toHaveCount( 1 );
+	await expectKit( canvas );
+	const welcome = page.getByRole( 'button', { name: 'Close', exact: true } );
+	if ( await welcome.isVisible() ) { await welcome.click(); }
+	await page.evaluate( () => {
+		wp.data.dispatch( 'core/block-editor' ).selectBlock( wp.data.select( 'core/block-editor' ).getBlocks()[ 0 ].clientId );
+		wp.data.dispatch( 'core/edit-post' ).openGeneralSidebar( 'edit-post/block' );
+	} );
+	const appearance = page.getByRole( 'combobox', { name: 'Appearance', exact: true } );
+	await expect( appearance ).toHaveValue( 'site-default' );
+	await expect( appearance.locator( 'option[value="site-default"]' ) ).toHaveText( 'Site default (Duotone / Solid)' );
+	await appearance.selectOption( 'sharp-duotone-thin' );
+	await expect( canvas.locator( '.fasdt.fa-pro-fixture' ) ).toHaveCount( 2 );
+	await appearance.selectOption( 'site-default' );
+	await page.evaluate( () => wp.data.dispatch( 'core/editor' ).savePost() );
+	const postId = await page.evaluate( () => wp.data.select( 'core/editor' ).getCurrentPostId() );
+	await page.reload();
+	await expect( canvas.locator( '.fad.fa-pro-fixture' ) ).toHaveCount( 2 );
+	await page.goto( `/?bfa_pro_preview=${ postId }` );
+	await expect( page.locator( '.fad.fa-pro-fixture' ) ).toHaveCount( 2 );
+	await expect( page.locator( '.fasdt.fa-pro-fixture' ) ).toHaveCount( 1 );
+	await expectKit( page );
+	for ( const postType of [ 'bfa_classic_test', 'post' ] ) {
+		await page.goto( `/wp-admin/post-new.php?post_type=${ postType }` );
+		const id = postType === 'post' ? 'bfa_hybrid_editor' : 'content';
+		await page.waitForFunction( id => window.tinymce?.get( id )?.initialized, id );
+		if ( await welcome.isVisible() ) { await welcome.click(); }
+		await expectKit( page.frameLocator( `#${ id }_ifr` ) );
+		await page.locator( '.bfa-iconpicker .iconpicker-component' ).first().click();
+		await page.locator( '.iconpicker-search' ).filter( { visible: true } ).first().fill( 'pro-fixture' );
+		await page.locator( '.iconpicker-item:visible .fad.fa-pro-fixture' ).first().click();
+		expect( await page.evaluate( id => tinymce.get( id ).getContent(), id ) ).toContain( 'style="duotone-solid"' );
+	}
+	await page.goto( settings );
+	await saveProvider( page, 'bundled-local' );
+	await page.goto( `/?bfa_pro_preview=${ postId }` );
+	await expect( page.locator( 'link[href*="kit.fontawesome.com"]' ) ).toHaveCount( 0 );
+	await expect( page.locator( '.fasdt.fa-pro-fixture' ) ).toHaveCount( 1 );
+	await expect( page.locator( '.fausb.fa-pro-fixture' ) ).toHaveCount( 1 );
+	await page.goto( settings );
+	await saveProvider( page, 'automatic' );
+	await page.goto( settings );
+	await page.getByRole( 'button', { name: 'Delete token', exact: true } ).click();
+	await expect( page.getByLabel( 'API Key', { exact: true } ) ).toBeVisible();
 	await fixture( page, '', false );
 } );

@@ -72,6 +72,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		brands: __( 'Brands', 'better-font-awesome' ),
 		light: __( 'Light', 'better-font-awesome' ),
 		thin: __( 'Thin', 'better-font-awesome' ),
+		...( window.bfaBlockEditor?.appearanceLabels ?? {} ),
 	};
 	const styleAvailable = availableStyles.includes( effectiveStyle );
 	const styleOptions = availableStyles.map( ( style ) => ( {
@@ -150,7 +151,7 @@ export default function Edit( { attributes, setAttributes } ) {
 						</div>
 						<SelectControl
 							__nextHasNoMarginBottom
-							label={ __( 'Style', 'better-font-awesome' ) }
+							label={ __( 'Appearance', 'better-font-awesome' ) }
 							value={ iconStyle }
 							options={ styleOptions }
 							disabled={ availableStyles.length === 0 }
@@ -160,7 +161,7 @@ export default function Edit( { attributes, setAttributes } ) {
 								}
 							} }
 							help={ ! styleAvailable && __(
-								'This icon or style is unavailable in the current catalog.',
+								'This icon or appearance is unavailable in the current catalog.',
 								'better-font-awesome'
 							) }
 						/>
