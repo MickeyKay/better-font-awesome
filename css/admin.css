@@ -139,6 +139,23 @@
 	margin: 0;
 }
 
-#bfa-pro-kit-details-toggle[aria-expanded="true"] .dashicons {
-	transform: rotate(90deg);
+/* A fitted vector avoids the font chevron's extra horizontal side bearings. */
+.bfa-details-caret {
+	width: 8px;
+	height: 12px;
+	flex: none;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.bfa-caret-open,
+#bfa-pro-kit-details-toggle[aria-expanded="true"] .bfa-caret-closed {
+	display: none;
+}
+
+#bfa-pro-kit-details-toggle[aria-expanded="true"] .bfa-caret-open {
+	display: inline;
 }

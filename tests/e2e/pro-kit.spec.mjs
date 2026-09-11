@@ -276,21 +276,23 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	await expect( select ).toHaveValue( 'KIT_ID' );
 	await expect( select.locator( 'option:checked' ) ).toHaveText( 'BFA staging (KIT_ID) (active)' );
 	await expect( select.locator( 'option[value=""]' ) ).toBeDisabled();
-	await expect( page.getByRole( 'button', { name: 'Disconnect kit', exact: true } ) ).toBeHidden();
+	await expect( page.getByRole( 'button', { name: 'Disconnect kit', exact: true } ) ).toBeVisible();
 	await expect( page.locator( '#bfa-provider-help' ) ).toBeHidden();
 	await expect( page.locator( '#bfa-delivery-status' ) ).toHaveCount( 0 );
 	await expect( page.locator( '#bfa-pro-status' ) ).toHaveClass( /screen-reader-text/ );
 	await expect( page.locator( '#bfa-pro-kit-details' ) ).toBeHidden();
 	const details = page.getByRole( 'button', { name: 'Kit details', exact: true } );
-	const actionSpacing = await page.locator( '#bfa-pro-refresh-kits, [data-pro-action="refresh"], #bfa-pro-kit-details-toggle' ).evaluateAll( actions => actions.map( action => {
+	const actionSpacing = await page.locator( '#bfa-pro-refresh-kits, [data-pro-action="refresh"], #bfa-pro-disconnect-kit, #bfa-pro-kit-details-toggle' ).evaluateAll( actions => actions.map( action => {
 		const box = action.getBoundingClientRect();
-		const icon = action.querySelector( '.dashicons' ).getBoundingClientRect();
+		const icon = action.querySelector( '.dashicons, .bfa-details-caret' ).getBoundingClientRect();
 		const label = action.querySelector( '.bfa-action-label' ).getBoundingClientRect();
 		return { left: box.left, right: box.right, iconGap: label.left - icon.right };
 	} ) );
 	for ( const action of actionSpacing ) { expect( action.iconGap ).toBeCloseTo( 4, 0 ); }
 	expect( actionSpacing[ 1 ].left - actionSpacing[ 0 ].right ).toBeCloseTo( 20, 0 );
 	expect( actionSpacing[ 2 ].left - actionSpacing[ 1 ].right ).toBeCloseTo( 20, 0 );
+	expect( actionSpacing[ 3 ].left - actionSpacing[ 2 ].right ).toBeCloseTo( 20, 0 );
+	await expect( page.locator( '#bfa-pro-disconnect-kit + #bfa-pro-kit-details-toggle' ) ).toHaveCount( 1 );
 	const beforeDetails = operations.length;
 	const selectBox = await select.boundingBox();
 	const toggleBox = await details.boundingBox();
@@ -382,10 +384,10 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	expect( operations.filter( operation => operation === 'connect' ) ).toHaveLength( beforeReplacement + 2 );
 	expect( responses.join( '' ) ).not.toMatch( /SYNTHETIC-(?:NOT-A-CREDENTIAL|BAD-REPLACEMENT|NEW-AUTHORIZATION)|credential|access_token/ );
 	const discoveriesBeforeDisconnect = operations.filter( operation => operation === 'find' ).length;
-	await page.getByRole( 'button', { name: 'Kit details', exact: true } ).click();
+	await expect( page.locator( '#bfa-pro-kit-details' ) ).toBeHidden();
 	const disconnect = page.getByRole( 'button', { name: 'Disconnect kit', exact: true } );
 	await expect( disconnect ).toBeVisible();
-	await page.screenshot( { path: test.info().outputPath( 'disconnect-in-kit-details.png' ), fullPage: true } );
+	await page.screenshot( { path: test.info().outputPath( 'disconnect-in-action-row.png' ), fullPage: true } );
 	await disconnect.focus();
 	await disconnect.press( 'Enter' );
 	await expect( page.locator( '#bfa-provider' ) ).toHaveValue( 'automatic' );

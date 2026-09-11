@@ -116,7 +116,7 @@
 		select.disabled = connecting || needsFreeSave() || ! account.authorized || ! account.kits.length;
 		retry.disabled = connecting || needsFreeSave();
 		disconnectKit.hidden = ! activeKit || select.value !== activeKit.id;
-		disconnectKit.querySelector( 'button' ).disabled = connecting || needsFreeSave();
+		disconnectKit.disabled = connecting || needsFreeSave();
 		showDetails( kit );
 		warning.textContent = kit && ! kit.supported ? kit.reason || __( 'This kit is unsupported. See Kit details for requirements.', 'better-font-awesome' ) : '';
 	}
