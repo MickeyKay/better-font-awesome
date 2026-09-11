@@ -87,6 +87,84 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		$this->assertSame( 5, $this->api->requests );
 	}
 
+	public function test_disconnect_kit_retains_account_and_fences_old_selections_and_workers() {
+		$account = $this->pro->find_kits( 'SYNTHETIC-TOKEN' );
+		$this->pro->start( 'KIT_ID', '', $account['id'] );
+		$this->complete();
+		$pending = $this->pro->start();
+		$before = Better_Font_Awesome_Pro::state();
+		$count = $this->api->requests;
+		$this->assertTrue( Better_Font_Awesome_Pro::cancel( true, false, true ) );
+		$after = Better_Font_Awesome_Pro::state();
+		$this->assertArrayNotHasKey( 'active', $after );
+		$this->assertEmpty( $after['candidate'] );
+		$this->assertFalse( $after['enabled'] );
+		$this->assertSame( $before['account']['credential'], $after['account']['credential'] );
+		$this->assertSame( $before['account']['kits'], $after['account']['kits'] );
+		$this->assertNotSame( $before['account']['id'], $after['account']['id'] );
+		$this->assertTrue( $this->pro->account_status()['authorized'] );
+		$this->pro->worker( $pending['operation'] );
+		$this->assertSame( $after, Better_Font_Awesome_Pro::state() );
+		$this->assertWPError( $this->pro->start( 'KIT_ID', '', $account['id'] ) );
+		$this->assertSame( $count, $this->api->requests );
+		foreach ( _get_cron_array() as $hooks ) { $this->assertArrayNotHasKey( Better_Font_Awesome_Pro::HOOK, $hooks ); }
+		$this->pro->start( 'KIT_ID', '', $after['account']['id'] );
+		$this->assertArrayHasKey( 'icons', $this->complete() );
+	}
+	public function test_disconnect_kit_preserves_legacy_active_credential_for_list_refresh() {
+		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
+		$active = $this->complete();
+		$count = $this->api->requests;
+		$this->assertTrue( Better_Font_Awesome_Pro::cancel( true, false, true ) );
+		$this->assertSame( $active['credential'], Better_Font_Awesome_Pro::state()['account']['credential'] );
+		$this->assertTrue( $this->pro->account_status()['saved'] );
+		$this->assertFalse( $this->pro->account_status()['authorized'] );
+		$this->assertSame( $count, $this->api->requests );
+		$this->assertTrue( $this->pro->find_kits()['authorized'] );
+	}
+	/** @dataProvider disconnect_kit_modes */
+	public function test_disconnect_kit_ajax_preserves_token_content_and_local_delivery( $mode, $expected ) {
+		$account = $this->pro->find_kits( 'SYNTHETIC-TOKEN' );
+		$this->pro->start( 'KIT_ID', '', $account['id'] );
+		$this->complete();
+		update_option( 'better-font-awesome_options', array( 'asset_delivery' => $mode, 'default_block_icon_style' => 'thin' ) );
+		$content = '[icon name="pro-fixture" style="thin"]';
+		$post = self::factory()->post->create( array( 'post_content' => $content ) );
+		$count = $this->api->requests;
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$_POST = array( 'operation' => 'disconnect-kit', 'nonce' => wp_create_nonce( 'bfa-pro' ) );
+		$_REQUEST = $_POST;
+		$handler = static function () { return static function () { throw new RuntimeException( 'done' ); }; };
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		add_filter( 'wp_die_ajax_handler', $handler );
+		ob_start();
+		try { $this->pro->ajax(); } catch ( RuntimeException $e ) { $output = ob_get_clean(); } finally {
+			remove_filter( 'wp_doing_ajax', '__return_true' );
+			remove_filter( 'wp_die_ajax_handler', $handler );
+		}
+		$this->assertTrue( json_decode( $output, true )['success'] );
+		$this->assertSame( $expected, get_option( 'better-font-awesome_options' )['asset_delivery'] );
+		$this->assertSame( 'thin', get_option( 'better-font-awesome_options' )['default_block_icon_style'] );
+		$this->assertSame( $content, get_post( $post )->post_content );
+		$this->assertTrue( $this->pro->account_status()['saved'] );
+		$this->assertArrayNotHasKey( 'active', Better_Font_Awesome_Pro::state() );
+		$this->assertSame( $count, $this->api->requests );
+		$this->assertStringNotContainsString( 'credential', $output );
+	}
+	public static function disconnect_kit_modes() {
+		return array( array( 'kit-css', 'automatic' ), array( 'bundled-local', 'bundled-local' ) );
+	}
+	public function test_disconnect_kit_fences_in_flight_discovery() {
+		$this->pro->find_kits( 'SYNTHETIC-TOKEN' );
+		$cancel = static function ( $response ) { Better_Font_Awesome_Pro::cancel( true, false, true ); return $response; };
+		add_filter( 'pre_http_request', $cancel, 30 );
+		$result = $this->pro->find_kits( 'SYNTHETIC-REPLACEMENT' );
+		remove_filter( 'pre_http_request', $cancel, 30 );
+		$this->assertWPError( $result );
+		$this->assertSame( 'changed', $result->get_error_code() );
+		$this->assertTrue( $this->pro->account_status()['authorized'] );
+		$this->assertArrayNotHasKey( 'active', Better_Font_Awesome_Pro::state() );
+	}
 	public function test_credentials_are_encrypted_non_autoloaded_and_never_in_status_or_html() {
 		$this->pro->start( 'KIT_ID', 'SYNTHETIC-ACCOUNT-NOT-A-CREDENTIAL' );
 		$state = wp_json_encode( Better_Font_Awesome_Pro::state() );
@@ -293,10 +371,10 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		$this->assertSame( array(), $library->get_stylesheet_url_v4_shim() ? array( 'bad' ) : array() );
 	}
 	/** @dataProvider authorization_cases */
-	public function test_ajax_rejects_bad_nonce_and_non_administrators_without_http( $role, $valid_nonce ) {
+	public function test_ajax_rejects_bad_nonce_and_non_administrators_without_http( $role, $valid_nonce, $operation = 'connect' ) {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => $role ) ) );
 		$_POST    = array(
-			'operation' => 'connect',
+			'operation' => $operation,
 			'kit'       => 'KIT_ID',
 			'token'     => 'SYNTHETIC-SECRET',
 			'nonce'     => $valid_nonce ? wp_create_nonce( 'bfa-pro' ) : 'invalid',
@@ -321,7 +399,7 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 			$this->assertEmpty( Better_Font_Awesome_Pro::state() );
 	}
 	public static function authorization_cases() {
-		return array( array( 'subscriber', true ), array( 'administrator', false ) ); }
+		return array( array( 'subscriber', true ), array( 'administrator', false ), array( 'subscriber', true, 'disconnect-kit' ), array( 'administrator', false, 'disconnect-kit' ) ); }
 	public function test_interrupted_step_lease_can_expire_and_resume_without_partial_activation() {
 		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
 		$id                           = $this->pro->status()['operation'];

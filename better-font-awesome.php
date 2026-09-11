@@ -1000,7 +1000,10 @@ class Better_Font_Awesome_Plugin {
 				</div>
 				<span id="bfa-pro-selection-help" class="screen-reader-text"><?php esc_html_e( 'Selecting a kit starts its connection.', 'better-font-awesome' ); ?></span>
 				<p id="bfa-pro-kit-warning" class="description" role="status" aria-live="polite" aria-atomic="true"></p>
-				<div id="bfa-pro-kit-details" hidden><dl id="bfa-pro-kit-facts"></dl><p id="bfa-pro-kit-help" class="description" hidden></p></div>
+				<div id="bfa-pro-kit-details" hidden>
+					<dl id="bfa-pro-kit-facts"></dl><p id="bfa-pro-kit-help" class="description" hidden></p>
+					<p id="bfa-pro-disconnect-kit" hidden><button type="button" class="button-link bfa-action" data-pro-action="disconnect-kit"><span class="dashicons dashicons-dismiss" aria-hidden="true"></span> <span class="bfa-action-label"><?php esc_html_e( 'Disconnect kit', 'better-font-awesome' ); ?></span></button></p>
+				</div>
 			</td></tr></tbody></table>
 		</form>
 		</section>

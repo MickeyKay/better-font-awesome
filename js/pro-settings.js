@@ -14,6 +14,7 @@
 	const details = document.getElementById( 'bfa-pro-kit-details' );
 	const detailsToggle = document.getElementById( 'bfa-pro-kit-details-toggle' );
 	const facts = document.getElementById( 'bfa-pro-kit-facts' );
+	const disconnectKit = document.getElementById( 'bfa-pro-disconnect-kit' );
 	const warning = document.getElementById( 'bfa-pro-kit-warning' );
 	const provider = document.getElementById( 'bfa-provider' );
 	const panel = document.getElementById( 'bfa-pro-panel' );
@@ -93,6 +94,10 @@
 				retry.hidden = ! state.error || ! retryAction;
 				selectionChanged();
 				if ( operation === 'disconnect' ) { window.location.reload(); }
+				if ( operation === 'disconnect-kit' ) {
+					history.replaceState( null, '', window.location.pathname + window.location.search );
+					window.location.reload();
+				}
 			}
 		} catch ( error ) {
 			if ( mine === generation ) {
@@ -106,9 +111,12 @@
 		}
 	}
 	function selectionChanged() {
-		const kit = account.kits.find( ( item ) => item.id === select.value );
+		const kit = account.kits.find( ( item ) => item.id === select.value ) || ( activeKit && select.value === activeKit.id ? { ...activeKit, supported: true, details: activeKit } : null );
+		select.options[ 0 ].disabled = Boolean( activeKit );
 		select.disabled = connecting || needsFreeSave() || ! account.authorized || ! account.kits.length;
 		retry.disabled = connecting || needsFreeSave();
+		disconnectKit.hidden = ! activeKit || select.value !== activeKit.id;
+		disconnectKit.querySelector( 'button' ).disabled = connecting || needsFreeSave();
 		showDetails( kit );
 		warning.textContent = kit && ! kit.supported ? kit.reason || __( 'This kit is unsupported. See Kit details for requirements.', 'better-font-awesome' ) : '';
 	}

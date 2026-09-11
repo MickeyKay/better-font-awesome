@@ -810,9 +810,10 @@ class Better_Font_Awesome_Pro {
 	 *
 	 * @param bool $disconnect Remove credentials and catalog as well as pending work.
 	 * @param bool $suspend Preserve the delivery choice for explicit reactivation.
+	 * @param bool $keep_account Retain account authorization when disconnecting only the kit.
 	 * @return bool Whether cancellation was persisted.
 	 */
-	public static function cancel( $disconnect = false, $suspend = false ) {
+	public static function cancel( $disconnect = false, $suspend = false, $keep_account = false ) {
 		$controller = new self();
 		for ( $attempt = 0; $attempt < 5; $attempt++ ) {
 			$old  = self::state();
@@ -828,8 +829,22 @@ class Better_Font_Awesome_Pro {
 			if ( ! $disconnect && isset( $old['active'] ) ) {
 				$next['active'] = $old['active'];
 			}
-			if ( ! $disconnect && isset( $old['account'] ) ) {
+			if ( ( ! $disconnect || $keep_account ) && isset( $old['account'] ) ) {
 				$next['account'] = $old['account'];
+			}
+			if ( $disconnect && $keep_account ) {
+				if ( empty( $next['account']['credential'] ) && isset( $old['active']['credential'] ) ) {
+					$next['account'] = array(
+						'credential' => $old['active']['credential'],
+						'id'         => '',
+						'kits'       => array(),
+					);
+				}
+				if ( ! empty( $next['account']['id'] ) ) {
+					// Keep the list usable, but fence earlier selections and in-flight discovery.
+					$next['account']['id'] = wp_generate_uuid4();
+					$next['discovery']     = $next['account']['id'];
+				}
 			}
 			if ( $old === $next || $controller->swap( $old, $next ) ) {
 				wp_unschedule_hook( self::HOOK );
@@ -938,12 +953,12 @@ class Better_Font_Awesome_Pro {
 		} elseif ( 'step' === $operation ) {
 			$id     = isset( $_POST['id'] ) && is_string( $_POST['id'] ) ? sanitize_text_field( wp_unslash( $_POST['id'] ) ) : '';
 			$result = $this->step( $id );
-		} elseif ( in_array( $operation, array( 'disconnect', 'pause' ), true ) ) {
-			if ( ! self::cancel( 'disconnect' === $operation ) ) {
+		} elseif ( in_array( $operation, array( 'disconnect', 'disconnect-kit', 'pause' ), true ) ) {
+			if ( ! self::cancel( 'pause' !== $operation, false, 'disconnect-kit' === $operation ) ) {
 				wp_send_json_error( array( 'message' => self::message( 'changed' ) ), 409 );
 			}
-			if ( 'pause' === $operation ) {
-				$options                   = get_option( 'better-font-awesome_options', array() );
+			$options = get_option( 'better-font-awesome_options', array() );
+			if ( 'pause' === $operation || ( 'disconnect-kit' === $operation && 'bundled-local' !== ( $options['asset_delivery'] ?? '' ) ) ) {
 				$options['asset_delivery'] = 'automatic';
 				update_option( 'better-font-awesome_options', $options );
 			}
