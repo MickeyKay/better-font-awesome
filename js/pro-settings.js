@@ -95,7 +95,7 @@
 				selectionChanged();
 				if ( operation === 'disconnect' ) { window.location.reload(); }
 				if ( operation === 'disconnect-kit' ) {
-					history.replaceState( null, '', window.location.pathname + window.location.search );
+					history.replaceState( null, '', window.location.pathname + window.location.search + '#bfa-kit' );
 					window.location.reload();
 				}
 			}
@@ -112,6 +112,7 @@
 		}
 	}
 	function selectionChanged() {
+		describeProvider();
 		const kit = account.kits.find( ( item ) => item.id === select.value ) || ( activeKit && select.value === activeKit.id ? { ...activeKit, supported: true, details: activeKit } : null );
 		select.disabled = connecting || needsFreeSave() || ( ! activeKit && ( ! account.authorized || ! account.kits.length ) );
 		retry.disabled = connecting || needsFreeSave();
@@ -300,13 +301,15 @@
 		find.disabled = needsFreeSave();
 		refreshKits.disabled = needsFreeSave();
 		form.querySelector( '[data-pro-action="refresh"]' ).disabled = needsFreeSave();
+		selectionChanged();
+	}
+	function describeProvider() {
 		const descriptions = {
 			automatic: __( 'Loads free icons from a CDN using your selected version.', 'better-font-awesome' ),
 			'bundled-local': __( 'Serves the bundled free icons from your own site. No CDN requests.', 'better-font-awesome' ),
-			'kit-css': __( 'Loads icons from Font Awesome using your Pro subscription and kit.', 'better-font-awesome' ),
+			'kit-css': activeKit ? __( 'Loads icons from Font Awesome using your Pro subscription and kit.', 'better-font-awesome' ) : __( 'Connect your Font Awesome Pro kit. Until connected, free icons load from the CDN.', 'better-font-awesome' ),
 		};
-		document.getElementById( 'bfa-provider-help' ).textContent = needsFreeSave() ? __( 'Save Settings to switch off local delivery before setting up a hosted kit.', 'better-font-awesome' ) : descriptions[ mode ];
-		selectionChanged();
+		document.getElementById( 'bfa-provider-help' ).textContent = needsFreeSave() ? __( 'Save Settings to switch off local delivery before setting up a hosted kit.', 'better-font-awesome' ) : descriptions[ selectedProvider() ];
 	}
 	if ( window.location.hash === '#bfa-kit' ) { provider.value = 'kit-css'; }
 	window.addEventListener( 'hashchange', () => {

@@ -943,9 +943,9 @@ class Better_Font_Awesome_Plugin {
 			<td><select id="bfa-provider" data-saved="<?php echo esc_attr( $mode ); ?>" aria-describedby="bfa-provider-help">
 			<?php
 			foreach ( array(
-				'automatic'     => __( 'Free icons (CDN)', 'better-font-awesome' ),
-				'bundled-local' => __( 'Free icons (no CDN)', 'better-font-awesome' ),
-				'kit-css'       => __( 'Pro icons (your kit)', 'better-font-awesome' ),
+				'automatic'     => __( 'CDN', 'better-font-awesome' ),
+				'bundled-local' => __( 'Local (no CDN)', 'better-font-awesome' ),
+				'kit-css'       => __( 'Font Awesome kit', 'better-font-awesome' ),
 			) as $value => $label ) :
 				?>
 				<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $mode, $value ); ?>><?php echo esc_html( $label ); ?></option>

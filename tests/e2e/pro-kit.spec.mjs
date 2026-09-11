@@ -212,7 +212,7 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	page.on( 'response', async response => {
 		if ( response.url().includes( 'admin-ajax.php' ) ) { responses.push( await response.text().catch( () => '' ) ); }
 	} );
-	await expect( page.locator( '#bfa-provider option[value="bundled-local"]' ) ).toHaveText( 'Free icons (no CDN)' );
+	await expect( page.locator( '#bfa-provider option' ) ).toHaveText( [ 'CDN', 'Local (no CDN)', 'Font Awesome kit' ] );
 	// Provider previews only toggle relevant controls, without server acquisition.
 	await expect( page.locator( '#include_v4_shim' ) ).toBeHidden();
 	await expect( page.locator( '#default_block_icon_style' ) ).toBeVisible();
@@ -402,10 +402,14 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	await page.unroute( '**/admin-ajax.php', failDisconnect );
 	await select.focus();
 	await select.press( 'n' );
-	await expect( page.locator( '#bfa-provider' ) ).toHaveValue( 'automatic' );
-	await expect( page.locator( '#bfa-pro-panel' ) ).toBeHidden();
+	await expect( page.locator( '#bfa-pro-status' ) ).toHaveText( '' );
+	await expect( page.locator( '#bfa-provider' ) ).toHaveValue( 'kit-css' );
+	await expect( page.locator( '#bfa-pro-panel' ) ).toBeVisible();
+	await expect( page.locator( '#bfa-provider-help' ) ).toHaveText( 'Connect your Font Awesome Pro kit. Until connected, free icons load from the CDN.' );
 	await expect( page.locator( 'link[href^="https://kit.fontawesome.com/"]' ) ).toHaveCount( 0 );
-	await page.locator( '#bfa-provider' ).selectOption( 'kit-css' );
+	await page.reload();
+	await expect( page.locator( '#bfa-provider' ) ).toHaveValue( 'kit-css' );
+	await expect( page.locator( '#bfa-pro-panel' ) ).toBeVisible();
 	await expect( page.getByText( 'API token saved', { exact: true } ) ).toBeVisible();
 	await expect( token ).toBeHidden();
 	await expect( select ).toHaveValue( '' );
