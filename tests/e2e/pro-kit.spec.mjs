@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import fs from 'node:fs';
+import { checkPickerSearch } from './helpers/picker-search.mjs';
 
 const settings = '/wp-admin/options-general.php?page=better-font-awesome#bfa-kit';
 const font = fs.readFileSync( new URL( '../../vendor/mickey-kay/better-font-awesome-library/inc/font-awesome-7-fallback/webfonts/fa-solid-900.woff2', import.meta.url ) );
@@ -138,13 +139,7 @@ test( 'bounded Pro Connect and Refresh, all editors, saved styles, local switch 
 		const id = postType === 'post' ? 'bfa_hybrid_editor' : 'content';
 		await page.waitForFunction( id => window.tinymce?.get( id )?.initialized, id );
 		await expectKit( page.frameLocator( `#${ id }_ifr` ) );
-		const before = Date.now();
-		const button = page.locator( '.bfa-iconpicker .iconpicker-component' ).first();
-		await button.click();
-		const search = page.locator( '.iconpicker-search' ).filter( { visible: true } ).first();
-		await search.fill( 'pro-fixture' );
-		await expect( page.locator( '.iconpicker-item:visible .fat.fa-pro-fixture' ).first() ).toBeVisible();
-		pickerMs[ postType ] = Date.now() - before;
+		pickerMs[ postType ] = await checkPickerSearch( page, [ '.fat.fa-pro-fixture' ] );
 		await page.locator( '.iconpicker-item:visible .fat.fa-pro-fixture' ).first().click();
 		const content = await page.evaluate( id => tinymce.get( id ).getContent(), id );
 		expect( content ).toContain( 'style="thin"' );
@@ -497,7 +492,7 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	await fixture( page, '', false );
 } );
 
-test( 'family appearances: defaults, iframe, saved rendering and Classic/hybrid insertion', async ( { page, context } ) => {
+test( 'family appearances: defaults, iframe, saved rendering and Classic/hybrid insertion', async ( { page, context }, testInfo ) => {
 	test.setTimeout( 120000 );
 	// Public Free font stands in for transport only; this does not prove real Pro glyphs.
 	const familyCss = css + '.fad,.fasdt,.fausb{font-family:BFA-Synthetic-Pro!important}.fad:before,.fasdt:before,.fausb:before{content:"\\f024"}';
@@ -556,8 +551,8 @@ test( 'family appearances: defaults, iframe, saved rendering and Classic/hybrid 
 		await page.waitForFunction( id => window.tinymce?.get( id )?.initialized, id );
 		if ( await welcome.isVisible() ) { await welcome.click(); }
 		await expectKit( page.frameLocator( `#${ id }_ifr` ) );
-		await page.locator( '.bfa-iconpicker .iconpicker-component' ).first().click();
-		await page.locator( '.iconpicker-search' ).filter( { visible: true } ).first().fill( 'pro-fixture' );
+		const timing = await checkPickerSearch( page, [ '.fad.fa-pro-fixture', '.fasdt.fa-pro-fixture', '.fausb.fa-pro-fixture' ] );
+		await testInfo.attach( `family-picker-${ postType }`, { body: JSON.stringify( timing ), contentType: 'application/json' } );
 		await page.locator( '.iconpicker-item:visible .fad.fa-pro-fixture' ).first().click();
 		expect( await page.evaluate( id => tinymce.get( id ).getContent(), id ) ).toContain( 'style="duotone-solid"' );
 	}
