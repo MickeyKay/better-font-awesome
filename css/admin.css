@@ -135,6 +135,13 @@
 	font-weight: 600;
 }
 
+#bfa-pro-kit-facts dd ul,
+#bfa-pro-kit-facts dd li {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
 #bfa-pro-kit-facts dd {
 	margin: 0;
 }

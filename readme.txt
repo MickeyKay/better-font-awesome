@@ -32,7 +32,7 @@ A built-in fallback means icons work immediately. Better Font Awesome automatica
 
 In the Block Editor, insert the **Font Awesome Icon** block. Choose an icon once in the Icon picker, then select an available family/style in the Appearance control. Use WordPress controls for font size, text color, margin, padding, and left, center, or right alignment. Add an accessible label when the icon communicates meaning, or leave it empty for a decorative icon.
 
-Set **Default icon appearance** to Classic / Solid, Classic / Regular, or an available connected-kit appearance under **Settings > Better Font Awesome**. New blocks added through the standard inserter follow **Site default**. Existing icons retain their styling unless you explicitly choose **Site default**; individual blocks can override it with an available style.
+Set **Default icon appearance** to Classic - Solid, Classic - Regular, or an available connected-kit appearance under **Settings > Better Font Awesome**. New blocks added through the standard inserter follow **Site default**. Existing icons retain their styling unless you explicitly choose **Site default**; individual blocks can override it with an available style.
 
 If the default appearance is unavailable for an icon, the block tries the Classic styles first, then an available non-Classic appearance. Brand-only icons stay Brands. The Appearance control shows the effective style. Missing icons and unavailable explicitly saved styles keep their saved selections until you change them.
 

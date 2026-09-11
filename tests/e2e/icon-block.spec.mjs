@@ -1006,7 +1006,7 @@ test( 'unique Icon picker and Free Style control synchronize, undo, persist, and
 	const iconControl = page.getByLabel( 'Icon', { exact: true } );
 	const styleControl = page.getByRole( 'combobox', { name: 'Appearance', exact: true } );
 	const labelControl = page.getByLabel( 'Accessible label', { exact: true } );
-	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Classic / Solid)', 'Classic / Solid', 'Classic / Regular' ] );
+	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Classic - Solid)', 'Classic - Solid', 'Classic - Regular' ] );
 	await expect( styleControl ).toHaveValue( 'solid' );
 	const catalogLabel = ( name ) => page.evaluate( ( name ) =>
 		window.bfaBlockEditor.icons.find( ( icon ) => icon.name === name ).label.replace( / \((?:solid|regular|brands)\)$/, '' ), name );
@@ -1033,12 +1033,12 @@ test( 'unique Icon picker and Free Style control synchronize, undo, persist, and
 	// Style-labelled queries find unique icons without changing the saved style.
 	await iconControl.fill( 'regular' );
 	await iconControl.press( 'Escape' );
-	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Classic / Solid)', 'Classic / Solid', 'Classic / Regular' ] );
+	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Classic - Solid)', 'Classic - Solid', 'Classic - Regular' ] );
 	await labelControl.focus();
 	await labelControl.press( 'Shift+Tab' );
 	await expect( styleControl ).toBeFocused();
 	// Native type-ahead includes the family prefix in the combined label.
-	await styleControl.pressSequentially( 'Classic / R' );
+	await styleControl.pressSequentially( 'Classic - R' );
 	await styleControl.press( 'Tab' );
 	await expect( labelControl ).toBeFocused();
 	await expect( styleControl ).toHaveValue( 'regular' );
@@ -1069,7 +1069,7 @@ test( 'unique Icon picker and Free Style control synchronize, undo, persist, and
 	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Brands)', 'Brands' ] );
 	await chooseIcon( 'arrow-right', 'solid' );
 	await expect( styleControl ).toBeEnabled();
-	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Classic / Solid)', 'Classic / Solid' ] );
+	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Classic - Solid)', 'Classic - Solid' ] );
 	await chooseIcon( 'heart', 'solid' );
 	await expect( styleControl ).toBeEnabled();
 	await styleControl.selectOption( 'regular' );
@@ -1231,11 +1231,11 @@ test( 'site default insertion, inheritance, overrides, and saved legacy blocks r
 		const styleControl = page.getByRole( 'combobox', { name: 'Appearance', exact: true } );
 		const iconControl = page.getByLabel( 'Icon', { exact: true } );
 		await expect( styleControl ).toHaveValue( 'site-default' );
-		await expect( styleControl.locator( 'option:checked' ) ).toHaveText( 'Site default (Classic / Regular)' );
+		await expect( styleControl.locator( 'option:checked' ) ).toHaveText( 'Site default (Classic - Regular)' );
 		for ( const [ label, name, prefix, effective ] of [
-			[ 'Arrow Right', 'arrow-right', 'fas', 'Classic / Solid' ],
+			[ 'Arrow Right', 'arrow-right', 'fas', 'Classic - Solid' ],
 			[ 'Github', 'github', 'fab', 'Brands' ],
-			[ 'Heart', 'heart', 'far', 'Classic / Regular' ],
+			[ 'Heart', 'heart', 'far', 'Classic - Regular' ],
 		] ) {
 			await iconControl.fill( label );
 			const result = page.getByRole( 'listbox' ).getByRole( 'option', { name: label, exact: true } );
@@ -1296,7 +1296,7 @@ test( 'site default insertion, inheritance, overrides, and saved legacy blocks r
 			window.wp.data.dispatch( 'core/block-editor' ).selectBlock( block.clientId );
 		} );
 		await expect( styleControl ).toHaveValue( 'site-default' );
-		await expect( styleControl.locator( 'option:checked' ) ).toHaveText( 'Site default (Classic / Solid)' );
+		await expect( styleControl.locator( 'option:checked' ) ).toHaveText( 'Site default (Classic - Solid)' );
 		await test.info().attach( 'site-default-selector', { body: await page.screenshot(), contentType: 'image/png' } );
 	} finally {
 		await saveDefaultStyle( page, 'solid' );

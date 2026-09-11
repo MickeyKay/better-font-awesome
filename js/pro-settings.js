@@ -144,13 +144,23 @@
 				[ __( 'Version', 'better-font-awesome' ), data.version || unknown ],
 				[ __( 'Older version compatibility', 'better-font-awesome' ), compatibility === null ? unknown : ( compatibility ? __( 'Enabled', 'better-font-awesome' ) : __( 'Disabled', 'better-font-awesome' ) ) ],
 			];
-			if ( kit.supported ) { rows.push( [ __( 'Appearances', 'better-font-awesome' ), Object.keys( styles ).filter( style => data.styles.includes( style ) ).map( style => styles[ style ] ).join( ', ' ) ] ); }
+			if ( kit.supported ) { rows.push( [ __( 'Appearances', 'better-font-awesome' ), Object.keys( styles ).filter( style => data.styles.includes( style ) ).map( style => styles[ style ] ) ] ); }
 			rows.forEach( ( [ label, value ] ) => {
 				const row = document.createElement( 'div' );
 				const term = document.createElement( 'dt' );
 				const definition = document.createElement( 'dd' );
 				term.textContent = label;
-				definition.textContent = value;
+				if ( Array.isArray( value ) ) {
+					const list = document.createElement( 'ul' );
+					value.forEach( appearance => {
+						const item = document.createElement( 'li' );
+						item.textContent = appearance;
+						list.append( item );
+					} );
+					definition.append( list );
+				} else {
+					definition.textContent = value;
+				}
 				row.append( term, definition );
 				facts.append( row );
 			} );

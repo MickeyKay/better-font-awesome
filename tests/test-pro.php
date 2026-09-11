@@ -34,6 +34,8 @@ class Better_Font_Awesome_Pro_Test extends Better_Font_Awesome_Metadata_Test_Cas
 		return Better_Font_Awesome_Pro::state()['active'];
 	}
 	public function test_family_catalog_distinguishes_every_official_appearance() {
+		$this->assertSame( 'Classic - Solid', Better_Font_Awesome_Appearance::labels()['solid'] );
+		$this->assertSame( 'Sharp Duotone - Thin', Better_Font_Awesome_Appearance::labels()['sharp-duotone-thin'] );
 		$this->api->families();
 		$this->pro->start( 'KIT_ID', 'SYNTHETIC-TOKEN' );
 		$active = $this->complete();

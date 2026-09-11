@@ -103,7 +103,7 @@ class Better_Font_Awesome_Appearance {
 		);
 		$labels  = array();
 		foreach ( self::DEFINITIONS as $key => $definition ) {
-			$labels[ $key ] = 'brands' === $key ? $weights['brands'] : ucwords( str_replace( '-', ' ', $definition[0] ) ) . ' / ' . $weights[ $definition[1] ];
+			$labels[ $key ] = 'brands' === $key ? $weights['brands'] : ucwords( str_replace( '-', ' ', $definition[0] ) ) . ' - ' . $weights[ $definition[1] ];
 		}
 		return $labels;
 	}

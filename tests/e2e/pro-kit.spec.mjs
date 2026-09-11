@@ -108,7 +108,7 @@ test( 'bounded Pro Connect and Refresh, all editors, saved styles, local switch 
 		wp.data.dispatch( 'core/edit-post' ).openGeneralSidebar( 'edit-post/block' );
 	} );
 	const styleControl = page.getByRole( 'combobox', { name: 'Appearance', exact: true } );
-	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Classic / Thin)', 'Classic / Solid', 'Classic / Regular', 'Classic / Light', 'Classic / Thin' ] );
+	await expect( styleControl.locator( 'option' ) ).toHaveText( [ 'Site default (Classic - Thin)', 'Classic - Solid', 'Classic - Regular', 'Classic - Light', 'Classic - Thin' ] );
 	await expect( page.getByText( /Search all \d+ available Font Awesome Kit icons\./ ) ).toBeVisible();
 	for ( const style of [ 'thin', 'light', 'solid' ] ) {
 		await styleControl.selectOption( style );
@@ -306,7 +306,10 @@ test( 'token-first onboarding: names, keyboard selection, retry, stale responses
 	await expect( page.locator( '#bfa-pro-kit-details' ) ).toBeVisible();
 	await expect( details ).toHaveAttribute( 'aria-expanded', 'true' );
 	await expect( page.locator( '#bfa-pro-kit-facts dt' ) ).toHaveText( [ 'Icons', 'Technology', 'Version', 'Older version compatibility', 'Appearances' ] );
-	await expect( page.locator( '#bfa-pro-kit-facts dd' ) ).toHaveText( [ 'Pro', 'Web fonts', /7\./, 'Enabled', 'Classic / Solid, Classic / Regular, Brands, Classic / Light, Classic / Thin' ] );
+	await expect( page.locator( '#bfa-pro-kit-facts dd' ).filter( { hasNot: page.locator( 'ul' ) } ) ).toHaveText( [ 'Pro', 'Web fonts', /7\./, 'Enabled' ] );
+	await expect( page.locator( '#bfa-pro-kit-facts dd li' ) ).toHaveText( [ 'Classic - Solid', 'Classic - Regular', 'Brands', 'Classic - Light', 'Classic - Thin' ] );
+	const appearanceRows = await page.locator( '#bfa-pro-kit-facts dd li' ).evaluateAll( items => items.map( item => { const box = item.getBoundingClientRect(); return { top: box.top, bottom: box.bottom }; } ) );
+	for ( let i = 1; i < appearanceRows.length; i++ ) { expect( appearanceRows[ i ].top ).toBeGreaterThanOrEqual( appearanceRows[ i - 1 ].bottom ); }
 	await page.screenshot( { path: test.info().outputPath( 'kit-details-expanded.png' ), fullPage: true } );
 	await details.press( 'Space' );
 	await expect( page.locator( '#bfa-pro-kit-details' ) ).toBeHidden();
@@ -510,8 +513,8 @@ test( 'family appearances: defaults, iframe, saved rendering and Classic/hybrid 
 	await page.getByLabel( 'Kit', { exact: true } ).selectOption( 'KIT_ID' );
 	await expect( page.locator( '#bfa-pro-status' ) ).toContainText( 'Connected:', { timeout: 60000 } );
 	const defaults = page.getByRole( 'combobox', { name: 'Default icon appearance', exact: true } );
-	await expect( defaults.locator( 'option[value="duotone-solid"]' ) ).toHaveText( 'Duotone / Solid' );
-	await expect( defaults.locator( 'option[value="utility-semibold"]' ) ).toHaveText( 'Utility / Semibold' );
+	await expect( defaults.locator( 'option[value="duotone-solid"]' ) ).toHaveText( 'Duotone - Solid' );
+	await expect( defaults.locator( 'option[value="utility-semibold"]' ) ).toHaveText( 'Utility - Semibold' );
 	await defaults.selectOption( 'duotone-solid' );
 	await page.getByText( 'Save Settings', { exact: true } ).click();
 	await expect( page.locator( '.bfa-ajax-response-holder' ) ).toContainText( 'Settings saved.' );
@@ -535,7 +538,7 @@ test( 'family appearances: defaults, iframe, saved rendering and Classic/hybrid 
 	} );
 	const appearance = page.getByRole( 'combobox', { name: 'Appearance', exact: true } );
 	await expect( appearance ).toHaveValue( 'site-default' );
-	await expect( appearance.locator( 'option[value="site-default"]' ) ).toHaveText( 'Site default (Duotone / Solid)' );
+	await expect( appearance.locator( 'option[value="site-default"]' ) ).toHaveText( 'Site default (Duotone - Solid)' );
 	await appearance.selectOption( 'sharp-duotone-thin' );
 	await expect( canvas.locator( '.fasdt.fa-pro-fixture' ) ).toHaveCount( 2 );
 	await appearance.selectOption( 'site-default' );
